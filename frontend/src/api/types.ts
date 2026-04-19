@@ -125,6 +125,19 @@ export interface DiaperUpdate {
   notes?: string | null;
 }
 
+export interface VitaminD3Entry {
+  id: number;
+  child_id: number;
+  date: string;
+  given_at: string;
+  created_at: string;
+}
+
+export interface VitaminD3Create {
+  child_id: number;
+  date: string;
+}
+
 export interface HealthStatus {
   status: string;
   version: string;

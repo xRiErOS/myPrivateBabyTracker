@@ -1,17 +1,40 @@
-/** Dashboard page — Widget grid with quick-action buttons. */
+/** Dashboard page — tabbed views: Heute, 7 Tage, 14 Tage. */
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Droplets, LayoutDashboard, Moon, Plus, Utensils } from "lucide-react";
 import { Button } from "../components/Button";
 import { EmptyState } from "../components/EmptyState";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useActiveChild } from "../context/ChildContext";
-import { SleepWidget } from "../plugins/sleep/SleepWidget";
-import { FeedingWidget } from "../plugins/feeding/FeedingWidget";
-import { DiaperWidget } from "../plugins/diaper/DiaperWidget";
+import { useDashboardData } from "../hooks/useDashboardData";
+import { ViewTabs, type DashboardView } from "../components/dashboard/ViewTabs";
+import { BabySummary } from "../components/dashboard/BabySummary";
+import { DayTimeline } from "../components/dashboard/DayTimeline";
+import { WeeklyReport } from "../components/dashboard/WeeklyReport";
+import { PatternChart } from "../components/dashboard/PatternChart";
+import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
+import {
+  splitSleepByDay,
+  groupByDay,
+  todayBerlin,
+} from "../lib/timelineUtils";
+
+const VIEW_DAYS: Record<DashboardView, number> = {
+  today: 2, // today + yesterday for comparison
+  week: 7,
+  pattern: 14,
+};
 
 export default function Dashboard() {
   const { activeChild } = useActiveChild();
   const navigate = useNavigate();
+  const [view, setView] = useState<DashboardView>("today");
+
+  const { data, isLoading } = useDashboardData(
+    activeChild?.id ?? 0,
+    VIEW_DAYS[view],
+  );
 
   if (!activeChild) {
     return (
@@ -23,11 +46,15 @@ export default function Dashboard() {
     );
   }
 
+  function handleTileClick(category: string) {
+    navigate(`/${category}`);
+  }
+
+  const today = todayBerlin();
+
   return (
     <div className="space-y-4">
-      <h2 className="font-headline text-lg font-semibold">
-        {activeChild.name}
-      </h2>
+      <h2 className="font-headline text-lg font-semibold">{activeChild.name}</h2>
 
       {/* Quick Actions */}
       <div className="flex gap-1.5 flex-wrap">
@@ -60,18 +87,73 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      {/* Widget Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div onClick={() => navigate("/sleep")} className="cursor-pointer hover:opacity-80 transition-opacity">
-          <SleepWidget childId={activeChild.id} />
-        </div>
-        <div onClick={() => navigate("/feeding")} className="cursor-pointer hover:opacity-80 transition-opacity">
-          <FeedingWidget childId={activeChild.id} />
-        </div>
-        <div onClick={() => navigate("/diaper")} className="cursor-pointer hover:opacity-80 transition-opacity">
-          <DiaperWidget childId={activeChild.id} />
-        </div>
-      </div>
+      {/* View Tabs */}
+      <ViewTabs active={view} onChange={setView} />
+
+      {/* Content */}
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : data ? (
+        <>
+          {view === "today" && (
+            <TodayView
+              data={data}
+              today={today}
+              onTileClick={handleTileClick}
+            />
+          )}
+          {view === "week" && (
+            <WeeklyReport
+              feedings={data.feedings}
+              diapers={data.diapers}
+              sleeps={data.sleeps}
+            />
+          )}
+          {view === "pattern" && (
+            <PatternChart
+              feedings={data.feedings}
+              diapers={data.diapers}
+              sleeps={data.sleeps}
+            />
+          )}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function TodayView({
+  data,
+  today,
+  onTileClick,
+}: {
+  data: { feedings: import("../api/types").FeedingEntry[]; diapers: import("../api/types").DiaperEntry[]; sleeps: import("../api/types").SleepEntry[] };
+  today: string;
+  onTileClick: (category: string) => void;
+}) {
+  const feedByDay = groupByDay(data.feedings, "start_time");
+  const diaperByDay = groupByDay(data.diapers, "time");
+  const sleepMap = splitSleepByDay(data.sleeps);
+
+  const todayFeedings = feedByDay[today] ?? [];
+  const todayDiapers = diaperByDay[today] ?? [];
+  const todaySleepSegments = sleepMap[today] ?? [];
+
+  return (
+    <div className="space-y-4">
+      <BabySummary
+        feedings={data.feedings}
+        diapers={data.diapers}
+        sleeps={data.sleeps}
+        onTileClick={onTileClick}
+      />
+      <DayTimeline
+        feedings={todayFeedings}
+        diapers={todayDiapers}
+        sleepSegments={todaySleepSegments}
+        isToday
+      />
+      <VitaminD3Widget />
     </div>
   );
 }

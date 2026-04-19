@@ -4,9 +4,10 @@ import { useState } from "react";
 import { AlertTriangle, Droplets, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
+import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteDiaper, useDiaperEntries } from "../../hooks/useDiaper";
-import { formatDateTime } from "../../lib/dateUtils";
+import { formatDateTime, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
 import type { DiaperEntry, DiaperType } from "../../api/types";
 
 const TYPE_OPTIONS = [
@@ -28,14 +29,22 @@ interface DiaperListProps {
   onEdit?: (entry: DiaperEntry) => void;
 }
 
+const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
+  today: startOfTodayISO(),
+  week: daysAgoISO(7),
+  all: undefined,
+};
+
 export function DiaperList({ onEdit }: DiaperListProps) {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange>("week");
   const deleteMut = useDeleteDiaper();
 
   const { data: entries = [], isLoading } = useDiaperEntries({
     child_id: activeChild?.id,
     diaper_type: typeFilter || undefined,
+    date_from: DATE_RANGE_MAP[dateRange],
   });
 
   if (isLoading) {
@@ -53,6 +62,8 @@ export function DiaperList({ onEdit }: DiaperListProps) {
 
   return (
     <div className="flex flex-col gap-3">
+      <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
       <Select
         label="Filter"
         options={TYPE_OPTIONS}

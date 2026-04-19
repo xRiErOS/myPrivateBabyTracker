@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Pencil, Trash2, Utensils } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
+import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteFeeding, useFeedingEntries } from "../../hooks/useFeeding";
-import { formatDateTime } from "../../lib/dateUtils";
+import { formatDateTime, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
 import type { FeedingEntry, FeedingType } from "../../api/types";
 
 const TYPE_OPTIONS = [
@@ -28,14 +29,22 @@ interface FeedingListProps {
   onEdit?: (entry: FeedingEntry) => void;
 }
 
+const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
+  today: startOfTodayISO(),
+  week: daysAgoISO(7),
+  all: undefined,
+};
+
 export function FeedingList({ onEdit }: FeedingListProps) {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange>("week");
   const deleteMut = useDeleteFeeding();
 
   const { data: entries = [], isLoading } = useFeedingEntries({
     child_id: activeChild?.id,
     feeding_type: typeFilter || undefined,
+    date_from: DATE_RANGE_MAP[dateRange],
   });
 
   if (isLoading) {
@@ -53,6 +62,8 @@ export function FeedingList({ onEdit }: FeedingListProps) {
 
   return (
     <div className="flex flex-col gap-3">
+      <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
       <Select
         label="Filter"
         options={TYPE_OPTIONS}

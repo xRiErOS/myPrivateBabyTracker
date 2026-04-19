@@ -76,6 +76,14 @@ export function formatTimeSince(iso: string): string {
   return `vor ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+/** Get ISO string for N days ago at midnight (local). */
+export function daysAgoISO(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
 /** Convert ISO string to datetime-local input value (local time). */
 export function isoToLocalInput(iso: string): string {
   const d = new Date(iso);

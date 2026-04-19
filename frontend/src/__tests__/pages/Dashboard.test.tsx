@@ -1,4 +1,4 @@
-/** Tests for Dashboard — widgets render, quick actions present. */
+/** Tests for Dashboard — view tabs, quick actions, summary tiles. */
 
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,26 +16,22 @@ vi.mock("../../context/ChildContext", () => ({
   }),
 }));
 
-// Mock hooks to return empty data
-vi.mock("../../hooks/useSleep", () => ({
-  useSleepEntries: () => ({
-    data: [],
+// Mock dashboard data hook
+vi.mock("../../hooks/useDashboardData", () => ({
+  useDashboardData: () => ({
+    data: { feedings: [], diapers: [], sleeps: [] },
     isLoading: false,
   }),
 }));
 
-vi.mock("../../hooks/useFeeding", () => ({
-  useFeedingEntries: () => ({
-    data: [],
-    isLoading: false,
-  }),
+// Mock VitaminD3Widget
+vi.mock("../../plugins/vitamind3/VitaminD3Widget", () => ({
+  VitaminD3Widget: () => <div data-testid="d3-widget">D3</div>,
 }));
 
-vi.mock("../../hooks/useDiaper", () => ({
-  useDiaperEntries: () => ({
-    data: [],
-    isLoading: false,
-  }),
+// Mock ToastContext
+vi.mock("../../context/ToastContext", () => ({
+  useToast: () => ({ showToast: vi.fn() }),
 }));
 
 function renderDashboard() {
@@ -57,18 +53,15 @@ describe("Dashboard", () => {
     expect(screen.getByText("Test Baby")).toBeInTheDocument();
   });
 
-  it("renders all three widgets", () => {
+  it("renders view tabs", () => {
     renderDashboard();
-    // "Schlaf" appears in both quick-action and widget, so use getAllByText
-    expect(screen.getAllByText("Schlaf").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Mahlzeiten").length).toBeGreaterThanOrEqual(1);
-    // "Windeln" only in widget, "Windel" in quick-action button
-    expect(screen.getByText("Windeln")).toBeInTheDocument();
+    expect(screen.getByText("Heute")).toBeInTheDocument();
+    expect(screen.getByText("7 Tage")).toBeInTheDocument();
+    expect(screen.getByText("14 Tage")).toBeInTheDocument();
   });
 
   it("renders quick action buttons", () => {
     renderDashboard();
-    // Quick actions contain text
     const buttons = screen.getAllByRole("button");
     const buttonTexts = buttons.map((b) => b.textContent);
     expect(buttonTexts.some((t) => t?.includes("Schlaf"))).toBe(true);
@@ -76,27 +69,17 @@ describe("Dashboard", () => {
     expect(buttonTexts.some((t) => t?.includes("Windel"))).toBe(true);
   });
 
-  it("shows today's totals (zero state)", () => {
+  it("renders summary tiles in today view", () => {
     renderDashboard();
-    expect(screen.getByText("0 Mahlzeiten")).toBeInTheDocument();
-    expect(screen.getByText("0 Windeln")).toBeInTheDocument();
+    expect(screen.getByText("Letzte Flasche")).toBeInTheDocument();
+    expect(screen.getByText("Heute gesamt")).toBeInTheDocument();
+    expect(screen.getByText("Letzte Windel")).toBeInTheDocument();
+    expect(screen.getByText("Windeln heute")).toBeInTheDocument();
+    expect(screen.getByText("Schlaf heute")).toBeInTheDocument();
   });
-});
 
-describe("Dashboard without child", () => {
-  it("shows empty state when no child is active", () => {
-    // Override the mock for this test
-    vi.doMock("../../context/ChildContext", () => ({
-      useActiveChild: () => ({
-        activeChild: null,
-        children: [],
-        setActiveChild: vi.fn(),
-        isLoading: false,
-      }),
-    }));
-
-    // Note: vi.doMock requires dynamic import, but for simplicity
-    // we test the primary case above. The empty state is covered
-    // by the component having the conditional check.
+  it("renders VitaminD3 widget", () => {
+    renderDashboard();
+    expect(screen.getByTestId("d3-widget")).toBeInTheDocument();
   });
 });

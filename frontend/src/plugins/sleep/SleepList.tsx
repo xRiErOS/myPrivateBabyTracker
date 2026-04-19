@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Moon, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
+import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDateTime, formatDuration } from "../../lib/dateUtils";
+import { formatDateTime, formatDuration, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
 import type { SleepEntry } from "../../api/types";
 
 const TYPE_OPTIONS = [
@@ -19,14 +20,22 @@ interface SleepListProps {
   onEdit?: (entry: SleepEntry) => void;
 }
 
+const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
+  today: startOfTodayISO(),
+  week: daysAgoISO(7),
+  all: undefined,
+};
+
 export function SleepList({ onEdit }: SleepListProps) {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange>("week");
   const deleteMut = useDeleteSleep();
 
   const { data: allEntries = [], isLoading } = useSleepEntries({
     child_id: activeChild?.id,
     sleep_type: typeFilter || undefined,
+    date_from: DATE_RANGE_MAP[dateRange],
   });
 
   // Filter out running entries — those are shown in SleepForm timer
@@ -47,6 +56,8 @@ export function SleepList({ onEdit }: SleepListProps) {
 
   return (
     <div className="flex flex-col gap-3">
+      <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
       <Select
         label="Filter"
         options={TYPE_OPTIONS}
