@@ -54,7 +54,7 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
       </div>
 
       {isLoading ? (
-        <p className="font-body text-sm text-overlay0">Laden...</p>
+        <p className="font-body text-sm text-subtext0">Laden...</p>
       ) : (
         <div className="flex flex-col gap-1">
           {running ? (
@@ -82,9 +82,9 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
               <p className="font-headline text-2xl font-semibold">
                 {formatDuration(totalMinutes)}
               </p>
-              <p className="font-body text-xs text-overlay0">Heute gesamt</p>
+              <p className="font-body text-xs text-subtext0">Heute gesamt</p>
               {lastEntry && (
-                <p className="font-body text-xs text-overlay0 mt-1">
+                <p className="font-body text-xs text-subtext0 mt-1">
                   Letzter Schlaf: {formatTime(lastEntry.start_time)}
                 </p>
               )}

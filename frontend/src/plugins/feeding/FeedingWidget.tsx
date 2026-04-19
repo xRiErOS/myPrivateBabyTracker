@@ -33,16 +33,16 @@ export function FeedingWidget({ childId }: FeedingWidgetProps) {
       </div>
 
       {isLoading ? (
-        <p className="font-body text-sm text-overlay0">Laden...</p>
+        <p className="font-body text-sm text-subtext0">Laden...</p>
       ) : (
         <div className="flex flex-col gap-1">
           <p className="font-headline text-2xl font-semibold">
             {entries.length} Mahlzeiten
           </p>
-          <p className="font-body text-xs text-overlay0">Heute</p>
+          <p className="font-body text-xs text-subtext0">Heute</p>
 
           {lastEntry && (
-            <p className="font-body text-xs text-overlay0 mt-1">
+            <p className="font-body text-xs text-subtext0 mt-1">
               Letzte:{" "}
               {TYPE_LABELS[lastEntry.feeding_type as FeedingType] ?? lastEntry.feeding_type}
               {" — "}
