@@ -62,9 +62,15 @@ export default function Dashboard() {
 
       {/* Widget Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SleepWidget childId={activeChild.id} />
-        <FeedingWidget childId={activeChild.id} />
-        <DiaperWidget childId={activeChild.id} />
+        <div onClick={() => navigate("/sleep")} className="cursor-pointer hover:opacity-80 transition-opacity">
+          <SleepWidget childId={activeChild.id} />
+        </div>
+        <div onClick={() => navigate("/feeding")} className="cursor-pointer hover:opacity-80 transition-opacity">
+          <FeedingWidget childId={activeChild.id} />
+        </div>
+        <div onClick={() => navigate("/diaper")} className="cursor-pointer hover:opacity-80 transition-opacity">
+          <DiaperWidget childId={activeChild.id} />
+        </div>
       </div>
     </div>
   );
