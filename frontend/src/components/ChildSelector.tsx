@@ -42,7 +42,7 @@ export function ChildSelector() {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 min-w-[160px] rounded-[8px] bg-surface0 shadow-lg z-50 overflow-hidden animate-fade-in">
+        <div className="absolute top-full left-0 mt-1 min-w-[160px] rounded-[8px] bg-surface1 shadow-lg ring-1 ring-surface2/50 z-50 overflow-hidden animate-fade-in">
           {children.map((child) => (
             <button
               key={child.id}
@@ -53,7 +53,7 @@ export function ChildSelector() {
               className={`w-full text-left px-4 py-3 font-body text-base transition-colors ${
                 child.id === activeChild?.id
                   ? "bg-mauve/20 text-mauve font-medium"
-                  : "text-text hover:bg-surface1"
+                  : "text-text hover:bg-surface2"
               }`}
             >
               {child.name}
