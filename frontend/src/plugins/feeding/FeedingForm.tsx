@@ -1,11 +1,11 @@
 /** Feeding entry form — type-switch changes visible fields. */
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
 import { useActiveChild } from "../../context/ChildContext";
-import { useCreateFeeding, useUpdateFeeding } from "../../hooks/useFeeding";
+import { useCreateFeeding, useFeedingEntries, useUpdateFeeding } from "../../hooks/useFeeding";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import type { FeedingEntry, FeedingType } from "../../api/types";
 
@@ -26,14 +26,26 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
   const createMut = useCreateFeeding();
   const updateMut = useUpdateFeeding();
 
+  // Letzten Eintrag laden, um feeding_type als Default vorzubelegen
+  const { data: recentEntries = [] } = useFeedingEntries({
+    child_id: activeChild?.id,
+  });
+  const lastFeedingType = recentEntries[0]?.feeding_type;
+
   const [feedingType, setFeedingType] = useState<FeedingType>(
     entry?.feeding_type ?? "breast_left",
   );
+  // Einmalig den Typ aus dem letzten Eintrag uebernehmen (nur neues Formular)
+  const presetApplied = useRef(!!entry);
+  useEffect(() => {
+    if (!presetApplied.current && lastFeedingType) {
+      setFeedingType(lastFeedingType);
+      presetApplied.current = true;
+    }
+  }, [lastFeedingType]);
+
   const [startTime, setStartTime] = useState(
     entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
-  );
-  const [endTime, setEndTime] = useState(
-    entry?.end_time ? isoToLocalInput(entry.end_time) : "",
   );
   const [amountMl, setAmountMl] = useState(entry?.amount_ml?.toString() ?? "");
   const [foodType, setFoodType] = useState(entry?.food_type ?? "");
@@ -50,7 +62,6 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
     const payload = {
       child_id: activeChild.id,
       start_time: localInputToISO(startTime),
-      end_time: endTime ? localInputToISO(endTime) : null,
       feeding_type: feedingType,
       amount_ml: amountMl ? Number(amountMl) : null,
       food_type: foodType || null,
@@ -76,18 +87,11 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
       />
 
       <Input
-        label="Beginn"
+        label="Zeitpunkt"
         type="datetime-local"
         value={startTime}
         onChange={(e) => setStartTime(e.target.value)}
         required
-      />
-
-      <Input
-        label="Ende"
-        type="datetime-local"
-        value={endTime}
-        onChange={(e) => setEndTime(e.target.value)}
       />
 
       {showAmount && (

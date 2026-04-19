@@ -90,7 +90,6 @@ export function FeedingList({ onEdit }: FeedingListProps) {
           </div>
           <p className="font-body text-sm text-subtext0">
             {formatDateTime(entry.start_time)}
-            {entry.end_time ? ` - ${formatDateTime(entry.end_time)}` : ""}
           </p>
           <p className="font-body text-sm text-overlay0">
             {entry.amount_ml != null && `${entry.amount_ml} ml`}

@@ -15,15 +15,6 @@ const SLEEP_TYPE_OPTIONS = [
   { value: "night", label: "Nachtschlaf" },
 ];
 
-const QUALITY_OPTIONS = [
-  { value: "", label: "Keine Angabe" },
-  { value: "1", label: "1" },
-  { value: "2", label: "2" },
-  { value: "3", label: "3" },
-  { value: "4", label: "4" },
-  { value: "5", label: "5" },
-];
-
 interface SleepFormProps {
   entry?: SleepEntry;
   onDone?: () => void;
@@ -44,13 +35,11 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
 
   const [sleepType, setSleepType] = useState<SleepType>(entry?.sleep_type ?? "nap");
   const [startTime, setStartTime] = useState(
-    entry?.start_time ? isoToLocalInput(entry.start_time) : "",
+    entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
   );
   const [endTime, setEndTime] = useState(
     entry?.end_time ? isoToLocalInput(entry.end_time) : "",
   );
-  const [location, setLocation] = useState(entry?.location ?? "");
-  const [quality, setQuality] = useState(entry?.quality?.toString() ?? "");
   const [notes, setNotes] = useState(entry?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -124,8 +113,6 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
       start_time: localInputToISO(startTime),
       end_time: endTime ? localInputToISO(endTime) : null,
       sleep_type: sleepType,
-      location: location || null,
-      quality: quality ? Number(quality) : null,
       notes: notes || null,
     };
 
@@ -219,21 +206,6 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
           </Button>
         )}
       </div>
-
-      <Input
-        label="Ort"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        placeholder="z.B. Kinderbett, Kinderwagen"
-        maxLength={50}
-      />
-
-      <Select
-        label="Qualitaet"
-        options={QUALITY_OPTIONS}
-        value={quality}
-        onChange={(e) => setQuality(e.target.value)}
-      />
 
       <Input
         label="Notizen"

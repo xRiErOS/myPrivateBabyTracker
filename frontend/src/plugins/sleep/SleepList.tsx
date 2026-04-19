@@ -106,8 +106,6 @@ export function SleepList({ onEdit }: SleepListProps) {
           <p className="font-body text-sm text-overlay0">
             {!isRunning && <>Dauer: {formatDuration(entry.duration_minutes)}</>}
             {isRunning && "Laufend"}
-            {entry.quality != null && ` | Qualitaet: ${entry.quality}/5`}
-            {entry.location && ` | ${entry.location}`}
           </p>
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
