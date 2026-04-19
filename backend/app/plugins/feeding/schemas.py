@@ -11,6 +11,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.base import UTCDatetime
+
 
 FEEDING_TYPES = Literal["breast_left", "breast_right", "bottle", "solid"]
 
@@ -45,13 +47,13 @@ class FeedingResponse(BaseModel):
 
     id: int
     child_id: int
-    start_time: datetime
-    end_time: datetime | None
+    start_time: UTCDatetime
+    end_time: UTCDatetime | None
     feeding_type: str
     amount_ml: float | None
     food_type: str | None
     duration_minutes: int | None
     notes: str | None
-    created_at: datetime
+    created_at: UTCDatetime
 
     model_config = {"from_attributes": True}

@@ -9,6 +9,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from app.schemas.base import UTCDatetime
+
 
 class DiaperType(str, Enum):
     """Valid diaper types."""
@@ -47,12 +49,12 @@ class DiaperResponse(BaseModel):
 
     id: int
     child_id: int
-    time: datetime
+    time: UTCDatetime
     diaper_type: DiaperType
     color: str | None
     consistency: str | None
     has_rash: bool
     notes: str | None
-    created_at: datetime
+    created_at: UTCDatetime
 
     model_config = {"from_attributes": True}

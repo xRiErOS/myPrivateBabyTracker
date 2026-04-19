@@ -24,13 +24,6 @@ const CONSISTENCY_OPTIONS = [
   { value: "koernig", label: "Koernig" },
 ];
 
-const COLOR_PRESETS = [
-  { value: "gelb", label: "Gelb", bg: "bg-yellow" },
-  { value: "braun", label: "Braun", bg: "bg-peach" },
-  { value: "gruen", label: "Gruen", bg: "bg-green" },
-  { value: "schwarz", label: "Schwarz", bg: "bg-crust" },
-  { value: "weiss", label: "Weiss", bg: "bg-surface2" },
-];
 
 interface DiaperFormProps {
   entry?: DiaperEntry;
@@ -46,13 +39,12 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
   const [time, setTime] = useState(
     entry?.time ? isoToLocalInput(entry.time) : isoToLocalInput(nowISO()),
   );
-  const [color, setColor] = useState(entry?.color ?? "");
   const [consistency, setConsistency] = useState(entry?.consistency ?? "");
   const [hasRash, setHasRash] = useState(entry?.has_rash ?? false);
   const [notes, setNotes] = useState(entry?.notes ?? "");
 
   const isPending = createMut.isPending || updateMut.isPending;
-  const showColorAndConsistency = diaperType === "dirty" || diaperType === "mixed";
+  const showConsistency = diaperType === "dirty" || diaperType === "mixed";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -62,7 +54,7 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
       child_id: activeChild.id,
       time: localInputToISO(time),
       diaper_type: diaperType,
-      color: color || null,
+      color: null,
       consistency: consistency || null,
       has_rash: hasRash,
       notes: notes || null,
@@ -94,37 +86,13 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
         required
       />
 
-      {showColorAndConsistency && (
-        <>
-          <div className="flex flex-col gap-1">
-            <span className="font-label text-sm font-medium text-subtext0">
-              Farbe
-            </span>
-            <div className="flex gap-1.5 flex-wrap">
-              {COLOR_PRESETS.map((preset) => (
-                <button
-                  key={preset.value}
-                  type="button"
-                  onClick={() => setColor(preset.value)}
-                  className={`min-h-[44px] min-w-[3rem] px-3 py-2 rounded-[8px] font-label text-xs font-medium transition-all ${
-                    color === preset.value
-                      ? `${preset.bg} text-ground ring-2 ring-mauve`
-                      : `${preset.bg} text-ground opacity-60 hover:opacity-80`
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <Select
-            label="Konsistenz"
-            options={CONSISTENCY_OPTIONS}
-            value={consistency}
-            onChange={(e) => setConsistency(e.target.value)}
-          />
-        </>
+      {showConsistency && (
+        <Select
+          label="Konsistenz"
+          options={CONSISTENCY_OPTIONS}
+          value={consistency}
+          onChange={(e) => setConsistency(e.target.value)}
+        />
       )}
 
       <label className="flex items-center gap-2 min-h-[44px] cursor-pointer">

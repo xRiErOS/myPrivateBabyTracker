@@ -7,6 +7,8 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
+from app.schemas.base import UTCDatetime
+
 
 class ChildCreate(BaseModel):
     """Schema for creating a new child."""
@@ -33,6 +35,6 @@ class ChildResponse(BaseModel):
     birth_date: date
     notes: str | None
     is_active: bool
-    created_at: datetime
+    created_at: UTCDatetime
 
     model_config = {"from_attributes": True}

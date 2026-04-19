@@ -9,6 +9,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.schemas.base import UTCDatetime
+
 
 class SleepType(str, Enum):
     """Valid sleep types."""
@@ -52,13 +54,13 @@ class SleepResponse(BaseModel):
 
     id: int
     child_id: int
-    start_time: datetime
-    end_time: datetime | None
+    start_time: UTCDatetime
+    end_time: UTCDatetime | None
     duration_minutes: int | None
     sleep_type: SleepType
     location: str | None
     quality: int | None
     notes: str | None
-    created_at: datetime
+    created_at: UTCDatetime
 
     model_config = {"from_attributes": True}
