@@ -10,6 +10,7 @@ import {
   todayBerlin,
   isWet,
   isSolid,
+  formatDuration,
   type SleepSegment,
 } from "../../lib/timelineUtils";
 import { MiniTimeline } from "./DayTimeline";
@@ -23,6 +24,7 @@ interface DayCardProps {
   sleepSegments: SleepSegment[];
   prevTotal: number | null;
   isToday: boolean;
+  onEntityClick?: (category: string) => void;
 }
 
 function DayCard({
@@ -32,6 +34,7 @@ function DayCard({
   sleepSegments,
   prevTotal,
   isToday,
+  onEntityClick,
 }: DayCardProps) {
   const [expanded, setExpanded] = useState(isToday);
 
@@ -49,7 +52,13 @@ function DayCard({
     const end = new Date(seg._splitEnd).getTime();
     return s + (end - start) / 60000;
   }, 0);
-  const sleepHours = (sleepMinutes / 60).toFixed(1);
+  const sleepDisplay = formatDuration(sleepMinutes);
+  const dryCount = diapers.filter((d) => d.diaper_type === "dry").length;
+  const wParts: string[] = [];
+  if (wet) wParts.push(`${wet} nass`);
+  if (solid) wParts.push(`${solid} dreckig`);
+  if (dryCount) wParts.push(`${dryCount} trocken`);
+  const windelBreakdown = wParts.length > 0 ? ` (${wParts.join(", ")})` : "";
 
   let trend: { arrow: string; color: string } | null = null;
   if (prevTotal !== null) {
@@ -78,7 +87,7 @@ function DayCard({
             )}
           </span>
           <span>{changeCount} W</span>
-          <span>{sleepHours}h</span>
+          <span>{sleepDisplay}</span>
           {expanded ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
@@ -89,25 +98,6 @@ function DayCard({
 
       {expanded && (
         <div className="px-3 pb-3 space-y-2">
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="bg-ground rounded-lg p-2 text-center">
-              <div className="text-[10px] text-subtext0 font-label uppercase">Flasche</div>
-              <div className="font-semibold text-text">
-                {totalMl} ml ({feedCount}x)
-              </div>
-            </div>
-            <div className="bg-ground rounded-lg p-2 text-center">
-              <div className="text-[10px] text-subtext0 font-label uppercase">Windeln</div>
-              <div className="font-semibold text-text">
-                {changeCount} ({wet}n, {solid}s)
-              </div>
-            </div>
-            <div className="bg-ground rounded-lg p-2 text-center">
-              <div className="text-[10px] text-subtext0 font-label uppercase">Schlaf</div>
-              <div className="font-semibold text-text">{sleepHours}h</div>
-            </div>
-          </div>
-
           <MiniTimeline
             feedings={feedings}
             diapers={diapers}
@@ -115,6 +105,35 @@ function DayCard({
             showAxis
             isToday={isToday}
           />
+
+          <div className="space-y-1">
+            <div
+              className="flex items-center justify-between bg-ground rounded-lg px-3 py-2 min-h-[44px] cursor-pointer active:bg-surface1 transition-colors"
+              onClick={() => onEntityClick?.("feeding")}
+            >
+              <span className="text-xs font-label text-text">Flasche</span>
+              <span className="text-xs font-semibold text-text">
+                {totalMl} ml ({feedCount}x)
+                {trend && <span className={`ml-1 ${trend.color}`}>{trend.arrow}</span>}
+              </span>
+            </div>
+            <div
+              className="flex items-center justify-between bg-ground rounded-lg px-3 py-2 min-h-[44px] cursor-pointer active:bg-surface1 transition-colors"
+              onClick={() => onEntityClick?.("diaper")}
+            >
+              <span className="text-xs font-label text-text">Windeln</span>
+              <span className="text-xs font-semibold text-text">
+                {changeCount}{windelBreakdown}
+              </span>
+            </div>
+            <div
+              className="flex items-center justify-between bg-ground rounded-lg px-3 py-2 min-h-[44px] cursor-pointer active:bg-surface1 transition-colors"
+              onClick={() => onEntityClick?.("sleep")}
+            >
+              <span className="text-xs font-label text-text">Schlaf</span>
+              <span className="text-xs font-semibold text-text">{sleepDisplay}</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -125,11 +144,12 @@ interface WeeklyReportProps {
   feedings: FeedingEntry[];
   diapers: DiaperEntry[];
   sleeps: SleepEntry[];
+  onEntityClick?: (category: string) => void;
 }
 
-export function WeeklyReport({ feedings, diapers, sleeps }: WeeklyReportProps) {
+export function WeeklyReport({ feedings, diapers, sleeps, onEntityClick }: WeeklyReportProps) {
   const today = todayBerlin();
-  const days = lastNDays(7);
+  const days = lastNDays(7).reverse();
 
   const feedByDay = groupByDay(feedings, "start_time");
   const diaperByDay = groupByDay(diapers, "time");
@@ -142,7 +162,7 @@ export function WeeklyReport({ feedings, diapers, sleeps }: WeeklyReportProps) {
         const dayDiapers = diaperByDay[date] ?? [];
         const daySegments = sleepMap[date] ?? [];
 
-        const prevDate = i > 0 ? days[i - 1] : null;
+        const prevDate = i < days.length - 1 ? days[i + 1] : null;
         const prevTotal = prevDate
           ? (feedByDay[prevDate] ?? []).reduce((s, f) => s + (f.amount_ml ?? 0), 0)
           : null;
@@ -156,6 +176,7 @@ export function WeeklyReport({ feedings, diapers, sleeps }: WeeklyReportProps) {
             sleepSegments={daySegments}
             prevTotal={prevTotal}
             isToday={date === today}
+            onEntityClick={onEntityClick}
           />
         );
       })}

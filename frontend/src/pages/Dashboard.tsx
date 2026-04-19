@@ -107,6 +107,7 @@ export default function Dashboard() {
               feedings={data.feedings}
               diapers={data.diapers}
               sleeps={data.sleeps}
+              onEntityClick={handleTileClick}
             />
           )}
           {view === "pattern" && (

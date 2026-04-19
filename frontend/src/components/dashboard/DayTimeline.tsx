@@ -60,6 +60,7 @@ function TrackRow({
         </div>
       )}
       <div className="flex-1 relative h-full">
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-overlay0/30" />
         {items.map((it, i) => (
           <div
             key={i}
@@ -91,10 +92,11 @@ function DotRow({
         </div>
       )}
       <div className="flex-1 relative h-full">
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-overlay0/30" />
         {items.map((it, i) => (
           <div
             key={i}
-            className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 ${color} rounded-full`}
+            className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 ${color} rounded-full`}
             style={{ left: `${it.posPct}%` }}
           />
         ))}

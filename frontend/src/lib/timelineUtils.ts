@@ -113,6 +113,13 @@ export function hoursAgo(iso: string): string {
   return `vor ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+/** Format minutes as "H:MM h" string. */
+export function formatDuration(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60);
+  const m = Math.round(totalMinutes % 60);
+  return `${h}:${String(m).padStart(2, "0")} h`;
+}
+
 /** Check if diaper entry is wet. */
 export function isWet(d: DiaperEntry): boolean {
   return d.diaper_type === "wet" || d.diaper_type === "mixed";

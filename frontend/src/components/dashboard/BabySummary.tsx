@@ -8,6 +8,7 @@ import {
   splitSleepByDay,
   todayBerlin,
   groupByDay,
+  formatDuration,
   type SleepSegment,
 } from "../../lib/timelineUtils";
 
@@ -47,7 +48,7 @@ function changeTypeLabel(d: DiaperEntry | undefined): string {
   switch (d.diaper_type) {
     case "mixed": return "Beides";
     case "wet": return "Nass";
-    case "dirty": return "Schmutzig";
+    case "dirty": return "Dreckig";
     case "dry": return "Trocken";
     default: return "\u2014";
   }
@@ -59,7 +60,7 @@ function diaperSummary(diapers: DiaperEntry[]): string {
   const dry = diapers.filter((d) => d.diaper_type === "dry").length;
   const parts: string[] = [];
   if (wet) parts.push(`${wet}x nass`);
-  if (solid) parts.push(`${solid}x Stuhl`);
+  if (solid) parts.push(`${solid}x dreckig`);
   if (dry) parts.push(`${dry}x trocken`);
   return parts.join(", ") || "keine";
 }
@@ -112,9 +113,7 @@ export function BabySummary({
     const end = new Date(seg._splitEnd).getTime();
     return s + (end - start) / 60000;
   }, 0);
-  const sleepH = Math.floor(sleepMinutes / 60);
-  const sleepM = Math.round(sleepMinutes % 60);
-  const sleepDisplay = sleepH > 0 ? `${sleepH}h ${sleepM}m` : `${sleepM}m`;
+  const sleepDisplay = formatDuration(sleepMinutes);
 
   const running = sleeps.find((s) => !s.end_time);
 

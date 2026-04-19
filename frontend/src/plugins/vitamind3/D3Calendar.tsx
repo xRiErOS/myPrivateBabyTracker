@@ -15,9 +15,10 @@ function getFirstDayOffset(year: number, month: number): number {
 
 interface D3CalendarProps {
   entries: VitaminD3Entry[];
+  onDayClick?: (date: string, isGiven: boolean, entryId?: number) => void;
 }
 
-export function D3Calendar({ entries }: D3CalendarProps) {
+export function D3Calendar({ entries, onDayClick }: D3CalendarProps) {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -30,10 +31,12 @@ export function D3Calendar({ entries }: D3CalendarProps) {
   });
 
   const d3Days = new Set<number>();
+  const entryByDay = new Map<number, VitaminD3Entry>();
   entries.forEach((e) => {
     const [y, m, d] = e.date.split("-").map(Number);
     if (y === year && m === month + 1) {
       d3Days.add(d);
+      entryByDay.set(d, e);
     }
   });
 
@@ -56,24 +59,39 @@ export function D3Calendar({ entries }: D3CalendarProps) {
         ))}
         {cells.map((day, i) => {
           if (day === null)
-            return <div key={`empty-${i}`} className="w-8 h-8" />;
+            return <div key={`empty-${i}`} className="w-8 h-9" />;
 
           const isGiven = d3Days.has(day);
           const isToday = day === today;
+          const isPast = day < today;
 
           let classes =
-            "w-8 h-8 rounded-full flex items-center justify-center text-[12px] mx-auto ";
+            "w-8 h-9 rounded-full flex items-center justify-center text-[12px] mx-auto relative ";
           if (isGiven) {
-            classes += "bg-green/20 text-green font-semibold";
+            classes += "text-green font-semibold";
+            if (isToday) classes += " ring-2 ring-green";
           } else if (isToday) {
             classes += "ring-2 ring-peach text-text font-semibold";
           } else {
             classes += "text-subtext0";
           }
 
+          const canClick = onDayClick && (isPast || isToday);
+          const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
           return (
-            <div key={day} className={classes}>
+            <div
+              key={day}
+              className={`${classes} ${canClick ? "cursor-pointer active:scale-110 transition-transform" : ""}`}
+              onClick={canClick ? () => onDayClick(dateStr, isGiven, entryByDay.get(day)?.id) : undefined}
+            >
               {day}
+              {isGiven && (
+                <span className="absolute bottom-0.5 w-1.5 h-1.5 bg-green rounded-full" />
+              )}
+              {!isGiven && isPast && (
+                <span className="absolute bottom-0.5 w-1.5 h-1.5 bg-overlay0 rounded-full" />
+              )}
             </div>
           );
         })}
