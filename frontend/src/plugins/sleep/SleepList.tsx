@@ -1,12 +1,12 @@
 /** Sleep entry list with type filter and running highlight. */
 
 import { useEffect, useState } from "react";
-import { Moon, Pencil, Trash2 } from "lucide-react";
+import { Moon, Pencil, Square, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
 import { useActiveChild } from "../../context/ChildContext";
-import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDateTime, formatDuration } from "../../lib/dateUtils";
+import { useDeleteSleep, useSleepEntries, useUpdateSleep } from "../../hooks/useSleep";
+import { formatDateTime, formatDuration, nowISO } from "../../lib/dateUtils";
 
 function RunningTimer({ startIso }: { startIso: string }) {
   const [elapsed, setElapsed] = useState("");
@@ -39,6 +39,7 @@ export function SleepList({ onEdit }: SleepListProps) {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
   const deleteMut = useDeleteSleep();
+  const updateMut = useUpdateSleep();
 
   const { data: entries = [], isLoading } = useSleepEntries({
     child_id: activeChild?.id,
@@ -107,6 +108,16 @@ export function SleepList({ onEdit }: SleepListProps) {
             {!isRunning && <>Dauer: {formatDuration(entry.duration_minutes)}</>}
             {isRunning && "Laufend"}
           </p>
+          {isRunning && (
+            <button
+              onClick={(e) => { e.stopPropagation(); updateMut.mutate({ id: entry.id, data: { end_time: nowISO() } }); }}
+              disabled={updateMut.isPending}
+              className="mt-1 min-h-[44px] flex items-center justify-center gap-2 rounded-[8px] bg-green text-ground font-label text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <Square className="h-4 w-4" />
+              {updateMut.isPending ? "Stoppe..." : "Timer stoppen"}
+            </button>
+          )}
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
           )}

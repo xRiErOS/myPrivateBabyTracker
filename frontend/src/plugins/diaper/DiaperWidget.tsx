@@ -27,7 +27,7 @@ export function DiaperWidget({ childId }: DiaperWidgetProps) {
   const hasRashToday = entries.some((e) => e.has_rash);
 
   return (
-    <Card>
+    <Card className="h-full">
       <div className="flex items-center gap-2 mb-3">
         <Droplets className="h-5 w-5 text-blue" />
         <p className="font-label text-sm font-medium text-subtext0">Windeln</p>

@@ -1,10 +1,10 @@
-/** Sleep dashboard widget — today's total, last sleep, running timer. */
+/** Sleep dashboard widget — today's total, last sleep, running timer with stop. */
 
 import { useEffect, useState } from "react";
-import { Moon } from "lucide-react";
+import { Moon, Square } from "lucide-react";
 import { Card } from "../../components/Card";
-import { useSleepEntries } from "../../hooks/useSleep";
-import { formatDuration, formatTime, startOfTodayISO } from "../../lib/dateUtils";
+import { useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
+import { formatDuration, formatTime, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 
 function useElapsedMinutes(startIso: string | undefined): number {
   const [minutes, setMinutes] = useState(() =>
@@ -30,6 +30,7 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
     child_id: childId,
     date_from: startOfTodayISO(),
   });
+  const updateMut = useUpdateSleep();
 
   const totalMinutes = entries.reduce(
     (sum, e) => sum + (e.duration_minutes ?? 0),
@@ -39,8 +40,14 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
   const elapsed = useElapsedMinutes(running?.start_time);
   const lastEntry = entries[0];
 
+  function handleStop(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!running) return;
+    updateMut.mutate({ id: running.id, data: { end_time: nowISO() } });
+  }
+
   return (
-    <Card className={running ? "ring-2 ring-green/40 bg-green/5" : ""}>
+    <Card className={`h-full ${running ? "ring-2 ring-green/40 bg-green/5" : ""}`}>
       <div className="flex items-center gap-2 mb-3">
         <Moon className={`h-5 w-5 ${running ? "text-green" : "text-mauve"}`} />
         <p className="font-label text-sm font-medium text-subtext0">Schlaf</p>
@@ -61,6 +68,14 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
                   Schlaeft seit {formatTime(running.start_time)}
                 </span>
               </div>
+              <button
+                onClick={handleStop}
+                disabled={updateMut.isPending}
+                className="mt-2 min-h-[44px] flex items-center justify-center gap-2 rounded-[8px] bg-green text-ground font-label text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                <Square className="h-4 w-4" />
+                {updateMut.isPending ? "Stoppe..." : "Timer stoppen"}
+              </button>
             </>
           ) : (
             <>
