@@ -9,6 +9,7 @@ import {
   type DiaperListParams,
 } from "../api/diaper";
 import type { DiaperCreate, DiaperUpdate } from "../api/types";
+import { useToast } from "../context/ToastContext";
 
 const DIAPER_KEY = ["diaper"] as const;
 
@@ -22,25 +23,37 @@ export function useDiaperEntries(params: DiaperListParams = {}) {
 
 export function useCreateDiaper() {
   const qc = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: DiaperCreate) => createDiaper(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: DIAPER_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DIAPER_KEY });
+      showToast("Windel gespeichert");
+    },
   });
 }
 
 export function useUpdateDiaper() {
   const qc = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: DiaperUpdate }) =>
       updateDiaper(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: DIAPER_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DIAPER_KEY });
+      showToast("Windel aktualisiert");
+    },
   });
 }
 
 export function useDeleteDiaper() {
   const qc = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (id: number) => deleteDiaper(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: DIAPER_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: DIAPER_KEY });
+      showToast("Windel geloescht");
+    },
   });
 }

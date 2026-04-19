@@ -9,6 +9,7 @@ import {
   type SleepListParams,
 } from "../api/sleep";
 import type { SleepCreate, SleepUpdate } from "../api/types";
+import { useToast } from "../context/ToastContext";
 
 const SLEEP_KEY = ["sleep"] as const;
 
@@ -22,25 +23,37 @@ export function useSleepEntries(params: SleepListParams = {}) {
 
 export function useCreateSleep() {
   const qc = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: SleepCreate) => createSleep(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: SLEEP_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: SLEEP_KEY });
+      showToast("Schlaf gespeichert");
+    },
   });
 }
 
 export function useUpdateSleep() {
   const qc = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: SleepUpdate }) =>
       updateSleep(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: SLEEP_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: SLEEP_KEY });
+      showToast("Schlaf aktualisiert");
+    },
   });
 }
 
 export function useDeleteSleep() {
   const qc = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (id: number) => deleteSleep(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: SLEEP_KEY }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: SLEEP_KEY });
+      showToast("Schlaf geloescht");
+    },
   });
 }

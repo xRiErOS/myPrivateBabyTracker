@@ -24,7 +24,7 @@ export function ChildSelector() {
         const child = children.find((c) => c.id === Number(e.target.value));
         if (child) setActiveChild(child);
       }}
-      className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-headline text-xl font-bold text-text border-none outline-none focus:ring-2 focus:ring-mauve"
+      className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-headline text-base font-bold text-text border-none outline-none focus:ring-2 focus:ring-mauve appearance-none cursor-pointer"
     >
       {children.map((child) => (
         <option key={child.id} value={child.id}>

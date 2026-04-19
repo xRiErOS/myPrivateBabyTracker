@@ -35,7 +35,7 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
 
   const [sleepType, setSleepType] = useState<SleepType>(entry?.sleep_type ?? "nap");
   const [startTime, setStartTime] = useState(
-    entry?.start_time ? isoToLocalInput(entry.start_time) : "",
+    entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
   );
   const [endTime, setEndTime] = useState(
     entry?.end_time ? isoToLocalInput(entry.end_time) : "",
@@ -100,9 +100,11 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
 
   /** Replace ISO timestamps in error messages with local date/time. */
   function localizeTimestamps(msg: string): string {
-    return msg.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g, (match) => {
+    return msg.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?/g, (match) => {
       try {
-        return formatDateTime(match);
+        // Timestamps without Z or offset are UTC from the backend — append Z
+        const iso = /Z|[+-]\d{2}:\d{2}$/.test(match) ? match : match + "Z";
+        return formatDateTime(iso);
       } catch {
         return match;
       }
