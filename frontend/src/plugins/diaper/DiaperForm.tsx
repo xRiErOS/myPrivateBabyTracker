@@ -116,7 +116,7 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
       />
 
       <Button type="submit" disabled={isPending || !time}>
-        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
+        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
       </Button>
     </form>
   );

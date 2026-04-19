@@ -64,22 +64,22 @@ describe("apiFetch", () => {
     await expect(apiFetch("/v1/children/999")).rejects.toThrow("API 404");
   });
 
-  it("includes CSRF token from cookie when available", async () => {
+  it("includes CSRF token from cookie on mutating requests", async () => {
     Object.defineProperty(document, "cookie", {
       writable: true,
-      value: "csrftoken=abc123; other=value",
+      value: "csrf_token=abc123; other=value",
     });
 
     mockFetch.mockResolvedValue({
       ok: true,
-      status: 200,
+      status: 201,
       json: () => Promise.resolve({}),
     });
 
-    await apiFetch("/v1/children");
+    await apiFetch("/v1/children/", { method: "POST", body: "{}" });
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "/api/v1/children",
+      "/api/v1/children/",
       expect.objectContaining({
         headers: expect.objectContaining({
           "X-CSRF-Token": "abc123",

@@ -57,21 +57,9 @@ describe("DiaperForm", () => {
     expect(screen.getByText("Trocken")).toBeInTheDocument();
   });
 
-  it("does not show color/consistency for wet type (default)", () => {
+  it("does not show consistency for wet type (default)", () => {
     renderForm();
-    expect(screen.queryByText("Farbe")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Konsistenz")).not.toBeInTheDocument();
-  });
-
-  it("shows color buttons when dirty is selected", async () => {
-    const user = userEvent.setup();
-    renderForm();
-
-    await user.selectOptions(screen.getByLabelText("Typ"), "dirty");
-    expect(screen.getByText("Farbe")).toBeInTheDocument();
-    expect(screen.getByText("Gelb")).toBeInTheDocument();
-    expect(screen.getByText("Braun")).toBeInTheDocument();
-    expect(screen.getByText("Gruen")).toBeInTheDocument();
   });
 
   it("shows consistency select when dirty is selected", async () => {
@@ -80,15 +68,6 @@ describe("DiaperForm", () => {
 
     await user.selectOptions(screen.getByLabelText("Typ"), "dirty");
     expect(screen.getByLabelText("Konsistenz")).toBeInTheDocument();
-  });
-
-  it("color buttons have 44px touch target", async () => {
-    const user = userEvent.setup();
-    renderForm();
-
-    await user.selectOptions(screen.getByLabelText("Typ"), "dirty");
-    const yellowBtn = screen.getByText("Gelb");
-    expect(yellowBtn.className).toContain("min-h-[44px]");
   });
 
   it("can toggle rash checkbox", async () => {
@@ -104,6 +83,6 @@ describe("DiaperForm", () => {
 
   it("renders submit button", () => {
     renderForm();
-    expect(screen.getByRole("button", { name: "Speichern" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nachtragen" })).toBeInTheDocument();
   });
 });

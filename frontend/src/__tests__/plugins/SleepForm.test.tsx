@@ -51,8 +51,6 @@ describe("SleepForm", () => {
     expect(screen.getByLabelText("Typ")).toBeInTheDocument();
     expect(screen.getByLabelText("Beginn")).toBeInTheDocument();
     expect(screen.getByLabelText("Ende")).toBeInTheDocument();
-    expect(screen.getByLabelText("Ort")).toBeInTheDocument();
-    expect(screen.getByLabelText("Qualitaet")).toBeInTheDocument();
     expect(screen.getByLabelText("Notizen")).toBeInTheDocument();
   });
 
@@ -71,16 +69,16 @@ describe("SleepForm", () => {
 
   it("renders submit button with correct text for new entry", () => {
     renderForm();
-    expect(screen.getByRole("button", { name: "Speichern" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nachtragen" })).toBeInTheDocument();
   });
 
-  it("renders submit button with 'Aktualisieren' for edit", () => {
+  it("renders submit button with 'Aktualisieren' for completed entry edit", () => {
     const entry = {
       id: 1,
       child_id: 1,
       start_time: "2026-04-19T10:00:00Z",
-      end_time: null,
-      duration_minutes: null,
+      end_time: "2026-04-19T12:00:00Z",
+      duration_minutes: 120,
       sleep_type: "nap" as const,
       location: null,
       quality: null,
@@ -110,7 +108,7 @@ describe("SleepForm", () => {
 
   it("has min-h-[44px] on submit button for touch target", () => {
     renderForm();
-    const btn = screen.getByRole("button", { name: "Speichern" });
+    const btn = screen.getByRole("button", { name: "Nachtragen" });
     expect(btn.className).toContain("min-h-[44px]");
   });
 
@@ -123,7 +121,7 @@ describe("SleepForm", () => {
     await user.click(screen.getByText("Jetzt starten"));
 
     // Submit
-    await user.click(screen.getByRole("button", { name: "Speichern" }));
+    await user.click(screen.getByRole("button", { name: "Nachtragen" }));
     expect(mockCreateMutateAsync).toHaveBeenCalled();
   });
 });

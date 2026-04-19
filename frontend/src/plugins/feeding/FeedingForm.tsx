@@ -125,7 +125,7 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
       />
 
       <Button type="submit" disabled={isPending || !startTime}>
-        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
+        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
       </Button>
     </form>
   );

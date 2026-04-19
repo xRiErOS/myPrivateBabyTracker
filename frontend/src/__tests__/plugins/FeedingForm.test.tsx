@@ -25,6 +25,10 @@ vi.mock("../../hooks/useFeeding", () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
   }),
+  useFeedingEntries: () => ({
+    data: [],
+    isLoading: false,
+  }),
 }));
 
 function renderForm(props = {}) {
@@ -44,8 +48,7 @@ describe("FeedingForm", () => {
   it("renders all base form fields", () => {
     renderForm();
     expect(screen.getByLabelText("Typ")).toBeInTheDocument();
-    expect(screen.getByLabelText("Beginn")).toBeInTheDocument();
-    expect(screen.getByLabelText("Ende")).toBeInTheDocument();
+    expect(screen.getByLabelText("Zeitpunkt")).toBeInTheDocument();
     expect(screen.getByLabelText("Notizen")).toBeInTheDocument();
   });
 
@@ -91,6 +94,6 @@ describe("FeedingForm", () => {
 
   it("renders submit button", () => {
     renderForm();
-    expect(screen.getByRole("button", { name: "Speichern" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nachtragen" })).toBeInTheDocument();
   });
 });
