@@ -1,7 +1,9 @@
-/** 7-day weekly report — expandable DayCards with aggregated metrics + MiniTimeline. */
+/** 7-day weekly report — expandable DayCards.
+ *  Collapsed: 3-column tiles (Flasche, Windeln, Schlaf).
+ *  Expanded: MiniTimeline with axis + clickable category buttons.
+ *  Ported from home-dashboard WeeklyReport.jsx. */
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import type { FeedingEntry, DiaperEntry, SleepEntry } from "../../api/types";
 import {
   groupByDay,
@@ -36,7 +38,7 @@ function DayCard({
   isToday,
   onEntityClick,
 }: DayCardProps) {
-  const [expanded, setExpanded] = useState(isToday);
+  const [expanded, setExpanded] = useState(false);
 
   const d = new Date(date + "T12:00:00");
   const dayLabel = `${WEEKDAYS[d.getDay()]}, ${d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}`;
@@ -53,51 +55,72 @@ function DayCard({
     return s + (end - start) / 60000;
   }, 0);
   const sleepDisplay = formatDuration(sleepMinutes);
-  const dryCount = diapers.filter((d) => d.diaper_type === "dry").length;
+
+  const dryCount = diapers.filter((dd) => dd.diaper_type === "dry").length;
   const wParts: string[] = [];
   if (wet) wParts.push(`${wet} nass`);
   if (solid) wParts.push(`${solid} dreckig`);
   if (dryCount) wParts.push(`${dryCount} trocken`);
-  const windelBreakdown = wParts.length > 0 ? ` (${wParts.join(", ")})` : "";
+  const windelDetail = `${changeCount}${wParts.length > 0 ? ` (${wParts.join(", ")})` : ""}`;
 
   let trend: { arrow: string; color: string } | null = null;
   if (prevTotal !== null) {
     if (totalMl > prevTotal) trend = { arrow: "\u2191", color: "text-green" };
-    else if (totalMl < prevTotal) trend = { arrow: "\u2193", color: "text-red" };
+    else if (totalMl < prevTotal)
+      trend = { arrow: "\u2193", color: "text-red" };
     else trend = { arrow: "\u2194", color: "text-subtext0" };
   }
 
   return (
-    <div className="bg-surface0 rounded-card overflow-hidden">
+    <div className="bg-surface0 rounded-card p-4">
       <button
         type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-3 min-h-[44px]"
+        className="w-full text-left"
+        onClick={() => setExpanded((v) => !v)}
       >
-        <span
-          className={`font-label font-semibold text-sm ${isToday ? "text-peach" : "text-text"}`}
-        >
-          {isToday ? "Heute" : dayLabel}
-        </span>
-        <div className="flex items-center gap-3 text-xs text-subtext0 font-body">
-          <span>
-            {totalMl} ml
-            {trend && (
-              <span className={`ml-1 ${trend.color}`}>{trend.arrow}</span>
-            )}
-          </span>
-          <span>{changeCount} W</span>
-          <span>{sleepDisplay}</span>
-          {expanded ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
+        <div className="flex items-center justify-between mb-2">
+          <div
+            className={`font-label font-semibold text-sm ${isToday ? "text-peach" : "text-text"}`}
+          >
+            {isToday ? "Heute" : dayLabel}
+          </div>
+          <div className="text-subtext0 text-[12px]">
+            {expanded ? "\u25B2" : "\u25BC"}
+          </div>
         </div>
+        {!expanded && (
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-surface1 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-[11px] text-subtext0 font-label">
+                Flasche
+              </div>
+              <div className="text-sm font-medium text-text">
+                {totalMl} ml{" "}
+                {trend && (
+                  <span className={`text-[11px] ${trend.color}`}>
+                    {trend.arrow}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="bg-surface1 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-[11px] text-subtext0 font-label">
+                Windeln
+              </div>
+              <div className="text-sm font-medium text-text">{changeCount}</div>
+            </div>
+            <div className="bg-surface1 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-[11px] text-subtext0 font-label">Schlaf</div>
+              <div className="text-sm font-medium text-text">
+                {sleepDisplay}
+              </div>
+            </div>
+          </div>
+        )}
       </button>
 
       {expanded && (
-        <div className="px-3 pb-3 space-y-2">
+        <div>
           <MiniTimeline
             feedings={feedings}
             diapers={diapers}
@@ -105,34 +128,36 @@ function DayCard({
             showAxis
             isToday={isToday}
           />
-
-          <div className="space-y-1">
-            <div
-              className="flex items-center justify-between bg-ground rounded-lg px-3 py-2 min-h-[44px] cursor-pointer active:bg-surface1 transition-colors"
+          <div className="flex flex-col gap-2 mt-3">
+            <button
+              type="button"
               onClick={() => onEntityClick?.("feeding")}
+              className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
-              <span className="text-xs font-label text-text">Flasche</span>
-              <span className="text-xs font-semibold text-text">
+              <span className="font-label font-medium">Flasche</span>
+              <span className="text-[13px]">
                 {totalMl} ml ({feedCount}x)
-                {trend && <span className={`ml-1 ${trend.color}`}>{trend.arrow}</span>}
+                {trend && (
+                  <span className={`ml-1 ${trend.color}`}>{trend.arrow}</span>
+                )}
               </span>
-            </div>
-            <div
-              className="flex items-center justify-between bg-ground rounded-lg px-3 py-2 min-h-[44px] cursor-pointer active:bg-surface1 transition-colors"
+            </button>
+            <button
+              type="button"
               onClick={() => onEntityClick?.("diaper")}
+              className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
-              <span className="text-xs font-label text-text">Windeln</span>
-              <span className="text-xs font-semibold text-text">
-                {changeCount}{windelBreakdown}
-              </span>
-            </div>
-            <div
-              className="flex items-center justify-between bg-ground rounded-lg px-3 py-2 min-h-[44px] cursor-pointer active:bg-surface1 transition-colors"
+              <span className="font-label font-medium">Windeln</span>
+              <span className="text-[13px]">{windelDetail}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => onEntityClick?.("sleep")}
+              className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
-              <span className="text-xs font-label text-text">Schlaf</span>
-              <span className="text-xs font-semibold text-text">{sleepDisplay}</span>
-            </div>
+              <span className="font-label font-medium">Schlaf</span>
+              <span className="text-[13px]">{sleepDisplay}</span>
+            </button>
           </div>
         </div>
       )}
@@ -147,7 +172,12 @@ interface WeeklyReportProps {
   onEntityClick?: (category: string) => void;
 }
 
-export function WeeklyReport({ feedings, diapers, sleeps, onEntityClick }: WeeklyReportProps) {
+export function WeeklyReport({
+  feedings,
+  diapers,
+  sleeps,
+  onEntityClick,
+}: WeeklyReportProps) {
   const today = todayBerlin();
   const days = lastNDays(7).reverse();
 
@@ -156,7 +186,7 @@ export function WeeklyReport({ feedings, diapers, sleeps, onEntityClick }: Weekl
   const sleepMap = splitSleepByDay(sleeps);
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-3">
       {days.map((date, i) => {
         const dayFeedings = feedByDay[date] ?? [];
         const dayDiapers = diaperByDay[date] ?? [];
@@ -164,7 +194,10 @@ export function WeeklyReport({ feedings, diapers, sleeps, onEntityClick }: Weekl
 
         const prevDate = i < days.length - 1 ? days[i + 1] : null;
         const prevTotal = prevDate
-          ? (feedByDay[prevDate] ?? []).reduce((s, f) => s + (f.amount_ml ?? 0), 0)
+          ? (feedByDay[prevDate] ?? []).reduce(
+              (s, f) => s + (f.amount_ml ?? 0),
+              0,
+            )
           : null;
 
         return (
