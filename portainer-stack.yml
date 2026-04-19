@@ -15,7 +15,7 @@ services:
       - AUTH_MODE=${AUTH_MODE:-forward}
       - AUTH_TRUSTED_HEADER=${AUTH_TRUSTED_HEADER:-Remote-User}
       - AUTH_TRUSTED_PROXIES=${AUTH_TRUSTED_PROXIES:-192.168.178.0/24}
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///app/data/mybaby.db}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/mybaby.db}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - ENVIRONMENT=${ENVIRONMENT:-prod}
     stop_grace_period: 15s
