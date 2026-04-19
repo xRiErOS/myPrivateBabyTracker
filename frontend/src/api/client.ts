@@ -3,8 +3,18 @@
 const API_BASE = "/api";
 
 function getCsrfToken(): string | null {
-  const match = document.cookie.match(/csrftoken=([^;]+)/);
-  return match ? match[1] : null;
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+async function ensureCsrfToken(): Promise<string | null> {
+  let token = getCsrfToken();
+  if (!token) {
+    // Trigger cookie creation with a GET request
+    await fetch(`${API_BASE}/v1/health`, { credentials: "same-origin" });
+    token = getCsrfToken();
+  }
+  return token;
 }
 
 export class ApiError extends Error {
@@ -26,9 +36,13 @@ export async function apiFetch<T>(
     ...(options.headers as Record<string, string>),
   };
 
-  const csrf = getCsrfToken();
-  if (csrf) {
-    headers["X-CSRF-Token"] = csrf;
+  // For mutating requests, ensure CSRF token is available
+  const method = (options.method || "GET").toUpperCase();
+  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    const csrf = await ensureCsrfToken();
+    if (csrf) {
+      headers["X-CSRF-Token"] = csrf;
+    }
   }
 
   const resp = await fetch(`${API_BASE}${path}`, {
