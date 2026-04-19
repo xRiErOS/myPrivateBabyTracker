@@ -1,4 +1,4 @@
-/** Sleep entry list with type filter and running highlight. */
+/** Sleep entry list with type filter (running entries excluded — shown in SleepForm timer). */
 
 import { useState } from "react";
 import { Moon, Pencil, Trash2 } from "lucide-react";
@@ -54,14 +54,11 @@ export function SleepList({ onEdit }: SleepListProps) {
         onChange={(e) => setTypeFilter(e.target.value)}
       />
 
-      {entries.map((entry) => {
-        const isRunning = !entry.end_time;
-        return (
-        <Card key={entry.id} className={`flex flex-col gap-1 cursor-pointer hover:opacity-80 transition-opacity ${isRunning ? "ring-2 ring-green/40 bg-green/5" : ""}`} onClick={() => onEdit?.(entry)}>
+      {entries.map((entry) => (
+        <Card key={entry.id} className="flex flex-col gap-1 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onEdit?.(entry)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {isRunning && <span className="h-2 w-2 rounded-full bg-green animate-pulse" />}
-              <Moon className={`h-4 w-4 ${isRunning ? "text-green" : "text-mauve"}`} />
+              <Moon className="h-4 w-4 text-mauve" />
               <span className="font-label text-sm font-medium">
                 {entry.sleep_type === "nap" ? "Nickerchen" : "Nachtschlaf"}
               </span>
@@ -85,31 +82,18 @@ export function SleepList({ onEdit }: SleepListProps) {
               </button>
             </div>
           </div>
-          <p className={`font-body text-sm ${isRunning ? "text-green" : "text-subtext0"}`}>
+          <p className="font-body text-sm text-subtext0">
             {formatDateTime(entry.start_time)}
             {entry.end_time ? ` - ${formatDateTime(entry.end_time)}` : ""}
-            {isRunning && <RunningTimer startIso={entry.start_time} />}
           </p>
           <p className="font-body text-sm text-overlay0">
-            {!isRunning && <>Dauer: {formatDuration(entry.duration_minutes)}</>}
-            {isRunning && "Laufend"}
+            Dauer: {formatDuration(entry.duration_minutes)}
           </p>
-          {isRunning && (
-            <button
-              onClick={(e) => { e.stopPropagation(); updateMut.mutate({ id: entry.id, data: { end_time: nowISO() } }); }}
-              disabled={updateMut.isPending}
-              className="mt-1 min-h-[44px] flex items-center justify-center gap-2 rounded-[8px] bg-green text-ground font-label text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              <Square className="h-4 w-4" />
-              {updateMut.isPending ? "Stoppe..." : "Timer stoppen"}
-            </button>
-          )}
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
           )}
         </Card>
-        );
-      })}
+      ))}
     </div>
   );
 }
