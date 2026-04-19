@@ -3,7 +3,7 @@
 import { Utensils } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useFeedingEntries } from "../../hooks/useFeeding";
-import { startOfTodayISO } from "../../lib/dateUtils";
+import { formatTimeSince, startOfTodayISO } from "../../lib/dateUtils";
 import type { FeedingType } from "../../api/types";
 
 const TYPE_LABELS: Record<FeedingType, string> = {
@@ -46,14 +46,7 @@ export function FeedingWidget({ childId }: FeedingWidgetProps) {
               Letzte:{" "}
               {TYPE_LABELS[lastEntry.feeding_type as FeedingType] ?? lastEntry.feeding_type}
               {" — "}
-              {(() => {
-                const mins = Math.floor((Date.now() - new Date(lastEntry.start_time).getTime()) / 60000);
-                const h = Math.floor(mins / 60);
-                const m = mins % 60;
-                if (h === 0) return `vor ${m} Min.`;
-                if (m === 0) return `vor ${h} Std.`;
-                return `vor ${h} Std. ${m} Min.`;
-              })()}
+              {formatTimeSince(lastEntry.start_time)}
             </p>
           )}
         </div>

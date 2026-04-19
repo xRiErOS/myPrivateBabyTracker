@@ -6,7 +6,7 @@ import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateSleep, useUpdateSleep } from "../../hooks/useSleep";
-import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
+import { formatDateTime, isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { ApiError } from "../../api/client";
 import type { SleepEntry, SleepType } from "../../api/types";
 
@@ -98,17 +98,28 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
     }
   }
 
+  /** Replace ISO timestamps in error messages with local date/time. */
+  function localizeTimestamps(msg: string): string {
+    return msg.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/g, (match) => {
+      try {
+        return formatDateTime(match);
+      } catch {
+        return match;
+      }
+    });
+  }
+
   function handleApiError(err: unknown) {
     if (err instanceof ApiError) {
       try {
         const body = JSON.parse(err.message.replace(/^API \d+: /, ""));
-        setError(body.detail || err.message);
+        setError(localizeTimestamps(body.detail || err.message));
       } catch {
         const msg = err.message.replace(/^API \d+: /, "");
-        setError(msg);
+        setError(localizeTimestamps(msg));
       }
     } else if (err instanceof Error) {
-      setError(err.message);
+      setError(localizeTimestamps(err.message));
     } else {
       setError("Unbekannter Fehler");
     }

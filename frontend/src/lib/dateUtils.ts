@@ -67,6 +67,15 @@ export function localInputToISO(value: string): string {
   return new Date(value).toISOString();
 }
 
+/** Format time since ISO timestamp as "vor HH:MM" (always two digits). */
+export function formatTimeSince(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const totalMinutes = Math.max(0, Math.floor(diffMs / 60000));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `vor ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
 /** Convert ISO string to datetime-local input value (local time). */
 export function isoToLocalInput(iso: string): string {
   const d = new Date(iso);

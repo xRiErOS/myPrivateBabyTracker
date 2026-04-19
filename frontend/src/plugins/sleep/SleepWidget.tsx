@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Moon, Square } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDuration, formatTime, nowISO, startOfTodayISO } from "../../lib/dateUtils";
+import { formatDuration, formatTime, formatTimeSince, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 
 function useElapsedMinutes(startIso: string | undefined): number {
   const [minutes, setMinutes] = useState(() =>
@@ -85,7 +85,7 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
               <p className="font-body text-xs text-subtext0">Heute gesamt</p>
               {lastEntry && (
                 <p className="font-body text-xs text-subtext0 mt-1">
-                  Letzter Schlaf: {formatTime(lastEntry.start_time)}
+                  Letzter Schlaf: {formatTimeSince(lastEntry.end_time ?? lastEntry.start_time)}
                 </p>
               )}
             </>

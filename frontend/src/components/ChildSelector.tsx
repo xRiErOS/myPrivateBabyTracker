@@ -8,12 +8,12 @@ export function ChildSelector() {
 
   if (isLoading || children.length === 0) return null;
 
-  // Single child — no selector needed
+  // Single child — show name as headline
   if (children.length === 1) {
     return (
-      <span className="font-label text-sm font-medium text-text">
+      <h1 className="font-headline text-xl font-bold text-text">
         {children[0].name}
-      </span>
+      </h1>
     );
   }
 
@@ -24,7 +24,7 @@ export function ChildSelector() {
         const child = children.find((c) => c.id === Number(e.target.value));
         if (child) setActiveChild(child);
       }}
-      className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-label text-sm text-text border-none outline-none focus:ring-2 focus:ring-mauve"
+      className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-headline text-xl font-bold text-text border-none outline-none focus:ring-2 focus:ring-mauve"
     >
       {children.map((child) => (
         <option key={child.id} value={child.id}>

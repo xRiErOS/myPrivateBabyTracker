@@ -3,7 +3,7 @@
 import { AlertTriangle, Droplets } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useDiaperEntries } from "../../hooks/useDiaper";
-import { formatTime, startOfTodayISO } from "../../lib/dateUtils";
+import { formatTimeSince, startOfTodayISO } from "../../lib/dateUtils";
 import type { DiaperType } from "../../api/types";
 
 const TYPE_LABELS: Record<DiaperType, string> = {
@@ -45,8 +45,8 @@ export function DiaperWidget({ childId }: DiaperWidgetProps) {
           {lastEntry && (
             <p className="font-body text-xs text-subtext0 mt-1">
               Letzte: {TYPE_LABELS[lastEntry.diaper_type] ?? lastEntry.diaper_type}
-              {" um "}
-              {formatTime(lastEntry.time)}
+              {" — "}
+              {formatTimeSince(lastEntry.time)}
             </p>
           )}
 

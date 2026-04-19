@@ -1,28 +1,12 @@
 /** Sleep entry list with type filter and running highlight. */
 
-import { useEffect, useState } from "react";
-import { Moon, Pencil, Square, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Moon, Pencil, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
 import { useActiveChild } from "../../context/ChildContext";
-import { useDeleteSleep, useSleepEntries, useUpdateSleep } from "../../hooks/useSleep";
-import { formatDateTime, formatDuration, nowISO } from "../../lib/dateUtils";
-
-function RunningTimer({ startIso }: { startIso: string }) {
-  const [elapsed, setElapsed] = useState("");
-  useEffect(() => {
-    const update = () => {
-      const mins = Math.floor((Date.now() - new Date(startIso).getTime()) / 60000);
-      const h = Math.floor(mins / 60);
-      const m = mins % 60;
-      setElapsed(h > 0 ? ` (${h} Std. ${m} Min.)` : ` (${m} Min.)`);
-    };
-    update();
-    const id = setInterval(update, 10000);
-    return () => clearInterval(id);
-  }, [startIso]);
-  return <span>{elapsed}</span>;
-}
+import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
+import { formatDateTime, formatDuration } from "../../lib/dateUtils";
 import type { SleepEntry } from "../../api/types";
 
 const TYPE_OPTIONS = [
@@ -39,12 +23,14 @@ export function SleepList({ onEdit }: SleepListProps) {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
   const deleteMut = useDeleteSleep();
-  const updateMut = useUpdateSleep();
 
-  const { data: entries = [], isLoading } = useSleepEntries({
+  const { data: allEntries = [], isLoading } = useSleepEntries({
     child_id: activeChild?.id,
     sleep_type: typeFilter || undefined,
   });
+
+  // Filter out running entries — those are shown in SleepForm timer
+  const entries = allEntries.filter((e) => e.end_time != null);
 
   if (isLoading) {
     return <p className="font-body text-sm text-overlay0">Laden...</p>;
