@@ -2,8 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Catppuccin Latte (Light) */
+/* Catppuccin Latte (Light) — default */
+:root,
+html[data-theme="light"] {
   --color-base: #eff1f5;
   --color-surface0: #ccd0da;
   --color-surface1: #bcc0cc;
@@ -28,36 +29,8 @@
   --color-rosewater: #dc8a78;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Catppuccin Macchiato (Dark) */
-    --color-base: #24273a;
-    --color-surface0: #363a4f;
-    --color-surface1: #494d64;
-    --color-surface2: #5b6078;
-    --color-overlay0: #6e738d;
-    --color-text: #cad3f5;
-    --color-subtext0: #a5adcb;
-    --color-subtext1: #b8c0e0;
-    --color-mauve: #c6a0f6;
-    --color-sapphire: #7dc4e4;
-    --color-green: #a6da95;
-    --color-yellow: #eed49f;
-    --color-peach: #f5a97f;
-    --color-red: #ed8796;
-    --color-maroon: #ee99a0;
-    --color-pink: #f5bde6;
-    --color-lavender: #b7bdf8;
-    --color-blue: #8aadf4;
-    --color-sky: #91d7e3;
-    --color-teal: #8bd5ca;
-    --color-flamingo: #f0c6c6;
-    --color-rosewater: #f4dbd6;
-  }
-}
-
-/* Manual dark theme toggle via data-theme attribute */
-[data-theme="dark"] {
+/* Catppuccin Macchiato (Dark) — via toggle or system preference */
+html[data-theme="dark"] {
   --color-base: #24273a;
   --color-surface0: #363a4f;
   --color-surface1: #494d64;
