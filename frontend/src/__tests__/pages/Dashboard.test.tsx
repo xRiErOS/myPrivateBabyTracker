@@ -61,7 +61,7 @@ describe("Dashboard", () => {
     renderDashboard();
     // "Schlaf" appears in both quick-action and widget, so use getAllByText
     expect(screen.getAllByText("Schlaf").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Futter").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Mahlzeiten").length).toBeGreaterThanOrEqual(1);
     // "Windeln" only in widget, "Windel" in quick-action button
     expect(screen.getByText("Windeln")).toBeInTheDocument();
   });
@@ -72,7 +72,7 @@ describe("Dashboard", () => {
     const buttons = screen.getAllByRole("button");
     const buttonTexts = buttons.map((b) => b.textContent);
     expect(buttonTexts.some((t) => t?.includes("Schlaf"))).toBe(true);
-    expect(buttonTexts.some((t) => t?.includes("Futter"))).toBe(true);
+    expect(buttonTexts.some((t) => t?.includes("Mahlzeiten"))).toBe(true);
     expect(buttonTexts.some((t) => t?.includes("Windel"))).toBe(true);
   });
 

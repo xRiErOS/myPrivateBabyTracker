@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/sleep", icon: Moon, label: "Schlaf" },
-  { to: "/feeding", icon: Utensils, label: "Futter" },
+  { to: "/feeding", icon: Utensils, label: "Mahlzeiten" },
   { to: "/diaper", icon: Droplets, label: "Windeln" },
   { to: "/children", icon: Baby, label: "Kinder" },
 ] as const;

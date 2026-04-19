@@ -47,7 +47,7 @@ export default function FeedingPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">Futter</h2>
+        <h2 className="font-headline text-lg font-semibold">Mahlzeiten</h2>
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => {

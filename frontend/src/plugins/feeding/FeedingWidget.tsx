@@ -29,7 +29,7 @@ export function FeedingWidget({ childId }: FeedingWidgetProps) {
     <Card>
       <div className="flex items-center gap-2 mb-3">
         <Utensils className="h-5 w-5 text-peach" />
-        <p className="font-label text-sm font-medium text-subtext0">Futter</p>
+        <p className="font-label text-sm font-medium text-subtext0">Mahlzeiten</p>
       </div>
 
       {isLoading ? (
