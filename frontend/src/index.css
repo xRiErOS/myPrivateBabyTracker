@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Catppuccin Latte (Light) */
+  --color-base: #eff1f5;
+  --color-surface0: #ccd0da;
+  --color-surface1: #bcc0cc;
+  --color-surface2: #acb0be;
+  --color-overlay0: #9ca0b0;
+  --color-text: #4c4f69;
+  --color-subtext0: #6c6f85;
+  --color-subtext1: #5c5f77;
+  --color-mauve: #8839ef;
+  --color-sapphire: #209fb5;
+  --color-green: #40a02b;
+  --color-yellow: #df8e1d;
+  --color-peach: #fe640b;
+  --color-red: #d20f39;
+  --color-maroon: #e64553;
+  --color-pink: #ea76cb;
+  --color-lavender: #7287fd;
+  --color-blue: #1e66f5;
+  --color-sky: #04a5e5;
+  --color-teal: #179299;
+  --color-flamingo: #dd7878;
+  --color-rosewater: #dc8a78;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Catppuccin Macchiato (Dark) */
+    --color-base: #24273a;
+    --color-surface0: #363a4f;
+    --color-surface1: #494d64;
+    --color-surface2: #5b6078;
+    --color-overlay0: #6e738d;
+    --color-text: #cad3f5;
+    --color-subtext0: #a5adcb;
+    --color-subtext1: #b8c0e0;
+    --color-mauve: #c6a0f6;
+    --color-sapphire: #7dc4e4;
+    --color-green: #a6da95;
+    --color-yellow: #eed49f;
+    --color-peach: #f5a97f;
+    --color-red: #ed8796;
+    --color-maroon: #ee99a0;
+    --color-pink: #f5bde6;
+    --color-lavender: #b7bdf8;
+    --color-blue: #8aadf4;
+    --color-sky: #91d7e3;
+    --color-teal: #8bd5ca;
+    --color-flamingo: #f0c6c6;
+    --color-rosewater: #f4dbd6;
+  }
+}
+
+body {
+  font-family: "Manrope", sans-serif;
+  background-color: var(--color-base);
+  color: var(--color-text);
+  margin: 0;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}

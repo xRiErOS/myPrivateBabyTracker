@@ -16,6 +16,9 @@ frontend/dist/
 data/*.db
 data/*.db-wal
 data/*.db-shm
+*.db
+*.db-wal
+*.db-shm
 
 # Environment
 .env
@@ -36,6 +39,7 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+pytest-of-*/
 
 # Claude Code
 .claude/settings.local.json

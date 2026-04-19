@@ -1,0 +1,23 @@
+services:
+  mybaby:
+    build: .
+    container_name: mybaby
+    ports:
+      - "8080:8080"
+    environment:
+      - AUTH_MODE=forward
+      - AUTH_TRUSTED_HEADER=Remote-User
+      - AUTH_TRUSTED_PROXIES=192.168.178.0/24
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=sqlite:///data/mybaby.db
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    stop_grace_period: 15s
+    networks:
+      - nginx-proxy_default
+
+networks:
+  nginx-proxy_default:
+    external: true
