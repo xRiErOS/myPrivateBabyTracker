@@ -41,5 +41,8 @@ htmlcov/
 .pytest_cache/
 pytest-of-*/
 
+# Node compile cache
+node-compile-cache/
+
 # Claude Code
 .claude/settings.local.json

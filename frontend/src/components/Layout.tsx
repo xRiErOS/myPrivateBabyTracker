@@ -1,16 +1,28 @@
+/** Responsive shell — Header + Sidebar (desktop) / BottomNav (mobile). */
+
 import type { ReactNode } from "react";
+import { useTheme } from "../hooks/useTheme";
+import { BottomNav } from "./BottomNav";
+import { Header } from "./Header";
+import { Sidebar } from "./Sidebar";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const { theme, toggle } = useTheme();
+
   return (
     <div className="min-h-screen bg-ground text-text">
-      <header className="bg-surface0 border-b border-surface1 px-4 py-3">
-        <h1 className="font-headline text-xl font-bold">MyBaby</h1>
-      </header>
-      <main className="max-w-screen-lg mx-auto px-4 py-6">{children}</main>
+      <Header theme={theme} onToggleTheme={toggle} />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 max-w-screen-lg mx-auto px-4 py-6 pb-24 md:pb-6">
+          {children}
+        </main>
+      </div>
+      <BottomNav />
     </div>
   );
 }

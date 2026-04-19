@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+.pytest_cache
+.mypy_cache
+*.egg-info
+
+# Node
+frontend/node_modules
+frontend/.vite
+
+# Data (mounted as volume)
+data/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docs
+docs/
+*.md
+!backend/README.md
+
+# CI/CD
+.github/
+
+# Claude
+.claude/
+CLAUDE.md
+DESIGN.md

@@ -468,14 +468,21 @@ http GET baby-buddy-host:8090/api/changes/ \
 ### Import-Script ausfuehren
 
 ```bash
-cd backend
-source .venv/bin/activate
+# Vom Projekt-Root ausfuehren
+cd /path/to/myPrivateBabyTracker
 
-# Import aller Daten
-python -m app.cli import \
-  --sleep export_sleep.json \
-  --feeding export_feeding.json \
-  --diaper export_diaper.json
+# Dry-Run (prueft Daten ohne zu importieren)
+python scripts/import_babybuddy.py \
+  --url https://babybuddy.example.com \
+  --token API_TOKEN \
+  --database data/mybaby.db \
+  --dry-run
+
+# Tatsaechlicher Import
+python scripts/import_babybuddy.py \
+  --url https://babybuddy.example.com \
+  --token API_TOKEN \
+  --database data/mybaby.db
 ```
 
 Erwartung:
@@ -490,3 +497,109 @@ Erwartung:
 - [ ] Timestamps korrekt konvertiert (Baby Buddy UTC > MyBaby UTC > Anzeige Lokalzeit)
 - [ ] Aelteste Eintraege in der Liste sichtbar (Scroll/Pagination pruefen)
 - [ ] Stichprobe: 3 zufaellige Eintraege manuell vergleichen (Export vs. UI)
+
+## 8. Automatisierte Tests
+
+### Backend (pytest)
+
+```bash
+cd backend
+source .venv/bin/activate
+python -m pytest tests/ -v --tb=short
+```
+
+180 Tests in 15 Test-Modulen:
+
+| Modul | Beschreibung |
+|-------|-------------|
+| `test_auth.py` | Argon2, Forward-Auth, Rollen |
+| `test_children.py` | CRUD Children, Validierung K3 |
+| `test_config.py` | Settings, SECRET_KEY K4 |
+| `test_database.py` | Engine, WAL, Foreign Keys |
+| `test_diaper_plugin.py` | CRUD Diaper, Validierung |
+| `test_errors.py` | Error-Handler, HTTP-Codes |
+| `test_feeding_plugin.py` | CRUD Feeding, Typen |
+| `test_health.py` | Health-Endpoint |
+| `test_import.py` | Baby Buddy Import, Duplikaterkennung |
+| `test_logging.py` | structlog JSON-Output |
+| `test_models.py` | SQLAlchemy Models |
+| `test_plugin_registry.py` | Plugin-Registrierung |
+| `test_security.py` | CSRF, CSP, Rate-Limit |
+| `test_sleep_plugin.py` | CRUD Sleep, Validierung |
+
+### Frontend (Vitest)
+
+```bash
+cd frontend
+npx vitest run
+```
+
+51 Tests in 8 Test-Dateien:
+
+| Datei | Beschreibung |
+|-------|-------------|
+| `api/client.test.ts` | API-Client, Error-Handling |
+| `components/Button.test.tsx` | Button-Varianten, States |
+| `components/Card.test.tsx` | Card-Rendering |
+| `hooks/useTheme.test.ts` | Dark/Light Mode Toggle |
+| `pages/Dashboard.test.tsx` | Dashboard-Rendering |
+| `plugins/DiaperForm.test.tsx` | Windel-Formular |
+| `plugins/FeedingForm.test.tsx` | Fuetterungs-Formular |
+| `plugins/SleepForm.test.tsx` | Schlaf-Formular |
+
+## 9. Vollstaendige API-Endpoint-Referenz
+
+Basis-URL: `http://localhost:8000/api/v1`
+
+### System
+
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| GET | `/health` | Health-Check (kein Auth) |
+
+### Auth (nur bei AUTH_MODE=local)
+
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| POST | `/auth/login` | Login (username/password) |
+| POST | `/auth/logout` | Logout (Session invalidieren) |
+
+### Children
+
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| GET | `/children/` | Alle Kinder auflisten |
+| POST | `/children/` | Kind anlegen |
+| GET | `/children/{id}` | Kind abrufen |
+| PATCH | `/children/{id}` | Kind aktualisieren |
+| DELETE | `/children/{id}` | Kind loeschen (Soft Delete) |
+
+### Sleep Plugin
+
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| GET | `/sleep/` | Alle Schlaf-Eintraege |
+| POST | `/sleep/` | Schlaf-Eintrag erstellen |
+| GET | `/sleep/{id}` | Einzelner Eintrag |
+| PATCH | `/sleep/{id}` | Eintrag aktualisieren |
+| DELETE | `/sleep/{id}` | Eintrag loeschen |
+
+### Feeding Plugin
+
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| GET | `/feeding/` | Alle Fuetterungs-Eintraege |
+| POST | `/feeding/` | Fuetterung erstellen |
+| GET | `/feeding/{id}` | Einzelner Eintrag |
+| PATCH | `/feeding/{id}` | Eintrag aktualisieren |
+| DELETE | `/feeding/{id}` | Eintrag loeschen |
+
+### Diaper Plugin
+
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| GET | `/diaper/` | Alle Windel-Eintraege |
+| POST | `/diaper/` | Windel-Eintrag erstellen |
+| GET | `/diaper/{id}` | Einzelner Eintrag |
+| PATCH | `/diaper/{id}` | Eintrag aktualisieren |
+| DELETE | `/diaper/{id}` | Eintrag loeschen |

@@ -1,0 +1,47 @@
+# Development Compose — hot-reload for backend + frontend
+# Usage: docker compose -f docker-compose.dev.yml up
+services:
+  backend:
+    build:
+      context: .
+      target: production
+    container_name: mybaby-backend-dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+    environment:
+      - SECRET_KEY=dev-secret-key-minimum-32-characters-long
+      - AUTH_MODE=disabled
+      - DATABASE_URL=sqlite:///app/data/mybaby.db
+      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=dev
+      - CSRF_ENABLED=false
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0 --port 8000
+      --reload --reload-dir /app/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    image: node:22-alpine
+    container_name: mybaby-frontend-dev
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+
+volumes:
+  frontend_node_modules:

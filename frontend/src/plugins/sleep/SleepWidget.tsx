@@ -1,0 +1,61 @@
+/** Sleep dashboard widget — today's total, last sleep, running indicator. */
+
+import { Moon } from "lucide-react";
+import { Card } from "../../components/Card";
+import { useSleepEntries } from "../../hooks/useSleep";
+import { formatDuration, formatTime, startOfTodayISO } from "../../lib/dateUtils";
+
+interface SleepWidgetProps {
+  childId: number;
+}
+
+export function SleepWidget({ childId }: SleepWidgetProps) {
+  const { data: entries = [], isLoading } = useSleepEntries({
+    child_id: childId,
+    date_from: startOfTodayISO(),
+  });
+
+  const totalMinutes = entries.reduce(
+    (sum, e) => sum + (e.duration_minutes ?? 0),
+    0,
+  );
+  const running = entries.find((e) => !e.end_time);
+  const lastEntry = entries[0];
+
+  return (
+    <Card>
+      <div className="flex items-center gap-2 mb-3">
+        <Moon className="h-5 w-5 text-mauve" />
+        <p className="font-label text-sm font-medium text-subtext0">Schlaf</p>
+      </div>
+
+      {isLoading ? (
+        <p className="font-body text-sm text-overlay0">Laden...</p>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <p className="font-headline text-2xl font-semibold">
+            {formatDuration(totalMinutes)}
+          </p>
+          <p className="font-body text-xs text-overlay0">
+            Heute gesamt
+          </p>
+
+          {running && (
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className="h-2 w-2 rounded-full bg-green animate-pulse" />
+              <span className="font-body text-xs text-green">
+                Schlaeft seit {formatTime(running.start_time)}
+              </span>
+            </div>
+          )}
+
+          {lastEntry && !running && (
+            <p className="font-body text-xs text-overlay0 mt-1">
+              Letzter Schlaf: {formatTime(lastEntry.start_time)}
+            </p>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
