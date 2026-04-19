@@ -76,10 +76,8 @@ async def lifespan(app: FastAPI):
     # Initialize async database engine with WAL mode
     init_db(settings.database_url)
 
-    # Discover and register plugins (ADR-1: filesystem scan)
-    plugins = discover_plugins()
-    for plugin in plugins:
-        plugin.register_routes(app)
+    # Run plugin startup hooks (routes already mounted in create_app)
+    for plugin in plugin_registry.get_all():
         plugin.on_startup()
         logger.info(
             "plugin_loaded",
@@ -94,7 +92,7 @@ async def lifespan(app: FastAPI):
         auth_mode=settings.auth_mode,
         environment=settings.environment,
         log_level=settings.log_level,
-        plugins_loaded=[p.name for p in plugins],
+        plugins_loaded=[p.name for p in plugin_registry.get_all()],
     )
 
     yield
@@ -170,6 +168,11 @@ def create_app(testing: bool = False) -> FastAPI:
     # Children: auth required, mounted at /api/v1
     app.include_router(children_router, prefix="/api/v1")
 
+    # --- Plugin routers (must be before SPA fallback) ---
+    plugins = discover_plugins()
+    for plugin in plugins:
+        plugin.register_routes(app)
+
     # --- Static file serving (production: frontend build) ---
     index_html = STATIC_DIR / "index.html"
     assets_dir = STATIC_DIR / "assets"
@@ -178,10 +181,14 @@ def create_app(testing: bool = False) -> FastAPI:
         if assets_dir.exists():
             app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-        # SPA fallback: all non-API routes serve index.html
+        # SPA fallback: non-API routes serve index.html
         @app.get("/{path:path}")
         async def spa_fallback(request: Request, path: str):
             """Serve index.html for all non-API routes (SPA routing)."""
+            # Never intercept API routes — let them 404 naturally
+            if path.startswith("api/"):
+                from fastapi.responses import JSONResponse
+                return JSONResponse({"detail": "Not Found"}, status_code=404)
             # Prevent path traversal
             file_path = (STATIC_DIR / path).resolve()
             if not str(file_path).startswith(str(STATIC_DIR.resolve())):
