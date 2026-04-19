@@ -104,20 +104,54 @@ Details: `DESIGN.md`
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `security:`
 - Ein Commit pro Task-Abschluss
 
-## Security-Checkliste (K1-K4)
+## Security-Checkliste (K1-K4) — IMPLEMENTIERT
 
-- [ ] K1: Header-Stripping-Middleware als erste Middleware
-- [ ] K2: CSRF Double-Submit-Cookie + CSP-Header auf allen Responses
-- [ ] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
-- [ ] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
+- [x] K1: Header-Stripping-Middleware als erste Middleware
+- [x] K2: CSRF Double-Submit-Cookie + CSP-Header auf allen Responses
+- [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
+- [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Frontend-Portierung
+## Aktueller Stand (Sprint 1 abgeschlossen)
+
+- **MVP v0.1.0**: 27 Commits, 189 Backend-Tests, deployed auf NAS
+- **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
+- **Auth**: AUTH_MODE=disabled, CSRF_ENABLED=false (Testing-Modus)
+- **Testdaten**: 298 Einträge für Anna (child_id=2), 30.03.-18.04.2026
+- **Git Stash**: `agent-wip-dashboard-timeline` — angefangene Dashboard-Komponenten (Referenz, nicht blind anwenden)
+- **SSTD**: `(SSTD) MyBaby MVP Sprint 1 + Deployment.md`
+
+## Bekannte UI-Entscheidungen
+
+- Timestamps: Backend sendet UTC mit Z-Suffix (UTCDatetime Type in schemas/base.py)
+- Inputs: font-size 16px (text-base) gegen iOS-Zoom
+- Touch-Targets: min 44px
+- Button Variants: primary (peach), secondary (surface1), danger (red), success (green)
+- Schlaf: Kein Ort, keine Qualität (entfernt nach User-Feedback)
+- Windeln: Keine Stuhlfarbe (entfernt nach User-Feedback)
+- Mahlzeiten: Kein Ende-Feld, Preset feeding_type aus letztem Eintrag
+- Timer: "Jetzt starten" erstellt sofort DB-Eintrag, laufende Einträge nicht in Liste
+
+## Frontend-Portierung (aus Home-Dashboard)
 
 Bestehende Komponenten aus `~/Obsidian/tools/home-dashboard/src/pages/baby/` werden portiert:
 - JSX → TSX (TypeScript-Typen hinzufügen)
 - API-Pfade: `/baby-api/` → `/api/v1/{plugin}/`
 - Baby-Buddy-Workarounds entfernen (client-side Filterung, Notes-als-D3-Tracker)
 - Alle Tailwind-Klassen und visuelles Design beibehalten (DESIGN.md ist bindend)
+- React Query statt custom useBabyApi Hook
+
+### Noch zu portieren (Priorität)
+| Quelle (Home-Dashboard) | Ziel (MyBaby) | Funktion |
+|--------------------------|---------------|----------|
+| Timeline.jsx | DayTimeline.tsx | 24h SVG-Timeline, splitSleepByDay |
+| PatternView.jsx | PatternChart.tsx | 14-Tage Muster-Visualisierung |
+| WeeklyReport.jsx | 7-Tage Dashboard | DayCards, aufklappbar |
+| BabySummary.jsx | Dashboard Heute | Kacheln, Gestern-Vergleich |
+| VitaminD3Button.jsx | VitaminD3 Plugin | Monatskalender, Doppelerfassung-Schutz |
+| D3Calendar.jsx | D3Calendar.tsx | Heatmap-Kalender |
+
+### Screenshots-Referenz
+`500 CONTEXTS/Home Lab Wiki/20 - Projekte/MyBabyTracker/Screenshots.md` — 3 Screenshots (Heute, 7 Tage, 14 Tage)
 
 ## Spezialisierte Agenten
 
