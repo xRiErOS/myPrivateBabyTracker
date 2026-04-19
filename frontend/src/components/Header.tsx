@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Theme } from "../hooks/useTheme";
 import { ChildSelector } from "./ChildSelector";
 import { ThemeToggle } from "./ThemeToggle";
+import { useToast } from "../context/ToastContext";
 
 interface HeaderProps {
   theme: Theme;
@@ -15,10 +16,12 @@ interface HeaderProps {
 export function Header({ theme, onToggleTheme }: HeaderProps) {
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
+  const { showToast } = useToast();
 
   function handleRefresh() {
     setSpinning(true);
     queryClient.invalidateQueries();
+    showToast("Daten aktualisiert", "success");
     setTimeout(() => setSpinning(false), 500);
   }
 

@@ -169,10 +169,9 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
           </div>
           <Button
             type="button"
-            variant="primary"
+            variant="success"
             onClick={handleStopAndSave}
             disabled={isPending}
-            className="bg-green text-ground"
           >
             {isPending ? "Stoppe..." : "Jetzt stoppen"}
           </Button>
