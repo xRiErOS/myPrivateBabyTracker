@@ -17,6 +17,7 @@ services:
       - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/mybaby.db}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - ENVIRONMENT=${ENVIRONMENT:-prod}
+      - CSRF_ENABLED=${CSRF_ENABLED:-true}
     stop_grace_period: 15s
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
