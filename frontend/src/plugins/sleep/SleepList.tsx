@@ -70,7 +70,7 @@ export function SleepList({ onEdit }: SleepListProps) {
       {entries.map((entry) => {
         const isRunning = !entry.end_time;
         return (
-        <Card key={entry.id} className={`flex flex-col gap-1 ${isRunning ? "ring-2 ring-green/40 bg-green/5" : ""}`}>
+        <Card key={entry.id} className={`flex flex-col gap-1 cursor-pointer hover:opacity-80 transition-opacity ${isRunning ? "ring-2 ring-green/40 bg-green/5" : ""}`} onClick={() => onEdit?.(entry)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {isRunning && <span className="h-2 w-2 rounded-full bg-green animate-pulse" />}
@@ -90,7 +90,7 @@ export function SleepList({ onEdit }: SleepListProps) {
                 </button>
               )}
               <button
-                onClick={() => deleteMut.mutate(entry.id)}
+                onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
                 aria-label="Loeschen"
               >

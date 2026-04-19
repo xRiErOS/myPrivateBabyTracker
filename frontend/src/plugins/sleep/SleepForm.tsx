@@ -62,14 +62,6 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
     return () => clearInterval(interval);
   }, [isRunning, entry?.start_time]);
 
-  function handleStartNow() {
-    setStartTime(isoToLocalInput(nowISO()));
-  }
-
-  function handleStopNow() {
-    setEndTime(isoToLocalInput(nowISO()));
-  }
-
   async function handleStopAndSave() {
     if (!entry || !activeChild) return;
     setError(null);
@@ -168,44 +160,22 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
         onChange={(e) => setSleepType(e.target.value as SleepType)}
       />
 
-      <div className="flex flex-col gap-1">
-        <Input
-          label="Beginn"
-          type="datetime-local"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-          required
-        />
-        {!startTime && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleStartNow}
-            className="mt-1"
-          >
-            Jetzt starten
-          </Button>
-        )}
-      </div>
+      <Input
+        label="Beginn"
+        type="datetime-local"
+        value={startTime}
+        onChange={(e) => setStartTime(e.target.value)}
+        required
+      />
 
-      <div className="flex flex-col gap-1">
+      {!isRunning && (
         <Input
           label="Ende"
           type="datetime-local"
           value={endTime}
           onChange={(e) => setEndTime(e.target.value)}
         />
-        {isRunning && !endTime && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleStopNow}
-            className="mt-1"
-          >
-            Ende-Zeit setzen
-          </Button>
-        )}
-      </div>
+      )}
 
       <Input
         label="Notizen"

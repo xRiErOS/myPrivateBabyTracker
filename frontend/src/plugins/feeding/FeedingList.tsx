@@ -61,7 +61,7 @@ export function FeedingList({ onEdit }: FeedingListProps) {
       />
 
       {entries.map((entry) => (
-        <Card key={entry.id} className="flex flex-col gap-1">
+        <Card key={entry.id} className="flex flex-col gap-1 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onEdit?.(entry)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Utensils className="h-4 w-4 text-peach" />
@@ -80,7 +80,7 @@ export function FeedingList({ onEdit }: FeedingListProps) {
                 </button>
               )}
               <button
-                onClick={() => deleteMut.mutate(entry.id)}
+                onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
                 aria-label="Loeschen"
               >
