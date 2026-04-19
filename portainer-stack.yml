@@ -2,7 +2,6 @@
 # Environment variables are set in Portainer UI, not in this file.
 services:
   mybaby:
-    image: mybaby:latest
     build: .
     container_name: mybaby
     restart: unless-stopped
