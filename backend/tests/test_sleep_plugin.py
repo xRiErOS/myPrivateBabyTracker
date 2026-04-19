@@ -317,6 +317,146 @@ async def test_duration_recalculated_on_update(async_client):
 
 
 # ---------------------------------------------------------------------------
+# Overlap Validation Tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.anyio
+async def test_overlap_create_rejected(async_client):
+    """POST rejects a new entry that overlaps an existing one."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    # New entry fully inside existing
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-19T20:30:00Z",
+        "end_time": "2026-04-19T21:00:00Z",
+        "sleep_type": "nap",
+    })
+    assert resp.status_code == 422
+    assert "Ueberlappender" in resp.json()["detail"]
+
+
+@pytest.mark.anyio
+async def test_overlap_partial_before(async_client):
+    """POST rejects entry that starts before and ends during existing."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-19T19:00:00Z",
+        "end_time": "2026-04-19T20:30:00Z",
+        "sleep_type": "nap",
+    })
+    assert resp.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_overlap_partial_after(async_client):
+    """POST rejects entry that starts during and ends after existing."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-19T21:30:00Z",
+        "end_time": "2026-04-19T23:00:00Z",
+        "sleep_type": "nap",
+    })
+    assert resp.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_no_overlap_adjacent(async_client):
+    """POST allows entry that starts exactly when existing ends."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-19T22:00:00Z",
+        "end_time": "2026-04-19T23:00:00Z",
+        "sleep_type": "night",
+    })
+    assert resp.status_code == 201
+
+
+@pytest.mark.anyio
+async def test_no_overlap_different_child(async_client):
+    """POST allows overlapping entries for different children."""
+    child1 = await _create_child(async_client, "Baby1")
+    child2 = await _create_child(async_client, "Baby2")
+    await _create_sleep(async_client, child1, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child2,
+        "start_time": "2026-04-19T20:00:00Z",
+        "end_time": "2026-04-19T22:00:00Z",
+        "sleep_type": "nap",
+    })
+    assert resp.status_code == 201
+
+
+@pytest.mark.anyio
+async def test_overlap_ongoing_blocks_new(async_client):
+    """POST rejects new entry when an ongoing sleep (end=null) exists."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end=None)
+
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-19T21:00:00Z",
+        "end_time": "2026-04-19T22:00:00Z",
+        "sleep_type": "nap",
+    })
+    assert resp.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_overlap_new_ongoing_blocked_by_existing(async_client):
+    """POST rejects new ongoing entry when it overlaps existing finished entry."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    resp = await async_client.post("/api/v1/sleep/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-19T21:00:00Z",
+        "sleep_type": "nap",
+    })
+    assert resp.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_overlap_update_excluded_self(async_client):
+    """PATCH does not flag overlap with its own entry."""
+    child_id = await _create_child(async_client)
+    created = await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+
+    resp = await async_client.patch(
+        f"/api/v1/sleep/{created['id']}",
+        json={"end_time": "2026-04-19T22:30:00Z"},
+    )
+    assert resp.status_code == 200
+
+
+@pytest.mark.anyio
+async def test_overlap_update_rejected(async_client):
+    """PATCH rejects update that causes overlap with another entry."""
+    child_id = await _create_child(async_client)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z")
+    second = await _create_sleep(async_client, child_id, start="2026-04-19T22:00:00Z", end="2026-04-19T23:00:00Z", sleep_type="night")
+
+    # Extend second entry's start into first entry's range
+    resp = await async_client.patch(
+        f"/api/v1/sleep/{second['id']}",
+        json={"start_time": "2026-04-19T21:00:00Z"},
+    )
+    assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
 # Plugin Discovery Test
 # ---------------------------------------------------------------------------
 

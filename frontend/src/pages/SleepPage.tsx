@@ -1,4 +1,4 @@
-/** Sleep page — list + form (inline toggle). */
+/** Sleep page — list + form (inline toggle), auto-opens running sleep. */
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
 import { useActiveChild } from "../context/ChildContext";
+import { useSleepEntries } from "../hooks/useSleep";
 import { SleepForm } from "../plugins/sleep/SleepForm";
 import { SleepList } from "../plugins/sleep/SleepList";
 import type { SleepEntry } from "../api/types";
@@ -16,6 +17,22 @@ export default function SleepPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [editEntry, setEditEntry] = useState<SleepEntry | undefined>();
+  const [autoOpened, setAutoOpened] = useState(false);
+
+  const { data: entries } = useSleepEntries({
+    child_id: activeChild?.id,
+  });
+
+  // Auto-open running sleep entry in edit mode
+  useEffect(() => {
+    if (autoOpened || !entries) return;
+    const running = entries.find((e) => e.end_time == null);
+    if (running) {
+      setEditEntry(running);
+      setShowForm(true);
+      setAutoOpened(true);
+    }
+  }, [entries, autoOpened]);
 
   useEffect(() => {
     if (searchParams.get("new") === "1") {

@@ -3,10 +3,10 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.errors import NotFoundError
+from app.api.errors import NotFoundError, ValidationError
 from app.database import get_session
 from app.logging import get_logger
 from app.middleware.auth import get_current_user
@@ -33,6 +33,66 @@ def _compute_duration(start_time: datetime, end_time: datetime | None) -> int | 
     return int(delta.total_seconds() / 60)
 
 
+async def _check_overlap(
+    db: AsyncSession,
+    child_id: int,
+    start_time: datetime,
+    end_time: datetime | None,
+    exclude_id: int | None = None,
+) -> None:
+    """Raise ValidationError if a sleep entry overlaps the given time range.
+
+    Overlap logic:
+    - Two finished entries overlap when: new_start < existing_end AND new_end > existing_start
+    - An ongoing entry (end_time=NULL) overlaps with anything that starts after its start_time
+    - A new ongoing entry overlaps with anything that ends after its start_time (or is also ongoing)
+    """
+    conditions = [SleepEntry.child_id == child_id]
+
+    if exclude_id is not None:
+        conditions.append(SleepEntry.id != exclude_id)
+
+    # Build overlap condition:
+    # existing overlaps new when:
+    #   existing_start < new_end (or new_end is NULL → always true)
+    #   AND existing_end > new_start (or existing_end is NULL → always true)
+    if end_time is not None:
+        start_before_new_end = SleepEntry.start_time < end_time
+    else:
+        # New entry is ongoing → any existing entry's start is "before new end"
+        start_before_new_end = True  # noqa: F841 — replaced below
+        # Simplify: ongoing new entry overlaps if existing_end > new_start OR existing is also ongoing
+        start_before_new_end = True
+
+    if end_time is not None:
+        overlap_cond = and_(
+            SleepEntry.start_time < end_time,
+            or_(
+                SleepEntry.end_time.is_(None),
+                SleepEntry.end_time > start_time,
+            ),
+        )
+    else:
+        # New entry is ongoing: overlaps if existing hasn't ended before new_start
+        overlap_cond = or_(
+            SleepEntry.end_time.is_(None),
+            SleepEntry.end_time > start_time,
+        )
+
+    conditions.append(overlap_cond)
+
+    stmt = select(SleepEntry).where(*conditions).limit(1)
+    result = await db.execute(stmt)
+    existing = result.scalar_one_or_none()
+
+    if existing is not None:
+        existing_start = existing.start_time.isoformat() if existing.start_time else "?"
+        raise ValidationError(
+            f"Ueberlappender Schlaf-Eintrag existiert "
+            f"(ID: {existing.id}, Start: {existing_start})"
+        )
+
+
 @router.post("/", response_model=SleepResponse, status_code=201)
 async def create_sleep(
     data: SleepCreate,
@@ -40,6 +100,8 @@ async def create_sleep(
     db: AsyncSession = Depends(get_session),
 ):
     """Create a new sleep entry."""
+    await _check_overlap(db, data.child_id, data.start_time, data.end_time)
+
     entry = SleepEntry(
         child_id=data.child_id,
         start_time=data.start_time,
@@ -115,6 +177,11 @@ async def update_sleep(
             setattr(entry, field, value.value if hasattr(value, "value") else value)
         else:
             setattr(entry, field, value)
+
+    # Check overlap with updated times (exclude own entry)
+    await _check_overlap(
+        db, entry.child_id, entry.start_time, entry.end_time, exclude_id=entry.id
+    )
 
     # Recompute duration if times changed
     entry.duration_minutes = _compute_duration(entry.start_time, entry.end_time)
