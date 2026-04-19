@@ -23,27 +23,27 @@ function buildQuery(params: SleepListParams): string {
 }
 
 export async function listSleep(params: SleepListParams = {}): Promise<SleepEntry[]> {
-  return apiFetch<SleepEntry[]>(`${BASE}/${buildQuery(params)}`);
+  return apiFetch<SleepEntry[]>(`${BASE}${buildQuery(params)}`);
 }
 
 export async function getSleep(id: number): Promise<SleepEntry> {
-  return apiFetch<SleepEntry>(`${BASE}/${id}`);
+  return apiFetch<SleepEntry>(`${BASE}${id}`);
 }
 
 export async function createSleep(data: SleepCreate): Promise<SleepEntry> {
-  return apiFetch<SleepEntry>(`${BASE}/`, {
+  return apiFetch<SleepEntry>(BASE, {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
 export async function updateSleep(id: number, data: SleepUpdate): Promise<SleepEntry> {
-  return apiFetch<SleepEntry>(`${BASE}/${id}`, {
+  return apiFetch<SleepEntry>(`${BASE}${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 }
 
 export async function deleteSleep(id: number): Promise<void> {
-  return apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" });
+  return apiFetch<void>(`${BASE}${id}`, { method: "DELETE" });
 }

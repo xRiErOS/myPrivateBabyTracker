@@ -23,27 +23,27 @@ function buildQuery(params: FeedingListParams): string {
 }
 
 export async function listFeedings(params: FeedingListParams = {}): Promise<FeedingEntry[]> {
-  return apiFetch<FeedingEntry[]>(`${BASE}/${buildQuery(params)}`);
+  return apiFetch<FeedingEntry[]>(`${BASE}${buildQuery(params)}`);
 }
 
 export async function getFeeding(id: number): Promise<FeedingEntry> {
-  return apiFetch<FeedingEntry>(`${BASE}/${id}`);
+  return apiFetch<FeedingEntry>(`${BASE}${id}`);
 }
 
 export async function createFeeding(data: FeedingCreate): Promise<FeedingEntry> {
-  return apiFetch<FeedingEntry>(`${BASE}/`, {
+  return apiFetch<FeedingEntry>(BASE, {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
 export async function updateFeeding(id: number, data: FeedingUpdate): Promise<FeedingEntry> {
-  return apiFetch<FeedingEntry>(`${BASE}/${id}`, {
+  return apiFetch<FeedingEntry>(`${BASE}${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 }
 
 export async function deleteFeeding(id: number): Promise<void> {
-  return apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" });
+  return apiFetch<void>(`${BASE}${id}`, { method: "DELETE" });
 }
