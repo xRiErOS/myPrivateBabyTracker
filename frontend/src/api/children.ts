@@ -3,7 +3,7 @@
 import { apiFetch } from "./client";
 import type { Child, ChildCreate, ChildUpdate } from "./types";
 
-const BASE = "/v1/children";
+const BASE = "/v1/children/";
 
 export async function listChildren(): Promise<Child[]> {
   return apiFetch<Child[]>(BASE);

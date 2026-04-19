@@ -3,7 +3,7 @@
 import { apiFetch } from "./client";
 import type { SleepCreate, SleepEntry, SleepUpdate } from "./types";
 
-const BASE = "/v1/sleep";
+const BASE = "/v1/sleep/";
 
 export interface SleepListParams {
   child_id?: number;

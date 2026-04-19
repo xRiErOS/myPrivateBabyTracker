@@ -3,7 +3,7 @@
 import { apiFetch } from "./client";
 import type { DiaperCreate, DiaperEntry, DiaperUpdate } from "./types";
 
-const BASE = "/v1/diaper";
+const BASE = "/v1/diaper/";
 
 export interface DiaperListParams {
   child_id?: number;

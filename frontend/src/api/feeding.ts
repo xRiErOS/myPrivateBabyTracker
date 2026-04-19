@@ -3,7 +3,7 @@
 import { apiFetch } from "./client";
 import type { FeedingCreate, FeedingEntry, FeedingUpdate } from "./types";
 
-const BASE = "/v1/feeding";
+const BASE = "/v1/feeding/";
 
 export interface FeedingListParams {
   child_id?: number;
