@@ -35,7 +35,7 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
 
   const [sleepType, setSleepType] = useState<SleepType>(entry?.sleep_type ?? "nap");
   const [startTime, setStartTime] = useState(
-    entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
+    entry?.start_time ? isoToLocalInput(entry.start_time) : "",
   );
   const [endTime, setEndTime] = useState(
     entry?.end_time ? isoToLocalInput(entry.end_time) : "",
@@ -45,6 +45,8 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
   const [elapsed, setElapsed] = useState(0);
 
   const isRunning = entry != null && entry.end_time == null;
+  const isEditing = entry != null && entry.end_time != null;
+  const isNew = entry == null;
   const isPending = createMut.isPending || updateMut.isPending;
 
   // Live timer for running sleep entries
@@ -62,15 +64,33 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
     return () => clearInterval(interval);
   }, [isRunning, entry?.start_time]);
 
+  /** Start timer: creates a sleep entry with start_time=now, no end_time */
+  async function handleStartTimer() {
+    if (!activeChild) return;
+    setError(null);
+
+    try {
+      await createMut.mutateAsync({
+        child_id: activeChild.id,
+        start_time: nowISO(),
+        end_time: null,
+        sleep_type: sleepType,
+        notes: notes || null,
+      });
+      onDone?.();
+    } catch (err) {
+      handleApiError(err);
+    }
+  }
+
   async function handleStopAndSave() {
     if (!entry || !activeChild) return;
     setError(null);
 
-    const now = nowISO();
     try {
       await updateMut.mutateAsync({
         id: entry.id,
-        data: { end_time: now },
+        data: { end_time: nowISO() },
       });
       onDone?.();
     } catch (err) {
@@ -84,7 +104,6 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
         const body = JSON.parse(err.message.replace(/^API \d+: /, ""));
         setError(body.detail || err.message);
       } catch {
-        // Message format: "API 422: {json}"
         const msg = err.message.replace(/^API \d+: /, "");
         setError(msg);
       }
@@ -95,6 +114,7 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
     }
   }
 
+  /** Manual save: only for entries with start + end (nachtraegen or editing) */
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!activeChild) return;
@@ -122,7 +142,7 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       {/* Running timer banner */}
       {isRunning && (
         <div className="rounded-[8px] border-2 border-green bg-green/10 p-3 flex flex-col gap-2">
@@ -153,41 +173,117 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
         </div>
       )}
 
-      <Select
-        label="Typ"
-        options={SLEEP_TYPE_OPTIONS}
-        value={sleepType}
-        onChange={(e) => setSleepType(e.target.value as SleepType)}
-      />
+      {/* New entry: Timer start OR manual entry */}
+      {isNew && (
+        <>
+          <Select
+            label="Typ"
+            options={SLEEP_TYPE_OPTIONS}
+            value={sleepType}
+            onChange={(e) => setSleepType(e.target.value as SleepType)}
+          />
 
-      <Input
-        label="Beginn"
-        type="datetime-local"
-        value={startTime}
-        onChange={(e) => setStartTime(e.target.value)}
-        required
-      />
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleStartTimer}
+            disabled={isPending}
+            className="bg-mauve text-ground"
+          >
+            {isPending ? "Starte..." : "Jetzt starten"}
+          </Button>
 
-      {!isRunning && (
-        <Input
-          label="Ende"
-          type="datetime-local"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-        />
+          <div className="flex items-center gap-2 my-1">
+            <div className="flex-1 h-px bg-overlay0/30" />
+            <span className="font-label text-xs text-overlay0">oder nachtragen</span>
+            <div className="flex-1 h-px bg-overlay0/30" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <Input
+              label="Beginn"
+              type="datetime-local"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              required
+            />
+            <Input
+              label="Ende"
+              type="datetime-local"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              required
+            />
+            <Input
+              label="Notizen"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optionale Notizen..."
+              maxLength={2000}
+            />
+            <Button type="submit" disabled={isPending || !startTime || !endTime}>
+              {isPending ? "Speichern..." : "Nachtragen"}
+            </Button>
+          </form>
+        </>
       )}
 
-      <Input
-        label="Notizen"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optionale Notizen..."
-        maxLength={2000}
-      />
+      {/* Edit existing (completed) entry */}
+      {isEditing && (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Select
+            label="Typ"
+            options={SLEEP_TYPE_OPTIONS}
+            value={sleepType}
+            onChange={(e) => setSleepType(e.target.value as SleepType)}
+          />
+          <Input
+            label="Beginn"
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            required
+          />
+          <Input
+            label="Ende"
+            type="datetime-local"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+          />
+          <Input
+            label="Notizen"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Optionale Notizen..."
+            maxLength={2000}
+          />
+          <Button type="submit" disabled={isPending || !startTime}>
+            {isPending ? "Speichern..." : "Aktualisieren"}
+          </Button>
+        </form>
+      )}
 
-      <Button type="submit" disabled={isPending || !startTime}>
-        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
-      </Button>
-    </form>
+      {/* Running entry: only notes editable below timer */}
+      {isRunning && (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Select
+            label="Typ"
+            options={SLEEP_TYPE_OPTIONS}
+            value={sleepType}
+            onChange={(e) => setSleepType(e.target.value as SleepType)}
+          />
+          <Input
+            label="Notizen"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Optionale Notizen..."
+            maxLength={2000}
+          />
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Speichern..." : "Notizen aktualisieren"}
+          </Button>
+        </form>
+      )}
+    </div>
   );
 }
