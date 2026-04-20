@@ -17,7 +17,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden md:flex flex-col w-56 bg-surface0 min-h-screen py-6 px-3 border-r border-surface1">
+    <aside className="hidden md:flex flex-col w-56 bg-surface0 fixed top-[52px] left-0 bottom-0 py-6 px-3 border-r border-surface1 overflow-y-auto">
       <nav className="flex flex-col gap-1">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
