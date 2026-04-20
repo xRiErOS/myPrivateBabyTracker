@@ -167,6 +167,9 @@ def create_app(testing: bool = False) -> FastAPI:
     app.include_router(health_router, prefix="/api/v1")
     # Children: auth required, mounted at /api/v1
     app.include_router(children_router, prefix="/api/v1")
+    # Alerts: warning system (ADR-10)
+    from app.api.alerts import router as alerts_router
+    app.include_router(alerts_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

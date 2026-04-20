@@ -12,6 +12,7 @@ from sqlalchemy import engine_from_config, pool
 # Import all models so Alembic metadata includes them
 from app.models import Base  # noqa: F401
 from app.models import User, Child, ChildCaregiver  # noqa: F401
+from app.models.alert_config import AlertConfig  # noqa: F401
 
 # Discover plugin models (ADR-1: filesystem scan)
 from app.plugins import discover_models  # noqa: E402

@@ -1,6 +1,6 @@
 /** Desktop sidebar navigation — hidden on mobile. */
 
-import { Baby, Droplets, LayoutDashboard, Moon, Utensils } from "lucide-react";
+import { Baby, Droplets, LayoutDashboard, Moon, Pill, Scale, Thermometer, Utensils } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
@@ -8,6 +8,9 @@ const navItems = [
   { to: "/sleep", icon: Moon, label: "Schlaf" },
   { to: "/feeding", icon: Utensils, label: "Mahlzeiten" },
   { to: "/diaper", icon: Droplets, label: "Windeln" },
+  { to: "/temperature", icon: Thermometer, label: "Temperatur" },
+  { to: "/weight", icon: Scale, label: "Gewicht" },
+  { to: "/medication", icon: Pill, label: "Medikamente" },
   { to: "/children", icon: Baby, label: "Kinder" },
 ] as const;
 

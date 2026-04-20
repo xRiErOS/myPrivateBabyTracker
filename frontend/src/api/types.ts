@@ -138,6 +138,101 @@ export interface VitaminD3Create {
   date: string;
 }
 
+export interface TemperatureEntry {
+  id: number;
+  child_id: number;
+  measured_at: string;
+  temperature_celsius: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface TemperatureCreate {
+  child_id: number;
+  measured_at: string;
+  temperature_celsius: number;
+  notes?: string | null;
+}
+
+export interface TemperatureUpdate {
+  measured_at?: string | null;
+  temperature_celsius?: number | null;
+  notes?: string | null;
+}
+
+export interface WeightEntry {
+  id: number;
+  child_id: number;
+  measured_at: string;
+  weight_grams: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface WeightCreate {
+  child_id: number;
+  measured_at: string;
+  weight_grams: number;
+  notes?: string | null;
+}
+
+export interface WeightUpdate {
+  measured_at?: string | null;
+  weight_grams?: number | null;
+  notes?: string | null;
+}
+
+export interface MedicationEntry {
+  id: number;
+  child_id: number;
+  given_at: string;
+  medication_name: string;
+  dose: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface MedicationCreate {
+  child_id: number;
+  given_at: string;
+  medication_name: string;
+  dose?: string | null;
+  notes?: string | null;
+}
+
+export interface MedicationUpdate {
+  given_at?: string | null;
+  medication_name?: string | null;
+  dose?: string | null;
+  notes?: string | null;
+}
+
+export interface AlertConfig {
+  id: number;
+  child_id: number;
+  wet_diaper_enabled: boolean;
+  wet_diaper_min: number;
+  no_stool_enabled: boolean;
+  no_stool_hours: number;
+  low_feeding_enabled: boolean;
+  low_feeding_ml: number;
+  fever_enabled: boolean;
+  fever_threshold: number;
+}
+
+export interface Alert {
+  type: string;
+  severity: "warning" | "critical";
+  message: string;
+  value: number | null;
+  threshold: number | null;
+}
+
+export interface AlertsResponse {
+  child_id: number;
+  alerts: Alert[];
+}
+
 export interface HealthStatus {
   status: string;
   version: string;

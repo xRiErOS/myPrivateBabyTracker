@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Droplets, LayoutDashboard, Moon, Plus, Utensils } from "lucide-react";
+import { Droplets, LayoutDashboard, Moon, Pill, Plus, Scale, Thermometer, Utensils } from "lucide-react";
+import { AlertBanner } from "../components/AlertBanner";
 import { Button } from "../components/Button";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -13,6 +14,9 @@ import { BabySummary } from "../components/dashboard/BabySummary";
 import { DayTimeline } from "../components/dashboard/DayTimeline";
 import { WeeklyReport } from "../components/dashboard/WeeklyReport";
 import { PatternChart } from "../components/dashboard/PatternChart";
+import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
+import { MedicationWidget } from "../plugins/medication/MedicationWidget";
+import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
 import {
   splitSleepByDay,
@@ -56,6 +60,9 @@ export default function Dashboard() {
     <div className="space-y-4">
       <h2 className="font-headline text-lg font-semibold">{activeChild.name}</h2>
 
+      {/* Alert Banner */}
+      <AlertBanner />
+
       {/* Quick Actions */}
       <div className="flex gap-1.5 flex-wrap">
         <Button
@@ -84,6 +91,33 @@ export default function Dashboard() {
           <Plus className="h-4 w-4" />
           <Droplets className="h-4 w-4" />
           Windel
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/temperature?new=1")}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          <Thermometer className="h-4 w-4" />
+          Temperatur
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/weight?new=1")}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          <Scale className="h-4 w-4" />
+          Gewicht
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/medication?new=1")}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          <Pill className="h-4 w-4" />
+          Medikament
         </Button>
       </div>
 
@@ -154,6 +188,9 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
+      <TemperatureWidget />
+      <WeightWidget />
+      <MedicationWidget />
       <VitaminD3Widget />
     </div>
   );

@@ -10,6 +10,9 @@ const SleepPage = lazy(() => import("./pages/SleepPage"));
 const FeedingPage = lazy(() => import("./pages/FeedingPage"));
 const DiaperPage = lazy(() => import("./pages/DiaperPage"));
 const ChildrenPage = lazy(() => import("./pages/ChildrenPage"));
+const TemperaturePage = lazy(() => import("./pages/TemperaturePage"));
+const WeightPage = lazy(() => import("./pages/WeightPage"));
+const MedicationPage = lazy(() => import("./pages/MedicationPage"));
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
           <Route path="/sleep" element={<SleepPage />} />
           <Route path="/feeding" element={<FeedingPage />} />
           <Route path="/diaper" element={<DiaperPage />} />
+          <Route path="/temperature" element={<TemperaturePage />} />
+          <Route path="/weight" element={<WeightPage />} />
+          <Route path="/medication" element={<MedicationPage />} />
           <Route path="/children" element={<ChildrenPage />} />
         </Routes>
       </Suspense>
