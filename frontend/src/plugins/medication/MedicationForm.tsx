@@ -125,31 +125,28 @@ export function MedicationForm({ entry, onDone }: MedicationFormProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label className="font-label text-sm font-medium text-subtext0">
-                Medikament <span className="text-red">*</span>
-              </label>
-              {masters.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setUseFreeText(false)}
-                  className="font-label text-xs text-mauve hover:underline"
-                >
-                  Aus Liste waehlen
-                </button>
-              )}
-            </div>
+            <label className="font-label text-sm font-medium text-subtext0">
+              Medikament <span className="text-red">*</span>
+            </label>
             <Input
               value={medicationName}
               onChange={(e) => setMedicationName(e.target.value)}
               placeholder="z.B. Paracetamol, Ibuprofen..."
               maxLength={200}
             />
-            {masters.length === 0 && (
+            {masters.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setUseFreeText(false)}
+                className="font-label text-xs text-mauve hover:underline text-left"
+              >
+                Aus Liste waehlen
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => navigate("/admin/medication-masters")}
-                className="font-label text-xs text-mauve hover:underline text-left mt-0.5"
+                className="font-label text-xs text-mauve hover:underline text-left"
               >
                 Medikamentenliste anlegen
               </button>
