@@ -80,21 +80,7 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
     }
   }
 
-  // After create: show TagSelector, then done
-  if (createdId && !entry) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="rounded-[8px] border-2 border-green bg-green/10 p-3">
-          <p className="font-label text-base font-semibold text-green">Eintrag gespeichert</p>
-        </div>
-        <div>
-          <p className="font-label text-sm font-medium text-text mb-2">Tags hinzufuegen (optional)</p>
-          <TagSelector entryType="todo" entryId={createdId} />
-        </div>
-        <Button variant="primary" onClick={() => onDone(createdId)}>Fertig</Button>
-      </div>
-    );
-  }
+  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -139,15 +125,26 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
           />
         </div>
       </div>
+      <div className="pt-3 border-t border-surface1">
+        {(entry || createdId) ? (
+          <TagSelector entryType="todo" entryId={(entry?.id ?? createdId)!} />
+        ) : (
+          <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+        )}
+      </div>
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel}>
             Abbrechen
           </Button>
         )}
-        <Button type="submit" disabled={isPending || !title.trim()}>
-          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
-        </Button>
+        {createdId && !entry ? (
+          <Button type="button" variant="primary" onClick={() => onDone(createdId)}>Fertig</Button>
+        ) : (
+          <Button type="submit" disabled={isPending || !title.trim()}>
+            {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
+          </Button>
+        )}
       </div>
     </form>
   );

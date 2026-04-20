@@ -158,20 +158,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
     }
   }
 
-  if (createdId && !entry) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="rounded-[8px] border-2 border-green bg-green/10 p-3">
-          <p className="font-label text-base font-semibold text-green">Eintrag gespeichert</p>
-        </div>
-        <div>
-          <p className="font-label text-sm font-medium text-text mb-2">Tags hinzufuegen (optional)</p>
-          <TagSelector entryType="sleep" entryId={createdId} />
-        </div>
-        <Button variant="primary" onClick={() => onDone?.()}>Fertig</Button>
-      </div>
-    );
-  }
+  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <div className="flex flex-col gap-3">
@@ -205,7 +192,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
       )}
 
       {/* New entry: Timer start OR manual entry */}
-      {isNew && (
+      {isNew && !createdId && (
         <>
           <Select
             label="Typ"
@@ -252,6 +239,9 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
               placeholder="Optionale Notizen..."
               maxLength={2000}
             />
+            <div className="pt-3 border-t border-surface1">
+              <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+            </div>
             <div className="flex justify-end gap-2">
               {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
               <Button type="submit" disabled={isPending || !startTime || !endTime}>
@@ -260,6 +250,18 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             </div>
           </form>
         </>
+      )}
+
+      {/* After creation (timer or manual): show TagSelector + Fertig */}
+      {isNew && createdId && (
+        <div className="flex flex-col gap-3">
+          <div className="pt-3 border-t border-surface1">
+            <TagSelector entryType="sleep" entryId={createdId} />
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" variant="primary" onClick={() => onDone?.()}>Fertig</Button>
+          </div>
+        </div>
       )}
 
       {/* Edit existing (completed) entry */}
@@ -291,11 +293,13 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             placeholder="Optionale Notizen..."
             maxLength={2000}
           />
-          {entry && (
-            <div className="pt-3 border-t border-surface1">
-              <TagSelector entryType="sleep" entryId={entry.id} />
-            </div>
-          )}
+          <div className="pt-3 border-t border-surface1">
+            {(entry || createdId) ? (
+              <TagSelector entryType="sleep" entryId={(entry?.id ?? createdId)!} />
+            ) : (
+              <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+            )}
+          </div>
           <div className="flex justify-end gap-2">
             {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
             <Button type="submit" disabled={isPending || !startTime}>
@@ -321,6 +325,13 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             placeholder="Optionale Notizen..."
             maxLength={2000}
           />
+          <div className="pt-3 border-t border-surface1">
+            {entry ? (
+              <TagSelector entryType="sleep" entryId={entry.id} />
+            ) : (
+              <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+            )}
+          </div>
           <div className="flex justify-end gap-2">
             {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
             <Button type="submit" disabled={isPending}>

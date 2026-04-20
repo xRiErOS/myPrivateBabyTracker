@@ -69,20 +69,7 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
     }
   }
 
-  if (createdId && !entry) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="rounded-[8px] border-2 border-green bg-green/10 p-3">
-          <p className="font-label text-base font-semibold text-green">Eintrag gespeichert</p>
-        </div>
-        <div>
-          <p className="font-label text-sm font-medium text-text mb-2">Tags hinzufuegen (optional)</p>
-          <TagSelector entryType="temperature" entryId={createdId} />
-        </div>
-        <Button variant="primary" onClick={() => onDone?.()}>Fertig</Button>
-      </div>
-    );
-  }
+  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <div className="flex flex-col gap-3">
@@ -140,16 +127,22 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
           placeholder="Optionale Notizen..."
           maxLength={2000}
         />
-        {entry && (
-          <div className="pt-3 border-t border-surface1">
-            <TagSelector entryType="temperature" entryId={entry.id} />
-          </div>
-        )}
+        <div className="pt-3 border-t border-surface1">
+          {(entry || createdId) ? (
+            <TagSelector entryType="temperature" entryId={(entry?.id ?? createdId)!} />
+          ) : (
+            <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+          )}
+        </div>
         <div className="flex justify-end gap-2">
           {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
-          <Button type="submit" disabled={isPending || !measuredAt}>
-            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
-          </Button>
+          {createdId && !entry ? (
+            <Button type="button" variant="primary" onClick={() => onDone?.()}>Fertig</Button>
+          ) : (
+            <Button type="submit" disabled={isPending || !measuredAt}>
+              {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
+            </Button>
+          )}
         </div>
       </form>
     </div>

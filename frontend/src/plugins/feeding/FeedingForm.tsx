@@ -79,20 +79,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
     }
   }
 
-  if (createdId && !entry) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="rounded-[8px] border-2 border-green bg-green/10 p-3">
-          <p className="font-label text-base font-semibold text-green">Eintrag gespeichert</p>
-        </div>
-        <div>
-          <p className="font-label text-sm font-medium text-text mb-2">Tags hinzufuegen (optional)</p>
-          <TagSelector entryType="feeding" entryId={createdId} />
-        </div>
-        <Button variant="primary" onClick={() => onDone?.()}>Fertig</Button>
-      </div>
-    );
-  }
+  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -117,16 +104,22 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
         <Input label="Beikost" value={foodType} onChange={(e) => setFoodType(e.target.value)} placeholder="z.B. Karotten, Brei" maxLength={100} />
       )}
       <Input label="Notizen" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optionale Notizen..." maxLength={2000} />
-      {entry && (
-        <div className="pt-3 border-t border-surface1">
-          <TagSelector entryType="feeding" entryId={entry.id} />
-        </div>
-      )}
+      <div className="pt-3 border-t border-surface1">
+        {(entry || createdId) ? (
+          <TagSelector entryType="feeding" entryId={(entry?.id ?? createdId)!} />
+        ) : (
+          <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+        )}
+      </div>
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
-        <Button type="submit" disabled={isPending || !startTime}>
-          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
-        </Button>
+        {createdId && !entry ? (
+          <Button type="button" variant="primary" onClick={() => onDone?.()}>Fertig</Button>
+        ) : (
+          <Button type="submit" disabled={isPending || !startTime}>
+            {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+          </Button>
+        )}
       </div>
     </form>
   );
