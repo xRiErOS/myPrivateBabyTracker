@@ -264,3 +264,61 @@ export interface HealthStatus {
   database: string;
   plugins_loaded: number;
 }
+
+export interface Tag {
+  id: number;
+  child_id: number;
+  name: string;
+  color: string;
+  created_at: string;
+}
+
+export interface TagCreate {
+  child_id: number;
+  name: string;
+  color?: string;
+}
+
+export interface TagUpdate {
+  name?: string;
+  color?: string;
+}
+
+export interface EntryTag {
+  id: number;
+  tag_id: number;
+  entry_type: string;
+  entry_id: number;
+  tag: Tag;
+}
+
+export interface EntryTagCreate {
+  tag_id: number;
+  entry_type: string;
+  entry_id: number;
+}
+
+export interface TodoEntry {
+  id: number;
+  child_id: number;
+  title: string;
+  details: string | null;
+  due_date: string | null;
+  is_done: boolean;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface TodoCreate {
+  child_id: number;
+  title: string;
+  details?: string | null;
+  due_date?: string | null;
+}
+
+export interface TodoUpdate {
+  title?: string | null;
+  details?: string | null;
+  due_date?: string | null;
+  is_done?: boolean | null;
+}

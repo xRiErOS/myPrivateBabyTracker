@@ -19,14 +19,14 @@ export function VitaminD3Button({ childId, givenToday }: VitaminD3ButtonProps) {
 
   return (
     <div className="bg-surface0 rounded-card p-4 overflow-hidden">
-      <div className="flex items-center justify-between">
-        <span className="font-label font-semibold text-text text-sm">
-          Vitamin D3
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-label font-semibold text-text text-sm whitespace-nowrap">
+          Vit. D3
         </span>
         {givenToday ? (
-          <div className="flex items-center gap-2 px-5 py-2.5">
-            <CheckCircle size={20} className="text-green" />
-            <span className="text-sm font-label font-semibold text-green">
+          <div className="flex items-center gap-1.5 px-3 py-2">
+            <CheckCircle size={18} className="text-green flex-shrink-0" />
+            <span className="text-sm font-label font-semibold text-green whitespace-nowrap">
               Gegeben
             </span>
           </div>
@@ -35,9 +35,9 @@ export function VitaminD3Button({ childId, givenToday }: VitaminD3ButtonProps) {
             type="button"
             onClick={handleClick}
             disabled={createMut.isPending}
-            className="px-5 py-2.5 text-sm font-label font-semibold bg-green text-ground rounded-card hover:opacity-90 disabled:opacity-40 transition-all min-h-[44px]"
+            className="px-3 py-2 text-sm font-label font-semibold bg-green text-ground rounded-card hover:opacity-90 disabled:opacity-40 transition-all min-h-[44px] whitespace-nowrap"
           >
-            {createMut.isPending ? "..." : "Gegeben"}
+            {createMut.isPending ? "..." : "Geben"}
           </button>
         )}
       </div>

@@ -1,6 +1,6 @@
 /** Dashboard page — tabbed views: Heute, 7 Tage, 14 Tage. */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Droplets, LayoutDashboard, Moon, Pill, Plus, Scale, Thermometer, Utensils } from "lucide-react";
 import { AlertBanner } from "../components/AlertBanner";
@@ -35,6 +35,12 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [view, setView] = useState<DashboardView>("today");
 
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
+
   const { data, isLoading } = useDashboardData(
     activeChild?.id ?? 0,
     VIEW_DAYS[view],
@@ -58,7 +64,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-4">
-      <h2 className="font-headline text-lg font-semibold">{activeChild.name}</h2>
+      <div className="flex items-baseline justify-between">
+        <h2 className="font-headline text-lg font-semibold">
+          {now.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}
+          {" — "}
+          {now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+        </h2>
+        <span className="font-label text-sm text-subtext0">{activeChild.name}</span>
+      </div>
 
       {/* Alert Banner */}
       <AlertBanner />

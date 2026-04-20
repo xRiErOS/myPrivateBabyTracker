@@ -173,6 +173,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # Medication masters: predefined medication catalog
     from app.api.medication_masters import router as med_masters_router
     app.include_router(med_masters_router, prefix="/api/v1")
+    # Tags: polymorphic tagging for all entries
+    from app.api.tags import router as tags_router
+    app.include_router(tags_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

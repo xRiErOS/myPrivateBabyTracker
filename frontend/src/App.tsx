@@ -13,8 +13,10 @@ const ChildrenPage = lazy(() => import("./pages/ChildrenPage"));
 const TemperaturePage = lazy(() => import("./pages/TemperaturePage"));
 const WeightPage = lazy(() => import("./pages/WeightPage"));
 const MedicationPage = lazy(() => import("./pages/MedicationPage"));
+const TodoPage = lazy(() => import("./pages/TodoPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const MedicationMastersPage = lazy(() => import("./pages/MedicationMastersPage"));
+const TagsPage = lazy(() => import("./pages/TagsPage"));
 
 function App() {
   return (
@@ -28,9 +30,11 @@ function App() {
           <Route path="/temperature" element={<TemperaturePage />} />
           <Route path="/weight" element={<WeightPage />} />
           <Route path="/medication" element={<MedicationPage />} />
+          <Route path="/todo" element={<TodoPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/children" element={<ChildrenPage />} />
           <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
+          <Route path="/admin/tags" element={<TagsPage />} />
         </Routes>
       </Suspense>
     </Layout>

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { AlertTriangle, Droplets, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { TagBadges } from "../../components/TagBadges";
+import { TagSelector } from "../../components/TagSelector";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
@@ -109,10 +111,14 @@ export function DiaperList() {
             {entry.notes && (
               <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
             )}
+            <TagBadges entryType="diaper" entryId={entry.id} />
           </Card>
           {editingId === entry.id && (
             <Card className="border border-mauve/20">
               <DiaperForm entry={entry} onDone={() => setEditingId(null)} />
+              <div className="mt-3 pt-3 border-t border-surface1">
+                <TagSelector entryType="diaper" entryId={entry.id} />
+              </div>
             </Card>
           )}
         </div>

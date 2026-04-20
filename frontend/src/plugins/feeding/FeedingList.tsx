@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Pencil, Trash2, Utensils, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { TagBadges } from "../../components/TagBadges";
+import { TagSelector } from "../../components/TagSelector";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
@@ -104,10 +106,14 @@ export function FeedingList() {
             {entry.notes && (
               <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
             )}
+            <TagBadges entryType="feeding" entryId={entry.id} />
           </Card>
           {editingId === entry.id && (
             <Card className="border border-mauve/20">
               <FeedingForm entry={entry} onDone={() => setEditingId(null)} />
+              <div className="mt-3 pt-3 border-t border-surface1">
+                <TagSelector entryType="feeding" entryId={entry.id} />
+              </div>
             </Card>
           )}
         </div>
