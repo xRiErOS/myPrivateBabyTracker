@@ -1,6 +1,7 @@
 /** Medication entry form — dropdown from master data + free-text fallback. */
 
 import { type FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { useActiveChild } from "../../context/ChildContext";
@@ -16,6 +17,7 @@ interface MedicationFormProps {
 }
 
 export function MedicationForm({ entry, onDone }: MedicationFormProps) {
+  const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const createMut = useCreateMedication();
   const updateMut = useUpdateMedication();
@@ -143,6 +145,15 @@ export function MedicationForm({ entry, onDone }: MedicationFormProps) {
               placeholder="z.B. Paracetamol, Ibuprofen..."
               maxLength={200}
             />
+            {masters.length === 0 && (
+              <button
+                type="button"
+                onClick={() => navigate("/admin/medication-masters")}
+                className="font-label text-xs text-mauve hover:underline text-left mt-0.5"
+              >
+                Medikamentenliste anlegen
+              </button>
+            )}
           </div>
         )}
         <Input
