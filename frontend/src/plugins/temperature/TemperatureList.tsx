@@ -1,13 +1,13 @@
-/** Temperature entry list with date range filter. */
+/** Temperature entry list with inline edit. */
 
 import { useState } from "react";
-import { Pencil, Thermometer, Trash2 } from "lucide-react";
+import { Pencil, Thermometer, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteTemperature, useTemperatureEntries } from "../../hooks/useTemperature";
 import { formatDateTime } from "../../lib/dateUtils";
-import type { TemperatureEntry } from "../../api/types";
+import { TemperatureForm } from "./TemperatureForm";
 
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
@@ -22,13 +22,10 @@ function tempColor(celsius: number): string {
   return "text-green";
 }
 
-interface TemperatureListProps {
-  onEdit?: (entry: TemperatureEntry) => void;
-}
-
-export function TemperatureList({ onEdit }: TemperatureListProps) {
+export function TemperatureList() {
   const { activeChild } = useActiveChild();
   const [dateRange, setDateRange] = useState<DateRange>("week");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteTemperature();
 
   const { data: entries = [], isLoading } = useTemperatureEntries({
@@ -54,39 +51,44 @@ export function TemperatureList({ onEdit }: TemperatureListProps) {
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
       {entries.map((entry) => (
-        <Card key={entry.id} className="flex flex-col gap-1 p-3">
-          <div className="flex items-center justify-between">
-            <span className={`font-heading text-lg ${tempColor(entry.temperature_celsius)}`}>
-              {entry.temperature_celsius.toFixed(1)} °C
-            </span>
-            <div className="flex gap-2">
-              {onEdit && (
+        <div key={entry.id} className="flex flex-col gap-2">
+          <Card className="flex flex-col gap-1 p-3">
+            <div className="flex items-center justify-between">
+              <span className={`font-heading text-lg ${tempColor(entry.temperature_celsius)}`}>
+                {entry.temperature_celsius.toFixed(1)} °C
+              </span>
+              <div className="flex gap-2">
                 <button
-                  onClick={() => onEdit(entry)}
-                  className="rounded p-1.5 text-overlay0 hover:bg-surface1 active:bg-surface2"
+                  onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
+                  className={`rounded p-1.5 ${editingId === entry.id ? "text-peach bg-peach/10" : "text-overlay0 hover:bg-surface1"} active:bg-surface2`}
                   style={{ minWidth: 44, minHeight: 44 }}
                 >
-                  <Pencil className="h-4 w-4" />
+                  {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
                 </button>
-              )}
-              <button
-                onClick={() => {
-                  if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
-                }}
-                className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
-                style={{ minWidth: 44, minHeight: 44 }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={() => {
+                    if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
+                  }}
+                  className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
+                  style={{ minWidth: 44, minHeight: 44 }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
-          <p className="font-body text-xs text-subtext0">
-            {formatDateTime(entry.measured_at)}
-          </p>
-          {entry.notes && (
-            <p className="font-body text-xs text-overlay0">{entry.notes}</p>
+            <p className="font-body text-xs text-subtext0">
+              {formatDateTime(entry.measured_at)}
+            </p>
+            {entry.notes && (
+              <p className="font-body text-xs text-overlay0">{entry.notes}</p>
+            )}
+          </Card>
+          {editingId === entry.id && (
+            <Card className="border border-mauve/20">
+              <TemperatureForm entry={entry} onDone={() => setEditingId(null)} />
+            </Card>
           )}
-        </Card>
+        </div>
       ))}
     </div>
   );

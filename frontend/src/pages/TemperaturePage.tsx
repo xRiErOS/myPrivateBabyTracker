@@ -1,4 +1,4 @@
-/** Temperature page — list + form (inline toggle). */
+/** Temperature page — new entry form + list with inline edit. */
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -9,13 +9,11 @@ import { EmptyState } from "../components/EmptyState";
 import { useActiveChild } from "../context/ChildContext";
 import { TemperatureForm } from "../plugins/temperature/TemperatureForm";
 import { TemperatureList } from "../plugins/temperature/TemperatureList";
-import type { TemperatureEntry } from "../api/types";
 
 export default function TemperaturePage() {
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
-  const [editEntry, setEditEntry] = useState<TemperatureEntry | undefined>();
 
   useEffect(() => {
     if (searchParams.get("new") === "1") {
@@ -24,15 +22,7 @@ export default function TemperaturePage() {
     }
   }, [searchParams, setSearchParams]);
 
-  const handleDone = useCallback(() => {
-    setShowForm(false);
-    setEditEntry(undefined);
-  }, []);
-
-  const handleEdit = useCallback((entry: TemperatureEntry) => {
-    setEditEntry(entry);
-    setShowForm(true);
-  }, []);
+  const handleDone = useCallback(() => setShowForm(false), []);
 
   if (!activeChild) {
     return (
@@ -50,10 +40,7 @@ export default function TemperaturePage() {
         <h2 className="font-headline text-lg font-semibold">Temperatur</h2>
         <Button
           variant={showForm ? "danger" : "primary"}
-          onClick={() => {
-            setShowForm(!showForm);
-            setEditEntry(undefined);
-          }}
+          onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2"
         >
           {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
@@ -62,11 +49,11 @@ export default function TemperaturePage() {
 
       {showForm && (
         <Card>
-          <TemperatureForm entry={editEntry} onDone={handleDone} />
+          <TemperatureForm onDone={handleDone} />
         </Card>
       )}
 
-      <TemperatureList onEdit={handleEdit} />
+      <TemperatureList />
     </div>
   );
 }

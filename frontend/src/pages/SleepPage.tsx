@@ -1,4 +1,4 @@
-/** Sleep page — list + form (inline toggle), auto-opens running sleep. */
+/** Sleep page — new entry form + list with inline edit, auto-opens running sleep. */
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -10,13 +10,12 @@ import { useActiveChild } from "../context/ChildContext";
 import { useSleepEntries } from "../hooks/useSleep";
 import { SleepForm } from "../plugins/sleep/SleepForm";
 import { SleepList } from "../plugins/sleep/SleepList";
-import type { SleepEntry } from "../api/types";
 
 export default function SleepPage() {
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
-  const [editEntry, setEditEntry] = useState<SleepEntry | undefined>();
+  const [runningEntry, setRunningEntry] = useState<import("../api/types").SleepEntry | undefined>();
   const [autoOpened, setAutoOpened] = useState(false);
 
   const { data: entries } = useSleepEntries({
@@ -28,7 +27,7 @@ export default function SleepPage() {
     if (autoOpened || !entries) return;
     const running = entries.find((e) => e.end_time == null);
     if (running) {
-      setEditEntry(running);
+      setRunningEntry(running);
       setShowForm(true);
       setAutoOpened(true);
     }
@@ -43,12 +42,7 @@ export default function SleepPage() {
 
   const handleDone = useCallback(() => {
     setShowForm(false);
-    setEditEntry(undefined);
-  }, []);
-
-  const handleEdit = useCallback((entry: SleepEntry) => {
-    setEditEntry(entry);
-    setShowForm(true);
+    setRunningEntry(undefined);
   }, []);
 
   if (!activeChild) {
@@ -69,7 +63,7 @@ export default function SleepPage() {
           variant={showForm ? "danger" : "primary"}
           onClick={() => {
             setShowForm(!showForm);
-            setEditEntry(undefined);
+            setRunningEntry(undefined);
           }}
           className="flex items-center gap-2"
         >
@@ -79,11 +73,11 @@ export default function SleepPage() {
 
       {showForm && (
         <Card>
-          <SleepForm entry={editEntry} onDone={handleDone} />
+          <SleepForm entry={runningEntry} onDone={handleDone} />
         </Card>
       )}
 
-      <SleepList onEdit={handleEdit} />
+      <SleepList />
     </div>
   );
 }

@@ -1,14 +1,15 @@
-/** Feeding entry list with type filter. */
+/** Feeding entry list with inline edit. */
 
 import { useState } from "react";
-import { Pencil, Trash2, Utensils } from "lucide-react";
+import { Pencil, Trash2, Utensils, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteFeeding, useFeedingEntries } from "../../hooks/useFeeding";
 import { formatDateTime, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
-import type { FeedingEntry, FeedingType } from "../../api/types";
+import { FeedingForm } from "./FeedingForm";
+import type { FeedingType } from "../../api/types";
 
 const TYPE_OPTIONS = [
   { value: "", label: "Alle Typen" },
@@ -25,20 +26,17 @@ const TYPE_LABELS: Record<FeedingType, string> = {
   solid: "Beikost",
 };
 
-interface FeedingListProps {
-  onEdit?: (entry: FeedingEntry) => void;
-}
-
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
   all: undefined,
 };
 
-export function FeedingList({ onEdit }: FeedingListProps) {
+export function FeedingList() {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("week");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteFeeding();
 
   const { data: entries = [], isLoading } = useFeedingEntries({
@@ -72,44 +70,47 @@ export function FeedingList({ onEdit }: FeedingListProps) {
       />
 
       {entries.map((entry) => (
-        <Card key={entry.id} className="flex flex-col gap-1 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onEdit?.(entry)}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Utensils className="h-4 w-4 text-peach" />
-              <span className="font-label text-sm font-medium">
-                {TYPE_LABELS[entry.feeding_type as FeedingType] ?? entry.feeding_type}
-              </span>
-            </div>
-            <div className="flex gap-1">
-              {onEdit && (
+        <div key={entry.id} className="flex flex-col gap-2">
+          <Card className="flex flex-col gap-1 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Utensils className="h-4 w-4 text-peach" />
+                <span className="font-label text-sm font-medium">
+                  {TYPE_LABELS[entry.feeding_type as FeedingType] ?? entry.feeding_type}
+                </span>
+              </div>
+              <div className="flex gap-1">
                 <button
-                  onClick={() => onEdit(entry)}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors"
-                  aria-label="Bearbeiten"
+                  onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
+                  className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}
                 >
-                  <Pencil className="h-4 w-4" />
+                  {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
                 </button>
-              )}
-              <button
-                onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
-                aria-label="Loeschen"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
-          <p className="font-body text-sm text-subtext0">
-            {formatDateTime(entry.start_time)}
-          </p>
-          <p className="font-body text-sm text-overlay0">
-            {entry.amount_ml != null && `${entry.amount_ml} ml`}
-            {entry.food_type && `${entry.amount_ml != null ? " | " : ""}${entry.food_type}`}
-          </p>
-          {entry.notes && (
-            <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
+            <p className="font-body text-sm text-subtext0">
+              {formatDateTime(entry.start_time)}
+            </p>
+            <p className="font-body text-sm text-overlay0">
+              {entry.amount_ml != null && `${entry.amount_ml} ml`}
+              {entry.food_type && `${entry.amount_ml != null ? " | " : ""}${entry.food_type}`}
+            </p>
+            {entry.notes && (
+              <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
+            )}
+          </Card>
+          {editingId === entry.id && (
+            <Card className="border border-mauve/20">
+              <FeedingForm entry={entry} onDone={() => setEditingId(null)} />
+            </Card>
           )}
-        </Card>
+        </div>
       ))}
     </div>
   );

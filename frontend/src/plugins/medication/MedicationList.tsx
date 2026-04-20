@@ -1,13 +1,13 @@
-/** Medication entry list with date range filter. */
+/** Medication entry list with inline edit. */
 
 import { useState } from "react";
-import { Pencil, Pill, Trash2 } from "lucide-react";
+import { Pencil, Pill, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteMedication, useMedicationEntries } from "../../hooks/useMedication";
 import { formatDateTime } from "../../lib/dateUtils";
-import type { MedicationEntry } from "../../api/types";
+import { MedicationForm } from "./MedicationForm";
 
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
@@ -15,13 +15,10 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   all: undefined,
 };
 
-interface MedicationListProps {
-  onEdit?: (entry: MedicationEntry) => void;
-}
-
-export function MedicationList({ onEdit }: MedicationListProps) {
+export function MedicationList() {
   const { activeChild } = useActiveChild();
   const [dateRange, setDateRange] = useState<DateRange>("week");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteMedication();
 
   const { data: entries = [], isLoading } = useMedicationEntries({
@@ -47,44 +44,49 @@ export function MedicationList({ onEdit }: MedicationListProps) {
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
       {entries.map((entry) => (
-        <Card key={entry.id} className="flex flex-col gap-1 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="font-heading text-base text-text">
-                {entry.medication_name}
-              </span>
-              {entry.dose && (
-                <span className="font-body text-sm text-subtext0">{entry.dose}</span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {onEdit && (
+        <div key={entry.id} className="flex flex-col gap-2">
+          <Card className="flex flex-col gap-1 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="font-heading text-base text-text">
+                  {entry.medication_name}
+                </span>
+                {entry.dose && (
+                  <span className="font-body text-sm text-subtext0">{entry.dose}</span>
+                )}
+              </div>
+              <div className="flex gap-2">
                 <button
-                  onClick={() => onEdit(entry)}
-                  className="rounded p-1.5 text-overlay0 hover:bg-surface1 active:bg-surface2"
+                  onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
+                  className={`rounded p-1.5 ${editingId === entry.id ? "text-peach bg-peach/10" : "text-overlay0 hover:bg-surface1"} active:bg-surface2`}
                   style={{ minWidth: 44, minHeight: 44 }}
                 >
-                  <Pencil className="h-4 w-4" />
+                  {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
                 </button>
-              )}
-              <button
-                onClick={() => {
-                  if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
-                }}
-                className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
-                style={{ minWidth: 44, minHeight: 44 }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={() => {
+                    if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
+                  }}
+                  className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
+                  style={{ minWidth: 44, minHeight: 44 }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
-          <p className="font-body text-xs text-subtext0">
-            {formatDateTime(entry.given_at)}
-          </p>
-          {entry.notes && (
-            <p className="font-body text-xs text-overlay0">{entry.notes}</p>
+            <p className="font-body text-xs text-subtext0">
+              {formatDateTime(entry.given_at)}
+            </p>
+            {entry.notes && (
+              <p className="font-body text-xs text-overlay0">{entry.notes}</p>
+            )}
+          </Card>
+          {editingId === entry.id && (
+            <Card className="border border-mauve/20">
+              <MedicationForm entry={entry} onDone={() => setEditingId(null)} />
+            </Card>
           )}
-        </Card>
+        </div>
       ))}
     </div>
   );

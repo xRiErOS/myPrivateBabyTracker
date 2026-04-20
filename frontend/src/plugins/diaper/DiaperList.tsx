@@ -1,14 +1,15 @@
-/** Diaper entry list with type filter. */
+/** Diaper entry list with inline edit. */
 
 import { useState } from "react";
-import { AlertTriangle, Droplets, Pencil, Trash2 } from "lucide-react";
+import { AlertTriangle, Droplets, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteDiaper, useDiaperEntries } from "../../hooks/useDiaper";
 import { formatDateTime, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
-import type { DiaperEntry, DiaperType } from "../../api/types";
+import { DiaperForm } from "./DiaperForm";
+import type { DiaperType } from "../../api/types";
 
 const TYPE_OPTIONS = [
   { value: "", label: "Alle Typen" },
@@ -25,20 +26,17 @@ const TYPE_LABELS: Record<DiaperType, string> = {
   dry: "Trocken",
 };
 
-interface DiaperListProps {
-  onEdit?: (entry: DiaperEntry) => void;
-}
-
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
   all: undefined,
 };
 
-export function DiaperList({ onEdit }: DiaperListProps) {
+export function DiaperList() {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("week");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteDiaper();
 
   const { data: entries = [], isLoading } = useDiaperEntries({
@@ -72,51 +70,52 @@ export function DiaperList({ onEdit }: DiaperListProps) {
       />
 
       {entries.map((entry) => (
-        <Card key={entry.id} className="flex flex-col gap-1 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => onEdit?.(entry)}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Droplets className="h-4 w-4 text-blue" />
-              <span className="font-label text-sm font-medium">
-                {TYPE_LABELS[entry.diaper_type] ?? entry.diaper_type}
-              </span>
-              {entry.has_rash && (
-                <span className="flex items-center gap-1 text-red">
-                  <AlertTriangle className="h-3 w-3" />
-                  <span className="font-label text-xs">Ausschlag</span>
+        <div key={entry.id} className="flex flex-col gap-2">
+          <Card className="flex flex-col gap-1 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Droplets className="h-4 w-4 text-blue" />
+                <span className="font-label text-sm font-medium">
+                  {TYPE_LABELS[entry.diaper_type] ?? entry.diaper_type}
                 </span>
-              )}
-            </div>
-            <div className="flex gap-1">
-              {onEdit && (
+                {entry.has_rash && (
+                  <span className="flex items-center gap-1 text-red">
+                    <AlertTriangle className="h-3 w-3" />
+                    <span className="font-label text-xs">Ausschlag</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-1">
                 <button
-                  onClick={() => onEdit(entry)}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors"
-                  aria-label="Bearbeiten"
+                  onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
+                  className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}
                 >
-                  <Pencil className="h-4 w-4" />
+                  {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
                 </button>
-              )}
-              <button
-                onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
-                aria-label="Loeschen"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
-          <p className="font-body text-sm text-subtext0">
-            {formatDateTime(entry.time)}
-          </p>
-          {entry.color && (
-            <p className="font-body text-sm text-overlay0">
-              Farbe: {entry.color}
+            <p className="font-body text-sm text-subtext0">
+              {formatDateTime(entry.time)}
             </p>
+            {entry.color && (
+              <p className="font-body text-sm text-overlay0">Farbe: {entry.color}</p>
+            )}
+            {entry.notes && (
+              <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
+            )}
+          </Card>
+          {editingId === entry.id && (
+            <Card className="border border-mauve/20">
+              <DiaperForm entry={entry} onDone={() => setEditingId(null)} />
+            </Card>
           )}
-          {entry.notes && (
-            <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
-          )}
-        </Card>
+        </div>
       ))}
     </div>
   );
