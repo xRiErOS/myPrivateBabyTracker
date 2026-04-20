@@ -111,19 +111,17 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (UI-Fixes abgeschlossen, Sprint 2 bereit)
+## Aktueller Stand (Sprint 2 abgeschlossen, v0.2.0)
 
-- **MVP v0.1.0**: 32 Commits, 198 Backend-Tests + 49 Frontend-Tests, deployed auf NAS
+- **v0.2.0**: 33 Commits, 268 Backend-Tests + 49 Frontend-Tests, deployed auf NAS
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben — erst Features)
 - **Testdaten**: 298 Einträge für Anna (child_id=2), 30.03.-18.04.2026
-- **4 Plugins**: sleep, feeding, diaper, vitamind3
-- **Dashboard**: 3 Views exakt nach Home-Dashboard Original portiert
-- **Timeline**: bg-surface1 Track-Baender, sapphire Windel-Dots, Labels in allen Modi
-- **7-Tage**: 3-Spalten-Kacheln (collapsed) + Category-Buttons (expanded)
-- **14-Tage**: Ultra-kompakte PatternBarRow/DotRow (h-2.5), Entity-Filter-Toggles
-- **VitaminD3**: Kalender klickbar fuer Nachtragen, gruen/grau Punkte
-- **Git Stash**: Beide geloescht
+- **7 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication
+- **Warnhinweise**: AlertConfig pro Kind, 4 Regeln (Windel, Stuhl, Trinkmenge, Fieber), konfigurierbar
+- **Dashboard**: 3 Views + AlertBanner + 4 neue Widgets (Temperatur, Gewicht, Medikamente, VitaminD3)
+- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, Kinder)
+- **ADRs**: 10 aktiv (ADR-8: Plugin-Reihenfolge, ADR-9: VitaminD3 eigenständig, ADR-10: Konfigurierbare Schwellwerte)
 - **SSTD**: `(SSTD) MyBaby UI-Fixes Issues 1-14 + Test-Reparatur.md`
 
 ## Bekannte UI-Entscheidungen
@@ -139,6 +137,10 @@ Details: `DESIGN.md`
 - Zeitformat: H:MM h (z.B. "4:25 h"), nicht dezimal
 - Button-Text: "Nachtragen" fuer neue Eintraege, "Aktualisieren" fuer Edit
 - Timer: "Jetzt starten" erstellt sofort DB-Eintrag, laufende Einträge nicht in Liste
+- Temperatur: Farben gruen (< 37.5), peach (< 38.5), rot (>= 38.5)
+- Gewicht: Anzeige in kg (gespeichert in Gramm), Trend-Anzeige mit +/- Differenz
+- Medikamente: Name Pflichtfeld, Dosis optional, freie Texteingabe
+- Warnhinweise: Default deaktiviert, pro Kind konfigurierbar, severity warning/critical
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 
