@@ -254,18 +254,29 @@ export function BabySummary({
         />
       </Tile>
 
-      <Tile label="Letzte Windel" icon={<Droplets className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("diaper")}>
-        <TileValue
-          value={changeTypeLabel(lastDiaper)}
-          sub={lastDiaper ? hoursAgo(lastDiaper.time) : null}
-        />
-      </Tile>
-
-      <Tile label="Windeln heute" icon={<Droplets className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("diaper")}>
-        <TileValue
-          value={`${todayDiapers.length}`}
-          sub={diaperSummary(todayDiapers)}
-        />
+      <Tile label="Windeln heute" icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")} className="col-span-2">
+        <div className="flex items-center gap-4">
+          <div className="flex gap-2 flex-1">
+            {[
+              { value: todayDiapers.length, label: "Ges." },
+              { value: todayDiapers.filter(isWet).length, label: "Nass" },
+              { value: todayDiapers.filter(d => d.diaper_type === "mixed").length, label: "Beid." },
+            ].map(({ value, label }) => (
+              <div key={label} className="bg-surface1 rounded-lg px-2 py-1 text-center flex-1">
+                <p className="font-headline text-base font-semibold">{value}</p>
+                <p className="font-body text-[10px] text-subtext0">{label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-right shrink-0">
+            <div className="font-body text-xs text-subtext0">
+              {lastDiaper ? `${changeTypeLabel(lastDiaper)} — ${hoursAgo(lastDiaper.time)}` : "\u2014"}
+            </div>
+            <div className="font-body text-[10px] text-subtext0">
+              {diaperSummary(todayDiapers)}
+            </div>
+          </div>
+        </div>
       </Tile>
 
       <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />

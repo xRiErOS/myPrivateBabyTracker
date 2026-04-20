@@ -73,7 +73,6 @@ describe("Dashboard", () => {
     renderDashboard();
     expect(screen.getByText("Stillseite")).toBeInTheDocument();
     expect(screen.getByText("Heute gesamt")).toBeInTheDocument();
-    expect(screen.getByText("Letzte Windel")).toBeInTheDocument();
     expect(screen.getByText("Windeln heute")).toBeInTheDocument();
     expect(screen.getAllByText("Schlaf").length).toBeGreaterThan(0);
   });

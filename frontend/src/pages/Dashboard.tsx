@@ -17,7 +17,6 @@ import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
-import { DiaperWidget } from "../plugins/diaper/DiaperWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { getQuickActions } from "../lib/quickActions";
 import {
@@ -152,18 +151,18 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
         </button>
       </div>
 
-      {/* Add Menu Overlay */}
+      {/* Add Menu Modal */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col justify-end"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
           onClick={closeMenu}
         >
           {/* Backdrop */}
           <div className="absolute inset-0 bg-ground/80 backdrop-blur-sm" />
 
-          {/* Bottom Sheet */}
+          {/* Modal */}
           <div
-            className="relative bg-surface0 rounded-t-2xl p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] space-y-1 animate-slide-up max-h-[70vh] overflow-y-auto overscroll-contain"
+            className="relative w-full max-w-sm bg-surface0 rounded-2xl p-4 space-y-1 animate-fade-in max-h-[80vh] overflow-y-auto overscroll-contain"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
@@ -239,7 +238,6 @@ function TodayView({
         <VitaminD3Widget />
         <WeightWidget />
         <MedicationWidget />
-        <DiaperWidget />
       </div>
     </div>
   );

@@ -127,12 +127,14 @@ export default function AdminPage() {
           </div>
           <button
             type="button"
+            role="switch"
+            aria-checked={breastfeedingEnabled}
             onClick={handleBreastfeedingToggle}
-            className={`relative min-h-[44px] w-14 shrink-0 rounded-full transition-colors ${breastfeedingEnabled ? "bg-green" : "bg-surface2"}`}
+            className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${breastfeedingEnabled ? "bg-green" : "bg-surface2"}`}
             aria-label="Stillseiten-Tracking umschalten"
           >
             <span
-              className={`absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-white shadow transition-transform ${breastfeedingEnabled ? "translate-x-7" : "translate-x-1"}`}
+              className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${breastfeedingEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
             />
           </button>
         </div>
