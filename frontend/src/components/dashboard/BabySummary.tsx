@@ -296,7 +296,9 @@ function VitD3Tile({ childId }: { childId: number }) {
     .sort((a, b) => b.date.localeCompare(a.date))[0];
 
   function subLabel(): string {
-    if (givenToday) return "Heute gegeben";
+    if (givenToday && todayEntry) {
+      return `Heute ${new Date(todayEntry.given_at).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" })}`;
+    }
     if (lastEntry) {
       const diffMs = new Date(today).getTime() - new Date(lastEntry.date).getTime();
       const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
