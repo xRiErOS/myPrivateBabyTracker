@@ -12,6 +12,7 @@ import {
   todayBerlin,
   groupByDay,
 } from "../../lib/timelineUtils";
+import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 
 function Tile({
   label,
@@ -213,6 +214,10 @@ export function BabySummary({
   // Last bottle feeding for sub-info in "Heute gesamt"
   const lastBottle = sortedFeedings.find((f) => f.feeding_type === "bottle");
 
+  // Last bottle across ALL feedings (for non-breastfeeding mode)
+  const lastBottleAll = allSortedFeedings.find((f) => f.feeding_type === "bottle");
+  const breastfeedingEnabled = isBreastfeedingEnabled();
+
   const sortedDiapers = [...todayDiapers].sort(
     (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
   );
@@ -220,13 +225,22 @@ export function BabySummary({
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Tile label="Stillseite" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
-        <TileValue
-          value={lastBreastSide ?? "\u2014"}
-          sub={lastBreast ? hoursAgo(lastBreast.start_time) : null}
-          sub2={nextBreastSide ? `N\u00e4chste: ${nextBreastSide}` : null}
-        />
-      </Tile>
+      {breastfeedingEnabled ? (
+        <Tile label="Stillseite" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
+          <TileValue
+            value={lastBreastSide ?? "\u2014"}
+            sub={lastBreast ? hoursAgo(lastBreast.start_time) : null}
+            sub2={nextBreastSide ? `N\u00e4chste: ${nextBreastSide}` : null}
+          />
+        </Tile>
+      ) : (
+        <Tile label="Letzte Flasche" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
+          <TileValue
+            value={lastBottleAll?.amount_ml ? `${lastBottleAll.amount_ml} ml` : "\u2014"}
+            sub={lastBottleAll ? hoursAgo(lastBottleAll.start_time) : null}
+          />
+        </Tile>
+      )}
 
       <Tile label="Heute gesamt" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue

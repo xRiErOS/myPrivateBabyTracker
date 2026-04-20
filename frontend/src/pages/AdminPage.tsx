@@ -1,11 +1,12 @@
 /** Admin hub page — navigation tiles for management pages + Quick Actions config. */
 
 import { useState } from "react";
-import { Baby, ClipboardList, Settings, Tags, Zap } from "lucide-react";
+import { AlertTriangle, Baby, ClipboardList, Settings, Tags, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { getQuickActions, setQuickActions } from "../lib/quickActions";
+import { isBreastfeedingEnabled, setBreastfeedingEnabled } from "../lib/breastfeedingMode";
 
 interface AdminTile {
   to: string;
@@ -33,6 +34,12 @@ const TILES: AdminTile[] = [
     label: "Tags",
     description: "Tags verwalten, Farben, umbenennen",
   },
+  {
+    to: "/admin/alerts",
+    icon: AlertTriangle,
+    label: "Warnhinweise",
+    description: "Alarme und Schwellwerte konfigurieren",
+  },
 ];
 
 const FAVORITE_LABELS = ["Favorit 1", "Favorit 2", "Favorit 3"];
@@ -40,12 +47,19 @@ const FAVORITE_LABELS = ["Favorit 1", "Favorit 2", "Favorit 3"];
 export default function AdminPage() {
   const navigate = useNavigate();
   const [quickActions, setQuickActionsState] = useState(getQuickActions);
+  const [breastfeedingEnabled, setBreastfeedingEnabledState] = useState(isBreastfeedingEnabled);
 
   function handleQuickActionChange(index: number, value: string) {
     const next = [...quickActions];
     next[index] = value;
     setQuickActionsState(next);
     setQuickActions(next);
+  }
+
+  function handleBreastfeedingToggle() {
+    const next = !breastfeedingEnabled;
+    setBreastfeedingEnabledState(next);
+    setBreastfeedingEnabled(next);
   }
 
   return (
@@ -99,6 +113,28 @@ export default function AdminPage() {
               </select>
             </div>
           ))}
+        </div>
+      </Card>
+
+      {/* Breastfeeding Mode Toggle */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-headline text-base font-semibold text-text">Stillmodus</h3>
+            <p className="font-body text-xs text-subtext0 mt-1">
+              Zeigt die zuletzt gestillte Seite auf dem Dashboard. Deaktiviere dies, wenn du nicht stillst.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleBreastfeedingToggle}
+            className={`min-h-[44px] min-w-[52px] rounded-full p-1 transition-colors ${breastfeedingEnabled ? "bg-green" : "bg-surface2"}`}
+            aria-label="Stillseiten-Tracking umschalten"
+          >
+            <div
+              className={`h-6 w-6 rounded-full bg-white shadow transition-transform ${breastfeedingEnabled ? "translate-x-6" : "translate-x-0"}`}
+            />
+          </button>
         </div>
       </Card>
     </div>

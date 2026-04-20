@@ -18,6 +18,7 @@ const AdminPage = lazy(() => import("./pages/AdminPage"));
 const MedicationMastersPage = lazy(() => import("./pages/MedicationMastersPage"));
 const TagsPage = lazy(() => import("./pages/TagsPage"));
 const TagDetailPage = lazy(() => import("./pages/TagDetailPage"));
+const AlertConfigPage = lazy(() => import("./pages/AlertConfigPage"));
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
           <Route path="/admin/tags" element={<TagsPage />} />
           <Route path="/admin/tags/:tagId" element={<TagDetailPage />} />
+          <Route path="/admin/alerts" element={<AlertConfigPage />} />
         </Routes>
       </Suspense>
     </Layout>

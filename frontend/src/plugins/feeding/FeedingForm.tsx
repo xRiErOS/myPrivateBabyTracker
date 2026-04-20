@@ -10,6 +10,7 @@ import { useCreateFeeding, useFeedingEntries, useUpdateFeeding } from "../../hoo
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { attachTag } from "../../api/tags";
 import type { FeedingEntry, FeedingType } from "../../api/types";
+import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 
 const FEEDING_TYPE_OPTIONS = [
   { value: "breast_left", label: "Brust links" },
@@ -41,12 +42,16 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const presetApplied = useRef(!!entry);
   useEffect(() => {
     if (!presetApplied.current && lastFeedingType) {
-      // Preset opposite breast side; for bottle/solid keep same type
-      const preset: FeedingType =
-        lastFeedingType === "breast_left" ? "breast_right" :
-        lastFeedingType === "breast_right" ? "breast_left" :
-        lastFeedingType;
-      setFeedingType(preset);
+      if (isBreastfeedingEnabled()) {
+        // Preset opposite breast side; for bottle/solid keep same type
+        const preset: FeedingType =
+          lastFeedingType === "breast_left" ? "breast_right" :
+          lastFeedingType === "breast_right" ? "breast_left" :
+          lastFeedingType;
+        setFeedingType(preset);
+      } else {
+        setFeedingType("bottle");
+      }
       presetApplied.current = true;
     }
   }, [lastFeedingType]);

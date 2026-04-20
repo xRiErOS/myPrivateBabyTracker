@@ -31,7 +31,7 @@ export function TemperatureWidget() {
   const latest = entries[0]; // already sorted by measured_at desc
 
   return (
-    <Card className="flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/temperature")}>
+    <Card className="h-full flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/temperature")}>
       <div className="flex items-center gap-2">
         <Thermometer className="h-4 w-4 text-overlay0" />
         <span className="font-label text-xs text-overlay0">Temperatur</span>

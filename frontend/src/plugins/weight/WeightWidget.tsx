@@ -27,7 +27,7 @@ export function WeightWidget() {
     : null;
 
   return (
-    <Card className="flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/weight")}>
+    <Card className="h-full flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/weight")}>
       <div className="flex items-center gap-2">
         <Scale className="h-4 w-4 text-overlay0" />
         <span className="font-label text-xs text-overlay0">Gewicht</span>

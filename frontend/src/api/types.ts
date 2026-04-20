@@ -243,6 +243,8 @@ export interface AlertConfig {
   low_feeding_ml: number;
   fever_enabled: boolean;
   fever_threshold: number;
+  feeding_interval_enabled: boolean;
+  feeding_interval_hours: number;
 }
 
 export interface Alert {

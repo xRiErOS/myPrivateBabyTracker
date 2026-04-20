@@ -58,7 +58,7 @@ export function VitaminD3Widget() {
 
   return (
     <Card
-      className="flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors"
+      className="h-full flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors"
       onClick={() => navigate("/vitamind3")}
     >
       <div className="flex items-center gap-2">

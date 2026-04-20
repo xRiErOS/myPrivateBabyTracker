@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Droplets } from "lucide-react";
 import { Card } from "../../components/Card";
+import { useActiveChild } from "../../context/ChildContext";
 import { useDiaperEntries } from "../../hooks/useDiaper";
 import { formatTimeSince, startOfTodayISO } from "../../lib/dateUtils";
 import type { DiaperType } from "../../api/types";
@@ -13,13 +14,10 @@ const TYPE_LABELS: Record<DiaperType, string> = {
   dry: "Trocken",
 };
 
-interface DiaperWidgetProps {
-  childId: number;
-}
-
-export function DiaperWidget({ childId }: DiaperWidgetProps) {
+export function DiaperWidget() {
+  const { activeChild } = useActiveChild();
   const { data: entries = [], isLoading } = useDiaperEntries({
-    child_id: childId,
+    child_id: activeChild?.id ?? 0,
     date_from: startOfTodayISO(),
   });
 

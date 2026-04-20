@@ -17,6 +17,7 @@ import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
+import { DiaperWidget } from "../plugins/diaper/DiaperWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { getQuickActions } from "../lib/quickActions";
 import {
@@ -162,7 +163,7 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
 
           {/* Bottom Sheet */}
           <div
-            className="relative bg-surface0 rounded-t-2xl p-4 pb-8 space-y-1 animate-slide-up"
+            className="relative bg-surface0 rounded-t-2xl p-4 pb-8 space-y-1 animate-slide-up max-h-[70vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
@@ -234,13 +235,12 @@ function TodayView({
         isToday
       />
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-3">
-          <TemperatureWidget />
-          <WeightWidget />
-        </div>
-        <div className="flex flex-col gap-3">
-          <VitaminD3Widget />
-          <MedicationWidget />
+        <TemperatureWidget />
+        <VitaminD3Widget />
+        <WeightWidget />
+        <MedicationWidget />
+        <div className="col-span-2">
+          <DiaperWidget />
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ export default {
     extend: {
       colors: {
         ground: "var(--color-base)",
+        mantle: "var(--color-mantle)",
         surface0: "var(--color-surface0)",
         surface1: "var(--color-surface1)",
         surface2: "var(--color-surface2)",

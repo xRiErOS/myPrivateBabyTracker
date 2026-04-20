@@ -6,6 +6,7 @@
 :root,
 html[data-theme="light"] {
   --color-base: #eff1f5;
+  --color-mantle: #e6e9ef;
   --color-surface0: #ccd0da;
   --color-surface1: #bcc0cc;
   --color-surface2: #acb0be;
@@ -32,6 +33,7 @@ html[data-theme="light"] {
 /* Catppuccin Macchiato (Dark) — via toggle or system preference */
 html[data-theme="dark"] {
   --color-base: #24273a;
+  --color-mantle: #1e2030;
   --color-surface0: #363a4f;
   --color-surface1: #494d64;
   --color-surface2: #5b6078;
