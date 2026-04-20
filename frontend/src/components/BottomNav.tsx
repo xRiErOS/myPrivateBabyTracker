@@ -5,14 +5,13 @@ Touch targets: min 44px. Expands with new plugins automatically.
 
 import { useState } from "react";
 import {
-  Baby,
-  ClipboardList,
   Droplets,
   LayoutDashboard,
   MoreHorizontal,
   Moon,
   Pill,
   Scale,
+  Settings,
   Thermometer,
   Utensils,
   X,
@@ -34,8 +33,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/temperature", icon: Thermometer, label: "Temperatur" },
   { to: "/weight", icon: Scale, label: "Gewicht" },
   { to: "/medication", icon: Pill, label: "Medikamente" },
-  { to: "/medication-masters", icon: ClipboardList, label: "Stammdaten" },
-  { to: "/children", icon: Baby, label: "Kinder" },
+  { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 
 const FAVORITES = ALL_ITEMS.slice(0, 4); // Dashboard, Schlaf, Mahlzeiten, Windeln
@@ -47,7 +45,7 @@ export function BottomNav() {
 
   // Check if current route is in the "more" section
   const isMoreActive = MORE_ITEMS.some(
-    (item) => location.pathname === item.to,
+    (item) => location.pathname === item.to || location.pathname.startsWith(item.to + "/"),
   );
 
   return (

@@ -17,6 +17,7 @@ import { PatternChart } from "../components/dashboard/PatternChart";
 import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
+import { SleepWidget } from "../plugins/sleep/SleepWidget";
 import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
 import {
   splitSleepByDay,
@@ -134,6 +135,7 @@ export default function Dashboard() {
               data={data}
               today={today}
               onTileClick={handleTileClick}
+              childId={activeChild.id}
             />
           )}
           {view === "week" && (
@@ -161,10 +163,12 @@ function TodayView({
   data,
   today,
   onTileClick,
+  childId,
 }: {
   data: { feedings: import("../api/types").FeedingEntry[]; diapers: import("../api/types").DiaperEntry[]; sleeps: import("../api/types").SleepEntry[] };
   today: string;
   onTileClick: (category: string) => void;
+  childId: number;
 }) {
   const feedByDay = groupByDay(data.feedings, "start_time");
   const diaperByDay = groupByDay(data.diapers, "time");
@@ -182,6 +186,7 @@ function TodayView({
         sleeps={data.sleeps}
         onTileClick={onTileClick}
       />
+      <SleepWidget childId={childId} />
       <DayTimeline
         feedings={todayFeedings}
         diapers={todayDiapers}

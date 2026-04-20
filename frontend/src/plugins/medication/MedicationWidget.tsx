@@ -1,11 +1,13 @@
 /** Medication dashboard widget — shows today's medications. */
 
 import { Pill } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
 import { useMedicationEntries } from "../../hooks/useMedication";
 
 export function MedicationWidget() {
+  const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const todayStart = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
   const { data: entries = [] } = useMedicationEntries({
@@ -14,7 +16,7 @@ export function MedicationWidget() {
   });
 
   return (
-    <Card className="flex flex-col gap-2 p-3">
+    <Card className="flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/medication")}>
       <div className="flex items-center gap-2">
         <Pill className="h-4 w-4 text-overlay0" />
         <span className="font-label text-xs text-overlay0">Medikamente heute</span>

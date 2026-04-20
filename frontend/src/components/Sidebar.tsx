@@ -1,6 +1,6 @@
 /** Desktop sidebar navigation — hidden on mobile. */
 
-import { Baby, ClipboardList, Droplets, LayoutDashboard, Moon, Pill, Scale, Thermometer, Utensils } from "lucide-react";
+import { Droplets, LayoutDashboard, Moon, Pill, Scale, Settings, Thermometer, Utensils } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
@@ -11,8 +11,7 @@ const navItems = [
   { to: "/temperature", icon: Thermometer, label: "Temperatur" },
   { to: "/weight", icon: Scale, label: "Gewicht" },
   { to: "/medication", icon: Pill, label: "Medikamente" },
-  { to: "/medication-masters", icon: ClipboardList, label: "Stammdaten" },
-  { to: "/children", icon: Baby, label: "Kinder" },
+  { to: "/admin", icon: Settings, label: "Verwaltung" },
 ] as const;
 
 export function Sidebar() {

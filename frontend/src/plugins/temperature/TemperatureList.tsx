@@ -18,6 +18,7 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
 function tempColor(celsius: number): string {
   if (celsius >= 38.5) return "text-red";
   if (celsius >= 37.5) return "text-peach";
+  if (celsius < 36.5) return "text-blue";
   return "text-green";
 }
 

@@ -1,6 +1,7 @@
 /** Temperature dashboard widget — shows latest measurement. */
 
 import { Thermometer } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
 import { useTemperatureEntries } from "../../hooks/useTemperature";
@@ -21,6 +22,7 @@ function tempLabel(celsius: number): string {
 }
 
 export function TemperatureWidget() {
+  const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: entries = [] } = useTemperatureEntries({
     child_id: activeChild?.id,
@@ -29,7 +31,7 @@ export function TemperatureWidget() {
   const latest = entries[0]; // already sorted by measured_at desc
 
   return (
-    <Card className="flex flex-col gap-2 p-3">
+    <Card className="flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/temperature")}>
       <div className="flex items-center gap-2">
         <Thermometer className="h-4 w-4 text-overlay0" />
         <span className="font-label text-xs text-overlay0">Temperatur</span>
