@@ -82,11 +82,11 @@ function ToggleButton({
   return (
     <button
       onClick={() => onChange(!enabled)}
-      className={`relative min-h-[44px] w-14 rounded-full transition-colors ${enabled ? "bg-green" : "bg-surface2"}`}
+      className={`relative min-h-[44px] w-14 shrink-0 rounded-full transition-colors ${enabled ? "bg-green" : "bg-surface2"}`}
       aria-pressed={enabled}
     >
       <span
-        className={`absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-text transition-transform ${enabled ? "translate-x-7" : "translate-x-1"}`}
+        className={`absolute top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-7" : "translate-x-1"}`}
       />
     </button>
   );

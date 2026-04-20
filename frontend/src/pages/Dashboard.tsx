@@ -155,7 +155,7 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
       {/* Add Menu Overlay */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-50 flex flex-col justify-end"
+          className="fixed inset-0 z-[60] flex flex-col justify-end"
           onClick={closeMenu}
         >
           {/* Backdrop */}
@@ -163,7 +163,7 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
 
           {/* Bottom Sheet */}
           <div
-            className="relative bg-surface0 rounded-t-2xl p-4 pb-8 space-y-1 animate-slide-up max-h-[70vh] overflow-y-auto"
+            className="relative bg-surface0 rounded-t-2xl p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] space-y-1 animate-slide-up max-h-[70vh] overflow-y-auto overscroll-contain"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
@@ -239,9 +239,7 @@ function TodayView({
         <VitaminD3Widget />
         <WeightWidget />
         <MedicationWidget />
-        <div className="col-span-2">
-          <DiaperWidget />
-        </div>
+        <DiaperWidget />
       </div>
     </div>
   );
