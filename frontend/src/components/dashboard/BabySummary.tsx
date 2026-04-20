@@ -1,7 +1,7 @@
 /** Dashboard today summary — 2x3 grid with feeding, diaper, sleep tiles. */
 
 import { useEffect, useState } from "react";
-import { Droplets, Moon, Play, Square, Utensils } from "lucide-react";
+import { Droplets, Moon, Play, Square, Sun, Utensils, X } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
 import { formatDuration, formatTime, nowISO, startOfTodayISO } from "../../lib/dateUtils";
@@ -12,7 +12,11 @@ import {
   groupByDay,
 } from "../../lib/timelineUtils";
 import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
-import { VitaminD3Widget } from "../../plugins/vitamind3/VitaminD3Widget";
+import {
+  useVitaminD3Entries,
+  useCreateVitaminD3,
+  useDeleteVitaminD3,
+} from "../../hooks/useVitaminD3";
 
 function Tile({
   label,
@@ -268,7 +272,105 @@ export function BabySummary({
 
       <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />
 
-      <VitaminD3Widget />
+      <VitD3Tile childId={childId} />
     </div>
+  );
+}
+
+/** Vitamin D3 tile — tap opens modal with toggle. */
+function VitD3Tile({ childId }: { childId: number }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const today = todayBerlin();
+
+  const { data: entries = [] } = useVitaminD3Entries({ child_id: childId, month });
+  const createMut = useCreateVitaminD3();
+  const deleteMut = useDeleteVitaminD3();
+
+  const todayEntry = entries.find((e) => e.date === today);
+  const givenToday = !!todayEntry;
+
+  const lastEntry = entries
+    .filter((e) => e.date !== today)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+  function subLabel(): string {
+    if (givenToday) return "Heute gegeben";
+    if (lastEntry) {
+      const diffMs = new Date(today).getTime() - new Date(lastEntry.date).getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) return "Zuletzt: gestern";
+      return `Zuletzt: vor ${diffDays} Tagen`;
+    }
+    return "Noch nie gegeben";
+  }
+
+  function handleToggle() {
+    if (givenToday && todayEntry) {
+      deleteMut.mutate(todayEntry.id);
+    } else {
+      createMut.mutate({ child_id: childId, date: today });
+    }
+  }
+
+  return (
+    <>
+      <Tile label="Vit. D3" icon={<Sun className="h-3 w-3 text-yellow" />} onClick={() => setModalOpen(true)}>
+        <TileValue
+          value={<span className={givenToday ? "text-green" : "text-peach"}>{givenToday ? "Gegeben" : "Ausstehend"}</span>}
+          sub={subLabel()}
+        />
+      </Tile>
+
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          onClick={() => setModalOpen(false)}
+        >
+          <div className="absolute inset-0 bg-ground/80 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-xs bg-surface0 rounded-2xl p-5 space-y-4 animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sun className="h-5 w-5 text-yellow" />
+                <h3 className="font-headline text-base font-semibold text-text">Vitamin D3</h3>
+              </div>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-surface1 text-subtext0"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="text-center py-2">
+              <p className={`font-headline text-xl font-semibold ${givenToday ? "text-green" : "text-peach"}`}>
+                {givenToday ? "Gegeben" : "Ausstehend"}
+              </p>
+              <p className="font-body text-sm text-subtext0 mt-1">{subLabel()}</p>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="font-label text-sm text-text">Heute gegeben</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={givenToday}
+                onClick={handleToggle}
+                disabled={createMut.isPending || deleteMut.isPending}
+                className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors disabled:opacity-40 ${givenToday ? "bg-green" : "bg-surface2"}`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${givenToday ? "translate-x-[26px]" : "translate-x-[2px]"}`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

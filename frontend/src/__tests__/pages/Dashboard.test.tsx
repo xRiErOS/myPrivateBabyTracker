@@ -24,9 +24,11 @@ vi.mock("../../hooks/useDashboardData", () => ({
   }),
 }));
 
-// Mock VitaminD3Widget
-vi.mock("../../plugins/vitamind3/VitaminD3Widget", () => ({
-  VitaminD3Widget: () => <div data-testid="d3-widget">D3</div>,
+// Mock VitaminD3 hooks
+vi.mock("../../hooks/useVitaminD3", () => ({
+  useVitaminD3Entries: () => ({ data: [], isLoading: false }),
+  useCreateVitaminD3: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteVitaminD3: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 // Mock ToastContext
@@ -77,8 +79,8 @@ describe("Dashboard", () => {
     expect(screen.getAllByText("Schlaf").length).toBeGreaterThan(0);
   });
 
-  it("renders VitaminD3 widget", () => {
+  it("renders VitaminD3 tile", () => {
     renderDashboard();
-    expect(screen.getByTestId("d3-widget")).toBeInTheDocument();
+    expect(screen.getByText("Vit. D3")).toBeInTheDocument();
   });
 });
