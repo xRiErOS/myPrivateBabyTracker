@@ -6,6 +6,7 @@ import { ArrowLeft, Tags, Trash2 } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
+import { EntryDetailModal } from "../components/EntryDetailModal";
 import { useBulkDetachTags, useEntryTags, useTags } from "../hooks/useTags";
 import { useActiveChild } from "../context/ChildContext";
 import type { EntryTag } from "../api/types";
@@ -29,6 +30,7 @@ export default function TagDetailPage() {
   const { data: entryTags = [] } = useEntryTags(undefined, undefined, tagId ? Number(tagId) : undefined);
   const bulkDetachMut = useBulkDetachTags();
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [modalEntry, setModalEntry] = useState<{ type: string; id: number } | null>(null);
 
   const tag = tags.find((t) => t.id === Number(tagId));
 
@@ -135,11 +137,19 @@ export default function TagDetailPage() {
                 {ENTRY_TYPE_LABELS[entryType] ?? entryType} ({ets.length})
               </h3>
               {ets.map((et) => (
-                <Card key={et.id} className="flex items-center gap-3 p-3">
+                <Card
+                  key={et.id}
+                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-surface0 transition-colors"
+                  onClick={() => setModalEntry({ type: et.entry_type, id: et.entry_id })}
+                >
                   <input
                     type="checkbox"
                     checked={selected.has(et.id)}
-                    onChange={() => toggleSelect(et.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleSelect(et.id);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
                     className="accent-peach flex-shrink-0"
                   />
                   <div className="flex flex-col flex-1 min-w-0">
@@ -152,6 +162,14 @@ export default function TagDetailPage() {
             </div>
           ))}
         </>
+      )}
+
+      {modalEntry && (
+        <EntryDetailModal
+          entryType={modalEntry.type}
+          entryId={modalEntry.id}
+          onClose={() => setModalEntry(null)}
+        />
       )}
     </div>
   );
