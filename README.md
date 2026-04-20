@@ -71,6 +71,21 @@ Each plugin provides a form for quick entry and a filterable history list. The s
 | Auth | Forward-auth (Authelia/Traefik) + local auth (Argon2) |
 | Container | Multi-stage Docker (node:22-alpine + python:3.12-slim) |
 
+## Mobile — Install as App (PWA)
+
+MyBaby is a Progressive Web App and can be installed directly from the browser — no app store required.
+
+**iOS (Safari)**
+1. Open the app in Safari
+2. Tap the Share button → "Add to Home Screen"
+3. Requires iOS 16.4+ for push notification support
+
+**Android (Chrome)**
+1. Open the app in Chrome
+2. Tap the menu → "Add to Home Screen" or use the install prompt in the address bar
+
+Once installed, the app launches in standalone mode (no browser chrome) and behaves like a native app. Push notifications for reminders (feeding, diaper, medication) require the installed PWA — they do not work in a regular browser tab on iOS.
+
 ## Quick Start
 
 ### Docker Compose (recommended)
@@ -195,7 +210,6 @@ npm run dev
 ### Future
 - [ ] Multi-child support
 - [ ] Data export (CSV, JSON)
-- [ ] Progressive Web App (PWA)
 - [ ] Growth percentile charts (WHO data)
 
 ## License
