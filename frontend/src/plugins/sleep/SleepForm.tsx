@@ -255,7 +255,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             <div className="flex justify-end gap-2">
               {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
               <Button type="submit" disabled={isPending || !startTime || !endTime}>
-                {isPending ? "Speichern..." : "Nachtragen"}
+                {isPending ? "Speichern..." : "Eintragen"}
               </Button>
             </div>
           </form>

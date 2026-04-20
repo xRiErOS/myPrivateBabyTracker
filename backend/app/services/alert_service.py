@@ -117,4 +117,29 @@ async def evaluate_alerts(db: AsyncSession, child_id: int) -> list[Alert]:
                 threshold=config.fever_threshold,
             ))
 
+    # 5. Feeding interval check
+    if config.feeding_interval_enabled:
+        result = await db.execute(
+            select(FeedingEntry.start_time).where(
+                FeedingEntry.child_id == child_id,
+            ).order_by(FeedingEntry.start_time.desc()).limit(1)
+        )
+        last_feeding_time = result.scalar_one_or_none()
+        if last_feeding_time is not None:
+            hours_since = (now - last_feeding_time.replace(tzinfo=timezone.utc)).total_seconds() / 3600
+            if hours_since > config.feeding_interval_hours:
+                alerts.append(Alert(
+                    type="feeding_interval",
+                    severity="critical",
+                    message=f"Letzte Mahlzeit vor {int(hours_since)} Stunden (Schwelle: {config.feeding_interval_hours}h)",
+                    value=int(hours_since),
+                    threshold=config.feeding_interval_hours,
+                ))
+        else:
+            alerts.append(Alert(
+                type="feeding_interval",
+                severity="critical",
+                message="Noch keine Mahlzeit erfasst",
+            ))
+
     return alerts

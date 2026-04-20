@@ -71,7 +71,7 @@ describe("Dashboard", () => {
 
   it("renders summary tiles in today view", () => {
     renderDashboard();
-    expect(screen.getByText("Letzte Flasche")).toBeInTheDocument();
+    expect(screen.getByText("Stillseite")).toBeInTheDocument();
     expect(screen.getByText("Heute gesamt")).toBeInTheDocument();
     expect(screen.getByText("Letzte Windel")).toBeInTheDocument();
     expect(screen.getByText("Windeln heute")).toBeInTheDocument();

@@ -18,6 +18,9 @@ class AlertConfigUpdate(BaseModel):
     fever_enabled: bool | None = None
     fever_threshold: float | None = Field(default=None, ge=36.0, le=42.0)
 
+    feeding_interval_enabled: bool | None = None
+    feeding_interval_hours: int | None = Field(default=None, ge=1, le=24)
+
 
 class AlertConfigResponse(BaseModel):
     """Schema for alert config API response."""
@@ -32,6 +35,8 @@ class AlertConfigResponse(BaseModel):
     low_feeding_ml: int
     fever_enabled: bool
     fever_threshold: float
+    feeding_interval_enabled: bool
+    feeding_interval_hours: int
 
     model_config = {"from_attributes": True}
 
@@ -39,7 +44,7 @@ class AlertConfigResponse(BaseModel):
 class Alert(BaseModel):
     """A single active alert/warning."""
 
-    type: str  # "wet_diaper" | "no_stool" | "low_feeding" | "fever"
+    type: str  # "wet_diaper" | "no_stool" | "low_feeding" | "fever" | "feeding_interval"
     severity: str  # "warning" | "critical"
     message: str
     value: float | int | None = None

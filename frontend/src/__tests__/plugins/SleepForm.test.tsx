@@ -69,7 +69,7 @@ describe("SleepForm", () => {
 
   it("renders submit button with correct text for new entry", () => {
     renderForm();
-    expect(screen.getByRole("button", { name: "Nachtragen" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Eintragen" })).toBeInTheDocument();
   });
 
   it("renders submit button with 'Aktualisieren' for completed entry edit", () => {
@@ -108,7 +108,7 @@ describe("SleepForm", () => {
 
   it("has min-h-[44px] on submit button for touch target", () => {
     renderForm();
-    const btn = screen.getByRole("button", { name: "Nachtragen" });
+    const btn = screen.getByRole("button", { name: "Eintragen" });
     expect(btn.className).toContain("min-h-[44px]");
   });
 
@@ -121,7 +121,7 @@ describe("SleepForm", () => {
     await user.click(screen.getByText("Jetzt starten"));
 
     // Submit
-    await user.click(screen.getByRole("button", { name: "Nachtragen" }));
+    await user.click(screen.getByRole("button", { name: "Eintragen" }));
     expect(mockCreateMutateAsync).toHaveBeenCalled();
   });
 });

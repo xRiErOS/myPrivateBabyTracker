@@ -2,6 +2,8 @@
  *  Ported from home-dashboard Timeline.jsx — bg-surface1 track bands,
  *  labels on all modes, sapphire diaper dots, axis at bottom. */
 
+import { useState } from "react";
+import { Settings } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import {
   buildTimelineItems,
@@ -11,6 +13,12 @@ import {
   type TimelineItem,
   type TimelinePoint,
 } from "../../lib/timelineUtils";
+
+interface TrackVisibility {
+  sleep: boolean;
+  feeding: boolean;
+  diaper: boolean;
+}
 
 const HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
 
@@ -135,6 +143,24 @@ export function DayTimeline({
   sleepSegments,
   isToday = false,
 }: DayTimelineProps) {
+  const [showSettings, setShowSettings] = useState(false);
+  const [visibility, setVisibility] = useState<TrackVisibility>(() => {
+    try {
+      const saved = localStorage.getItem("mybaby-timeline-visibility");
+      return saved
+        ? JSON.parse(saved)
+        : { sleep: true, feeding: true, diaper: true };
+    } catch {
+      return { sleep: true, feeding: true, diaper: true };
+    }
+  });
+
+  function toggleTrack(key: keyof TrackVisibility) {
+    const next = { ...visibility, [key]: !visibility[key] };
+    setVisibility(next);
+    localStorage.setItem("mybaby-timeline-visibility", JSON.stringify(next));
+  }
+
   const { sleepItems, feedItems, changeItems } = buildTimelineItems(
     feedings,
     diapers,
@@ -150,13 +176,51 @@ export function DayTimeline({
 
   return (
     <div className="bg-surface0 rounded-card p-4">
-      <div className="text-[11px] uppercase tracking-wider text-subtext0 font-label mb-2">
-        Tagesverlauf
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[11px] uppercase tracking-wider text-subtext0 font-label">
+          Tagesverlauf
+        </div>
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          className="p-1 text-subtext0 hover:text-text transition-colors"
+        >
+          <Settings className="h-3.5 w-3.5" />
+        </button>
       </div>
+      {showSettings && (
+        <div className="flex gap-3 mb-2">
+          {([
+            { key: "sleep", label: "Schlaf", color: "bg-lavender" },
+            { key: "feeding", label: "Flasche", color: "bg-peach" },
+            { key: "diaper", label: "Windeln", color: "bg-sapphire" },
+          ] as const).map(({ key, label, color }) => (
+            <button
+              key={key}
+              onClick={() => toggleTrack(key)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-label transition-all ${
+                visibility[key]
+                  ? `${color}/20 text-text`
+                  : "bg-surface1/50 text-overlay0 line-through"
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${visibility[key] ? color : "bg-overlay0"}`}
+              />
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="relative">
-        <TrackRow label="Schlaf" color="bg-lavender" items={sleepItems} />
-        <DotRow label="Flasche" color="bg-peach" items={feedItems} />
-        <DotRow label="Windeln" color="bg-sapphire" items={changeItems} />
+        {visibility.sleep && (
+          <TrackRow label="Schlaf" color="bg-lavender" items={sleepItems} />
+        )}
+        {visibility.feeding && (
+          <DotRow label="Flasche" color="bg-peach" items={feedItems} />
+        )}
+        {visibility.diaper && (
+          <DotRow label="Windeln" color="bg-sapphire" items={changeItems} />
+        )}
 
         <div className="flex items-center gap-2">
           <div className="w-14 shrink-0" />

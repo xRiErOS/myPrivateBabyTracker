@@ -116,7 +116,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
         <Button type="submit" disabled={isPending || !time}>
-          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Eintragen"}
         </Button>
       </div>
     </form>

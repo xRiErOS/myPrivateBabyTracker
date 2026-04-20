@@ -41,7 +41,12 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const presetApplied = useRef(!!entry);
   useEffect(() => {
     if (!presetApplied.current && lastFeedingType) {
-      setFeedingType(lastFeedingType);
+      // Preset opposite breast side; for bottle/solid keep same type
+      const preset: FeedingType =
+        lastFeedingType === "breast_left" ? "breast_right" :
+        lastFeedingType === "breast_right" ? "breast_left" :
+        lastFeedingType;
+      setFeedingType(preset);
       presetApplied.current = true;
     }
   }, [lastFeedingType]);
@@ -118,7 +123,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
         <Button type="submit" disabled={isPending || !startTime}>
-          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Eintragen"}
         </Button>
       </div>
     </form>

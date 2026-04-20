@@ -198,6 +198,102 @@ async def test_low_feeding_alert(async_client):
 
 
 @pytest.mark.anyio
+async def test_feeding_interval_alert_triggers(async_client):
+    """Alert fires when last feeding > threshold hours ago."""
+    child_id = await _create_child(async_client)
+
+    await async_client.patch(
+        f"/api/v1/alerts/config?child_id={child_id}",
+        json={"feeding_interval_enabled": True, "feeding_interval_hours": 3},
+    )
+
+    # Create a feeding 5 hours ago
+    await async_client.post("/api/v1/feeding/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-20T05:00:00Z",
+        "feeding_type": "breast_left",
+    })
+
+    resp = await async_client.get(f"/api/v1/alerts/?child_id={child_id}")
+    alerts = resp.json()["alerts"]
+    fi_alert = next((a for a in alerts if a["type"] == "feeding_interval"), None)
+    assert fi_alert is not None
+    assert fi_alert["severity"] == "critical"
+    assert "Stunden" in fi_alert["message"]
+
+
+@pytest.mark.anyio
+async def test_feeding_interval_no_alert_when_disabled(async_client):
+    """No feeding interval alert when disabled (default)."""
+    child_id = await _create_child(async_client)
+
+    # Create a feeding 5 hours ago but leave alert disabled
+    await async_client.post("/api/v1/feeding/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-20T05:00:00Z",
+        "feeding_type": "bottle",
+        "amount_ml": 100,
+    })
+
+    resp = await async_client.get(f"/api/v1/alerts/?child_id={child_id}")
+    alerts = resp.json()["alerts"]
+    fi_alerts = [a for a in alerts if a["type"] == "feeding_interval"]
+    assert len(fi_alerts) == 0
+
+
+@pytest.mark.anyio
+async def test_feeding_interval_no_alert_within_threshold(async_client):
+    """No alert when last feeding is within threshold."""
+    child_id = await _create_child(async_client)
+
+    await async_client.patch(
+        f"/api/v1/alerts/config?child_id={child_id}",
+        json={"feeding_interval_enabled": True, "feeding_interval_hours": 3},
+    )
+
+    # Create a very recent feeding
+    await async_client.post("/api/v1/feeding/", json={
+        "child_id": child_id,
+        "start_time": "2026-04-20T20:00:00Z",
+        "feeding_type": "bottle",
+        "amount_ml": 150,
+    })
+
+    resp = await async_client.get(f"/api/v1/alerts/?child_id={child_id}")
+    alerts = resp.json()["alerts"]
+    fi_alerts = [a for a in alerts if a["type"] == "feeding_interval"]
+    assert len(fi_alerts) == 0
+
+
+@pytest.mark.anyio
+async def test_feeding_interval_alert_no_feedings(async_client):
+    """Alert fires with special message when no feedings exist at all."""
+    child_id = await _create_child(async_client)
+
+    await async_client.patch(
+        f"/api/v1/alerts/config?child_id={child_id}",
+        json={"feeding_interval_enabled": True, "feeding_interval_hours": 3},
+    )
+
+    resp = await async_client.get(f"/api/v1/alerts/?child_id={child_id}")
+    alerts = resp.json()["alerts"]
+    fi_alert = next((a for a in alerts if a["type"] == "feeding_interval"), None)
+    assert fi_alert is not None
+    assert fi_alert["severity"] == "critical"
+    assert "keine Mahlzeit" in fi_alert["message"]
+
+
+@pytest.mark.anyio
+async def test_feeding_interval_config_in_response(async_client):
+    """Config response includes feeding interval fields."""
+    child_id = await _create_child(async_client)
+    resp = await async_client.get(f"/api/v1/alerts/config?child_id={child_id}")
+    config = resp.json()
+    assert config["feeding_interval_enabled"] is False
+    assert config["feeding_interval_hours"] == 3
+
+
+@pytest.mark.anyio
 async def test_plugin_discovered_alerts_route(async_client):
     """Alert endpoints are accessible."""
     resp = await async_client.get("/api/v1/alerts/?child_id=1")

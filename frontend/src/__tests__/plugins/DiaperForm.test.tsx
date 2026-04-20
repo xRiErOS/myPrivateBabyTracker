@@ -70,6 +70,6 @@ describe("DiaperForm", () => {
 
   it("renders submit button", () => {
     renderForm();
-    expect(screen.getByRole("button", { name: "Nachtragen" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Eintragen" })).toBeInTheDocument();
   });
 });

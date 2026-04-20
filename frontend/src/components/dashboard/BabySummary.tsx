@@ -42,11 +42,12 @@ function Tile({
   );
 }
 
-function TileValue({ value, sub }: { value: React.ReactNode; sub?: string | null }) {
+function TileValue({ value, sub, sub2 }: { value: React.ReactNode; sub?: string | null; sub2?: string | null }) {
   return (
     <>
       <div className="font-headline text-lg font-semibold text-text">{value}</div>
       {sub && <div className="font-body text-xs text-subtext0">{sub}</div>}
+      {sub2 && <div className="font-body text-xs text-mauve">{sub2}</div>}
     </>
   );
 }
@@ -198,7 +199,19 @@ export function BabySummary({
   const sortedFeedings = [...todayFeedings].sort(
     (a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
   );
-  const lastFeeding = sortedFeedings[0];
+
+  // Last breast feeding across ALL feedings (not just today)
+  const allSortedFeedings = [...feedings].sort(
+    (a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
+  );
+  const lastBreast = allSortedFeedings.find(
+    (f) => f.feeding_type === "breast_left" || f.feeding_type === "breast_right",
+  );
+  const lastBreastSide = lastBreast?.feeding_type === "breast_left" ? "Links" : lastBreast?.feeding_type === "breast_right" ? "Rechts" : null;
+  const nextBreastSide = lastBreastSide === "Links" ? "Rechts" : lastBreastSide === "Rechts" ? "Links" : null;
+
+  // Last bottle feeding for sub-info in "Heute gesamt"
+  const lastBottle = sortedFeedings.find((f) => f.feeding_type === "bottle");
 
   const sortedDiapers = [...todayDiapers].sort(
     (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
@@ -207,10 +220,11 @@ export function BabySummary({
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Tile label="Letzte Flasche" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
+      <Tile label="Stillseite" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue
-          value={lastFeeding ? `${lastFeeding.amount_ml ?? 0} ml` : "\u2014"}
-          sub={lastFeeding ? hoursAgo(lastFeeding.start_time) : null}
+          value={lastBreastSide ?? "\u2014"}
+          sub={lastBreast ? hoursAgo(lastBreast.start_time) : null}
+          sub2={nextBreastSide ? `N\u00e4chste: ${nextBreastSide}` : null}
         />
       </Tile>
 
@@ -222,7 +236,7 @@ export function BabySummary({
               <span className={`text-[12px] ${trendColor}`}>{trend}</span>
             </>
           }
-          sub={`Gestern: ${yesterdayTotal} ml`}
+          sub={lastBottle ? `Letzte Flasche: ${lastBottle.amount_ml ?? 0} ml` : `Gestern: ${yesterdayTotal} ml`}
         />
       </Tile>
 
@@ -244,7 +258,7 @@ export function BabySummary({
 
       <Tile label="Mahlzeiten" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue
-          value={`${todayFeedings.length}x`}
+          value={`${todayFeedings.length}`}
           sub={`${sortedFeedings.length > 0 ? `Letzte: ${new Date(sortedFeedings[0].start_time).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" })}` : ""}`}
         />
       </Tile>

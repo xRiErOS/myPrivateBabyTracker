@@ -1,12 +1,18 @@
-/** Vitamin D3 dashboard widget — button + calendar for current month. */
+/** Vitamin D3 dashboard widget — card showing today's status with give/undo button. */
 
+import { Sun, CheckCircle, Undo2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
-import { useVitaminD3Entries, useCreateVitaminD3, useDeleteVitaminD3 } from "../../hooks/useVitaminD3";
+import {
+  useVitaminD3Entries,
+  useCreateVitaminD3,
+  useDeleteVitaminD3,
+} from "../../hooks/useVitaminD3";
 import { todayBerlin } from "../../lib/timelineUtils";
-import { VitaminD3Button } from "./VitaminD3Button";
-import { D3Calendar } from "./D3Calendar";
 
 export function VitaminD3Widget() {
+  const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -22,20 +28,79 @@ export function VitaminD3Widget() {
   if (!activeChild) return null;
 
   const today = todayBerlin();
-  const givenToday = entries.some((e) => e.date === today);
+  const todayEntry = entries.find((e) => e.date === today);
+  const givenToday = !!todayEntry;
 
-  function handleDayClick(date: string, isGiven: boolean, entryId?: number) {
-    if (isGiven && entryId) {
-      deleteMut.mutate(entryId);
-    } else if (!isGiven) {
-      createMut.mutate({ child_id: activeChild!.id, date });
+  // Calculate days since last given (excluding today)
+  const lastEntry = entries
+    .filter((e) => e.date !== today)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+  function subLabel(): string {
+    if (givenToday) return "Heute gegeben";
+    if (lastEntry) {
+      const diffMs = new Date(today).getTime() - new Date(lastEntry.date).getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) return "Zuletzt: gestern";
+      return `Zuletzt: vor ${diffDays} Tagen`;
+    }
+    return "Noch nie gegeben";
+  }
+
+  function handleToggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (givenToday && todayEntry) {
+      deleteMut.mutate(todayEntry.id);
+    } else {
+      createMut.mutate({ child_id: activeChild!.id, date: today });
     }
   }
 
   return (
-    <div className="space-y-2">
-      <VitaminD3Button childId={activeChild.id} givenToday={givenToday} />
-      <D3Calendar entries={entries} onDayClick={handleDayClick} />
-    </div>
+    <Card
+      className="flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors"
+      onClick={() => navigate("/vitamind3")}
+    >
+      <div className="flex items-center gap-2">
+        <Sun className="h-4 w-4 text-overlay0" />
+        <span className="font-label text-xs text-overlay0">Vit. D3</span>
+      </div>
+
+      <div className="flex items-baseline gap-2">
+        <span
+          className={`font-heading text-lg font-semibold whitespace-nowrap ${
+            givenToday ? "text-green" : "text-peach"
+          }`}
+        >
+          {givenToday ? "Gegeben" : "Ausstehend"}
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="font-body text-xs text-overlay0">{subLabel()}</p>
+        <button
+          type="button"
+          onClick={handleToggle}
+          disabled={createMut.isPending || deleteMut.isPending}
+          className={`flex items-center gap-1 px-2 py-1 text-xs font-label font-semibold rounded-card min-h-[32px] transition-all disabled:opacity-40 ${
+            givenToday
+              ? "bg-surface1 text-subtext0 hover:bg-surface2"
+              : "bg-green text-ground hover:opacity-90"
+          }`}
+        >
+          {givenToday ? (
+            <>
+              <Undo2 className="h-3 w-3" />
+              Zurueck
+            </>
+          ) : (
+            <>
+              <CheckCircle className="h-3 w-3" />
+              Geben
+            </>
+          )}
+        </button>
+      </div>
+    </Card>
   );
 }

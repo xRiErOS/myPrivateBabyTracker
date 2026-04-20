@@ -60,6 +60,11 @@ html[data-theme="dark"] {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
 @keyframes spin-once {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -71,6 +76,10 @@ html[data-theme="dark"] {
 
 .animate-spin-once {
   animation: spin-once 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
 }
 
 body {

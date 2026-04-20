@@ -70,6 +70,10 @@ SELECT * FROM conversation_snapshots ORDER BY session_timestamp DESC LIMIT 1;
 
 ## Konventionen
 
+### Scrum Master — Backlog-Kommunikation
+- Beim Auflisten von Backlog-Items immer die Backlog-ID (#) mit angeben
+- Erleichtert dem Nutzer, Testfälle und Items präzise anzusprechen
+
 ### Timestamps
 - **Alle Timestamps in der DB sind UTC** — keine Ausnahmen
 - API akzeptiert ISO 8601 mit Offset, konvertiert zu UTC vor Speicherung
@@ -111,23 +115,30 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 4 abgeschlossen, v0.4.0)
+## Aktueller Stand (Sprint 4a abgeschlossen, v0.4.0a)
 
-- **v0.4.0**: 308 Backend-Tests + 52 Frontend-Tests = 360 total
+- **v0.4.0a**: 313 Backend-Tests + 52 Frontend-Tests = 365 total
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben — erst Features)
 - **8 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo
-- **Tag-System**: Polymorphes Tagging (tags + entry_tags Tables), CRUD API, TagSelector + TagBadges in allen Listen
+- **Tag-System**: Polymorphes Tagging (tags + entry_tags Tables), CRUD API, TagSelector (bound + pending Modus) + TagBadges in allen Listen
+- **TagSelector Pending-Modus**: Tags direkt im Formular waehlbar bei neuen Eintraegen, kein Zwischenschritt
+- **Entry-Detail-Modal**: Getaggte Eintraege auf Tag-Detail-Seite klickbar, Notizen editierbar
 - **Baby ToDo-Liste**: Todo-Plugin mit Checkbox-Toggle, Inline-Edit, due_date, completed_at Auto-Set
 - **Medikamenten-Stammdaten**: MedicationMaster Model, CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
-- **Warnhinweise**: AlertConfig pro Kind, 4 Regeln + Untertemperatur < 36.5 (blau)
-- **Dashboard**: SleepTile mit Timer im 2x3 BabySummary-Grid, Widgets als 2x2 Grid (Temp/Gewicht/Med/VitD3), klickbar, Seitentitel mit Datum+Uhrzeit+Kindname
-- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags
+- **Warnhinweise**: AlertConfig pro Kind, 5 Regeln (+ Fuetterungsintervall-Alarm) + Untertemperatur < 36.5 (blau)
+- **Stillseiten-Tracking**: BabySummary-Tile zeigt letzte Stillseite + Gegenseite-Preset im FeedingForm
+- **Dashboard**: Quick Actions (3 konfigurierbare Favoriten) + Add-Menue, Widgets 2-spaltig (Temp+Gewicht links, VitD3+Med rechts), Kacheln verlinken auf Heute-Ansicht
+- **VitD3-Widget**: Card-Stil ohne Kalender, Gegeben/Ausstehend-Status
+- **Windeln-Widget**: 3 Kacheln (Gesamt/Nass/Beides) + Zusatzzeile Stuhl/Trocken
+- **Tagesverlauf**: Konfigurierbare Track-Sichtbarkeit (Zahnrad + localStorage)
+- **Edit-Form**: Visuell im Stamm-Element eingebettet (Card-Einheit, border-t Trennlinie)
+- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags + Quick Actions
 - **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, ToDo, Verwaltung)
-- **Inline-Edit**: Edit-Forms oeffnen direkt unter dem Eintrag in allen Listen
+- **PWA**: manifest.json, PNG-Icons (180/192/512px), apple-touch-icon, standalone display
 - **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary
 - **ADRs**: 10 aktiv
-- **SSTD**: `(SSTD) MyBaby Sprint 4 — Tag-System + ToDo-Liste.md`
+- **SSTD**: `(SSTD) MyBaby Sprint 4a — UX-Redesign + Stillseiten + Alarme.md`
 
 ## Bekannte UI-Entscheidungen
 
@@ -138,19 +149,26 @@ Details: `DESIGN.md`
 - Schlaf: Kein Ort, keine Qualität (entfernt nach User-Feedback)
 - Windeln: Keine Stuhlfarbe (entfernt), keine Konsistenz (entfernt v0.3.0), Label "dreckig" statt "Stuhl"
 - Windel-Timeline-Farbe: bg-sapphire (teal), nicht bg-yellow
-- Mahlzeiten: Kein Ende-Feld, Preset feeding_type aus letztem Eintrag
+- Mahlzeiten: Kein Ende-Feld, Preset feeding_type auf Gegenseite (breast_left↔breast_right), Flasche/Beikost bleibt gleich
 - Zeitformat: H:MM h (z.B. "4:25 h"), nicht dezimal
-- Button-Text: "Nachtragen" fuer neue Eintraege, "Aktualisieren" fuer Edit
+- Button-Text: "Eintragen" fuer neue Eintraege, "Aktualisieren" fuer Edit
 - Timer: "Jetzt starten" erstellt sofort DB-Eintrag, laufende Einträge nicht in Liste
 - Temperatur: Farben blau (< 36.5 Unterkuehlung), gruen (< 37.5), peach (< 38.5), rot (>= 38.5)
 - Gewicht: Anzeige in kg (gespeichert in Gramm), Trend-Anzeige mit +/- Differenz
 - Medikamente: Name Pflichtfeld, Dosis optional, Dropdown aus Stammdaten + Freitext-Fallback
 - Medikamenten-Stammdaten: MedicationMaster (name unique, active_ingredient, default_unit, is_active)
 - Warnhinweise: Default deaktiviert, pro Kind konfigurierbar, severity warning/critical
-- Tags: Polymorphe entry_tags Table (entry_type + entry_id), 10 Farbpresets (Catppuccin), TagSelector im Inline-Edit, TagBadges auf Eintraegen
+- Tags: Polymorphe entry_tags Table (entry_type + entry_id), 10 Farbpresets (Catppuccin), TagSelector bound (Edit) + pending (Create), TagBadges auf Eintraegen
+- Tag-Seite: Klickbare Entry-Cards mit EntryDetailModal, Read-only Felder + editierbare Notizen
 - ToDo: Checkbox-Toggle, completed_at automatisch gesetzt/geloescht, Sortierung: offene zuerst
 - Dashboard-Titel: Datum + Uhrzeit (30s Interval) + Kindname rechts
-- VitaminD3: Widget-Label "Vit. D3" (gekuerzt fuer schmale Widgets)
+- VitaminD3: Card-Widget ohne Kalender, Gegeben/Ausstehend-Status, Geben-Button inline
+- Quick Actions: 3 konfigurierbare Favoriten (localStorage), Default: Schlaf/Mahlzeiten/Windel
+- Add-Menue: Bottom-Sheet mit allen 6 Tracking-Optionen, Overlay + slide-up Animation
+- Plugin-Registry: pluginRegistry.ts als zentrale Plugin-Definition (key, label, icon, route)
+- Dashboard-Kacheln: Klick navigiert mit ?range=today, Listen lesen initialen DateRange aus URL
+- Tagesverlauf: Zahnrad-Icon fuer Track-Sichtbarkeit (Schlaf/Flasche/Windeln), localStorage-Persistenz
+- Windeln-Widget: 3 Kacheln (Gesamt/Nass/Beides), Stuhl+Trocken als Zusatzzeile
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 
@@ -171,7 +189,7 @@ Alle Komponenten aus `~/Obsidian/tools/home-dashboard/src/pages/baby/` wurden po
 
 ## Spezialisierte Agenten
 
-Agenten-Definitionen liegen in `.claude/agents/`. Sie werden als Subagenten in der Dev-Pipeline eingesetzt.
+Agenten-Definitionen liegen in `~/.claude/agents/`. Sie werden als Subagenten in der Dev-Pipeline eingesetzt.
 
 | Agent | Datei | Rolle | Wann einsetzen |
 |-------|-------|-------|----------------|
@@ -194,7 +212,7 @@ Scrum Master → weist Task zu
 
 ### Agenten aufrufen
 
-Agenten werden als Subagenten via `Agent`-Tool dispatched. Der Agent-Prompt verweist auf die jeweilige `.claude/agents/*.md`-Datei. Jeder Agent liest zu Beginn die CLAUDE.md und die für ihn relevanten Dokumente.
+Agenten werden als Subagenten via `Agent`-Tool dispatched. Der Agent-Prompt verweist auf die jeweilige `~/.claude/agents/*.md`-Datei. Jeder Agent liest zu Beginn die CLAUDE.md und die für ihn relevanten Dokumente.
 
 ## Deployment-Kontext
 

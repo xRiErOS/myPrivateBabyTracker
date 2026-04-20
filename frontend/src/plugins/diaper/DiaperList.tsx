@@ -1,6 +1,7 @@
 /** Diaper entry list with inline edit. */
 
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AlertTriangle, Droplets, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
@@ -36,7 +37,8 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
 export function DiaperList() {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange>("week");
+  const [searchParams] = useSearchParams();
+  const [dateRange, setDateRange] = useState<DateRange>((searchParams.get("range") as DateRange) ?? "week");
   const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteDiaper();
 
@@ -71,53 +73,51 @@ export function DiaperList() {
       />
 
       {entries.map((entry) => (
-        <div key={entry.id} className="flex flex-col gap-2">
-          <Card className="flex flex-col gap-1 p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Droplets className="h-4 w-4 text-blue" />
-                <span className="font-label text-sm font-medium">
-                  {TYPE_LABELS[entry.diaper_type] ?? entry.diaper_type}
+        <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Droplets className="h-4 w-4 text-blue" />
+              <span className="font-label text-sm font-medium">
+                {TYPE_LABELS[entry.diaper_type] ?? entry.diaper_type}
+              </span>
+              {entry.has_rash && (
+                <span className="flex items-center gap-1 text-red">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span className="font-label text-xs">Ausschlag</span>
                 </span>
-                {entry.has_rash && (
-                  <span className="flex items-center gap-1 text-red">
-                    <AlertTriangle className="h-3 w-3" />
-                    <span className="font-label text-xs">Ausschlag</span>
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
-                  className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}
-                >
-                  {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              )}
             </div>
-            <p className="font-body text-sm text-subtext0">
-              {formatDateTime(entry.time)}
-            </p>
-            {entry.color && (
-              <p className="font-body text-sm text-overlay0">Farbe: {entry.color}</p>
-            )}
-            {entry.notes && (
-              <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
-            )}
-            <TagBadges entryType="diaper" entryId={entry.id} />
-          </Card>
-          {editingId === entry.id && (
-            <Card className="border border-mauve/20">
-              <DiaperForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
-            </Card>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
+                className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}
+              >
+                {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); deleteMut.mutate(entry.id); }}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <p className="font-body text-sm text-subtext0">
+            {formatDateTime(entry.time)}
+          </p>
+          {entry.color && (
+            <p className="font-body text-sm text-overlay0">Farbe: {entry.color}</p>
           )}
-        </div>
+          {entry.notes && (
+            <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
+          )}
+          <TagBadges entryType="diaper" entryId={entry.id} />
+          {editingId === entry.id && (
+            <div className="border-t border-surface1 bg-surface0/50 -mx-3 -mb-3 px-3 py-3 mt-3">
+              <DiaperForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
+            </div>
+          )}
+        </Card>
       ))}
     </div>
   );

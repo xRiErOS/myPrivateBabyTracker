@@ -36,6 +36,10 @@ class AlertConfig(TimestampMixin, Base):
     fever_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     fever_threshold: Mapped[float] = mapped_column(Integer, default=38.0)
 
+    # Feeding interval: no feeding for more than N hours
+    feeding_interval_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    feeding_interval_hours: Mapped[int] = mapped_column(Integer, default=3)
+
     child = relationship("Child", backref="alert_config", lazy="selectin")
 
     __table_args__ = (

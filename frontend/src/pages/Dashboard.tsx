@@ -1,10 +1,9 @@
 /** Dashboard page — tabbed views: Heute, 7 Tage, 14 Tage. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Droplets, LayoutDashboard, Moon, Pill, Plus, Scale, Thermometer, Utensils } from "lucide-react";
+import { LayoutDashboard, Plus, X } from "lucide-react";
 import { AlertBanner } from "../components/AlertBanner";
-import { Button } from "../components/Button";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useActiveChild } from "../context/ChildContext";
@@ -18,6 +17,8 @@ import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
+import { PLUGINS } from "../lib/pluginRegistry";
+import { getQuickActions } from "../lib/quickActions";
 import {
   splitSleepByDay,
   groupByDay,
@@ -57,7 +58,7 @@ export default function Dashboard() {
   }
 
   function handleTileClick(category: string) {
-    navigate(`/${category}`);
+    navigate(`/${category}?range=today`);
   }
 
   const today = todayBerlin();
@@ -76,63 +77,8 @@ export default function Dashboard() {
       {/* Alert Banner */}
       <AlertBanner />
 
-      {/* Quick Actions */}
-      <div className="flex gap-1.5 flex-wrap">
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/sleep?new=1")}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <Moon className="h-4 w-4" />
-          Schlaf
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/feeding?new=1")}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <Utensils className="h-4 w-4" />
-          Mahlzeiten
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/diaper?new=1")}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <Droplets className="h-4 w-4" />
-          Windel
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/temperature?new=1")}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <Thermometer className="h-4 w-4" />
-          Temperatur
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/weight?new=1")}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <Scale className="h-4 w-4" />
-          Gewicht
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/medication?new=1")}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <Pill className="h-4 w-4" />
-          Medikament
-        </Button>
-      </div>
+      {/* Quick Actions + Add Menu */}
+      <QuickActionsBar navigate={navigate} />
 
       {/* View Tabs */}
       <ViewTabs active={view} onChange={setView} />
@@ -171,6 +117,89 @@ export default function Dashboard() {
   );
 }
 
+function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const quickActionKeys = getQuickActions();
+  const quickPlugins = quickActionKeys
+    .map((key) => PLUGINS.find((p) => p.key === key))
+    .filter(Boolean) as typeof PLUGINS;
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  return (
+    <>
+      <div className="flex gap-2">
+        {quickPlugins.map((plugin) => {
+          const Icon = plugin.icon;
+          return (
+            <button
+              key={plugin.key}
+              onClick={() => navigate(`${plugin.route}?new=1`)}
+              className="flex-1 min-h-[44px] flex items-center justify-center gap-2 rounded-[8px] bg-surface1 text-text font-label text-sm font-semibold transition-all hover:bg-surface2 active:bg-surface2"
+            >
+              <Icon className="h-4 w-4" />
+              {plugin.label}
+            </button>
+          );
+        })}
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-[8px] bg-peach text-ground font-label text-sm font-semibold transition-all hover:opacity-90"
+          aria-label="Neuer Eintrag"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Add Menu Overlay */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col justify-end"
+          onClick={closeMenu}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-ground/80 backdrop-blur-sm" />
+
+          {/* Bottom Sheet */}
+          <div
+            className="relative bg-surface0 rounded-t-2xl p-4 pb-8 space-y-1 animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-headline text-base font-semibold text-text">
+                Neuer Eintrag
+              </h3>
+              <button
+                onClick={closeMenu}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-surface1 text-subtext0"
+                aria-label="Schliessen"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {PLUGINS.map((plugin) => {
+              const Icon = plugin.icon;
+              return (
+                <button
+                  key={plugin.key}
+                  onClick={() => {
+                    navigate(`${plugin.route}?new=1`);
+                    closeMenu();
+                  }}
+                  className="w-full min-h-[44px] flex items-center gap-3 px-3 py-2 rounded-lg text-text hover:bg-surface1 active:bg-surface1 transition-colors"
+                >
+                  <Icon className="h-5 w-5 text-subtext0" />
+                  <span className="font-label text-sm">{plugin.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function TodayView({
   data,
   today,
@@ -205,10 +234,14 @@ function TodayView({
         isToday
       />
       <div className="grid grid-cols-2 gap-3">
-        <TemperatureWidget />
-        <WeightWidget />
-        <MedicationWidget />
-        <VitaminD3Widget />
+        <div className="flex flex-col gap-3">
+          <TemperatureWidget />
+          <WeightWidget />
+        </div>
+        <div className="flex flex-col gap-3">
+          <VitaminD3Widget />
+          <MedicationWidget />
+        </div>
       </div>
     </div>
   );

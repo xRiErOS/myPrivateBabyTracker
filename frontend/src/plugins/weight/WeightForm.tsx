@@ -122,7 +122,7 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
         <div className="flex justify-end gap-2">
           {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
           <Button type="submit" disabled={isPending || !measuredAt}>
-            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
+            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Eintragen"}
           </Button>
         </div>
       </form>

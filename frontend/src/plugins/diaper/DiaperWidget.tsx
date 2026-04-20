@@ -37,13 +37,32 @@ export function DiaperWidget({ childId }: DiaperWidgetProps) {
         <p className="font-body text-sm text-subtext0">Laden...</p>
       ) : (
         <div className="flex flex-col gap-1">
-          <p className="font-headline text-2xl font-semibold">
-            {entries.length} Windeln
+          {/* Kacheln: Gesamt / Nass / Beides */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { value: entries.length, label: "Ges." },
+              { value: entries.filter((e) => e.diaper_type === "wet").length, label: "Nass" },
+              { value: entries.filter((e) => e.diaper_type === "mixed").length, label: "Beid." },
+            ].map(({ value, label }) => (
+              <div
+                key={label}
+                className="bg-surface1 rounded-lg p-2 text-center"
+              >
+                <p className="font-headline text-lg font-semibold">{value}</p>
+                <p className="font-body text-[10px] text-subtext0">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Stuhl + Trocken kompakt */}
+          <p className="font-body text-xs text-subtext0 mt-1">
+            Stuhl: {entries.filter((e) => e.diaper_type === "dirty").length}
+            {" \u00B7 "}
+            Trocken: {entries.filter((e) => e.diaper_type === "dry").length}
           </p>
-          <p className="font-body text-xs text-subtext0">Heute</p>
 
           {lastEntry && (
-            <p className="font-body text-xs text-subtext0 mt-1">
+            <p className="font-body text-xs text-subtext0">
               Letzte: {TYPE_LABELS[lastEntry.diaper_type] ?? lastEntry.diaper_type}
               {" — "}
               {formatTimeSince(lastEntry.time)}
