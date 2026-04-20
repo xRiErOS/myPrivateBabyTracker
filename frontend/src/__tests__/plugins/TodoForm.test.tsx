@@ -16,7 +16,7 @@ vi.mock("../../context/ChildContext", () => ({
   }),
 }));
 
-const mockCreateMutateAsync = vi.fn().mockResolvedValue({});
+const mockCreateMutateAsync = vi.fn().mockResolvedValue({ id: 99 });
 const mockUpdateMutateAsync = vi.fn().mockResolvedValue({});
 
 vi.mock("../../hooks/useTodos", () => ({
@@ -28,6 +28,11 @@ vi.mock("../../hooks/useTodos", () => ({
     mutateAsync: mockUpdateMutateAsync,
     isPending: false,
   }),
+}));
+
+// Mock TagSelector (shown after create)
+vi.mock("../../components/TagSelector", () => ({
+  TagSelector: () => <div data-testid="tag-selector" />,
 }));
 
 function renderForm(props = {}) {
@@ -51,9 +56,9 @@ describe("TodoForm", () => {
     expect(screen.getByLabelText(/Faellig/)).toBeInTheDocument();
   });
 
-  it("shows 'Nachtragen' button for new entry", () => {
+  it("shows 'Speichern' button for new entry", () => {
     renderForm();
-    expect(screen.getByRole("button", { name: /Nachtragen/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Speichern/ })).toBeInTheDocument();
   });
 
   it("shows 'Aktualisieren' button for edit mode", () => {
@@ -72,12 +77,11 @@ describe("TodoForm", () => {
   });
 
   it("submits create with correct data", async () => {
-    const onDone = vi.fn();
-    renderForm({ onDone });
+    renderForm();
 
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/Titel/), "Impfung U4");
-    await user.click(screen.getByRole("button", { name: /Nachtragen/ }));
+    await user.click(screen.getByRole("button", { name: /Speichern/ }));
 
     expect(mockCreateMutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -85,7 +89,6 @@ describe("TodoForm", () => {
         title: "Impfung U4",
       }),
     );
-    expect(onDone).toHaveBeenCalled();
   });
 
   it("pre-fills fields in edit mode", () => {

@@ -1,7 +1,7 @@
-/** Todo entry list with checkbox toggle and inline edit. */
+/** Todo entry list with toggle, search, smart done filter, and inline edit. */
 
-import { useState } from "react";
-import { CheckSquare, Pencil, Square, Trash2, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CalendarClock, Pencil, Search, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
 import { TagSelector } from "../../components/TagSelector";
@@ -10,17 +10,70 @@ import { useDeleteTodo, useTodos, useUpdateTodo } from "../../hooks/useTodos";
 import { formatDateTime } from "../../lib/dateUtils";
 import { TodoForm } from "./TodoForm";
 
+function isToday(dateStr: string): boolean {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
+
+function nextDay(daysFromNow: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  return d.toISOString();
+}
+
+function nextWeekday(targetDay: number): string {
+  const d = new Date();
+  const diff = (targetDay - d.getDay() + 7) % 7 || 7;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString();
+}
+
 export function TodoList() {
   const { activeChild } = useActiveChild();
-  const [showDone, setShowDone] = useState(true);
+  const [showAllDone, setShowAllDone] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
-  const { data: entries = [], isLoading } = useTodos(activeChild?.id, showDone);
+  // Fetch all entries (including done) so we can filter client-side
+  const { data: entries = [], isLoading } = useTodos(activeChild?.id, true);
   const updateMut = useUpdateTodo();
   const deleteMut = useDeleteTodo();
 
   function toggleDone(id: number, currentDone: boolean) {
     updateMut.mutate({ id, data: { is_done: !currentDone } });
   }
+
+  function postpone(id: number, newDate: string) {
+    updateMut.mutate({ id, data: { due_date: newDate } });
+  }
+
+  // Smart filter: open + today's done by default, all done when toggled
+  const filtered = useMemo(() => {
+    let items = entries;
+
+    // Done filter: show open + today-done by default, all when toggled
+    if (!showAllDone) {
+      items = items.filter(
+        (e) => !e.is_done || (e.completed_at && isToday(e.completed_at))
+      );
+    }
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(
+        (e) =>
+          e.title.toLowerCase().includes(q) ||
+          (e.details && e.details.toLowerCase().includes(q))
+      );
+    }
+
+    return items;
+  }, [entries, showAllDone, searchQuery]);
 
   if (isLoading) {
     return <p className="font-body text-sm text-overlay0">Laden...</p>;
@@ -29,7 +82,7 @@ export function TodoList() {
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
-        <CheckSquare className="h-8 w-8" />
+        <CalendarClock className="h-8 w-8" />
         <p className="font-body text-sm">Noch keine ToDos</p>
       </div>
     );
@@ -37,40 +90,74 @@ export function TodoList() {
 
   return (
     <div className="flex flex-col gap-3">
-      <label className="flex items-center gap-2 font-label text-sm text-subtext0">
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-overlay0" />
         <input
-          type="checkbox"
-          checked={showDone}
-          onChange={(e) => setShowDone(e.target.checked)}
-          className="accent-peach"
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="ToDos durchsuchen..."
+          className="w-full rounded-lg border border-surface2 bg-ground pl-9 pr-3 py-2 font-body text-base text-text placeholder:text-overlay0 focus:border-mauve focus:outline-none"
         />
-        Erledigte anzeigen
-      </label>
+      </div>
 
-      {entries.map((entry) => (
+      {/* Toggle: show all done */}
+      <div className="flex items-center justify-between">
+        <span className="font-label text-sm text-subtext0">Alle erledigten anzeigen</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={showAllDone}
+          onClick={() => setShowAllDone(!showAllDone)}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+            showAllDone ? "bg-green" : "bg-surface2"
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 rounded-full bg-ground transition-transform ${
+              showAllDone ? "translate-x-6" : "translate-x-1"
+            }`}
+          />
+        </button>
+      </div>
+
+      {filtered.length === 0 && (
+        <p className="font-body text-sm text-overlay0 text-center py-4">
+          {searchQuery ? "Keine Treffer" : "Keine offenen ToDos"}
+        </p>
+      )}
+
+      {filtered.map((entry) => (
         <div key={entry.id} className="flex flex-col gap-2">
           <Card className={`flex flex-col gap-1 p-3 ${entry.is_done ? "opacity-60" : ""}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-2 flex-1 min-w-0">
+                {/* Toggle switch */}
                 <button
                   type="button"
+                  role="switch"
+                  aria-checked={entry.is_done}
                   onClick={() => toggleDone(entry.id, entry.is_done)}
-                  className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
+                  className={`flex-shrink-0 mt-0.5 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    entry.is_done ? "bg-green" : "bg-surface2"
+                  }`}
+                  style={{ minWidth: 44, minHeight: 24 }}
                 >
-                  {entry.is_done ? (
-                    <CheckSquare className="h-5 w-5 text-green" />
-                  ) : (
-                    <Square className="h-5 w-5" />
-                  )}
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-ground transition-transform ${
+                      entry.is_done ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
                 </button>
                 <div className="flex flex-col min-w-0">
                   <span className={`font-heading text-base text-text ${entry.is_done ? "line-through" : ""}`}>
                     {entry.title}
                   </span>
                   {entry.details && (
-                    <span className="font-body text-xs text-subtext0 truncate">
+                    <p className="font-body text-xs text-subtext0 whitespace-pre-wrap mt-0.5">
                       {entry.details}
-                    </span>
+                    </p>
                   )}
                 </div>
               </div>
@@ -92,16 +179,43 @@ export function TodoList() {
               </div>
             </div>
             {entry.due_date && (
-              <p className="font-body text-xs text-overlay0 ml-11">
-                Faellig: {formatDateTime(entry.due_date)}
-              </p>
+              <div className="flex items-center gap-2 ml-[52px]">
+                <p className="font-body text-xs text-overlay0">
+                  Faellig: {formatDateTime(entry.due_date)}
+                </p>
+                {!entry.is_done && (
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => postpone(entry.id, nextDay(1))}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                    >
+                      Morgen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => postpone(entry.id, nextWeekday(6))}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                    >
+                      Sa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => postpone(entry.id, nextDay(7))}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                    >
+                      +1W
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
             {entry.completed_at && (
-              <p className="font-body text-xs text-green ml-11">
+              <p className="font-body text-xs text-green ml-[52px]">
                 Erledigt: {formatDateTime(entry.completed_at)}
               </p>
             )}
-            <div className="ml-11">
+            <div className="ml-[52px]">
               <TagBadges entryType="todo" entryId={entry.id} />
             </div>
           </Card>

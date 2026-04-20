@@ -197,7 +197,7 @@ async def detach_tag(
 
 @router.get("/entries/", response_model=list[EntryTagResponse])
 async def list_entry_tags(
-    entry_type: str = Query(..., min_length=1, max_length=50),
+    entry_type: str | None = Query(default=None, min_length=1, max_length=50),
     entry_id: int | None = Query(default=None, gt=0),
     tag_id: int | None = Query(default=None, gt=0),
     user: User | None = Depends(get_current_user),
@@ -205,8 +205,9 @@ async def list_entry_tags(
 ):
     """List entry-tag associations with filters."""
     stmt = select(EntryTag).options(selectinload(EntryTag.tag))
-    stmt = stmt.where(EntryTag.entry_type == entry_type)
 
+    if entry_type is not None:
+        stmt = stmt.where(EntryTag.entry_type == entry_type)
     if entry_id is not None:
         stmt = stmt.where(EntryTag.entry_id == entry_id)
     if tag_id is not None:
@@ -214,3 +215,21 @@ async def list_entry_tags(
 
     result = await db.execute(stmt)
     return result.scalars().all()
+
+
+@router.post("/entries/bulk-detach", status_code=204)
+async def bulk_detach_tags(
+    entry_tag_ids: list[int],
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Bulk-detach tags from entries."""
+    if not entry_tag_ids:
+        return
+    result = await db.execute(
+        select(EntryTag).where(EntryTag.id.in_(entry_tag_ids))
+    )
+    for et in result.scalars().all():
+        await db.delete(et)
+    await db.commit()
+    logger.info("tags_bulk_detached", count=len(entry_tag_ids))

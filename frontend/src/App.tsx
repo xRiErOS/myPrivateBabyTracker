@@ -17,6 +17,7 @@ const TodoPage = lazy(() => import("./pages/TodoPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const MedicationMastersPage = lazy(() => import("./pages/MedicationMastersPage"));
 const TagsPage = lazy(() => import("./pages/TagsPage"));
+const TagDetailPage = lazy(() => import("./pages/TagDetailPage"));
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/admin/children" element={<ChildrenPage />} />
           <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
           <Route path="/admin/tags" element={<TagsPage />} />
+          <Route path="/admin/tags/:tagId" element={<TagDetailPage />} />
         </Routes>
       </Suspense>
     </Layout>

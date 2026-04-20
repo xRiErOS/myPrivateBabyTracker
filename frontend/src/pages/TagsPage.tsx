@@ -1,6 +1,7 @@
 /** Tags management page — CRUD for child tags with color picker. */
 
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Pencil, Plus, Tags, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -97,6 +98,7 @@ function TagForm({
 
 export default function TagsPage() {
   const { activeChild } = useActiveChild();
+  const navigate = useNavigate();
   const { data: tags = [], isLoading } = useTags(activeChild?.id);
   const deleteMut = useDeleteTag();
   const [showForm, setShowForm] = useState(false);
@@ -164,13 +166,16 @@ export default function TagsPage() {
         <div className="flex flex-col gap-2">
           {tags.map((t) => (
             <Card key={t.id} className="flex items-center justify-between p-3">
-              <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate(`/admin/tags/${t.id}`)}
+                className="flex items-center gap-2 min-h-[44px] hover:opacity-80 transition-opacity"
+              >
                 <span
                   className="w-4 h-4 rounded-full flex-shrink-0"
                   style={{ backgroundColor: t.color }}
                 />
                 <span className="font-heading text-base text-text">{t.name}</span>
-              </div>
+              </button>
               <div className="flex gap-1">
                 <button
                   onClick={() => handleEdit(t)}
