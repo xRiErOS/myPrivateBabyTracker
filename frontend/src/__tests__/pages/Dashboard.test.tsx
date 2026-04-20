@@ -75,7 +75,7 @@ describe("Dashboard", () => {
     expect(screen.getByText("Heute gesamt")).toBeInTheDocument();
     expect(screen.getByText("Letzte Windel")).toBeInTheDocument();
     expect(screen.getByText("Windeln heute")).toBeInTheDocument();
-    expect(screen.getByText("Schlaf heute")).toBeInTheDocument();
+    expect(screen.getAllByText("Schlaf").length).toBeGreaterThan(0);
   });
 
   it("renders VitaminD3 widget", () => {

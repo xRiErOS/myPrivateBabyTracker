@@ -35,7 +35,7 @@ export function WeightWidget() {
 
       {latest ? (
         <div className="flex items-baseline gap-2">
-          <span className="font-heading text-2xl text-text">
+          <span className="font-heading text-lg font-semibold text-text">
             {formatWeight(latest.weight_grams)}
           </span>
           {trend !== null && (

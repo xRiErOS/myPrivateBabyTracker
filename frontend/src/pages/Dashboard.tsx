@@ -183,7 +183,6 @@ function TodayView({
       <BabySummary
         feedings={data.feedings}
         diapers={data.diapers}
-        sleeps={data.sleeps}
         onTileClick={onTileClick}
       />
       <SleepWidget childId={childId} />
@@ -193,10 +192,12 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      <TemperatureWidget />
-      <WeightWidget />
-      <MedicationWidget />
-      <VitaminD3Widget />
+      <div className="grid grid-cols-2 gap-3">
+        <TemperatureWidget />
+        <WeightWidget />
+        <MedicationWidget />
+        <VitaminD3Widget />
+      </div>
     </div>
   );
 }

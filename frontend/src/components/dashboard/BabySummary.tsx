@@ -1,23 +1,23 @@
 /** Dashboard today summary — tiles with last entry, totals, yesterday comparison. */
 
-import type { FeedingEntry, DiaperEntry, SleepEntry } from "../../api/types";
+import { Droplets, Utensils } from "lucide-react";
+import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import {
   hoursAgo,
   isWet,
   isSolid,
-  splitSleepByDay,
   todayBerlin,
   groupByDay,
-  formatDuration,
-  type SleepSegment,
 } from "../../lib/timelineUtils";
 
 function Tile({
   label,
+  icon,
   children,
   onClick,
 }: {
   label: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
   onClick?: () => void;
 }) {
@@ -26,8 +26,11 @@ function Tile({
       className={`bg-surface0 rounded-card p-3 ${onClick ? "cursor-pointer active:bg-surface1 transition-colors" : ""}`}
       onClick={onClick}
     >
-      <div className="text-[11px] uppercase tracking-wider text-subtext0 font-label mb-1">
-        {label}
+      <div className="flex items-center gap-1.5 mb-1">
+        {icon}
+        <span className="text-[11px] uppercase tracking-wider text-subtext0 font-label">
+          {label}
+        </span>
       </div>
       {children}
     </div>
@@ -68,14 +71,12 @@ function diaperSummary(diapers: DiaperEntry[]): string {
 interface BabySummaryProps {
   feedings: FeedingEntry[];
   diapers: DiaperEntry[];
-  sleeps: SleepEntry[];
   onTileClick?: (category: string) => void;
 }
 
 export function BabySummary({
   feedings,
   diapers,
-  sleeps,
   onTileClick,
 }: BabySummaryProps) {
   const today = todayBerlin();
@@ -85,12 +86,10 @@ export function BabySummary({
 
   const feedByDay = groupByDay(feedings, "start_time");
   const diaperByDay = groupByDay(diapers, "time");
-  const sleepMap = splitSleepByDay(sleeps);
 
   const todayFeedings = feedByDay[today] ?? [];
   const yesterdayFeedings = feedByDay[yesterday] ?? [];
   const todayDiapers = diaperByDay[today] ?? [];
-  const todaySleepSegs: SleepSegment[] = sleepMap[today] ?? [];
 
   const todayTotal = todayFeedings.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
   const yesterdayTotal = yesterdayFeedings.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
@@ -108,25 +107,16 @@ export function BabySummary({
   );
   const lastDiaper = sortedDiapers[0];
 
-  const sleepMinutes = todaySleepSegs.reduce((s, seg) => {
-    const start = new Date(seg._splitStart).getTime();
-    const end = new Date(seg._splitEnd).getTime();
-    return s + (end - start) / 60000;
-  }, 0);
-  const sleepDisplay = formatDuration(sleepMinutes);
-
-  const running = sleeps.find((s) => !s.end_time);
-
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Tile label="Letzte Flasche" onClick={() => onTileClick?.("feeding")}>
+      <Tile label="Letzte Flasche" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue
           value={lastFeeding ? `${lastFeeding.amount_ml ?? 0} ml` : "\u2014"}
           sub={lastFeeding ? hoursAgo(lastFeeding.start_time) : null}
         />
       </Tile>
 
-      <Tile label="Heute gesamt" onClick={() => onTileClick?.("feeding")}>
+      <Tile label="Heute gesamt" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue
           value={
             <>
@@ -138,35 +128,21 @@ export function BabySummary({
         />
       </Tile>
 
-      <Tile label="Letzte Windel" onClick={() => onTileClick?.("diaper")}>
+      <Tile label="Letzte Windel" icon={<Droplets className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("diaper")}>
         <TileValue
           value={changeTypeLabel(lastDiaper)}
           sub={lastDiaper ? hoursAgo(lastDiaper.time) : null}
         />
       </Tile>
 
-      <Tile label="Windeln heute" onClick={() => onTileClick?.("diaper")}>
+      <Tile label="Windeln heute" icon={<Droplets className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("diaper")}>
         <TileValue
           value={`${todayDiapers.length}`}
           sub={diaperSummary(todayDiapers)}
         />
       </Tile>
 
-      <Tile label="Schlaf heute" onClick={() => onTileClick?.("sleep")}>
-        <TileValue
-          value={
-            <>
-              {running && (
-                <span className="inline-block w-2 h-2 bg-green rounded-full mr-1 animate-pulse" />
-              )}
-              {sleepDisplay}
-            </>
-          }
-          sub={running ? "Schlaeft gerade" : null}
-        />
-      </Tile>
-
-      <Tile label="Mahlzeiten" onClick={() => onTileClick?.("feeding")}>
+      <Tile label="Mahlzeiten" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue
           value={`${todayFeedings.length}x`}
           sub={`${sortedFeedings.length > 0 ? `Letzte: ${new Date(sortedFeedings[0].start_time).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" })}` : ""}`}

@@ -39,7 +39,7 @@ export function TemperatureWidget() {
 
       {latest ? (
         <div className="flex items-baseline gap-2">
-          <span className={`font-heading text-2xl ${tempColor(latest.temperature_celsius)}`}>
+          <span className={`font-heading text-lg font-semibold ${tempColor(latest.temperature_celsius)}`}>
             {latest.temperature_celsius.toFixed(1)} °C
           </span>
           <span className="font-body text-xs text-subtext0">
