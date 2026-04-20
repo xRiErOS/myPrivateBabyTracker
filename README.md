@@ -31,6 +31,28 @@ Your baby's data belongs to you — not to a cloud provider. MyBaby runs entirel
 - **Weekly reports** — Aggregated statistics and trends
 - **Alert system** — Configurable warnings per child (fever, weight, etc.)
 
+## Screenshots
+
+### Dashboard
+
+<p align="center">
+  <img src="docs/screenshots/myBabyTracker_Dashboard_Today_1.png" width="400" alt="Dashboard — Today: Summary widgets with live sleep timer, feeding totals, diaper count, and day timeline">
+  <img src="docs/screenshots/myBabyTracker_Dashboard_Today_2.png" width="400" alt="Dashboard — Today: Temperature, weight trend, medication log, and Vitamin D3 calendar">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/myBabyTracker_Dashboard_7Days_1.png" width="400" alt="Dashboard — 7 Days: Daily breakdown of feeding, diapers, and sleep with trend indicators">
+  <img src="docs/screenshots/myBabyTracker_Dashboard_14Days_1.png" width="400" alt="Dashboard — 14 Days: Pattern chart showing sleep, feeding, and diaper events across two weeks">
+</p>
+
+### Tracking
+
+<p align="center">
+  <img src="docs/screenshots/myBabyTracker_Sleep_1.png" width="260" alt="Sleep tracker with active timer, stop button, and entry history">
+  <img src="docs/screenshots/myBabyTracker_Feeding_1.png" width="260" alt="Feeding list with filter, timestamps, and amounts">
+  <img src="docs/screenshots/myBabyTracker_Pampers_1.png" width="260" alt="Diaper form with type selector, timestamp, and entry list">
+</p>
+
 ## Tech Stack
 
 | Layer | Technology |
