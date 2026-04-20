@@ -8,7 +8,6 @@ import { formatDuration, formatTime, nowISO, startOfTodayISO } from "../../lib/d
 import {
   hoursAgo,
   isWet,
-  isSolid,
   todayBerlin,
   groupByDay,
 } from "../../lib/timelineUtils";
@@ -65,16 +64,6 @@ function changeTypeLabel(d: DiaperEntry | undefined): string {
   }
 }
 
-function diaperSummary(diapers: DiaperEntry[]): string {
-  const wet = diapers.filter(isWet).length;
-  const solid = diapers.filter(isSolid).length;
-  const dry = diapers.filter((d) => d.diaper_type === "dry").length;
-  const parts: string[] = [];
-  if (wet) parts.push(`${wet}x nass`);
-  if (solid) parts.push(`${solid}x dreckig`);
-  if (dry) parts.push(`${dry}x trocken`);
-  return parts.join(", ") || "keine";
-}
 
 /** Compact sleep tile with timer start/stop. */
 function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void }) {
@@ -263,10 +252,18 @@ export function BabySummary({
       </Tile>
 
       <Tile label="Windeln heute" icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")}>
-        <TileValue
-          value={`${todayDiapers.length}`}
-          sub={diaperSummary(todayDiapers)}
-        />
+        <div className="flex gap-1.5">
+          {[
+            { value: todayDiapers.length, label: "Ges." },
+            { value: todayDiapers.filter(isWet).length, label: "Nass" },
+            { value: todayDiapers.filter(d => d.diaper_type === "mixed").length, label: "Beid." },
+          ].map(({ value, label }) => (
+            <div key={label} className="bg-surface1 rounded-lg px-1.5 py-1 text-center flex-1">
+              <p className="font-headline text-sm font-semibold">{value}</p>
+              <p className="font-body text-[9px] text-subtext0">{label}</p>
+            </div>
+          ))}
+        </div>
       </Tile>
 
       <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />
