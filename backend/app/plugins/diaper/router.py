@@ -57,7 +57,6 @@ async def create_diaper_entry(
         time=data.time,
         diaper_type=data.diaper_type.value,
         color=data.color,
-        consistency=data.consistency,
         has_rash=data.has_rash,
         notes=data.notes,
     )

@@ -6,6 +6,7 @@ Touch targets: min 44px. Expands with new plugins automatically.
 import { useState } from "react";
 import {
   Baby,
+  ClipboardList,
   Droplets,
   LayoutDashboard,
   MoreHorizontal,
@@ -33,6 +34,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/temperature", icon: Thermometer, label: "Temperatur" },
   { to: "/weight", icon: Scale, label: "Gewicht" },
   { to: "/medication", icon: Pill, label: "Medikamente" },
+  { to: "/medication-masters", icon: ClipboardList, label: "Stammdaten" },
   { to: "/children", icon: Baby, label: "Kinder" },
 ];
 

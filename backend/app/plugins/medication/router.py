@@ -34,6 +34,7 @@ async def create_medication(
         child_id=data.child_id,
         given_at=data.given_at,
         medication_name=data.medication_name,
+        medication_master_id=data.medication_master_id,
         dose=data.dose,
         notes=data.notes,
     )

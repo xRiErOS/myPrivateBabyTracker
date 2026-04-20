@@ -108,11 +108,9 @@ export function DiaperList({ onEdit }: DiaperListProps) {
           <p className="font-body text-sm text-subtext0">
             {formatDateTime(entry.time)}
           </p>
-          {(entry.color || entry.consistency) && (
+          {entry.color && (
             <p className="font-body text-sm text-overlay0">
-              {entry.color && `Farbe: ${entry.color}`}
-              {entry.color && entry.consistency && " | "}
-              {entry.consistency && `Konsistenz: ${entry.consistency}`}
+              Farbe: {entry.color}
             </p>
           )}
           {entry.notes && (

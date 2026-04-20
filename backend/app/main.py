@@ -170,6 +170,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # Alerts: warning system (ADR-10)
     from app.api.alerts import router as alerts_router
     app.include_router(alerts_router, prefix="/api/v1")
+    # Medication masters: predefined medication catalog
+    from app.api.medication_masters import router as med_masters_router
+    app.include_router(med_masters_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

@@ -6,7 +6,7 @@ All timestamps stored in UTC (W1).
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -28,7 +28,6 @@ class DiaperEntry(TimestampMixin, Base):
         String(10), nullable=False
     )  # "wet" | "dirty" | "mixed" | "dry"
     color: Mapped[str | None] = mapped_column(String(30), nullable=True)
-    consistency: Mapped[str | None] = mapped_column(String(30), nullable=True)
     has_rash: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 

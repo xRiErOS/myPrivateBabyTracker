@@ -56,7 +56,6 @@ export interface DiaperEntry {
   time: string;
   diaper_type: DiaperType;
   color: string | null;
-  consistency: string | null;
   has_rash: boolean;
   notes: string | null;
   created_at: string;
@@ -67,7 +66,6 @@ export interface DiaperCreate {
   time: string;
   diaper_type: DiaperType;
   color?: string | null;
-  consistency?: string | null;
   has_rash?: boolean;
   notes?: string | null;
 }
@@ -120,7 +118,6 @@ export interface DiaperUpdate {
   time?: string | null;
   diaper_type?: DiaperType | null;
   color?: string | null;
-  consistency?: string | null;
   has_rash?: boolean | null;
   notes?: string | null;
 }
@@ -182,11 +179,37 @@ export interface WeightUpdate {
   notes?: string | null;
 }
 
+export interface MedicationMaster {
+  id: number;
+  name: string;
+  active_ingredient: string | null;
+  default_unit: string;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface MedicationMasterCreate {
+  name: string;
+  active_ingredient?: string | null;
+  default_unit?: string;
+  notes?: string | null;
+}
+
+export interface MedicationMasterUpdate {
+  name?: string | null;
+  active_ingredient?: string | null;
+  default_unit?: string | null;
+  notes?: string | null;
+  is_active?: boolean | null;
+}
+
 export interface MedicationEntry {
   id: number;
   child_id: number;
   given_at: string;
   medication_name: string;
+  medication_master_id: number | null;
   dose: string | null;
   notes: string | null;
   created_at: string;
@@ -196,6 +219,7 @@ export interface MedicationCreate {
   child_id: number;
   given_at: string;
   medication_name: string;
+  medication_master_id?: number | null;
   dose?: string | null;
   notes?: string | null;
 }
@@ -203,6 +227,7 @@ export interface MedicationCreate {
 export interface MedicationUpdate {
   given_at?: string | null;
   medication_name?: string | null;
+  medication_master_id?: number | null;
   dose?: string | null;
   notes?: string | null;
 }

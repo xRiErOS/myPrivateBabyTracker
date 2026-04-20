@@ -48,15 +48,15 @@ function renderForm(props = {}) {
 describe("SleepForm", () => {
   it("renders all form fields", () => {
     renderForm();
-    expect(screen.getByLabelText("Typ")).toBeInTheDocument();
-    expect(screen.getByLabelText("Beginn")).toBeInTheDocument();
-    expect(screen.getByLabelText("Ende")).toBeInTheDocument();
-    expect(screen.getByLabelText("Notizen")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Typ/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Beginn/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Ende/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Notizen/)).toBeInTheDocument();
   });
 
   it("renders sleep type options", () => {
     renderForm();
-    const select = screen.getByLabelText("Typ");
+    const select = screen.getByLabelText(/Typ/);
     expect(select).toBeInTheDocument();
     expect(screen.getByText("Nickerchen")).toBeInTheDocument();
     expect(screen.getByText("Nachtschlaf")).toBeInTheDocument();

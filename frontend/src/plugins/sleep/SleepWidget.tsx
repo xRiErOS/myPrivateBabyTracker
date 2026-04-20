@@ -1,9 +1,9 @@
 /** Sleep dashboard widget — today's total, last sleep, running timer with stop. */
 
 import { useEffect, useState } from "react";
-import { Moon, Square } from "lucide-react";
+import { Moon, Play, Square } from "lucide-react";
 import { Card } from "../../components/Card";
-import { useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
+import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
 import { formatDuration, formatTime, formatTimeSince, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 
 function useElapsedSeconds(startIso: string | undefined): number {
@@ -38,6 +38,7 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
     child_id: childId,
     date_from: startOfTodayISO(),
   });
+  const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
 
   const totalMinutes = entries.reduce(
@@ -52,6 +53,15 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
     e.stopPropagation();
     if (!running) return;
     updateMut.mutate({ id: running.id, data: { end_time: nowISO() } });
+  }
+
+  function handleStart(e: React.MouseEvent) {
+    e.stopPropagation();
+    createMut.mutate({
+      child_id: childId,
+      start_time: nowISO(),
+      sleep_type: "nap",
+    });
   }
 
   return (
@@ -96,6 +106,14 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
                   Letzter Schlaf: {formatTimeSince(lastEntry.end_time ?? lastEntry.start_time)}
                 </p>
               )}
+              <button
+                onClick={handleStart}
+                disabled={createMut.isPending}
+                className="mt-2 min-h-[44px] flex items-center justify-center gap-2 rounded-[8px] bg-mauve text-ground font-label text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                <Play className="h-4 w-4" />
+                {createMut.isPending ? "Starte..." : "Jetzt starten"}
+              </button>
             </>
           )}
         </div>

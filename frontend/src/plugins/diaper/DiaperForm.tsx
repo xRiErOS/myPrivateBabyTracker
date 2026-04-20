@@ -16,14 +16,6 @@ const DIAPER_TYPE_OPTIONS = [
   { value: "dry", label: "Trocken" },
 ];
 
-const CONSISTENCY_OPTIONS = [
-  { value: "", label: "Keine Angabe" },
-  { value: "fluessig", label: "Fluessig" },
-  { value: "weich", label: "Weich" },
-  { value: "fest", label: "Fest" },
-  { value: "koernig", label: "Koernig" },
-];
-
 
 interface DiaperFormProps {
   entry?: DiaperEntry;
@@ -39,12 +31,10 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
   const [time, setTime] = useState(
     entry?.time ? isoToLocalInput(entry.time) : isoToLocalInput(nowISO()),
   );
-  const [consistency, setConsistency] = useState(entry?.consistency ?? "");
   const [hasRash, setHasRash] = useState(entry?.has_rash ?? false);
   const [notes, setNotes] = useState(entry?.notes ?? "");
 
   const isPending = createMut.isPending || updateMut.isPending;
-  const showConsistency = diaperType === "dirty" || diaperType === "mixed";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -55,7 +45,6 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
       time: localInputToISO(time),
       diaper_type: diaperType,
       color: null,
-      consistency: consistency || null,
       has_rash: hasRash,
       notes: notes || null,
     };
@@ -76,6 +65,7 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
         options={DIAPER_TYPE_OPTIONS}
         value={diaperType}
         onChange={(e) => setDiaperType(e.target.value as DiaperType)}
+        required
       />
 
       <Input
@@ -85,15 +75,6 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
         onChange={(e) => setTime(e.target.value)}
         required
       />
-
-      {showConsistency && (
-        <Select
-          label="Konsistenz"
-          options={CONSISTENCY_OPTIONS}
-          value={consistency}
-          onChange={(e) => setConsistency(e.target.value)}
-        />
-      )}
 
       <label className="flex items-center gap-2 min-h-[44px] cursor-pointer">
         <input

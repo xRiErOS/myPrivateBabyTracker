@@ -28,7 +28,6 @@ class DiaperCreate(BaseModel):
     time: datetime
     diaper_type: DiaperType
     color: str | None = Field(default=None, max_length=30)
-    consistency: str | None = Field(default=None, max_length=30)
     has_rash: bool = Field(default=False)
     notes: str | None = Field(default=None, max_length=2000)
 
@@ -39,7 +38,6 @@ class DiaperUpdate(BaseModel):
     time: datetime | None = None
     diaper_type: DiaperType | None = None
     color: str | None = Field(default=None, max_length=30)
-    consistency: str | None = Field(default=None, max_length=30)
     has_rash: bool | None = None
     notes: str | None = Field(default=None, max_length=2000)
 
@@ -52,7 +50,6 @@ class DiaperResponse(BaseModel):
     time: UTCDatetime
     diaper_type: DiaperType
     color: str | None
-    consistency: str | None
     has_rash: bool
     notes: str | None
     created_at: UTCDatetime

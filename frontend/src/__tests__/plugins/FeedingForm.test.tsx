@@ -47,9 +47,9 @@ function renderForm(props = {}) {
 describe("FeedingForm", () => {
   it("renders all base form fields", () => {
     renderForm();
-    expect(screen.getByLabelText("Typ")).toBeInTheDocument();
-    expect(screen.getByLabelText("Zeitpunkt")).toBeInTheDocument();
-    expect(screen.getByLabelText("Notizen")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Typ/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Zeitpunkt/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Notizen/)).toBeInTheDocument();
   });
 
   it("renders feeding type options", () => {
@@ -62,34 +62,34 @@ describe("FeedingForm", () => {
 
   it("does not show amount field for breast feeding (default)", () => {
     renderForm();
-    expect(screen.queryByLabelText("Menge (ml)")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Menge/)).not.toBeInTheDocument();
   });
 
   it("shows amount field when bottle is selected", async () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.selectOptions(screen.getByLabelText("Typ"), "bottle");
-    expect(screen.getByLabelText("Menge (ml)")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/Typ/), "bottle");
+    expect(screen.getByLabelText(/Menge/)).toBeInTheDocument();
   });
 
   it("shows food type field when solid is selected", async () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.selectOptions(screen.getByLabelText("Typ"), "solid");
-    expect(screen.getByLabelText("Beikost")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/Typ/), "solid");
+    expect(screen.getByLabelText(/Beikost/)).toBeInTheDocument();
   });
 
   it("hides amount field when switching from bottle to breast", async () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.selectOptions(screen.getByLabelText("Typ"), "bottle");
-    expect(screen.getByLabelText("Menge (ml)")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/Typ/), "bottle");
+    expect(screen.getByLabelText(/Menge/)).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText("Typ"), "breast_left");
-    expect(screen.queryByLabelText("Menge (ml)")).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/Typ/), "breast_left");
+    expect(screen.queryByLabelText(/Menge/)).not.toBeInTheDocument();
   });
 
   it("renders submit button", () => {

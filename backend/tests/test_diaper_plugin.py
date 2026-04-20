@@ -100,13 +100,12 @@ async def test_create_diaper_entry(async_client: AsyncClient, child: Child):
 
 @pytest.mark.anyio
 async def test_create_diaper_entry_full(async_client: AsyncClient, child: Child):
-    """POST with all fields including color, consistency, has_rash."""
+    """POST with all fields including color, has_rash."""
     payload = {
         "child_id": child.id,
         "time": "2026-04-19T08:00:00Z",
         "diaper_type": "dirty",
         "color": "yellow",
-        "consistency": "soft",
         "has_rash": True,
         "notes": "Leichter Ausschlag",
     }
@@ -115,7 +114,6 @@ async def test_create_diaper_entry_full(async_client: AsyncClient, child: Child)
     data = resp.json()
     assert data["diaper_type"] == "dirty"
     assert data["color"] == "yellow"
-    assert data["consistency"] == "soft"
     assert data["has_rash"] is True
 
 
@@ -320,21 +318,6 @@ async def test_color_max_length(async_client: AsyncClient, child: Child):
             "time": "2026-04-19T10:00:00Z",
             "diaper_type": "wet",
             "color": "x" * 31,
-        },
-    )
-    assert resp.status_code == 422
-
-
-@pytest.mark.anyio
-async def test_consistency_max_length(async_client: AsyncClient, child: Child):
-    """POST with consistency exceeding max_length returns 422."""
-    resp = await async_client.post(
-        "/api/v1/diaper/",
-        json={
-            "child_id": child.id,
-            "time": "2026-04-19T10:00:00Z",
-            "diaper_type": "wet",
-            "consistency": "x" * 31,
         },
     )
     assert resp.status_code == 422

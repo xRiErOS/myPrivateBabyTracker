@@ -26,11 +26,15 @@ class MedicationEntry(TimestampMixin, Base):
         DateTime(timezone=True), nullable=False
     )
     medication_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    medication_master_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("medication_masters.id"), nullable=True
+    )
     dose: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    # Relationship
+    # Relationships
     child = relationship("Child", backref="medication_entries", lazy="selectin")
+    medication_master = relationship("MedicationMaster", lazy="selectin")
 
     # Indexes for common queries (W4)
     __table_args__ = (

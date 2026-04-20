@@ -78,15 +78,42 @@ export function TemperatureForm({ entry, onDone }: TemperatureFormProps) {
           value={measuredAt}
           onChange={(e) => setMeasuredAt(e.target.value)}
         />
-        <Input
-          label="Temperatur (°C)"
-          type="number"
-          value={temperature}
-          onChange={(e) => setTemperature(e.target.value)}
-          min="34.0"
-          max="43.0"
-          step="0.1"
-        />
+        <div className="flex flex-col gap-1">
+          <label className="font-label text-sm font-medium text-subtext0">
+            Temperatur (°C) <span className="text-red">*</span>
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const v = Math.max(34.0, parseFloat(temperature) - 0.1);
+                setTemperature(v.toFixed(1));
+              }}
+              className="min-h-[44px] min-w-[44px] rounded-[8px] bg-surface0 text-text font-headline text-xl font-semibold hover:bg-surface1 active:bg-surface2 transition-colors"
+            >
+              -
+            </button>
+            <input
+              type="number"
+              value={temperature}
+              onChange={(e) => setTemperature(e.target.value)}
+              min="34.0"
+              max="43.0"
+              step="0.1"
+              className="flex-1 min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-headline text-xl text-center text-text border-none outline-none focus:ring-2 focus:ring-mauve transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const v = Math.min(43.0, parseFloat(temperature) + 0.1);
+                setTemperature(v.toFixed(1));
+              }}
+              className="min-h-[44px] min-w-[44px] rounded-[8px] bg-surface0 text-text font-headline text-xl font-semibold hover:bg-surface1 active:bg-surface2 transition-colors"
+            >
+              +
+            </button>
+          </div>
+        </div>
         <Input
           label="Notizen"
           value={notes}

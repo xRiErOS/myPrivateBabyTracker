@@ -84,6 +84,7 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
         options={FEEDING_TYPE_OPTIONS}
         value={feedingType}
         onChange={(e) => setFeedingType(e.target.value as FeedingType)}
+        required
       />
 
       <Input

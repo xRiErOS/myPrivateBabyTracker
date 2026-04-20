@@ -23,8 +23,8 @@ export function ViewTabs({ active, onChange }: ViewTabsProps) {
           onClick={() => onChange(key)}
           className={`flex-1 py-2 text-sm font-label font-medium rounded-[calc(1rem-4px)] transition-colors min-h-[44px] ${
             active === key
-              ? "bg-peach text-ground"
-              : "text-subtext0 hover:text-text"
+              ? "bg-peach text-ground shadow-sm"
+              : "bg-surface1 text-subtext0 hover:text-text hover:bg-surface2"
           }`}
         >
           {label}

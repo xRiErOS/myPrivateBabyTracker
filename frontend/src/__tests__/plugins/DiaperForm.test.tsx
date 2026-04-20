@@ -43,10 +43,10 @@ function renderForm(props = {}) {
 describe("DiaperForm", () => {
   it("renders all base form fields", () => {
     renderForm();
-    expect(screen.getByLabelText("Typ")).toBeInTheDocument();
-    expect(screen.getByLabelText("Zeitpunkt")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Typ/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Zeitpunkt/)).toBeInTheDocument();
     expect(screen.getByText("Ausschlag vorhanden")).toBeInTheDocument();
-    expect(screen.getByLabelText("Notizen")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Notizen/)).toBeInTheDocument();
   });
 
   it("renders diaper type options", () => {
@@ -55,19 +55,6 @@ describe("DiaperForm", () => {
     expect(screen.getByText("Stuhl")).toBeInTheDocument();
     expect(screen.getByText("Gemischt")).toBeInTheDocument();
     expect(screen.getByText("Trocken")).toBeInTheDocument();
-  });
-
-  it("does not show consistency for wet type (default)", () => {
-    renderForm();
-    expect(screen.queryByLabelText("Konsistenz")).not.toBeInTheDocument();
-  });
-
-  it("shows consistency select when dirty is selected", async () => {
-    const user = userEvent.setup();
-    renderForm();
-
-    await user.selectOptions(screen.getByLabelText("Typ"), "dirty");
-    expect(screen.getByLabelText("Konsistenz")).toBeInTheDocument();
   });
 
   it("can toggle rash checkbox", async () => {
