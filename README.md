@@ -35,10 +35,16 @@ Your baby's data belongs to you — not to a cloud provider. MyBaby runs entirel
 
 ### Dashboard
 
+**Today** — At-a-glance summary with live widgets: last feeding, diaper count, active sleep timer, daily totals, and a 24h timeline showing all events.
+
 <p align="center">
   <img src="docs/screenshots/myBabyTracker_Dashboard_Today_1.png" width="400" alt="Dashboard — Today: Summary widgets with live sleep timer, feeding totals, diaper count, and day timeline">
   <img src="docs/screenshots/myBabyTracker_Dashboard_Today_2.png" width="400" alt="Dashboard — Today: Temperature, weight trend, medication log, and Vitamin D3 calendar">
 </p>
+
+**7 Days** — Daily breakdown with feeding volumes, diaper counts, and sleep durations. Trend arrows show changes compared to the previous day.
+
+**14 Days** — Pattern chart visualizing sleep blocks, feeding events, and diaper changes across a two-week period. Helps identify routines and irregularities at a glance.
 
 <p align="center">
   <img src="docs/screenshots/myBabyTracker_Dashboard_7Days_1.png" width="400" alt="Dashboard — 7 Days: Daily breakdown of feeding, diapers, and sleep with trend indicators">
@@ -46,6 +52,8 @@ Your baby's data belongs to you — not to a cloud provider. MyBaby runs entirel
 </p>
 
 ### Tracking
+
+Each plugin provides a form for quick entry and a filterable history list. The sleep plugin includes a live timer with start/stop functionality.
 
 <p align="center">
   <img src="docs/screenshots/myBabyTracker_Sleep_1.png" width="260" alt="Sleep tracker with active timer, stop button, and entry history">
@@ -153,10 +161,34 @@ npm run dev
 
 ## Roadmap
 
-- [x] Core tracking plugins (sleep, feeding, diaper, temperature, weight, medication, vitamin D3)
-- [x] Dashboard with timeline, patterns, and weekly reports
+### v0.1.0 — MVP (done)
+- [x] Core tracking plugins: sleep, feeding, diaper
+- [x] Auth middleware + security hardening
+- [x] Frontend shell + plugin components
+- [x] Docker deployment
+- [x] Baby Buddy data import
+
+### v0.2.0 — Extended Tracking (done)
+- [x] Temperature, weight, and medication plugins
+- [x] Adaptive bottom navigation
 - [x] Alert system with configurable thresholds
+- [x] Dashboard alert banner
+
+### v0.3.0 — UX Polish + Master Data (done)
 - [x] Medication master data management
+- [x] Dashboard live timer (start/stop)
+- [x] Temperature stepper (+/- buttons) and hypothermia warning
+- [x] Required field indicators, visual tab separation
+
+### v0.4.0 — Organization (planned)
+- [ ] Tag system for all entries
+- [ ] Baby to-do list
+
+### v0.6.0 — Advanced Alerts (planned)
+- [ ] Enhanced alert visuals
+- [ ] Age-specific warning thresholds
+
+### Future
 - [ ] Multi-child support
 - [ ] Data export (CSV, JSON)
 - [ ] Progressive Web App (PWA)
