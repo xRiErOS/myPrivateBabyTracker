@@ -188,6 +188,10 @@ npm run dev
 - [ ] Enhanced alert visuals
 - [ ] Age-specific warning thresholds
 
+### v0.7.0 — Authentication (planned)
+- [ ] SSO integration (Authelia, OAuth2 Proxy)
+- [ ] Forward-auth production-ready (session handling, user mapping)
+
 ### Future
 - [ ] Multi-child support
 - [ ] Data export (CSV, JSON)
