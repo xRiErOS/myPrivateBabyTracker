@@ -111,18 +111,19 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 2 abgeschlossen, v0.2.0)
+## Aktueller Stand (Sprint 3 abgeschlossen, v0.3.0)
 
-- **v0.2.0**: 33 Commits, 268 Backend-Tests + 49 Frontend-Tests, deployed auf NAS
+- **v0.3.0**: 278 Backend-Tests + 47 Frontend-Tests
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben — erst Features)
-- **Testdaten**: 298 Einträge für Anna (child_id=2), 30.03.-18.04.2026
 - **7 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication
-- **Warnhinweise**: AlertConfig pro Kind, 4 Regeln (Windel, Stuhl, Trinkmenge, Fieber), konfigurierbar
-- **Dashboard**: 3 Views + AlertBanner + 4 neue Widgets (Temperatur, Gewicht, Medikamente, VitaminD3)
-- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, Kinder)
-- **ADRs**: 10 aktiv (ADR-8: Plugin-Reihenfolge, ADR-9: VitaminD3 eigenständig, ADR-10: Konfigurierbare Schwellwerte)
-- **SSTD**: `(SSTD) MyBaby UI-Fixes Issues 1-14 + Test-Reparatur.md`
+- **Medikamenten-Stammdaten**: MedicationMaster Model (name, active_ingredient, default_unit), CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
+- **Warnhinweise**: AlertConfig pro Kind, 4 Regeln + Untertemperatur < 36.5 (blau)
+- **Dashboard**: Timer Start/Stop im SleepWidget, 3 Views + AlertBanner + Widgets
+- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, Stammdaten, Kinder)
+- **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper
+- **ADRs**: 10 aktiv
+- **SSTD**: `(SSTD) MyBaby Sprint 3 — UX-Polish + Stammdaten.md`
 
 ## Bekannte UI-Entscheidungen
 
@@ -131,7 +132,7 @@ Details: `DESIGN.md`
 - Touch-Targets: min 44px
 - Button Variants: primary (peach), secondary (surface1), danger (red), success (green)
 - Schlaf: Kein Ort, keine Qualität (entfernt nach User-Feedback)
-- Windeln: Keine Stuhlfarbe (entfernt), Label "dreckig" statt "Stuhl"
+- Windeln: Keine Stuhlfarbe (entfernt), keine Konsistenz (entfernt v0.3.0), Label "dreckig" statt "Stuhl"
 - Windel-Timeline-Farbe: bg-sapphire (teal), nicht bg-yellow
 - Mahlzeiten: Kein Ende-Feld, Preset feeding_type aus letztem Eintrag
 - Zeitformat: H:MM h (z.B. "4:25 h"), nicht dezimal
@@ -139,7 +140,8 @@ Details: `DESIGN.md`
 - Timer: "Jetzt starten" erstellt sofort DB-Eintrag, laufende Einträge nicht in Liste
 - Temperatur: Farben gruen (< 37.5), peach (< 38.5), rot (>= 38.5)
 - Gewicht: Anzeige in kg (gespeichert in Gramm), Trend-Anzeige mit +/- Differenz
-- Medikamente: Name Pflichtfeld, Dosis optional, freie Texteingabe
+- Medikamente: Name Pflichtfeld, Dosis optional, Dropdown aus Stammdaten + Freitext-Fallback
+- Medikamenten-Stammdaten: MedicationMaster (name unique, active_ingredient, default_unit, is_active)
 - Warnhinweise: Default deaktiviert, pro Kind konfigurierbar, severity warning/critical
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
