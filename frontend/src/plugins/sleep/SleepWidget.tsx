@@ -6,19 +6,27 @@ import { Card } from "../../components/Card";
 import { useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
 import { formatDuration, formatTime, formatTimeSince, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 
-function useElapsedMinutes(startIso: string | undefined): number {
-  const [minutes, setMinutes] = useState(() =>
-    startIso ? Math.floor((Date.now() - new Date(startIso).getTime()) / 60000) : 0,
+function useElapsedSeconds(startIso: string | undefined): number {
+  const [seconds, setSeconds] = useState(() =>
+    startIso ? Math.floor((Date.now() - new Date(startIso).getTime()) / 1000) : 0,
   );
   useEffect(() => {
     if (!startIso) return;
     const update = () =>
-      setMinutes(Math.floor((Date.now() - new Date(startIso).getTime()) / 60000));
+      setSeconds(Math.floor((Date.now() - new Date(startIso).getTime()) / 1000));
     update();
-    const id = setInterval(update, 10000);
+    const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, [startIso]);
-  return minutes;
+  return seconds;
+}
+
+function formatElapsed(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, "0")} h`;
+  return `${m}:${String(s).padStart(2, "0")} min`;
 }
 
 interface SleepWidgetProps {
@@ -37,7 +45,7 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
     0,
   );
   const running = entries.find((e) => !e.end_time);
-  const elapsed = useElapsedMinutes(running?.start_time);
+  const elapsedSec = useElapsedSeconds(running?.start_time);
   const lastEntry = entries[0];
 
   function handleStop(e: React.MouseEvent) {
@@ -60,7 +68,7 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
           {running ? (
             <>
               <p className="font-headline text-2xl font-semibold text-green">
-                {formatDuration(elapsed)}
+                {formatElapsed(elapsedSec)}
               </p>
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-green animate-pulse" />
