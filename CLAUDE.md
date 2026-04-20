@@ -111,21 +111,23 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 3 abgeschlossen, v0.3.0)
+## Aktueller Stand (Sprint 4 abgeschlossen, v0.4.0)
 
-- **v0.3.0**: 278 Backend-Tests + 47 Frontend-Tests
+- **v0.4.0**: 308 Backend-Tests + 52 Frontend-Tests = 360 total
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben — erst Features)
-- **7 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication
-- **Medikamenten-Stammdaten**: MedicationMaster Model (name, active_ingredient, default_unit), CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
+- **8 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo
+- **Tag-System**: Polymorphes Tagging (tags + entry_tags Tables), CRUD API, TagSelector + TagBadges in allen Listen
+- **Baby ToDo-Liste**: Todo-Plugin mit Checkbox-Toggle, Inline-Edit, due_date, completed_at Auto-Set
+- **Medikamenten-Stammdaten**: MedicationMaster Model, CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
 - **Warnhinweise**: AlertConfig pro Kind, 4 Regeln + Untertemperatur < 36.5 (blau)
-- **Dashboard**: SleepTile mit Timer im 2x3 BabySummary-Grid, Widgets als 2x2 Grid (Temp/Gewicht/Med/VitD3), klickbar
-- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste
-- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, Verwaltung)
-- **Inline-Edit**: Edit-Forms oeffnen direkt unter dem Eintrag in allen 6 Listen
+- **Dashboard**: SleepTile mit Timer im 2x3 BabySummary-Grid, Widgets als 2x2 Grid (Temp/Gewicht/Med/VitD3), klickbar, Seitentitel mit Datum+Uhrzeit+Kindname
+- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags
+- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, ToDo, Verwaltung)
+- **Inline-Edit**: Edit-Forms oeffnen direkt unter dem Eintrag in allen Listen
 - **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary
 - **ADRs**: 10 aktiv
-- **SSTD**: `(SSTD) MyBaby Sprint 3 — UX-Polish + Stammdaten.md`
+- **SSTD**: `(SSTD) MyBaby Sprint 4 — Tag-System + ToDo-Liste.md`
 
 ## Bekannte UI-Entscheidungen
 
@@ -145,6 +147,10 @@ Details: `DESIGN.md`
 - Medikamente: Name Pflichtfeld, Dosis optional, Dropdown aus Stammdaten + Freitext-Fallback
 - Medikamenten-Stammdaten: MedicationMaster (name unique, active_ingredient, default_unit, is_active)
 - Warnhinweise: Default deaktiviert, pro Kind konfigurierbar, severity warning/critical
+- Tags: Polymorphe entry_tags Table (entry_type + entry_id), 10 Farbpresets (Catppuccin), TagSelector im Inline-Edit, TagBadges auf Eintraegen
+- ToDo: Checkbox-Toggle, completed_at automatisch gesetzt/geloescht, Sortierung: offene zuerst
+- Dashboard-Titel: Datum + Uhrzeit (30s Interval) + Kindname rechts
+- VitaminD3: Widget-Label "Vit. D3" (gekuerzt fuer schmale Widgets)
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 
