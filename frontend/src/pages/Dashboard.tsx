@@ -16,7 +16,6 @@ import { PatternChart } from "../components/dashboard/PatternChart";
 import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
-import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { getQuickActions } from "../lib/quickActions";
 import {
@@ -235,9 +234,8 @@ function TodayView({
       />
       <div className="grid grid-cols-2 gap-3">
         <TemperatureWidget />
-        <VitaminD3Widget />
-        <WeightWidget />
         <MedicationWidget />
+        <WeightWidget />
       </div>
     </div>
   );
