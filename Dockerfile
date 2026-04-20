@@ -13,6 +13,7 @@ RUN npm run build
 # Stage 2: Production Runtime
 FROM python:3.12-slim AS production
 WORKDIR /app
+ENV PYTHONPATH=/app
 
 LABEL maintainer="Erik Riedel"
 LABEL version="0.1.0"
