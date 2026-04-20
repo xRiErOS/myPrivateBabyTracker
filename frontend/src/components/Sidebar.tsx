@@ -1,6 +1,6 @@
 /** Desktop sidebar navigation — hidden on mobile. */
 
-import { CheckSquare, Droplets, LayoutDashboard, Moon, Pill, Scale, Settings, Thermometer, Utensils } from "lucide-react";
+import { CheckSquare, Droplets, LayoutDashboard, Moon, Pill, Scale, Settings, Tags, Thermometer, Utensils } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/weight", icon: Scale, label: "Gewicht" },
   { to: "/medication", icon: Pill, label: "Medikamente" },
   { to: "/todo", icon: CheckSquare, label: "ToDo" },
+  { to: "/admin/tags", icon: Tags, label: "Tags" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ] as const;
 

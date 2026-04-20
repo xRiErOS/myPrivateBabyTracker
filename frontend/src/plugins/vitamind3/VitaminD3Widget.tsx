@@ -1,6 +1,6 @@
 /** Vitamin D3 dashboard widget — card showing today's status with give/undo button. */
 
-import { Sun, CheckCircle, Undo2 } from "lucide-react";
+import { Sun, CheckCircle, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
@@ -89,10 +89,7 @@ export function VitaminD3Widget() {
           }`}
         >
           {givenToday ? (
-            <>
-              <Undo2 className="h-3 w-3" />
-              Zurueck
-            </>
+            <Pencil className="h-3 w-3" />
           ) : (
             <>
               <CheckCircle className="h-3 w-3" />

@@ -13,6 +13,7 @@ import {
   Pill,
   Scale,
   Settings,
+  Tags,
   Thermometer,
   Utensils,
   X,
@@ -31,6 +32,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/sleep", icon: Moon, label: "Schlaf" },
   { to: "/feeding", icon: Utensils, label: "Mahlzeiten" },
   { to: "/diaper", icon: Droplets, label: "Windeln" },
+  { to: "/admin/tags", icon: Tags, label: "Tags" },
   { to: "/temperature", icon: Thermometer, label: "Temperatur" },
   { to: "/weight", icon: Scale, label: "Gewicht" },
   { to: "/medication", icon: Pill, label: "Medikamente" },
@@ -38,8 +40,8 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 
-const FAVORITES = ALL_ITEMS.slice(0, 4); // Dashboard, Schlaf, Mahlzeiten, Windeln
-const MORE_ITEMS = ALL_ITEMS.slice(4);
+const FAVORITES = ALL_ITEMS.slice(0, 5); // Dashboard, Schlaf, Mahlzeiten, Windeln, Tags
+const MORE_ITEMS = ALL_ITEMS.slice(5);
 
 export function BottomNav() {
   const [showMore, setShowMore] = useState(false);

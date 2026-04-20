@@ -25,10 +25,10 @@ export function MedicationWidget() {
       {entries.length > 0 ? (
         <div className="flex flex-col gap-1">
           {entries.slice(0, 4).map((entry) => (
-            <div key={entry.id} className="flex items-baseline gap-2">
-              <span className="font-body text-sm text-text">{entry.medication_name}</span>
+            <div key={entry.id} className="flex items-baseline justify-between gap-1">
+              <span className="font-body text-sm text-text truncate">{entry.medication_name}</span>
               {entry.dose && (
-                <span className="font-body text-xs text-subtext0">{entry.dose}</span>
+                <span className="font-body text-xs text-subtext0 shrink-0 text-right">{entry.dose}</span>
               )}
             </div>
           ))}
