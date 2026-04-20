@@ -1,7 +1,10 @@
-/** Dashboard today summary — tiles with last entry, totals, yesterday comparison. */
+/** Dashboard today summary — 2x3 grid with feeding, diaper, sleep tiles. */
 
-import { Droplets, Utensils } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Droplets, Moon, Play, Square, Utensils } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
+import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
+import { formatDuration, formatTime, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 import {
   hoursAgo,
   isWet,
@@ -14,16 +17,18 @@ function Tile({
   label,
   icon,
   children,
+  className = "",
   onClick,
 }: {
   label: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
+  className?: string;
   onClick?: () => void;
 }) {
   return (
     <div
-      className={`bg-surface0 rounded-card p-3 ${onClick ? "cursor-pointer active:bg-surface1 transition-colors" : ""}`}
+      className={`bg-surface0 rounded-card p-3 ${onClick ? "cursor-pointer active:bg-surface1 transition-colors" : ""} ${className}`}
       onClick={onClick}
     >
       <div className="flex items-center gap-1.5 mb-1">
@@ -68,15 +73,108 @@ function diaperSummary(diapers: DiaperEntry[]): string {
   return parts.join(", ") || "keine";
 }
 
+/** Compact sleep tile with timer start/stop. */
+function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void }) {
+  const { data: entries = [] } = useSleepEntries({
+    child_id: childId,
+    date_from: startOfTodayISO(),
+  });
+  const createMut = useCreateSleep();
+  const updateMut = useUpdateSleep();
+
+  const totalMinutes = entries.reduce((sum, e) => sum + (e.duration_minutes ?? 0), 0);
+  const running = entries.find((e) => !e.end_time);
+
+  // Live elapsed seconds for running timer
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!running?.start_time) return;
+    const tick = () =>
+      setElapsed(Math.floor((Date.now() - new Date(running.start_time).getTime()) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [running?.start_time]);
+
+  function formatElapsed(s: number): string {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, "0")} h`;
+    return `${m}:${String(sec).padStart(2, "0")}`;
+  }
+
+  function handleStart(e: React.MouseEvent) {
+    e.stopPropagation();
+    createMut.mutate({ child_id: childId, start_time: nowISO(), sleep_type: "nap" });
+  }
+
+  function handleStop(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (running) updateMut.mutate({ id: running.id, data: { end_time: nowISO() } });
+  }
+
+  if (running) {
+    return (
+      <Tile
+        label="Schlaf"
+        icon={<Moon className="h-3 w-3 text-green" />}
+        className="ring-1 ring-green/30 bg-green/5"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-headline text-lg font-semibold text-green">
+              {formatElapsed(elapsed)}
+            </div>
+            <div className="font-body text-xs text-green flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
+              seit {formatTime(running.start_time)}
+            </div>
+          </div>
+          <button
+            onClick={handleStop}
+            disabled={updateMut.isPending}
+            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-green text-ground hover:opacity-90 transition-opacity"
+          >
+            <Square className="h-4 w-4" />
+          </button>
+        </div>
+      </Tile>
+    );
+  }
+
+  return (
+    <Tile label="Schlaf" icon={<Moon className="h-3 w-3 text-subtext0" />} onClick={onClick}>
+      <div className="flex items-center justify-between">
+        <div>
+          <TileValue
+            value={formatDuration(totalMinutes)}
+            sub={entries[0] ? `Letzter: ${hoursAgo(entries[0].end_time ?? entries[0].start_time)}` : null}
+          />
+        </div>
+        <button
+          onClick={handleStart}
+          disabled={createMut.isPending}
+          className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-mauve text-ground hover:opacity-90 transition-opacity"
+        >
+          <Play className="h-4 w-4" />
+        </button>
+      </div>
+    </Tile>
+  );
+}
+
 interface BabySummaryProps {
   feedings: FeedingEntry[];
   diapers: DiaperEntry[];
+  childId: number;
   onTileClick?: (category: string) => void;
 }
 
 export function BabySummary({
   feedings,
   diapers,
+  childId,
   onTileClick,
 }: BabySummaryProps) {
   const today = todayBerlin();
@@ -141,6 +239,8 @@ export function BabySummary({
           sub={diaperSummary(todayDiapers)}
         />
       </Tile>
+
+      <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />
 
       <Tile label="Mahlzeiten" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
         <TileValue

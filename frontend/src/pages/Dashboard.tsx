@@ -17,7 +17,6 @@ import { PatternChart } from "../components/dashboard/PatternChart";
 import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
-import { SleepWidget } from "../plugins/sleep/SleepWidget";
 import { VitaminD3Widget } from "../plugins/vitamind3/VitaminD3Widget";
 import {
   splitSleepByDay,
@@ -183,9 +182,9 @@ function TodayView({
       <BabySummary
         feedings={data.feedings}
         diapers={data.diapers}
+        childId={childId}
         onTileClick={onTileClick}
       />
-      <SleepWidget childId={childId} />
       <DayTimeline
         feedings={todayFeedings}
         diapers={todayDiapers}
