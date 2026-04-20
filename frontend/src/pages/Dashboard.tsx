@@ -234,7 +234,9 @@ function TodayView({
       />
       <div className="grid grid-cols-2 gap-3">
         <TemperatureWidget />
-        <MedicationWidget />
+        <div className="row-span-2">
+          <MedicationWidget />
+        </div>
         <WeightWidget />
       </div>
     </div>

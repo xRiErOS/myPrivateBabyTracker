@@ -18,7 +18,7 @@ export function Layout({ children }: LayoutProps) {
       <Header theme={theme} onToggleTheme={toggle} />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 max-w-screen-lg mx-auto px-4 py-6 pb-24 md:pb-6">
+        <main className="flex-1 max-w-screen-lg mx-auto px-4 pt-[72px] pb-24 md:pb-6">
           {children}
         </main>
       </div>
