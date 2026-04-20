@@ -1,4 +1,4 @@
-/** Reusable tag selector — shows available tags, allows attach/detach on entries. */
+/** Reusable tag selector — bound mode (API-driven) or pending mode (local state). */
 
 import { Plus, X } from "lucide-react";
 import { useActiveChild } from "../context/ChildContext";
@@ -7,44 +7,73 @@ import type { EntryTag, Tag } from "../api/types";
 
 interface TagSelectorProps {
   entryType: string;
-  entryId: number;
+  /** If set, operates in bound mode (attach/detach via API). */
+  entryId?: number;
+  /** Pending mode: selected tag IDs held by parent. */
+  pendingTagIds?: number[];
+  /** Pending mode: callback when selection changes. */
+  onPendingChange?: (ids: number[]) => void;
 }
 
-export function TagSelector({ entryType, entryId }: TagSelectorProps) {
+export function TagSelector({ entryType, entryId, pendingTagIds, onPendingChange }: TagSelectorProps) {
   const { activeChild } = useActiveChild();
   const { data: allTags = [] } = useTags(activeChild?.id);
   const { data: entryTags = [] } = useEntryTags(entryType, entryId);
   const attachMut = useAttachTag();
   const detachMut = useDetachTag();
 
-  const attachedTagIds = new Set(entryTags.map((et: EntryTag) => et.tag_id));
-  const availableTags = allTags.filter((t: Tag) => !attachedTagIds.has(t.id));
+  const isBound = entryId != null;
 
-  function handleAttach(tagId: number) {
-    attachMut.mutate({ tag_id: tagId, entry_type: entryType, entry_id: entryId });
+  const selectedTagIds = isBound
+    ? new Set(entryTags.map((et: EntryTag) => et.tag_id))
+    : new Set(pendingTagIds ?? []);
+
+  const availableTags = allTags.filter((t: Tag) => !selectedTagIds.has(t.id));
+
+  // Build display list for selected tags
+  const attachedDisplay: { tagId: number; entryTagId?: number; name: string; color: string }[] = isBound
+    ? entryTags.map((et: EntryTag) => ({
+        tagId: et.tag_id,
+        entryTagId: et.id,
+        name: et.tag.name,
+        color: et.tag.color,
+      }))
+    : allTags
+        .filter((t: Tag) => selectedTagIds.has(t.id))
+        .map((t: Tag) => ({ tagId: t.id, name: t.name, color: t.color }));
+
+  function handleAdd(tagId: number) {
+    if (isBound) {
+      attachMut.mutate({ tag_id: tagId, entry_type: entryType, entry_id: entryId! });
+    } else {
+      onPendingChange?.([...(pendingTagIds ?? []), tagId]);
+    }
   }
 
-  function handleDetach(entryTag: EntryTag) {
-    detachMut.mutate(entryTag.id);
+  function handleRemove(tagId: number, entryTagId?: number) {
+    if (isBound && entryTagId != null) {
+      detachMut.mutate(entryTagId);
+    } else {
+      onPendingChange?.((pendingTagIds ?? []).filter((id) => id !== tagId));
+    }
   }
 
   return (
     <div className="flex flex-col gap-2">
       <label className="font-label text-sm font-medium text-subtext0">Tags</label>
 
-      {/* Attached tags */}
-      {entryTags.length > 0 && (
+      {attachedDisplay.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {entryTags.map((et: EntryTag) => (
+          {attachedDisplay.map((item) => (
             <span
-              key={et.id}
+              key={item.tagId}
               className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-label text-ground"
-              style={{ backgroundColor: et.tag.color }}
+              style={{ backgroundColor: item.color }}
             >
-              {et.tag.name}
+              {item.name}
               <button
                 type="button"
-                onClick={() => handleDetach(et)}
+                onClick={() => handleRemove(item.tagId, item.entryTagId)}
                 className="hover:opacity-70"
               >
                 <X className="h-3 w-3" />
@@ -54,14 +83,13 @@ export function TagSelector({ entryType, entryId }: TagSelectorProps) {
         </div>
       )}
 
-      {/* Available tags to add */}
       {availableTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {availableTags.map((t: Tag) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => handleAttach(t.id)}
+              onClick={() => handleAdd(t.id)}
               className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-label border border-surface2 text-subtext0 hover:bg-surface1 transition-colors"
             >
               <span

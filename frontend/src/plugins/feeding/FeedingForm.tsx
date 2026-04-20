@@ -8,6 +8,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateFeeding, useFeedingEntries, useUpdateFeeding } from "../../hooks/useFeeding";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
+import { attachTag } from "../../api/tags";
 import type { FeedingEntry, FeedingType } from "../../api/types";
 
 const FEEDING_TYPE_OPTIONS = [
@@ -27,7 +28,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateFeeding();
   const updateMut = useUpdateFeeding();
-  const [createdId, setCreatedId] = useState<number | null>(null);
+  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
   const { data: recentEntries = [] } = useFeedingEntries({
     child_id: activeChild?.id,
@@ -75,11 +76,14 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       onDone?.();
     } else {
       const result = await createMut.mutateAsync(payload);
-      setCreatedId(result.id);
+      if (pendingTagIds.length > 0) {
+        await Promise.all(pendingTagIds.map(tagId =>
+          attachTag({ tag_id: tagId, entry_type: "feeding", entry_id: result.id })
+        ));
+      }
+      onDone?.();
     }
   }
-
-  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -105,21 +109,17 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       )}
       <Input label="Notizen" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optionale Notizen..." maxLength={2000} />
       <div className="pt-3 border-t border-surface1">
-        {(entry || createdId) ? (
-          <TagSelector entryType="feeding" entryId={(entry?.id ?? createdId)!} />
+        {entry ? (
+          <TagSelector entryType="feeding" entryId={entry.id} />
         ) : (
-          <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+          <TagSelector entryType="feeding" pendingTagIds={pendingTagIds} onPendingChange={setPendingTagIds} />
         )}
       </div>
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
-        {createdId && !entry ? (
-          <Button type="button" variant="primary" onClick={() => onDone?.()}>Fertig</Button>
-        ) : (
-          <Button type="submit" disabled={isPending || !startTime}>
-            {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
-          </Button>
-        )}
+        <Button type="submit" disabled={isPending || !startTime}>
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+        </Button>
       </div>
     </form>
   );

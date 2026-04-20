@@ -10,6 +10,7 @@ import { useCreateMedication, useUpdateMedication } from "../../hooks/useMedicat
 import { useMedicationMasters } from "../../hooks/useMedicationMasters";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { ApiError } from "../../api/client";
+import { attachTag } from "../../api/tags";
 import type { MedicationEntry } from "../../api/types";
 
 interface MedicationFormProps {
@@ -38,7 +39,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
     entry != null && !entry.medication_master_id,
   );
   const [error, setError] = useState<string | null>(null);
-  const [createdId, setCreatedId] = useState<number | null>(null);
+  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
   const isEditing = entry != null;
   const isPending = createMut.isPending || updateMut.isPending;
@@ -93,14 +94,17 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
           dose: dose.trim() || null,
           notes: notes || null,
         });
-        setCreatedId(result.id);
+        if (pendingTagIds.length > 0) {
+          await Promise.all(pendingTagIds.map(tagId =>
+            attachTag({ tag_id: tagId, entry_type: "medication", entry_id: result.id })
+          ));
+        }
+        onDone?.();
       }
     } catch (err) {
       if (err instanceof ApiError) setError(err.message);
     }
   }
-
-  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <div className="flex flex-col gap-3">
@@ -180,21 +184,17 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
           maxLength={2000}
         />
         <div className="pt-3 border-t border-surface1">
-          {(entry || createdId) ? (
-            <TagSelector entryType="medication" entryId={(entry?.id ?? createdId)!} />
+          {entry ? (
+            <TagSelector entryType="medication" entryId={entry.id} />
           ) : (
-            <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+            <TagSelector entryType="medication" pendingTagIds={pendingTagIds} onPendingChange={setPendingTagIds} />
           )}
         </div>
         <div className="flex justify-end gap-2">
           {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
-          {createdId && !entry ? (
-            <Button type="button" variant="primary" onClick={() => onDone?.()}>Fertig</Button>
-          ) : (
-            <Button type="submit" disabled={isPending || !medicationName.trim()}>
-              {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
-            </Button>
-          )}
+          <Button type="submit" disabled={isPending || !medicationName.trim()}>
+            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
+          </Button>
         </div>
       </form>
     </div>

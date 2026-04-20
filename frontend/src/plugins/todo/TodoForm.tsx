@@ -6,6 +6,7 @@ import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTodo, useUpdateTodo } from "../../hooks/useTodos";
+import { attachTag } from "../../api/tags";
 import type { TodoEntry } from "../../api/types";
 
 interface TodoFormProps {
@@ -27,7 +28,7 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
   const [dueTime, setDueTime] = useState(
     entry?.due_date ? entry.due_date.slice(11, 16) : ""
   );
-  const [createdId, setCreatedId] = useState<number | null>(null);
+  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -76,11 +77,14 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
         details: details.trim() || null,
         due_date: buildDueDate(),
       });
-      setCreatedId(result.id);
+      if (pendingTagIds.length > 0) {
+        await Promise.all(pendingTagIds.map(tagId =>
+          attachTag({ tag_id: tagId, entry_type: "todo", entry_id: result.id })
+        ));
+      }
+      onDone(result.id);
     }
   }
-
-  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -126,10 +130,10 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
         </div>
       </div>
       <div className="pt-3 border-t border-surface1">
-        {(entry || createdId) ? (
-          <TagSelector entryType="todo" entryId={(entry?.id ?? createdId)!} />
+        {entry ? (
+          <TagSelector entryType="todo" entryId={entry.id} />
         ) : (
-          <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+          <TagSelector entryType="todo" pendingTagIds={pendingTagIds} onPendingChange={setPendingTagIds} />
         )}
       </div>
       <div className="flex justify-end gap-2">
@@ -138,13 +142,9 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
             Abbrechen
           </Button>
         )}
-        {createdId && !entry ? (
-          <Button type="button" variant="primary" onClick={() => onDone(createdId)}>Fertig</Button>
-        ) : (
-          <Button type="submit" disabled={isPending || !title.trim()}>
-            {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
-          </Button>
-        )}
+        <Button type="submit" disabled={isPending || !title.trim()}>
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
+        </Button>
       </div>
     </form>
   );

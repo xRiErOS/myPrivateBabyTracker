@@ -8,6 +8,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateDiaper, useUpdateDiaper } from "../../hooks/useDiaper";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
+import { attachTag } from "../../api/tags";
 import type { DiaperEntry, DiaperType } from "../../api/types";
 
 const DIAPER_TYPE_OPTIONS = [
@@ -35,7 +36,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
   );
   const [hasRash, setHasRash] = useState(entry?.has_rash ?? false);
   const [notes, setNotes] = useState(entry?.notes ?? "");
-  const [createdId, setCreatedId] = useState<number | null>(null);
+  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
   const isPending = createMut.isPending || updateMut.isPending;
 
@@ -58,11 +59,14 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
       onDone?.();
     } else {
       const result = await createMut.mutateAsync(payload);
-      setCreatedId(result.id);
+      if (pendingTagIds.length > 0) {
+        await Promise.all(pendingTagIds.map(tagId =>
+          attachTag({ tag_id: tagId, entry_type: "diaper", entry_id: result.id })
+        ));
+      }
+      onDone?.();
     }
   }
-
-  // After creation: form stays open, TagSelector becomes active, submit changes to "Fertig"
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -103,21 +107,17 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
       />
 
       <div className="pt-3 border-t border-surface1">
-        {(entry || createdId) ? (
-          <TagSelector entryType="diaper" entryId={(entry?.id ?? createdId)!} />
+        {entry ? (
+          <TagSelector entryType="diaper" entryId={entry.id} />
         ) : (
-          <p className="font-body text-xs text-subtext0">Tags nach dem Speichern verfuegbar</p>
+          <TagSelector entryType="diaper" pendingTagIds={pendingTagIds} onPendingChange={setPendingTagIds} />
         )}
       </div>
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
-        {createdId && !entry ? (
-          <Button type="button" variant="primary" onClick={() => onDone?.()}>Fertig</Button>
-        ) : (
-          <Button type="submit" disabled={isPending || !time}>
-            {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
-          </Button>
-        )}
+        <Button type="submit" disabled={isPending || !time}>
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+        </Button>
       </div>
     </form>
   );
