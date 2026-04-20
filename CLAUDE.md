@@ -119,9 +119,11 @@ Details: `DESIGN.md`
 - **7 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication
 - **Medikamenten-Stammdaten**: MedicationMaster Model (name, active_ingredient, default_unit), CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
 - **Warnhinweise**: AlertConfig pro Kind, 4 Regeln + Untertemperatur < 36.5 (blau)
-- **Dashboard**: Timer Start/Stop im SleepWidget, 3 Views + AlertBanner + Widgets
-- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, Stammdaten, Kinder)
-- **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper
+- **Dashboard**: SleepTile mit Timer im 2x3 BabySummary-Grid, Widgets als 2x2 Grid (Temp/Gewicht/Med/VitD3), klickbar
+- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste
+- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, Verwaltung)
+- **Inline-Edit**: Edit-Forms oeffnen direkt unter dem Eintrag in allen 6 Listen
+- **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary
 - **ADRs**: 10 aktiv
 - **SSTD**: `(SSTD) MyBaby Sprint 3 — UX-Polish + Stammdaten.md`
 
@@ -138,7 +140,7 @@ Details: `DESIGN.md`
 - Zeitformat: H:MM h (z.B. "4:25 h"), nicht dezimal
 - Button-Text: "Nachtragen" fuer neue Eintraege, "Aktualisieren" fuer Edit
 - Timer: "Jetzt starten" erstellt sofort DB-Eintrag, laufende Einträge nicht in Liste
-- Temperatur: Farben gruen (< 37.5), peach (< 38.5), rot (>= 38.5)
+- Temperatur: Farben blau (< 36.5 Unterkuehlung), gruen (< 37.5), peach (< 38.5), rot (>= 38.5)
 - Gewicht: Anzeige in kg (gespeichert in Gramm), Trend-Anzeige mit +/- Differenz
 - Medikamente: Name Pflichtfeld, Dosis optional, Dropdown aus Stammdaten + Freitext-Fallback
 - Medikamenten-Stammdaten: MedicationMaster (name unique, active_ingredient, default_unit, is_active)
