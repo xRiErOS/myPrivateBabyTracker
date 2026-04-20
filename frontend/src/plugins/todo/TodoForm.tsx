@@ -83,14 +83,15 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
   // After create: show TagSelector, then done
   if (createdId && !entry) {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="font-label text-sm text-green">ToDo angelegt. Tags hinzufuegen?</p>
-        <TagSelector entryType="todo" entryId={createdId} />
-        <div className="flex justify-end">
-          <Button variant="secondary" onClick={() => onDone(createdId)}>
-            Fertig
-          </Button>
+      <div className="flex flex-col gap-4">
+        <div className="rounded-[8px] border-2 border-green bg-green/10 p-3">
+          <p className="font-label text-base font-semibold text-green">Eintrag gespeichert</p>
         </div>
+        <div>
+          <p className="font-label text-sm font-medium text-text mb-2">Tags hinzufuegen (optional)</p>
+          <TagSelector entryType="todo" entryId={createdId} />
+        </div>
+        <Button variant="primary" onClick={() => onDone(createdId)}>Fertig</Button>
       </div>
     );
   }

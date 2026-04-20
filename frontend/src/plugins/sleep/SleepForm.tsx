@@ -73,14 +73,14 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
     setError(null);
 
     try {
-      await createMut.mutateAsync({
+      const result = await createMut.mutateAsync({
         child_id: activeChild.id,
         start_time: nowISO(),
         end_time: null,
         sleep_type: sleepType,
         notes: notes || null,
       });
-      onDone?.();
+      setCreatedId(result.id);
     } catch (err) {
       handleApiError(err);
     }
@@ -160,12 +160,15 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
 
   if (createdId && !entry) {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="font-label text-sm text-green">Eintrag angelegt. Tags hinzufuegen?</p>
-        <TagSelector entryType="sleep" entryId={createdId} />
-        <div className="flex justify-end">
-          <Button variant="secondary" onClick={() => onDone?.()}>Fertig</Button>
+      <div className="flex flex-col gap-4">
+        <div className="rounded-[8px] border-2 border-green bg-green/10 p-3">
+          <p className="font-label text-base font-semibold text-green">Eintrag gespeichert</p>
         </div>
+        <div>
+          <p className="font-label text-sm font-medium text-text mb-2">Tags hinzufuegen (optional)</p>
+          <TagSelector entryType="sleep" entryId={createdId} />
+        </div>
+        <Button variant="primary" onClick={() => onDone?.()}>Fertig</Button>
       </div>
     );
   }

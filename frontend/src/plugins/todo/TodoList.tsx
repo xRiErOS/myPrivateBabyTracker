@@ -133,9 +133,9 @@ export function TodoList() {
                   className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
                 >
                   {entry.is_done ? (
-                    <CheckSquare className="h-5 w-5 text-green" />
+                    <CheckSquare className="h-6 w-6 text-green" />
                   ) : (
-                    <Square className="h-5 w-5" />
+                    <Square className="h-6 w-6" />
                   )}
                 </button>
                 <div className="flex flex-col min-w-0 break-words w-full">
@@ -154,7 +154,7 @@ export function TodoList() {
                   onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
                   className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}
                 >
-                  {editingId === entry.id ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                  {editingId === entry.id ? <X className="h-5 w-5" /> : <Pencil className="h-5 w-5" />}
                 </button>
                 <button
                   onClick={() => {
@@ -162,17 +162,30 @@ export function TodoList() {
                   }}
                   className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
               </div>
             </div>
             {/* Due date + postpone buttons (always visible for open entries) */}
             <div className="flex items-center gap-2 ml-11 flex-wrap">
-              {entry.due_date && (
-                <p className="font-body text-xs text-overlay0">
-                  Faellig: {formatDateTime(entry.due_date)}
-                </p>
-              )}
+              {entry.due_date && (() => {
+                const due = new Date(entry.due_date);
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+                const isOverdue = dueDay < today && !entry.is_done;
+                const isDueToday = dueDay.getTime() === today.getTime() && !entry.is_done;
+                const cls = isOverdue
+                  ? "text-sm font-medium text-red"
+                  : isDueToday
+                    ? "text-sm font-medium text-peach"
+                    : "text-sm text-subtext0";
+                return (
+                  <p className={`font-body ${cls}`}>
+                    Faellig: {formatDateTime(entry.due_date)}
+                  </p>
+                );
+              })()}
               {!entry.is_done && (
                 <div className="flex gap-1">
                   <button
