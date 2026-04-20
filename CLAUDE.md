@@ -115,9 +115,9 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 4a abgeschlossen, v0.4.0a)
+## Aktueller Stand (User-Testing Sprint 4a abgeschlossen, v0.4.0b)
 
-- **v0.4.0a**: 313 Backend-Tests + 52 Frontend-Tests = 365 total
+- **v0.4.0b**: 313 Backend-Tests + 52 Frontend-Tests = 365 total
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben — erst Features)
 - **8 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo
@@ -126,19 +126,22 @@ Details: `DESIGN.md`
 - **Entry-Detail-Modal**: Getaggte Eintraege auf Tag-Detail-Seite klickbar, Notizen editierbar
 - **Baby ToDo-Liste**: Todo-Plugin mit Checkbox-Toggle, Inline-Edit, due_date, completed_at Auto-Set
 - **Medikamenten-Stammdaten**: MedicationMaster Model, CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
-- **Warnhinweise**: AlertConfig pro Kind, 5 Regeln (+ Fuetterungsintervall-Alarm) + Untertemperatur < 36.5 (blau)
-- **Stillseiten-Tracking**: BabySummary-Tile zeigt letzte Stillseite + Gegenseite-Preset im FeedingForm
-- **Dashboard**: Quick Actions (3 konfigurierbare Favoriten) + Add-Menue, Widgets 2-spaltig (Temp+Gewicht links, VitD3+Med rechts), Kacheln verlinken auf Heute-Ansicht
-- **VitD3-Widget**: Card-Stil ohne Kalender, Gegeben/Ausstehend-Status
-- **Windeln-Widget**: 3 Kacheln (Gesamt/Nass/Beides) + Zusatzzeile Stuhl/Trocken
+- **Warnhinweise**: AlertConfig pro Kind, 5 Regeln (+ Fuetterungsintervall-Alarm) + Untertemperatur < 36.5 (blau), Konfigurationsseite unter /admin/alerts
+- **Stillmodus**: Deaktivierbar in Verwaltung (localStorage Toggle). Bei deaktiviert: "Letzte Flasche"-Tile + bottle Preset im FeedingForm
+- **Dashboard BabySummary 2x3**: Flasche/Brust | Heute gesamt | Letzte Windel | Windeln heute | Schlaf+Timer | VitD3
+- **Dashboard Widget-Grid**: Temperatur + Gewicht links, Medikamente rechts (row-span-2)
+- **Add-Menu**: Zentriertes Modal (nicht Bottom-Sheet), scrollbar auf Mobile
+- **VitD3-Widget**: Inline im BabySummary-Grid (nicht mehr im Widget-Grid)
 - **Tagesverlauf**: Konfigurierbare Track-Sichtbarkeit (Zahnrad + localStorage)
 - **Edit-Form**: Visuell im Stamm-Element eingebettet (Card-Einheit, border-t Trennlinie)
-- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags + Quick Actions
+- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags + Warnhinweise + Quick Actions + Stillmodus
+- **Layout**: Header fixed (nicht sticky), Sidebar fixed auf Desktop, Spacer-Div fuer Zentrierung
 - **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, ToDo, Verwaltung)
 - **PWA**: manifest.json, PNG-Icons (180/192/512px), apple-touch-icon, standalone display
-- **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary
+- **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary, Catppuccin-Toggles (iOS-Stil)
+- **Farben**: Header bg-mantle (unterscheidbar von Cards bg-surface0), mantle Token in CSS + Tailwind
 - **ADRs**: 10 aktiv
-- **SSTD**: `(SSTD) MyBaby Sprint 4a — UX-Redesign + Stillseiten + Alarme.md`
+- **SSTD**: `(SSTD) MyBaby User-Testing Sprint 4a — Dashboard-Layout + Stillmodus + Alerts.md`
 
 ## Bekannte UI-Entscheidungen
 
@@ -164,11 +167,16 @@ Details: `DESIGN.md`
 - Dashboard-Titel: Datum + Uhrzeit (30s Interval) + Kindname rechts
 - VitaminD3: Card-Widget ohne Kalender, Gegeben/Ausstehend-Status, Geben-Button inline
 - Quick Actions: 3 konfigurierbare Favoriten (localStorage), Default: Schlaf/Mahlzeiten/Windel
-- Add-Menue: Bottom-Sheet mit allen 6 Tracking-Optionen, Overlay + slide-up Animation
+- Add-Menue: Zentriertes Modal mit allen 6 Tracking-Optionen, max-h-[80vh] scrollbar
 - Plugin-Registry: pluginRegistry.ts als zentrale Plugin-Definition (key, label, icon, route)
 - Dashboard-Kacheln: Klick navigiert mit ?range=today, Listen lesen initialen DateRange aus URL
 - Tagesverlauf: Zahnrad-Icon fuer Track-Sichtbarkeit (Schlaf/Flasche/Windeln), localStorage-Persistenz
-- Windeln-Widget: 3 Kacheln (Gesamt/Nass/Beides), Stuhl+Trocken als Zusatzzeile
+- Windeln-Widget: 2 Tiles im BabySummary-Grid (Letzte Windel + Windeln heute)
+- Stillmodus: Deaktivierbar in Verwaltung (localStorage), bei off zeigt "Letzte Flasche" statt "Stillseite"
+- Toggles: iOS-Stil (h-8, w-[52px], bg-white shadow-md Knob, bg-green/bg-surface2 Track)
+- Header: bg-mantle (Catppuccin Latte #e6e9ef / Macchiato #1e2030), fixed statt sticky
+- Sidebar: fixed auf Desktop, Spacer-Div fuer Content-Zentrierung
+- Warnhinweise-UI: /admin/alerts mit 5 Regeln (Toggle + Schwellwert), auto-save
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 
