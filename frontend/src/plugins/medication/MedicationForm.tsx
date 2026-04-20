@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateMedication, useUpdateMedication } from "../../hooks/useMedication";
 import { useMedicationMasters } from "../../hooks/useMedicationMasters";
@@ -14,9 +15,10 @@ import type { MedicationEntry } from "../../api/types";
 interface MedicationFormProps {
   entry?: MedicationEntry;
   onDone?: () => void;
+  onCancel?: () => void;
 }
 
-export function MedicationForm({ entry, onDone }: MedicationFormProps) {
+export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps) {
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const createMut = useCreateMedication();
@@ -36,6 +38,7 @@ export function MedicationForm({ entry, onDone }: MedicationFormProps) {
     entry != null && !entry.medication_master_id,
   );
   const [error, setError] = useState<string | null>(null);
+  const [createdId, setCreatedId] = useState<number | null>(null);
 
   const isEditing = entry != null;
   const isPending = createMut.isPending || updateMut.isPending;
@@ -80,8 +83,9 @@ export function MedicationForm({ entry, onDone }: MedicationFormProps) {
             notes: notes || null,
           },
         });
+        onDone?.();
       } else {
-        await createMut.mutateAsync({
+        const result = await createMut.mutateAsync({
           child_id: activeChild!.id,
           given_at: localInputToISO(givenAt),
           medication_name: medicationName.trim(),
@@ -89,11 +93,23 @@ export function MedicationForm({ entry, onDone }: MedicationFormProps) {
           dose: dose.trim() || null,
           notes: notes || null,
         });
+        setCreatedId(result.id);
       }
-      onDone?.();
     } catch (err) {
       if (err instanceof ApiError) setError(err.message);
     }
+  }
+
+  if (createdId && !entry) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="font-label text-sm text-green">Eintrag angelegt. Tags hinzufuegen?</p>
+        <TagSelector entryType="medication" entryId={createdId} />
+        <div className="flex justify-end">
+          <Button variant="secondary" onClick={() => onDone?.()}>Fertig</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -173,9 +189,17 @@ export function MedicationForm({ entry, onDone }: MedicationFormProps) {
           placeholder="Optionale Notizen..."
           maxLength={2000}
         />
-        <Button type="submit" disabled={isPending || !medicationName.trim()}>
-          {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
-        </Button>
+        {entry && (
+          <div className="pt-3 border-t border-surface1">
+            <TagSelector entryType="medication" entryId={entry.id} />
+          </div>
+        )}
+        <div className="flex justify-end gap-2">
+          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+          <Button type="submit" disabled={isPending || !medicationName.trim()}>
+            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
+          </Button>
+        </div>
       </form>
     </div>
   );

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Moon, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
-import { TagSelector } from "../../components/TagSelector";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
@@ -103,10 +102,7 @@ export function SleepList() {
           </Card>
           {editingId === entry.id && (
             <Card className="border border-mauve/20">
-              <SleepForm entry={entry} onDone={() => setEditingId(null)} />
-              <div className="mt-3 pt-3 border-t border-surface1">
-                <TagSelector entryType="sleep" entryId={entry.id} />
-              </div>
+              <SleepForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
             </Card>
           )}
         </div>

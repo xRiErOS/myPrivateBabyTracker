@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateFeeding, useFeedingEntries, useUpdateFeeding } from "../../hooks/useFeeding";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
@@ -19,14 +20,15 @@ const FEEDING_TYPE_OPTIONS = [
 interface FeedingFormProps {
   entry?: FeedingEntry;
   onDone?: () => void;
+  onCancel?: () => void;
 }
 
-export function FeedingForm({ entry, onDone }: FeedingFormProps) {
+export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateFeeding();
   const updateMut = useUpdateFeeding();
+  const [createdId, setCreatedId] = useState<number | null>(null);
 
-  // Letzten Eintrag laden, um feeding_type als Default vorzubelegen
   const { data: recentEntries = [] } = useFeedingEntries({
     child_id: activeChild?.id,
   });
@@ -35,7 +37,6 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
   const [feedingType, setFeedingType] = useState<FeedingType>(
     entry?.feeding_type ?? "breast_left",
   );
-  // Einmalig den Typ aus dem letzten Eintrag uebernehmen (nur neues Formular)
   const presetApplied = useRef(!!entry);
   useEffect(() => {
     if (!presetApplied.current && lastFeedingType) {
@@ -71,10 +72,23 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
     if (entry) {
       const { child_id: _, ...updateData } = payload;
       await updateMut.mutateAsync({ id: entry.id, data: updateData });
+      onDone?.();
     } else {
-      await createMut.mutateAsync(payload);
+      const result = await createMut.mutateAsync(payload);
+      setCreatedId(result.id);
     }
-    onDone?.();
+  }
+
+  if (createdId && !entry) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="font-label text-sm text-green">Eintrag angelegt. Tags hinzufuegen?</p>
+        <TagSelector entryType="feeding" entryId={createdId} />
+        <div className="flex justify-end">
+          <Button variant="secondary" onClick={() => onDone?.()}>Fertig</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -86,7 +100,6 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
         onChange={(e) => setFeedingType(e.target.value as FeedingType)}
         required
       />
-
       <Input
         label="Zeitpunkt"
         type="datetime-local"
@@ -94,40 +107,24 @@ export function FeedingForm({ entry, onDone }: FeedingFormProps) {
         onChange={(e) => setStartTime(e.target.value)}
         required
       />
-
       {showAmount && (
-        <Input
-          label="Menge (ml)"
-          type="number"
-          value={amountMl}
-          onChange={(e) => setAmountMl(e.target.value)}
-          min={0}
-          max={1000}
-          placeholder="0"
-        />
+        <Input label="Menge (ml)" type="number" value={amountMl} onChange={(e) => setAmountMl(e.target.value)} min={0} max={1000} placeholder="0" />
       )}
-
       {showFoodType && (
-        <Input
-          label="Beikost"
-          value={foodType}
-          onChange={(e) => setFoodType(e.target.value)}
-          placeholder="z.B. Karotten, Brei"
-          maxLength={100}
-        />
+        <Input label="Beikost" value={foodType} onChange={(e) => setFoodType(e.target.value)} placeholder="z.B. Karotten, Brei" maxLength={100} />
       )}
-
-      <Input
-        label="Notizen"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optionale Notizen..."
-        maxLength={2000}
-      />
-
-      <Button type="submit" disabled={isPending || !startTime}>
-        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
-      </Button>
+      <Input label="Notizen" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optionale Notizen..." maxLength={2000} />
+      {entry && (
+        <div className="pt-3 border-t border-surface1">
+          <TagSelector entryType="feeding" entryId={entry.id} />
+        </div>
+      )}
+      <div className="flex justify-end gap-2">
+        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+        <Button type="submit" disabled={isPending || !startTime}>
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+        </Button>
+      </div>
     </form>
   );
 }

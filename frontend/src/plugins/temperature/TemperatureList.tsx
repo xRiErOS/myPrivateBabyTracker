@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Pencil, Thermometer, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
-import { TagSelector } from "../../components/TagSelector";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteTemperature, useTemperatureEntries } from "../../hooks/useTemperature";
@@ -88,10 +87,7 @@ export function TemperatureList() {
           </Card>
           {editingId === entry.id && (
             <Card className="border border-mauve/20">
-              <TemperatureForm entry={entry} onDone={() => setEditingId(null)} />
-              <div className="mt-3 pt-3 border-t border-surface1">
-                <TagSelector entryType="temperature" entryId={entry.id} />
-              </div>
+              <TemperatureForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
             </Card>
           )}
         </div>

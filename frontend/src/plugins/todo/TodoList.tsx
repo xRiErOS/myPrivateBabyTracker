@@ -1,7 +1,7 @@
-/** Todo entry list with toggle, search, smart done filter, and inline edit. */
+/** Todo entry list with checkbox, search, smart done filter, and inline edit. */
 
 import { useMemo, useState } from "react";
-import { CalendarClock, Pencil, Search, Trash2, X } from "lucide-react";
+import { CalendarClock, CheckSquare, Pencil, Search, Square, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
 import { TagSelector } from "../../components/TagSelector";
@@ -38,7 +38,6 @@ export function TodoList() {
   const [showAllDone, setShowAllDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
-  // Fetch all entries (including done) so we can filter client-side
   const { data: entries = [], isLoading } = useTodos(activeChild?.id, true);
   const updateMut = useUpdateTodo();
   const deleteMut = useDeleteTodo();
@@ -51,18 +50,13 @@ export function TodoList() {
     updateMut.mutate({ id, data: { due_date: newDate } });
   }
 
-  // Smart filter: open + today's done by default, all done when toggled
   const filtered = useMemo(() => {
     let items = entries;
-
-    // Done filter: show open + today-done by default, all when toggled
     if (!showAllDone) {
       items = items.filter(
         (e) => !e.is_done || (e.completed_at && isToday(e.completed_at))
       );
     }
-
-    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       items = items.filter(
@@ -71,7 +65,6 @@ export function TodoList() {
           (e.details && e.details.toLowerCase().includes(q))
       );
     }
-
     return items;
   }, [entries, showAllDone, searchQuery]);
 
@@ -133,29 +126,24 @@ export function TodoList() {
           <Card className={`flex flex-col gap-1 p-3 ${entry.is_done ? "opacity-60" : ""}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-2 flex-1 min-w-0">
-                {/* Toggle switch */}
+                {/* Checkbox */}
                 <button
                   type="button"
-                  role="switch"
-                  aria-checked={entry.is_done}
                   onClick={() => toggleDone(entry.id, entry.is_done)}
-                  className={`flex-shrink-0 mt-0.5 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    entry.is_done ? "bg-green" : "bg-surface2"
-                  }`}
-                  style={{ minWidth: 44, minHeight: 24 }}
+                  className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
                 >
-                  <span
-                    className={`inline-block h-4 w-4 rounded-full bg-ground transition-transform ${
-                      entry.is_done ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
+                  {entry.is_done ? (
+                    <CheckSquare className="h-5 w-5 text-green" />
+                  ) : (
+                    <Square className="h-5 w-5" />
+                  )}
                 </button>
-                <div className="flex flex-col min-w-0">
-                  <span className={`font-heading text-base text-text ${entry.is_done ? "line-through" : ""}`}>
+                <div className="flex flex-col min-w-0 break-words w-full">
+                  <span className={`font-heading text-base text-text break-words ${entry.is_done ? "line-through" : ""}`}>
                     {entry.title}
                   </span>
                   {entry.details && (
-                    <p className="font-body text-xs text-subtext0 whitespace-pre-wrap mt-0.5">
+                    <p className="font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5">
                       {entry.details}
                     </p>
                   )}
@@ -178,50 +166,51 @@ export function TodoList() {
                 </button>
               </div>
             </div>
-            {entry.due_date && (
-              <div className="flex items-center gap-2 ml-[52px]">
+            {/* Due date + postpone buttons (always visible for open entries) */}
+            <div className="flex items-center gap-2 ml-11 flex-wrap">
+              {entry.due_date && (
                 <p className="font-body text-xs text-overlay0">
                   Faellig: {formatDateTime(entry.due_date)}
                 </p>
-                {!entry.is_done && (
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => postpone(entry.id, nextDay(1))}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
-                    >
-                      Morgen
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => postpone(entry.id, nextWeekday(6))}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
-                    >
-                      Sa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => postpone(entry.id, nextDay(7))}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
-                    >
-                      +1W
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+              {!entry.is_done && (
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => postpone(entry.id, nextDay(1))}
+                    className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                  >
+                    Morgen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => postpone(entry.id, nextWeekday(6))}
+                    className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                  >
+                    Sa
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => postpone(entry.id, nextDay(7))}
+                    className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                  >
+                    +1W
+                  </button>
+                </div>
+              )}
+            </div>
             {entry.completed_at && (
-              <p className="font-body text-xs text-green ml-[52px]">
+              <p className="font-body text-xs text-green ml-11">
                 Erledigt: {formatDateTime(entry.completed_at)}
               </p>
             )}
-            <div className="ml-[52px]">
+            <div className="ml-11">
               <TagBadges entryType="todo" entryId={entry.id} />
             </div>
           </Card>
           {editingId === entry.id && (
             <Card className="border border-mauve/20">
-              <TodoForm entry={entry} onDone={() => setEditingId(null)} />
+              <TodoForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
               <div className="mt-3 pt-3 border-t border-surface1">
                 <TagSelector entryType="todo" entryId={entry.id} />
               </div>

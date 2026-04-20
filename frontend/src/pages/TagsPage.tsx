@@ -165,27 +165,29 @@ export default function TagsPage() {
       ) : (
         <div className="flex flex-col gap-2">
           {tags.map((t) => (
-            <Card key={t.id} className="flex items-center justify-between p-3">
-              <button
-                onClick={() => navigate(`/admin/tags/${t.id}`)}
-                className="flex items-center gap-2 min-h-[44px] hover:opacity-80 transition-opacity"
-              >
+            <Card
+              key={t.id}
+              className="flex items-center justify-between p-3 cursor-pointer active:bg-surface1 transition-colors"
+              onClick={() => navigate(`/admin/tags/${t.id}`)}
+            >
+              <div className="flex items-center gap-2 min-h-[44px]">
                 <span
                   className="w-4 h-4 rounded-full flex-shrink-0"
                   style={{ backgroundColor: t.color }}
                 />
                 <span className="font-heading text-base text-text">{t.name}</span>
-              </button>
+              </div>
               <div className="flex gap-1">
                 <button
-                  onClick={() => handleEdit(t)}
+                  onClick={(e) => { e.stopPropagation(); handleEdit(t); }}
                   className="rounded p-1.5 text-overlay0 hover:bg-surface1"
                   style={{ minWidth: 44, minHeight: 44 }}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (confirm(`Tag "${t.name}" loeschen?`)) deleteMut.mutate(t.id);
                   }}
                   className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red"

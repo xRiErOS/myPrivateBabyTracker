@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Pencil, Trash2, Utensils, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
-import { TagSelector } from "../../components/TagSelector";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
@@ -110,10 +109,7 @@ export function FeedingList() {
           </Card>
           {editingId === entry.id && (
             <Card className="border border-mauve/20">
-              <FeedingForm entry={entry} onDone={() => setEditingId(null)} />
-              <div className="mt-3 pt-3 border-t border-surface1">
-                <TagSelector entryType="feeding" entryId={entry.id} />
-              </div>
+              <FeedingForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
             </Card>
           )}
         </div>

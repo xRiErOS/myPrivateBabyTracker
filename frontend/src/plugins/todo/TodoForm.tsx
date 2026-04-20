@@ -1,6 +1,6 @@
 /** Todo form — create or edit a todo entry. */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
@@ -11,9 +11,10 @@ import type { TodoEntry } from "../../api/types";
 interface TodoFormProps {
   entry?: TodoEntry;
   onDone: (createdId?: number) => void;
+  onCancel?: () => void;
 }
 
-export function TodoForm({ entry, onDone }: TodoFormProps) {
+export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateTodo();
   const updateMut = useUpdateTodo();
@@ -31,13 +32,20 @@ export function TodoForm({ entry, onDone }: TodoFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
-  useEffect(() => {
+  const autoResize = useCallback(() => {
     const el = textareaRef.current;
     if (el) {
-      el.style.height = "auto";
+      el.style.height = "0";
       el.style.height = `${el.scrollHeight}px`;
     }
-  }, [details]);
+  }, []);
+
+  useEffect(() => { autoResize(); }, [details, autoResize]);
+
+  // Also resize on mount (for pre-filled content)
+  useEffect(() => {
+    requestAnimationFrame(autoResize);
+  }, [autoResize]);
 
   const isPending = createMut.isPending || updateMut.isPending;
 
@@ -78,9 +86,11 @@ export function TodoForm({ entry, onDone }: TodoFormProps) {
       <div className="flex flex-col gap-3">
         <p className="font-label text-sm text-green">ToDo angelegt. Tags hinzufuegen?</p>
         <TagSelector entryType="todo" entryId={createdId} />
-        <Button variant="secondary" onClick={() => onDone(createdId)}>
-          Fertig
-        </Button>
+        <div className="flex justify-end">
+          <Button variant="secondary" onClick={() => onDone(createdId)}>
+            Fertig
+          </Button>
+        </div>
       </div>
     );
   }
@@ -107,7 +117,7 @@ export function TodoForm({ entry, onDone }: TodoFormProps) {
           placeholder="Optionale Details..."
           maxLength={2000}
           rows={2}
-          className="w-full rounded-lg border border-surface2 bg-ground px-3 py-2 font-body text-base text-text placeholder:text-overlay0 focus:border-mauve focus:outline-none resize-none"
+          className="w-full rounded-lg border border-surface2 bg-ground px-3 py-2 font-body text-base text-text placeholder:text-overlay0 focus:border-mauve focus:outline-none resize-none overflow-hidden"
         />
       </div>
       <div className="flex gap-3">
@@ -119,7 +129,7 @@ export function TodoForm({ entry, onDone }: TodoFormProps) {
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
-        <div className="w-28">
+        <div className="w-32">
           <Input
             label="Uhrzeit"
             type="time"
@@ -128,9 +138,16 @@ export function TodoForm({ entry, onDone }: TodoFormProps) {
           />
         </div>
       </div>
-      <Button type="submit" disabled={isPending || !title.trim()}>
-        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
-      </Button>
+      <div className="flex justify-end gap-2">
+        {onCancel && (
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            Abbrechen
+          </Button>
+        )}
+        <Button type="submit" disabled={isPending || !title.trim()}>
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Speichern"}
+        </Button>
+      </div>
     </form>
   );
 }

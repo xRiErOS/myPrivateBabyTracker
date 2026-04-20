@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateSleep, useUpdateSleep } from "../../hooks/useSleep";
 import { formatDateTime, isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
@@ -18,6 +19,7 @@ const SLEEP_TYPE_OPTIONS = [
 interface SleepFormProps {
   entry?: SleepEntry;
   onDone?: () => void;
+  onCancel?: () => void;
 }
 
 /** Format elapsed seconds as HH:MM:SS. */
@@ -28,7 +30,7 @@ function formatElapsed(seconds: number): string {
   return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
 }
 
-export function SleepForm({ entry, onDone }: SleepFormProps) {
+export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
@@ -43,6 +45,7 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
   const [notes, setNotes] = useState(entry?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [createdId, setCreatedId] = useState<number | null>(null);
 
   const isRunning = entry != null && entry.end_time == null;
   const isEditing = entry != null && entry.end_time != null;
@@ -145,13 +148,26 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
       if (entry) {
         const { child_id: _, ...updateData } = payload;
         await updateMut.mutateAsync({ id: entry.id, data: updateData });
+        onDone?.();
       } else {
-        await createMut.mutateAsync(payload);
+        const result = await createMut.mutateAsync(payload);
+        setCreatedId(result.id);
       }
-      onDone?.();
     } catch (err) {
       handleApiError(err);
     }
+  }
+
+  if (createdId && !entry) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="font-label text-sm text-green">Eintrag angelegt. Tags hinzufuegen?</p>
+        <TagSelector entryType="sleep" entryId={createdId} />
+        <div className="flex justify-end">
+          <Button variant="secondary" onClick={() => onDone?.()}>Fertig</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -233,9 +249,12 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
               placeholder="Optionale Notizen..."
               maxLength={2000}
             />
-            <Button type="submit" disabled={isPending || !startTime || !endTime}>
-              {isPending ? "Speichern..." : "Nachtragen"}
-            </Button>
+            <div className="flex justify-end gap-2">
+              {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+              <Button type="submit" disabled={isPending || !startTime || !endTime}>
+                {isPending ? "Speichern..." : "Nachtragen"}
+              </Button>
+            </div>
           </form>
         </>
       )}
@@ -269,9 +288,17 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
             placeholder="Optionale Notizen..."
             maxLength={2000}
           />
-          <Button type="submit" disabled={isPending || !startTime}>
-            {isPending ? "Speichern..." : "Aktualisieren"}
-          </Button>
+          {entry && (
+            <div className="pt-3 border-t border-surface1">
+              <TagSelector entryType="sleep" entryId={entry.id} />
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+            <Button type="submit" disabled={isPending || !startTime}>
+              {isPending ? "Speichern..." : "Aktualisieren"}
+            </Button>
+          </div>
         </form>
       )}
 
@@ -291,9 +318,12 @@ export function SleepForm({ entry, onDone }: SleepFormProps) {
             placeholder="Optionale Notizen..."
             maxLength={2000}
           />
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Speichern..." : "Notizen aktualisieren"}
-          </Button>
+          <div className="flex justify-end gap-2">
+            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Speichern..." : "Notizen aktualisieren"}
+            </Button>
+          </div>
         </form>
       )}
     </div>

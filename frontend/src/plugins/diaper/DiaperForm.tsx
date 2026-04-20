@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateDiaper, useUpdateDiaper } from "../../hooks/useDiaper";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
@@ -20,9 +21,10 @@ const DIAPER_TYPE_OPTIONS = [
 interface DiaperFormProps {
   entry?: DiaperEntry;
   onDone?: () => void;
+  onCancel?: () => void;
 }
 
-export function DiaperForm({ entry, onDone }: DiaperFormProps) {
+export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateDiaper();
   const updateMut = useUpdateDiaper();
@@ -33,6 +35,7 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
   );
   const [hasRash, setHasRash] = useState(entry?.has_rash ?? false);
   const [notes, setNotes] = useState(entry?.notes ?? "");
+  const [createdId, setCreatedId] = useState<number | null>(null);
 
   const isPending = createMut.isPending || updateMut.isPending;
 
@@ -52,10 +55,23 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
     if (entry) {
       const { child_id: _, ...updateData } = payload;
       await updateMut.mutateAsync({ id: entry.id, data: updateData });
+      onDone?.();
     } else {
-      await createMut.mutateAsync(payload);
+      const result = await createMut.mutateAsync(payload);
+      setCreatedId(result.id);
     }
-    onDone?.();
+  }
+
+  if (createdId && !entry) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="font-label text-sm text-green">Eintrag angelegt. Tags hinzufuegen?</p>
+        <TagSelector entryType="diaper" entryId={createdId} />
+        <div className="flex justify-end">
+          <Button variant="secondary" onClick={() => onDone?.()}>Fertig</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -96,9 +112,17 @@ export function DiaperForm({ entry, onDone }: DiaperFormProps) {
         maxLength={2000}
       />
 
-      <Button type="submit" disabled={isPending || !time}>
-        {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
-      </Button>
+      {entry && (
+        <div className="pt-3 border-t border-surface1">
+          <TagSelector entryType="diaper" entryId={entry.id} />
+        </div>
+      )}
+      <div className="flex justify-end gap-2">
+        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+        <Button type="submit" disabled={isPending || !time}>
+          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Nachtragen"}
+        </Button>
+      </div>
     </form>
   );
 }

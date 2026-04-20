@@ -3,6 +3,7 @@
 import { type FormEvent, useState } from "react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTemperature, useUpdateTemperature } from "../../hooks/useTemperature";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
@@ -12,9 +13,10 @@ import type { TemperatureEntry } from "../../api/types";
 interface TemperatureFormProps {
   entry?: TemperatureEntry;
   onDone?: () => void;
+  onCancel?: () => void;
 }
 
-export function TemperatureForm({ entry, onDone }: TemperatureFormProps) {
+export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateTemperature();
   const updateMut = useUpdateTemperature();
@@ -27,6 +29,7 @@ export function TemperatureForm({ entry, onDone }: TemperatureFormProps) {
   );
   const [notes, setNotes] = useState(entry?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [createdId, setCreatedId] = useState<number | null>(null);
 
   const isEditing = entry != null;
   const isPending = createMut.isPending || updateMut.isPending;
@@ -51,18 +54,31 @@ export function TemperatureForm({ entry, onDone }: TemperatureFormProps) {
             notes: notes || null,
           },
         });
+        onDone?.();
       } else {
-        await createMut.mutateAsync({
+        const result = await createMut.mutateAsync({
           child_id: activeChild!.id,
           measured_at: localInputToISO(measuredAt),
           temperature_celsius: tempValue,
           notes: notes || null,
         });
+        setCreatedId(result.id);
       }
-      onDone?.();
     } catch (err) {
       if (err instanceof ApiError) setError(err.message);
     }
+  }
+
+  if (createdId && !entry) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="font-label text-sm text-green">Eintrag angelegt. Tags hinzufuegen?</p>
+        <TagSelector entryType="temperature" entryId={createdId} />
+        <div className="flex justify-end">
+          <Button variant="secondary" onClick={() => onDone?.()}>Fertig</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -121,9 +137,17 @@ export function TemperatureForm({ entry, onDone }: TemperatureFormProps) {
           placeholder="Optionale Notizen..."
           maxLength={2000}
         />
-        <Button type="submit" disabled={isPending || !measuredAt}>
-          {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
-        </Button>
+        {entry && (
+          <div className="pt-3 border-t border-surface1">
+            <TagSelector entryType="temperature" entryId={entry.id} />
+          </div>
+        )}
+        <div className="flex justify-end gap-2">
+          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+          <Button type="submit" disabled={isPending || !measuredAt}>
+            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Nachtragen"}
+          </Button>
+        </div>
       </form>
     </div>
   );

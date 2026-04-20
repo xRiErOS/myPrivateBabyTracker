@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Pencil, Scale, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
-import { TagSelector } from "../../components/TagSelector";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteWeight, useWeightEntries } from "../../hooks/useWeight";
@@ -96,10 +95,7 @@ export function WeightList() {
             </Card>
             {editingId === entry.id && (
               <Card className="border border-mauve/20">
-                <WeightForm entry={entry} onDone={() => setEditingId(null)} />
-                <div className="mt-3 pt-3 border-t border-surface1">
-                  <TagSelector entryType="weight" entryId={entry.id} />
-                </div>
+                <WeightForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
               </Card>
             )}
           </div>
