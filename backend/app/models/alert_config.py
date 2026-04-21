@@ -40,6 +40,9 @@ class AlertConfig(TimestampMixin, Base):
     feeding_interval_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     feeding_interval_hours: Mapped[int] = mapped_column(Integer, default=3)
 
+    # Leap storm: alert when child is in a developmental leap storm phase
+    leap_storm_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+
     child = relationship("Child", backref="alert_config", lazy="selectin")
 
     __table_args__ = (

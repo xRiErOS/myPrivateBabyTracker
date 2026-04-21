@@ -1,7 +1,7 @@
 /** Alert banner — shows active warnings in the dashboard. Dismissable for 6h. */
 
 import { useState } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, Info, X } from "lucide-react";
 import { useActiveChild } from "../context/ChildContext";
 import { useActiveAlerts } from "../hooks/useAlerts";
 
@@ -56,10 +56,15 @@ export function AlertBanner() {
             className={`flex items-start gap-2 rounded-lg px-3 py-2.5 ${
               alert.severity === "critical"
                 ? "bg-red/15 text-red"
-                : "bg-peach/15 text-peach"
+                : alert.severity === "info"
+                  ? "bg-blue/15 text-blue"
+                  : "bg-peach/15 text-peach"
             }`}
           >
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            {alert.severity === "info"
+              ? <Info className="mt-0.5 h-4 w-4 shrink-0" />
+              : <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            }
             <p className="font-body text-sm flex-1">{alert.message}</p>
             <button
               onClick={() => {

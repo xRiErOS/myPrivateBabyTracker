@@ -251,11 +251,12 @@ export interface AlertConfig {
   fever_threshold: number;
   feeding_interval_enabled: boolean;
   feeding_interval_hours: number;
+  leap_storm_enabled: boolean;
 }
 
 export interface Alert {
   type: string;
-  severity: "warning" | "critical";
+  severity: "warning" | "critical" | "info";
   message: string;
   value: number | null;
   threshold: number | null;

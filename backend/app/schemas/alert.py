@@ -21,6 +21,8 @@ class AlertConfigUpdate(BaseModel):
     feeding_interval_enabled: bool | None = None
     feeding_interval_hours: int | None = Field(default=None, ge=1, le=24)
 
+    leap_storm_enabled: bool | None = None
+
 
 class AlertConfigResponse(BaseModel):
     """Schema for alert config API response."""
@@ -37,6 +39,7 @@ class AlertConfigResponse(BaseModel):
     fever_threshold: float
     feeding_interval_enabled: bool
     feeding_interval_hours: int
+    leap_storm_enabled: bool
 
     model_config = {"from_attributes": True}
 

@@ -1,7 +1,14 @@
 """Tests for the Alert system — config CRUD + warning evaluation."""
 
+from datetime import datetime, timedelta, timezone
+
 import pytest
 from httpx import AsyncClient
+
+
+def _recent(hours_ago: float = 1) -> str:
+    """Return an ISO timestamp N hours in the past."""
+    return (datetime.now(timezone.utc) - timedelta(hours=hours_ago)).isoformat()
 
 
 async def _create_child(async_client: AsyncClient, name: str = "TestBaby") -> int:
@@ -32,6 +39,7 @@ async def test_get_default_config(async_client):
     assert config["no_stool_hours"] == 48
     assert config["low_feeding_enabled"] is False
     assert config["fever_enabled"] is False
+    assert config["leap_storm_enabled"] is False
 
 
 @pytest.mark.anyio
@@ -88,11 +96,11 @@ async def test_wet_diaper_alert(async_client):
         json={"wet_diaper_enabled": True, "wet_diaper_min": 5},
     )
 
-    # Create only 2 wet diapers in last 24h
+    # Create only 2 wet diapers within last 24h
     for i in range(2):
         await async_client.post("/api/v1/diaper/", json={
             "child_id": child_id,
-            "time": f"2026-04-20T{8+i:02d}:00:00Z",
+            "time": _recent(hours_ago=i + 1),
             "diaper_type": "wet",
         })
 
@@ -117,7 +125,7 @@ async def test_no_wet_diaper_alert_when_sufficient(async_client):
     for i in range(4):
         await async_client.post("/api/v1/diaper/", json={
             "child_id": child_id,
-            "time": f"2026-04-20T{8+i:02d}:00:00Z",
+            "time": _recent(hours_ago=i + 1),
             "diaper_type": "wet",
         })
 
@@ -139,7 +147,7 @@ async def test_fever_alert(async_client):
 
     await async_client.post("/api/v1/temperature/", json={
         "child_id": child_id,
-        "measured_at": "2026-04-20T08:00:00Z",
+        "measured_at": _recent(hours_ago=1),
         "temperature_celsius": 38.5,
     })
 
@@ -162,7 +170,7 @@ async def test_fever_critical(async_client):
 
     await async_client.post("/api/v1/temperature/", json={
         "child_id": child_id,
-        "measured_at": "2026-04-20T08:00:00Z",
+        "measured_at": _recent(hours_ago=1),
         "temperature_celsius": 39.5,
     })
 
@@ -186,7 +194,7 @@ async def test_low_feeding_alert(async_client):
     # Only 100ml bottle feeding in 24h
     await async_client.post("/api/v1/feeding/", json={
         "child_id": child_id,
-        "start_time": "2026-04-20T08:00:00Z",
+        "start_time": _recent(hours_ago=2),
         "feeding_type": "bottle",
         "amount_ml": 100,
     })
@@ -210,7 +218,7 @@ async def test_feeding_interval_alert_triggers(async_client):
     # Create a feeding 5 hours ago
     await async_client.post("/api/v1/feeding/", json={
         "child_id": child_id,
-        "start_time": "2026-04-20T05:00:00Z",
+        "start_time": _recent(hours_ago=5),
         "feeding_type": "breast_left",
     })
 
@@ -230,7 +238,7 @@ async def test_feeding_interval_no_alert_when_disabled(async_client):
     # Create a feeding 5 hours ago but leave alert disabled
     await async_client.post("/api/v1/feeding/", json={
         "child_id": child_id,
-        "start_time": "2026-04-20T05:00:00Z",
+        "start_time": _recent(hours_ago=5),
         "feeding_type": "bottle",
         "amount_ml": 100,
     })
@@ -251,10 +259,10 @@ async def test_feeding_interval_no_alert_within_threshold(async_client):
         json={"feeding_interval_enabled": True, "feeding_interval_hours": 3},
     )
 
-    # Create a very recent feeding
+    # Create a very recent feeding (1 hour ago)
     await async_client.post("/api/v1/feeding/", json={
         "child_id": child_id,
-        "start_time": "2026-04-20T20:00:00Z",
+        "start_time": _recent(hours_ago=1),
         "feeding_type": "bottle",
         "amount_ml": 150,
     })
@@ -291,6 +299,15 @@ async def test_feeding_interval_config_in_response(async_client):
     config = resp.json()
     assert config["feeding_interval_enabled"] is False
     assert config["feeding_interval_hours"] == 3
+
+
+@pytest.mark.anyio
+async def test_leap_storm_config_in_response(async_client):
+    """Config response includes leap_storm_enabled field."""
+    child_id = await _create_child(async_client)
+    resp = await async_client.get(f"/api/v1/alerts/config?child_id={child_id}")
+    config = resp.json()
+    assert config["leap_storm_enabled"] is False
 
 
 @pytest.mark.anyio

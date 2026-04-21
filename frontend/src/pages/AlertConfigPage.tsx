@@ -176,6 +176,24 @@ export default function AlertConfigPage() {
           </Card>
         );
       })}
+
+      {/* Leap storm — toggle only, no threshold */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex-1 mr-3">
+            <h4 className="font-label text-sm font-medium text-text">
+              Entwicklungssprung
+            </h4>
+            <p className="font-body text-xs text-subtext0">
+              Hinweis wenn sich das Kind in einer Sturmphase befindet
+            </p>
+          </div>
+          <ToggleButton
+            enabled={config.leap_storm_enabled}
+            onChange={(v) => handleToggle("leap_storm_enabled", v)}
+          />
+        </div>
+      </Card>
     </div>
   );
 }

@@ -1,13 +1,15 @@
 """Alert service — evaluates warning rules against recent data (ADR-10)."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.alert_config import AlertConfig
+from app.models.child import Child
 from app.plugins.diaper.models import DiaperEntry
 from app.plugins.feeding.models import FeedingEntry
+from app.plugins.milestones.models import LeapDefinition
 from app.plugins.temperature.models import TemperatureEntry
 from app.schemas.alert import Alert
 
@@ -141,5 +143,27 @@ async def evaluate_alerts(db: AsyncSession, child_id: int) -> list[Alert]:
                 severity="critical",
                 message="Noch keine Mahlzeit erfasst",
             ))
+
+    # 6. Leap storm check
+    if config.leap_storm_enabled:
+        child_result = await db.execute(
+            select(Child).where(Child.id == child_id)
+        )
+        child = child_result.scalar_one_or_none()
+        if child is not None:
+            ref_date = child.estimated_birth_date if child.estimated_birth_date else child.birth_date
+            age_weeks = (date.today() - ref_date).days / 7
+
+            leaps_result = await db.execute(
+                select(LeapDefinition).order_by(LeapDefinition.leap_number)
+            )
+            for leap in leaps_result.scalars().all():
+                if age_weeks >= leap.storm_start_weeks and age_weeks <= leap.storm_end_weeks:
+                    alerts.append(Alert(
+                        type="leap_storm",
+                        severity="info",
+                        message=f"Sprung {leap.leap_number}: {leap.title} — Sturmphase (Woche {leap.storm_start_weeks}-{leap.storm_end_weeks})",
+                    ))
+                    break
 
     return alerts
