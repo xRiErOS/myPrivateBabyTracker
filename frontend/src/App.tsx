@@ -2,6 +2,7 @@
 
 import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Layout } from "./components/Layout";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 
@@ -28,6 +29,7 @@ const MilestonesPage = lazy(() => import("./pages/MilestonesPage"));
 function App() {
   return (
     <Layout>
+      <ErrorBoundary>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -51,6 +53,7 @@ function App() {
           <Route path="/admin/api-keys" element={<ApiKeyPage />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </Layout>
   );
 }
