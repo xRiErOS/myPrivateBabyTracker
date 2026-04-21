@@ -115,9 +115,9 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 6 Backend abgeschlossen, v0.5.2)
+## Aktueller Stand (Sprint 8 abgeschlossen, v0.5.3)
 
-- **v0.5.2**: ~400 Backend-Tests + 83 Frontend-Tests (Frontend Sprint 7)
+- **v0.5.3**: ~400 Backend-Tests + 83 Frontend-Tests
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben) + API-Key-Auth fuer Machine-to-Machine (Argon2, Scopes, Rate-Limiting)
 - **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
@@ -149,6 +149,7 @@ Details: `DESIGN.md`
 - **PWA**: manifest.json, PNG-Icons (180/192/512px), apple-touch-icon, standalone display
 - **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary, Catppuccin-Toggles (iOS-Stil)
 - **Farben**: Header bg-mantle (unterscheidbar von Cards bg-surface0), mantle Token in CSS + Tailwind
+- **Milestones-Frontend**: 3-Tab-View (Uebersicht/Alle/Spruenge), MilestonesList mit Filter+Suche+CRUD, LeapCalendar, MilestonesOverview mit Suggestions+Quick-Complete, Dashboard-Widget, EntryDetailModal erweitert
 - **ADRs**: 10 aktiv + 6 Milestones-ADRs (M1-M6 in Implementierungsplan)
 - **SSTD**: `(SSTD) MyBaby Sprint 6 — Milestones Backend + Fruehgeborenen + Recurring Tasks.md`
 
