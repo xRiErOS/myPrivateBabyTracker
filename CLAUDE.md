@@ -117,7 +117,7 @@ Details: `DESIGN.md`
 
 ## Aktueller Stand (Sprint 4b abgeschlossen, v0.5.3a)
 
-- **v0.5.3a**: ~400 Backend-Tests + 83 Frontend-Tests, Sprint 4b: 7 Commits (c64ce55..6beb522)
+- **v0.5.3a**: ~400 Backend-Tests + 83 Frontend-Tests, Sprint 4b: 16 Commits (c64ce55..8822f49), 2 User-Testing-Runden
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben) + API-Key-Auth fuer Machine-to-Machine (Argon2, Scopes, Rate-Limiting)
 - **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
@@ -159,6 +159,14 @@ Details: `DESIGN.md`
 - **Mobile Nav**: BottomNav reduziert auf 4 feste Items (Dashboard/Schlaf/Mahlzeiten/Windeln) + Burger-Drawer
 - **Swipe-Gesten**: useSwipe Hook fuer Dashboard-Tabs und Milestones-Tabs, Threshold 50px
 - **Migrations-Kette**: ...d5e6f7a8b9c0 → e6f7a8b9c0d1 (entry_tags.created_at) → f7a8b9c0d1e2 (entry_tags.is_archived)
+- **Tag-Swipe**: SwipeableEntry auf TagDetailPage — links=archivieren, rechts=Tag-Zuordnung entfernen. Visuelle Hints waehrend des Swipens.
+- **Tag-Suche**: Suchfeld auf TagDetailPage durchsucht entry_summary + Notizen (Backend liefert Notes via Separator)
+- **Tag-Entry-Anzeige**: Summary in Peach+font-semibold (Zeile 1), Notizen in normaler Schrift (Zeile 2), getrennt am " — " Separator
+- **TodoWidget**: Dashboard-Kachel — 1 offenes ToDo zeigt Titel, >1 zeigt Zaehler + Fortschrittsbalken, 0 zeigt "Alles erledigt!"
+- **TagsWidget**: Dashboard-Kachel — Top 3 Tags mit Farbpunkt + Name + non-archived Entry-Count Badge
+- **Alert-Dismiss**: X-Button an Warnmeldungen, 6h Dismiss via localStorage (Key: Kind+Typ+Index)
+- **MobileMenu**: Burger-Drawer vom Header (nicht BottomNav), 3-spaltiges Grid, auto-close bei Navigation
+- **BottomNav**: Nur zentrierter Dashboard-Button auf Mobile, alle anderen Items im MobileMenu
 - **SSTD**: `(SSTD) MyBaby Sprint 4b — User-Feedback-Fixes + UX-Erweiterungen.md`
 
 ## Bekannte UI-Entscheidungen
