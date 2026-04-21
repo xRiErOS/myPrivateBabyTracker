@@ -182,7 +182,7 @@ async def get_suggestions(
         raise NotFoundError(f"Child with id {child_id} not found")
 
     # Calculate age in weeks
-    ref_date = child.estimated_birth_date if child.is_preterm and child.estimated_birth_date else child.birth_date
+    ref_date = child.estimated_birth_date if child.estimated_birth_date else child.birth_date
     age_weeks = (date.today() - ref_date).days / 7
 
     # Get templates in age range (with 4-week buffer)
@@ -516,7 +516,7 @@ async def get_leap_status(
         raise NotFoundError(f"Child with id {child_id} not found")
 
     # Reference date: ET for preterm, birth_date otherwise
-    ref_date = child.estimated_birth_date if child.is_preterm and child.estimated_birth_date else child.birth_date
+    ref_date = child.estimated_birth_date if child.estimated_birth_date else child.birth_date
     age_weeks = (date.today() - ref_date).days / 7
 
     # Get all leaps

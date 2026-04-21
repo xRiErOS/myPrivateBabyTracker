@@ -77,6 +77,12 @@ export default function Dashboard() {
   }
 
   const leapIndicator = getLeapIndicator();
+  const [showLeapPopup, setShowLeapPopup] = useState(false);
+
+  // Find the leap to show in popup (active or next upcoming)
+  const popupLeap = leapStatus?.active_leap
+    ?? leapStatus?.leaps.find((l) => l.status === "upcoming")
+    ?? null;
 
   if (!activeChild) {
     return (
@@ -105,7 +111,7 @@ export default function Dashboard() {
         <span className="font-label text-sm text-subtext0 flex items-center gap-1.5">
           {activeChild.name}
           {isPluginEnabled("milestones") && (
-            <button onClick={() => navigate("/milestones")} className="flex items-center" aria-label="Spruenge">
+            <button onClick={() => setShowLeapPopup(true)} className="flex items-center min-h-[44px] min-w-[44px] justify-center" aria-label="Spruenge">
               <leapIndicator.icon className={`h-4 w-4 ${leapIndicator.color}`} />
             </button>
           )}
@@ -151,6 +157,11 @@ export default function Dashboard() {
           )}
         </>
       ) : null}
+
+      {/* Leap Popup */}
+      {showLeapPopup && popupLeap && (
+        <LeapPopup leap={popupLeap} onClose={() => setShowLeapPopup(false)} />
+      )}
     </div>
   );
 }
@@ -285,6 +296,79 @@ function TodayView({
           {isPluginEnabled("milestones") && <MilestoneWidget childId={childId} />}
         </div>
       )}
+
+    </div>
+  );
+}
+
+function parseJsonArray(val: string | null): string[] {
+  if (!val) return [];
+  try { return JSON.parse(val); } catch { return []; }
+}
+
+function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusItem; onClose: () => void }) {
+  const isStorm = leap.status === "active_storm";
+  const isSun = leap.status === "active_sun";
+  const isUpcoming = leap.status === "upcoming" || leap.status === "far_future";
+  const skills = parseJsonArray(leap.new_skills);
+  const signs = parseJsonArray(leap.storm_signs);
+
+  const stormStart = leap.storm_start_date
+    ? new Date(leap.storm_start_date).toLocaleDateString("de-DE", { day: "2-digit", month: "short" })
+    : "";
+  const countdown = leap.storm_start_date
+    ? Math.ceil((new Date(leap.storm_start_date).getTime() - Date.now()) / 86400000)
+    : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div className="bg-ground rounded-[12px] shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-surface0">
+          <h3 className="font-headline text-base font-semibold text-text">
+            Sprung {leap.leap_number} &mdash; {leap.title}
+          </h3>
+          <button onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-4 space-y-4">
+          {/* Status */}
+          <div className="flex items-center gap-2">
+            {isStorm && <CloudLightning className="h-5 w-5 text-peach" />}
+            {isSun && <Sun className="h-5 w-5 text-green" />}
+            {isUpcoming && <CloudSun className="h-5 w-5 text-sapphire" />}
+            <span className={`font-label text-sm font-medium ${isStorm ? "text-peach" : isSun ? "text-green" : "text-sapphire"}`}>
+              {isStorm ? "Sturmphase" : isSun ? "Sonnenphase" : "Bevorstehend"}
+            </span>
+            {isUpcoming && countdown !== null && countdown > 0 && (
+              <span className="font-body text-xs text-sapphire">in {countdown} Tagen (ab {stormStart})</span>
+            )}
+          </div>
+
+          {/* Description */}
+          <p className="font-body text-sm text-subtext0">{leap.description}</p>
+
+          {/* Skills */}
+          {skills.length > 0 && (
+            <div>
+              <h4 className="font-headline text-sm font-semibold text-green mb-2">Neue Faehigkeiten</h4>
+              {skills.map((s, i) => (
+                <p key={i} className="font-body text-sm text-text py-0.5">• {s}</p>
+              ))}
+            </div>
+          )}
+
+          {/* Storm signs */}
+          {signs.length > 0 && (
+            <div>
+              <h4 className="font-headline text-sm font-semibold text-peach mb-2">Sturm-Anzeichen</h4>
+              {signs.map((s, i) => (
+                <p key={i} className="font-body text-sm text-text py-0.5">• {s}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

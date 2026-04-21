@@ -65,7 +65,7 @@ export default function ChildrenPage() {
       name: name.trim(),
       birth_date: birthDate,
       is_preterm: isPreterm,
-      estimated_birth_date: isPreterm && estimatedBirthDate ? estimatedBirthDate : null,
+      estimated_birth_date: estimatedBirthDate || null,
     });
 
     resetCreateForm();
@@ -81,8 +81,7 @@ export default function ChildrenPage() {
         name: editName.trim(),
         birth_date: editBirthDate,
         is_preterm: editIsPreterm,
-        estimated_birth_date:
-          editIsPreterm && editEstimatedBirthDate ? editEstimatedBirthDate : null,
+        estimated_birth_date: editEstimatedBirthDate || null,
       },
     });
 
@@ -124,36 +123,15 @@ export default function ChildrenPage() {
               required
             />
 
-            {/* Fruehgeborenes Toggle */}
-            <div className="flex items-center justify-between">
-              <label className="font-label text-sm font-medium text-text">
-                Fruehgeborenes
-              </label>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isPreterm}
-                onClick={() => setIsPreterm(!isPreterm)}
-                className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${
-                  isPreterm ? "bg-green" : "bg-surface2"
-                }`}
-              >
-                <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
-                    isPreterm ? "translate-x-[26px]" : "translate-x-[2px]"
-                  }`}
-                />
-              </button>
-            </div>
-
-            {isPreterm && (
-              <Input
-                label="Errechneter Termin"
-                type="date"
-                value={estimatedBirthDate}
-                onChange={(e) => setEstimatedBirthDate(e.target.value)}
-              />
-            )}
+            <Input
+              label="Errechneter Termin (ET)"
+              type="date"
+              value={estimatedBirthDate}
+              onChange={(e) => setEstimatedBirthDate(e.target.value)}
+            />
+            <p className="font-body text-xs text-subtext0 -mt-2">
+              Wichtig fuer die Berechnung der Entwicklungsspruenge.
+            </p>
 
             <div className="flex gap-2">
               <Button type="submit" disabled={createChild.isPending}>
@@ -243,40 +221,17 @@ export default function ChildrenPage() {
                       required
                     />
 
-                    {/* Fruehgeborenes Toggle */}
-                    <div className="flex items-center justify-between">
-                      <label className="font-label text-sm font-medium text-text">
-                        Fruehgeborenes
-                      </label>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={editIsPreterm}
-                        onClick={() => setEditIsPreterm(!editIsPreterm)}
-                        className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${
-                          editIsPreterm ? "bg-green" : "bg-surface2"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
-                            editIsPreterm
-                              ? "translate-x-[26px]"
-                              : "translate-x-[2px]"
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    {editIsPreterm && (
-                      <Input
-                        label="Errechneter Termin"
-                        type="date"
-                        value={editEstimatedBirthDate}
-                        onChange={(e) =>
-                          setEditEstimatedBirthDate(e.target.value)
-                        }
-                      />
-                    )}
+                    <Input
+                      label="Errechneter Termin (ET)"
+                      type="date"
+                      value={editEstimatedBirthDate}
+                      onChange={(e) =>
+                        setEditEstimatedBirthDate(e.target.value)
+                      }
+                    />
+                    <p className="font-body text-xs text-subtext0 -mt-2">
+                      Wichtig fuer die Berechnung der Entwicklungsspruenge.
+                    </p>
 
                     <div className="flex gap-2">
                       <Button type="submit" disabled={updateChild.isPending}>

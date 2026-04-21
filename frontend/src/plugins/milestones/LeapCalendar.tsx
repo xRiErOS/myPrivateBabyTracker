@@ -107,7 +107,9 @@ function LeapCard({ leap }: { leap: LeapStatusItem }) {
     ? leap.status === "active_storm"
       ? "border-l-4 border-peach bg-red/5"
       : "border-l-4 border-green bg-green/5"
-    : "";
+    : leap.status === "upcoming"
+      ? "border-l-4 border-sapphire"
+      : "";
 
   const countdown = isUpcoming ? daysUntil(leap.storm_start_date) : null;
 
@@ -160,7 +162,7 @@ function LeapCard({ leap }: { leap: LeapStatusItem }) {
             {/* New skills — checkboxes */}
             {skills.length > 0 && (
               <div>
-                <h4 className="font-label text-xs text-subtext1 mb-1">Neue Faehigkeiten</h4>
+                <h4 className="font-headline text-sm font-semibold text-green mb-1">Neue Faehigkeiten</h4>
                 <div className="flex flex-col gap-0.5">
                   {skills.map((skill, i) => (
                     <label key={i} className="flex items-center gap-2 min-h-[36px]">
@@ -188,7 +190,7 @@ function LeapCard({ leap }: { leap: LeapStatusItem }) {
             {/* Storm signs — checkboxes */}
             {signs.length > 0 && (
               <div>
-                <h4 className="font-label text-xs text-subtext1 mb-1">Sturm-Anzeichen</h4>
+                <h4 className="font-headline text-sm font-semibold text-peach mb-1">Sturm-Anzeichen</h4>
                 <div className="flex flex-col gap-0.5">
                   {signs.map((sign, i) => (
                     <label key={i} className="flex items-center gap-2 min-h-[36px]">
