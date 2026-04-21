@@ -176,6 +176,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # Tags: polymorphic tagging for all entries
     from app.api.tags import router as tags_router
     app.include_router(tags_router, prefix="/api/v1")
+    # API Keys: machine-to-machine authentication
+    from app.api.api_keys import router as api_keys_router
+    app.include_router(api_keys_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

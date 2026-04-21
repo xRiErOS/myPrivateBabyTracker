@@ -324,3 +324,30 @@ export interface TodoUpdate {
   due_date?: string | null;
   is_done?: boolean | null;
 }
+
+export type ApiKeyScope = "read" | "write" | "admin";
+
+export interface ApiKeyResponse {
+  id: number;
+  name: string;
+  key_prefix: string;
+  scopes: ApiKeyScope[];
+  is_active: boolean;
+  last_used_at: string | null;
+  created_at: string;
+}
+
+export interface ApiKeyCreateResponse extends ApiKeyResponse {
+  key: string;
+}
+
+export interface ApiKeyCreate {
+  name: string;
+  scopes?: ApiKeyScope[];
+}
+
+export interface ApiKeyUpdate {
+  name?: string | null;
+  scopes?: ApiKeyScope[] | null;
+  is_active?: boolean | null;
+}

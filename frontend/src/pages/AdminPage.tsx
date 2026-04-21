@@ -1,7 +1,7 @@
 /** Admin hub page — navigation tiles for management pages + Quick Actions config. */
 
 import { useState } from "react";
-import { AlertTriangle, Baby, ClipboardList, Puzzle, Settings, Tags, Zap } from "lucide-react";
+import { AlertTriangle, Baby, ClipboardList, KeyRound, Puzzle, Settings, Tags, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { PLUGINS } from "../lib/pluginRegistry";
@@ -45,6 +45,12 @@ const TILES: AdminTile[] = [
     icon: Puzzle,
     label: "Plugins",
     description: "Module aktivieren/deaktivieren",
+  },
+  {
+    to: "/admin/api-keys",
+    icon: KeyRound,
+    label: "API-Keys",
+    description: "Schluessel fuer externe Systeme verwalten",
   },
 ];
 
