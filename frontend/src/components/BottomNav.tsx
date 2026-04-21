@@ -14,6 +14,7 @@ import {
   Pill,
   Scale,
   Settings,
+  Star,
   Tags,
   Thermometer,
   Timer,
@@ -44,6 +45,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/health", icon: Activity, label: "Gesundheit", pluginKey: "health" },
   { to: "/tummy-time", icon: Timer, label: "Bauchlage", pluginKey: "tummytime" },
   { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
+  { to: "/milestones", icon: Star, label: "Meilensteine", pluginKey: "milestones" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 

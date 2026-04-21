@@ -4,6 +4,8 @@ export interface Child {
   id: number;
   name: string;
   birth_date: string;
+  estimated_birth_date: string | null;
+  is_preterm: boolean;
   notes: string | null;
   is_active: boolean;
   created_at: string;
@@ -12,12 +14,16 @@ export interface Child {
 export interface ChildCreate {
   name: string;
   birth_date: string;
+  estimated_birth_date?: string | null;
+  is_preterm?: boolean;
   notes?: string | null;
 }
 
 export interface ChildUpdate {
   name?: string;
   birth_date?: string;
+  estimated_birth_date?: string | null;
+  is_preterm?: boolean;
   notes?: string | null;
   is_active?: boolean;
 }
@@ -405,4 +411,169 @@ export interface ApiKeyUpdate {
   name?: string | null;
   scopes?: ApiKeyScope[] | null;
   is_active?: boolean | null;
+}
+
+// --- Milestones ---
+
+export type MilestoneSourceType = "medical" | "emotional" | "custom" | "leap";
+export type MilestoneConfidence = "exact" | "approximate" | "unsure";
+export type LeapStatus = "past" | "active_storm" | "active_sun" | "upcoming" | "far_future";
+
+export interface MilestoneCategory {
+  id: number;
+  name: string;
+  color: string;
+  icon: string | null;
+  is_system: boolean;
+  child_id: number | null;
+  created_at: string;
+}
+
+export interface CategoryCreate {
+  name: string;
+  color?: string;
+  icon?: string | null;
+  child_id: number;
+}
+
+export interface CategoryUpdate {
+  name?: string;
+  color?: string;
+  icon?: string | null;
+}
+
+export interface MilestoneTemplate {
+  id: number;
+  title: string;
+  description: string | null;
+  category_id: number;
+  source_type: MilestoneSourceType;
+  suggested_age_weeks_min: number | null;
+  suggested_age_weeks_max: number | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface MilestoneSuggestion {
+  id: number;
+  title: string;
+  description: string | null;
+  category_id: number;
+  source_type: MilestoneSourceType;
+  suggested_age_weeks_min: number | null;
+  suggested_age_weeks_max: number | null;
+  is_completed: boolean;
+  is_current: boolean;
+}
+
+export interface MilestonePhoto {
+  id: number;
+  milestone_entry_id: number;
+  file_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+}
+
+export interface MilestoneEntry {
+  id: number;
+  child_id: number;
+  template_id: number | null;
+  title: string;
+  category_id: number;
+  source_type: MilestoneSourceType;
+  completed: boolean;
+  completed_date: string | null;
+  confidence: MilestoneConfidence;
+  notes: string | null;
+  photos: MilestonePhoto[];
+  created_at: string;
+}
+
+export interface MilestoneCreate {
+  child_id: number;
+  template_id?: number | null;
+  title: string;
+  category_id: number;
+  source_type?: MilestoneSourceType;
+  completed?: boolean;
+  completed_date?: string | null;
+  confidence?: MilestoneConfidence;
+  notes?: string | null;
+}
+
+export interface MilestoneUpdate {
+  title?: string;
+  category_id?: number;
+  completed?: boolean;
+  completed_date?: string | null;
+  confidence?: MilestoneConfidence;
+  notes?: string | null;
+}
+
+export interface MilestoneCompleteRequest {
+  completed_date: string;
+  confidence?: MilestoneConfidence;
+  notes?: string | null;
+}
+
+export interface LeapDefinition {
+  id: number;
+  leap_number: number;
+  title: string;
+  description: string;
+  storm_start_weeks: number;
+  storm_end_weeks: number;
+  sun_start_weeks: number;
+  new_skills: string | null;
+  storm_signs: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface LeapStatusItem {
+  id: number;
+  leap_number: number;
+  title: string;
+  description: string;
+  storm_start_weeks: number;
+  storm_end_weeks: number;
+  sun_start_weeks: number;
+  new_skills: string | null;
+  storm_signs: string | null;
+  status: LeapStatus;
+  storm_start_date: string | null;
+  storm_end_date: string | null;
+  sun_start_date: string | null;
+}
+
+export interface LeapStatusResponse {
+  child_age_weeks: number;
+  reference_date: string;
+  leaps: LeapStatusItem[];
+  active_leap: LeapStatusItem | null;
+}
+
+// --- Todo Templates ---
+
+export interface TodoTemplate {
+  id: number;
+  child_id: number;
+  title: string;
+  details: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface TodoTemplateCreate {
+  child_id: number;
+  title: string;
+  details?: string | null;
+}
+
+export interface TodoTemplateUpdate {
+  title?: string;
+  details?: string | null;
+  is_active?: boolean;
 }

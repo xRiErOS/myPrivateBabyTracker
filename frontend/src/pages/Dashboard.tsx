@@ -18,6 +18,7 @@ import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { HealthWidget } from "../plugins/health/HealthWidget";
 import { TummyTimeWidget } from "../plugins/tummytime/TummyTimeWidget";
+import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
@@ -246,6 +247,7 @@ function TodayView({
           {isPluginEnabled("weight") && <WeightWidget />}
           {isPluginEnabled("health") && <HealthWidget childId={childId} />}
           {isPluginEnabled("tummytime") && <TummyTimeWidget />}
+          {isPluginEnabled("milestones") && <MilestoneWidget childId={childId} />}
         </div>
       )}
     </div>

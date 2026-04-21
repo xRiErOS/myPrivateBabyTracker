@@ -23,6 +23,7 @@ const AlertConfigPage = lazy(() => import("./pages/AlertConfigPage"));
 const PluginConfigPage = lazy(() => import("./pages/PluginConfigPage"));
 const ApiKeyPage = lazy(() => import("./pages/ApiKeyPage"));
 const TummyTimePage = lazy(() => import("./pages/TummyTimePage"));
+const MilestonesPage = lazy(() => import("./pages/MilestonesPage"));
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/health" element={<HealthPage />} />
           <Route path="/todo" element={<TodoPage />} />
           <Route path="/tummy-time" element={<TummyTimePage />} />
+          <Route path="/milestones" element={<MilestonesPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/children" element={<ChildrenPage />} />
           <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
