@@ -1,18 +1,26 @@
 /** Reusable card component per DESIGN.md — surface0, rounded-card, no shadows. */
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode, TouchEventHandler } from "react";
 
 interface CardProps {
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
   onClick?: () => void;
+  onTouchStart?: TouchEventHandler;
+  onTouchMove?: TouchEventHandler;
+  onTouchEnd?: TouchEventHandler;
 }
 
-export function Card({ children, className = "", onClick }: CardProps) {
+export function Card({ children, className = "", style, onClick, onTouchStart, onTouchMove, onTouchEnd }: CardProps) {
   return (
     <div
       className={`bg-surface0 rounded-card p-4 ${className}`.trim()}
+      style={style}
       onClick={onClick}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
       role={onClick ? "button" : undefined}
     >
       {children}

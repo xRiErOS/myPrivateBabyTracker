@@ -1,13 +1,13 @@
-/** Tag detail page — shows all entries tagged with a specific tag + bulk untag. */
+/** Tag detail page — entries grouped by type, swipe gestures, search, archive. */
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Archive, ArchiveRestore, ArrowLeft, Tags, Trash2 } from "lucide-react";
+import { ArrowLeft, Search, Tags, Trash2 } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
 import { EntryDetailModal } from "../components/EntryDetailModal";
-import { useArchiveEntryTag, useBulkDetachTags, useEntryTags, useTags } from "../hooks/useTags";
+import { useArchiveEntryTag, useBulkDetachTags, useDetachTag, useEntryTags, useTags } from "../hooks/useTags";
 import { useActiveChild } from "../context/ChildContext";
 import type { EntryTag } from "../api/types";
 
@@ -20,7 +20,103 @@ const ENTRY_TYPE_LABELS: Record<string, string> = {
   medication: "Medikament",
   vitamind3: "Vitamin D3",
   todo: "ToDo",
+  health: "Gesundheit",
+  tummytime: "Bauchlage",
+  milestone: "Meilenstein",
 };
+
+/** Swipeable entry card with visual feedback. */
+function SwipeableEntry({
+  et,
+  selected,
+  onToggleSelect,
+  onClick,
+  onSwipeLeft,
+  onSwipeRight,
+}: {
+  et: EntryTag;
+  selected: boolean;
+  onToggleSelect: () => void;
+  onClick: () => void;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
+}) {
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const [offsetX, setOffsetX] = useState(0);
+  const threshold = 80;
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+    setOffsetX(0);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const dx = e.touches[0].clientX - startX.current;
+    const dy = e.touches[0].clientY - startY.current;
+    // Only allow horizontal swipe if horizontal > vertical
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      setOffsetX(dx);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (offsetX < -threshold) {
+      onSwipeLeft();
+    } else if (offsetX > threshold) {
+      onSwipeRight();
+    }
+    setOffsetX(0);
+  }, [offsetX, onSwipeLeft, onSwipeRight, threshold]);
+
+  const bgColor = offsetX < -threshold / 2
+    ? "bg-sapphire/20"
+    : offsetX > threshold / 2
+      ? "bg-red/20"
+      : "";
+
+  return (
+    <div className={`relative overflow-hidden rounded-card ${bgColor} transition-colors`}>
+      {/* Swipe hint labels */}
+      {offsetX < -30 && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 font-label text-xs text-sapphire">
+          Archivieren
+        </div>
+      )}
+      {offsetX > 30 && (
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 font-label text-xs text-red">
+          Entfernen
+        </div>
+      )}
+      <Card
+        className={`flex items-center gap-3 p-3 cursor-pointer transition-transform ${et.is_archived ? "opacity-50" : ""}`}
+        style={{ transform: `translateX(${offsetX}px)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={onClick}
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={(e) => {
+            e.stopPropagation();
+            onToggleSelect();
+          }}
+          onClick={(e) => e.stopPropagation()}
+          className="accent-peach flex-shrink-0"
+        />
+        <div className="flex flex-col flex-1 min-w-0">
+          <span className="font-body text-sm text-text">
+            {et.entry_summary ?? `#${et.entry_id}`}
+            {et.is_archived && <span className="ml-1 text-xs text-overlay0">(archiviert)</span>}
+          </span>
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 export default function TagDetailPage() {
   const { tagId } = useParams<{ tagId: string }>();
@@ -28,15 +124,28 @@ export default function TagDetailPage() {
   const { activeChild } = useActiveChild();
   const { data: tags = [] } = useTags(activeChild?.id);
   const [showArchived, setShowArchived] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: entryTags = [] } = useEntryTags(undefined, undefined, tagId ? Number(tagId) : undefined, showArchived);
   const bulkDetachMut = useBulkDetachTags();
   const archiveMut = useArchiveEntryTag();
+  const detachMut = useDetachTag();
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [modalEntry, setModalEntry] = useState<{ type: string; id: number } | null>(null);
 
   const tag = tags.find((t) => t.id === Number(tagId));
 
-  const allSelected = entryTags.length > 0 && selected.size === entryTags.length;
+  // Filter by search query
+  const filteredEntryTags = useMemo(() => {
+    if (!searchQuery.trim()) return entryTags;
+    const q = searchQuery.toLowerCase();
+    return entryTags.filter((et) => {
+      const summary = et.entry_summary?.toLowerCase() ?? "";
+      const typeLabel = (ENTRY_TYPE_LABELS[et.entry_type] ?? et.entry_type).toLowerCase();
+      return summary.includes(q) || typeLabel.includes(q);
+    });
+  }, [entryTags, searchQuery]);
+
+  const allSelected = filteredEntryTags.length > 0 && selected.size === filteredEntryTags.length;
 
   function toggleSelect(id: number) {
     setSelected((prev) => {
@@ -51,7 +160,7 @@ export default function TagDetailPage() {
     if (allSelected) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(entryTags.map((et: EntryTag) => et.id)));
+      setSelected(new Set(filteredEntryTags.map((et: EntryTag) => et.id)));
     }
   }
 
@@ -65,17 +174,16 @@ export default function TagDetailPage() {
   // Group by entry_type, sort within groups by created_at desc
   const grouped = useMemo(() => {
     const map = new Map<string, EntryTag[]>();
-    for (const et of entryTags) {
+    for (const et of filteredEntryTags) {
       const list = map.get(et.entry_type) ?? [];
       list.push(et);
       map.set(et.entry_type, list);
     }
-    // Sort each group by created_at descending
     for (const [, list] of map) {
       list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
     return map;
-  }, [entryTags]);
+  }, [filteredEntryTags]);
 
   if (!tag) {
     return (
@@ -106,13 +214,25 @@ export default function TagDetailPage() {
         </span>
       </div>
 
+      {/* Search field */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-subtext0 pointer-events-none" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Eintraege durchsuchen..."
+          className="w-full min-h-[44px] pl-10 pr-3 py-2 rounded-card bg-surface0 border border-surface1 font-body text-sm text-text placeholder:text-overlay0 focus:outline-none focus:border-mauve"
+        />
+      </div>
+
       {entryTags.length === 0 ? (
         <p className="font-body text-sm text-overlay0 text-center py-8">
           Keine Eintraege mit diesem Tag.
         </p>
       ) : (
         <>
-          {/* Show archived toggle + Bulk actions */}
+          {/* Archive toggle + Bulk actions */}
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 font-label text-sm text-subtext0 cursor-pointer">
               <input
@@ -131,7 +251,7 @@ export default function TagDetailPage() {
                   onChange={toggleSelectAll}
                   className="accent-peach"
                 />
-                Alle auswaehlen ({selected.size}/{entryTags.length})
+                Alle auswaehlen ({selected.size}/{filteredEntryTags.length})
               </label>
               {selected.size > 0 && (
                 <Button
@@ -147,6 +267,11 @@ export default function TagDetailPage() {
             </div>
           </div>
 
+          {/* Swipe hint */}
+          <p className="font-body text-xs text-overlay0 text-center">
+            Wischen: links = archivieren, rechts = entfernen
+          </p>
+
           {/* Grouped entries by type */}
           {[...grouped.entries()].map(([entryType, ets]) => (
             <div key={entryType} className="flex flex-col gap-2">
@@ -154,44 +279,28 @@ export default function TagDetailPage() {
                 {ENTRY_TYPE_LABELS[entryType] ?? entryType} ({ets.length})
               </h3>
               {ets.map((et) => (
-                <Card
+                <SwipeableEntry
                   key={et.id}
-                  className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-surface0 transition-colors ${et.is_archived ? "opacity-50" : ""}`}
+                  et={et}
+                  selected={selected.has(et.id)}
+                  onToggleSelect={() => toggleSelect(et.id)}
                   onClick={() => setModalEntry({ type: et.entry_type, id: et.entry_id })}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selected.has(et.id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      toggleSelect(et.id);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="accent-peach flex-shrink-0"
-                  />
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="font-body text-sm text-text">
-                      {et.entry_summary ?? `#${et.entry_id}`}
-                      {et.is_archived && <span className="ml-1 text-xs text-overlay0">(archiviert)</span>}
-                    </span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      archiveMut.mutate({ id: et.id, isArchived: !et.is_archived });
-                    }}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors shrink-0"
-                    aria-label={et.is_archived ? "Wiederherstellen" : "Archivieren"}
-                  >
-                    {et.is_archived
-                      ? <ArchiveRestore className="h-4 w-4" />
-                      : <Archive className="h-4 w-4" />
+                  onSwipeLeft={() => archiveMut.mutate({ id: et.id, isArchived: !et.is_archived })}
+                  onSwipeRight={() => {
+                    if (confirm("Tag-Zuordnung entfernen?")) {
+                      detachMut.mutate(et.id);
                     }
-                  </button>
-                </Card>
+                  }}
+                />
               ))}
             </div>
           ))}
+
+          {filteredEntryTags.length === 0 && searchQuery && (
+            <p className="font-body text-sm text-overlay0 text-center py-4">
+              Keine Treffer fuer "{searchQuery}"
+            </p>
+          )}
         </>
       )}
 
