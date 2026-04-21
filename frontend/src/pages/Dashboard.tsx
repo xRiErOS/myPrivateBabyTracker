@@ -19,6 +19,8 @@ import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { HealthWidget } from "../plugins/health/HealthWidget";
 import { TummyTimeWidget } from "../plugins/tummytime/TummyTimeWidget";
 import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
+import { TodoWidget } from "../plugins/todo/TodoWidget";
+import { TagsWidget } from "../plugins/tags/TagsWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled, isVisibleOnDashboard } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
@@ -302,7 +304,7 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      {(isVisibleOnDashboard("temperature") || isVisibleOnDashboard("medication") || isVisibleOnDashboard("weight") || isVisibleOnDashboard("health") || isVisibleOnDashboard("tummytime") || isVisibleOnDashboard("milestones")) && (
+      {(isVisibleOnDashboard("temperature") || isVisibleOnDashboard("medication") || isVisibleOnDashboard("weight") || isVisibleOnDashboard("health") || isVisibleOnDashboard("tummytime") || isVisibleOnDashboard("milestones") || isVisibleOnDashboard("todo") || isVisibleOnDashboard("tags")) && (
         <div className="grid grid-cols-2 gap-3">
           {isVisibleOnDashboard("temperature") && <TemperatureWidget />}
           {isVisibleOnDashboard("medication") && (
@@ -314,6 +316,8 @@ function TodayView({
           {isVisibleOnDashboard("health") && <HealthWidget childId={childId} />}
           {isVisibleOnDashboard("tummytime") && <TummyTimeWidget />}
           {isVisibleOnDashboard("milestones") && <MilestoneWidget childId={childId} />}
+          {isVisibleOnDashboard("todo") && <TodoWidget />}
+          {isVisibleOnDashboard("tags") && <TagsWidget />}
         </div>
       )}
 
