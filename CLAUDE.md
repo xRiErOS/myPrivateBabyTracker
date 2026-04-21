@@ -115,12 +115,16 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 5 abgeschlossen, v0.5.1)
+## Aktueller Stand (Sprint 6 Backend abgeschlossen, v0.5.2)
 
-- **v0.5.1**: 367 Backend-Tests + 83 Frontend-Tests = 450 total
+- **v0.5.2**: ~400 Backend-Tests + 83 Frontend-Tests (Frontend Sprint 7)
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben) + API-Key-Auth fuer Machine-to-Machine (Argon2, Scopes, Rate-Limiting)
-- **10 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime
+- **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
+- **Milestones-Plugin**: 5 Tabellen (categories, templates, entries, photos, leaps), Seed-Daten (8 Kategorien, 107 Vorlagen, 10 Spruenge), CRUD + Quick-Complete + Photo-Upload + Leap-Status-API
+- **Fruehgeborenen-Modus**: Child-Model: estimated_birth_date + is_preterm, korrigiertes Alter fuer Leap-Berechnung und Suggestions
+- **Recurring Tasks**: TodoTemplate Model, CRUD + Clone-to-Today-Endpoint (kein Scheduler, manueller Klick)
+- **Photo-Upload**: Lokale Dateispeicherung unter data/uploads/milestones/{child_id}/{uuid}.ext, Static-File-Mount /uploads/
 - **Plugin-Management**: Basis-Plugins (sleep, feeding, diaper) immer aktiv. Optionale Plugins per Toggle in /admin/plugins konfigurierbar. Nav, Dashboard, Widgets reagieren dynamisch.
 - **API-Key-Auth**: ApiKey Model (Argon2 Hash, Prefix-Matching, Scopes read/write/admin), CRUD Router, FastAPI Dependency, Verwaltungsseite /admin/api-keys
 - **Health-Plugin**: Spucken + Bauchschmerzen (entry_type, severity, duration nur bei Bauchschmerzen), Dashboard-Widget
@@ -145,8 +149,8 @@ Details: `DESIGN.md`
 - **PWA**: manifest.json, PNG-Icons (180/192/512px), apple-touch-icon, standalone display
 - **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary, Catppuccin-Toggles (iOS-Stil)
 - **Farben**: Header bg-mantle (unterscheidbar von Cards bg-surface0), mantle Token in CSS + Tailwind
-- **ADRs**: 10 aktiv
-- **SSTD**: `(SSTD) MyBaby Sprint 5 — Plugins + API-Keys + Health + TummyTime.md`
+- **ADRs**: 10 aktiv + 6 Milestones-ADRs (M1-M6 in Implementierungsplan)
+- **SSTD**: `(SSTD) MyBaby Sprint 6 — Milestones Backend + Fruehgeborenen + Recurring Tasks.md`
 
 ## Bekannte UI-Entscheidungen
 
@@ -187,6 +191,15 @@ Details: `DESIGN.md`
 - Gesundheit (Health): Zwei Typen (spit_up, tummy_ache), Severity (mild/moderate/severe), Duration nur bei Bauchschmerzen (short/medium/long)
 - Bauchlage (TummyTime): Timer-basiert analog Sleep, "Jetzt starten" erstellt DB-Eintrag, laufende Sessions nicht in Liste
 - Windeln-Balken: Proportionale farbige Balken unter Mini-Kacheln (sapphire=nass, peach=dreckig, mauve=beides, overlay0=trocken)
+- Meilensteine: 5 Tabellen (categories, templates, entries, photos, leap_definitions), Seed-Daten via Alembic-Migration
+- Meilenstein-Kategorien: 8 System-Kategorien (Catppuccin-Farben, Lucide-Icons, nicht loeschbar) + Custom pro Kind
+- Meilenstein-Vorlagen: source_type (medical/emotional/leap), suggested_age_weeks fuer altersbasierte Vorschlaege
+- Meilenstein-Eintraege: Quick-Complete-Flow (Datum + Konfidenz), Photo-Upload (max 10MB, JPEG/PNG/WebP)
+- Leaps: 10 Spruenge nach Plooij, Berechnung ab ET (Fallback birth_date), Status: past/active_storm/active_sun/upcoming/far_future
+- Meilenstein-Wording: Soft-Wording durchgehend, kein "verspaetet"-Label, Disclaimer "Jedes Kind entwickelt sich in eigenem Tempo"
+- Fruehgeborenen-Modus: is_preterm + estimated_birth_date im Child-Model, korrigiertes Alter fuer Leaps + Suggestions
+- Todo-Vorlagen: TodoTemplate (title, details, is_active), Clone-to-Today-Button erstellt normalen TodoEntry mit due_date=heute
+- Photo-Speicherung: data/uploads/milestones/{child_id}/{uuid}.ext, Static-Mount /uploads/, Cascade-Delete bei Entry-Loeschung
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 
