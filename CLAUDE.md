@@ -115,9 +115,9 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 4b abgeschlossen, v0.5.3a)
+## Aktueller Stand (Sprint 10 abgeschlossen, v0.5.4)
 
-- **v0.5.3a**: ~400 Backend-Tests + 83 Frontend-Tests, Sprint 4b: 16 Commits (c64ce55..8822f49), 2 User-Testing-Runden
+- **v0.5.4**: 387 Backend-Tests + 83 Frontend-Tests, Sprint 10: 4 Commits (697d858..970591f), 1 Migration
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: AUTH_MODE=disabled (verschoben) + API-Key-Auth fuer Machine-to-Machine (Argon2, Scopes, Rate-Limiting)
 - **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
@@ -168,6 +168,13 @@ Details: `DESIGN.md`
 - **MobileMenu**: Burger-Drawer vom Header (nicht BottomNav), 3-spaltiges Grid, auto-close bei Navigation
 - **BottomNav**: Nur zentrierter Dashboard-Button auf Mobile, alle anderen Items im MobileMenu
 - **SSTD**: `(SSTD) MyBaby Sprint 4b — User-Feedback-Fixes + UX-Erweiterungen.md`
+- **Recurring Tasks Frontend**: TodoPage mit Tab-Navigation (Aufgaben / Vorlagen), TemplateList mit CRUD, Clone-to-Today-Button, Active-Toggle
+- **Sturmphase-Alert**: leap_storm_enabled in AlertConfig, alert_service prueft aktive Sturmphase, AlertBanner zeigt info-Severity in Blau mit Info-Icon
+- **Widget-Grid Reihenfolge**: getWidgetOrder/moveWidget in pluginConfig.ts (localStorage), Dashboard rendert Widgets dynamisch, Up/Down-Buttons in /admin/plugins
+- **entry_summary Batch**: N+1 auf max 8 Queries reduziert — eine IN-Clause pro Plugin-Typ statt einzelne Abfragen
+- **test_alerts.py Fix**: Hardcoded Timestamps durch relative ersetzt (_recent Helper), alle 16 Tests zeitunabhaengig
+- **Migrations-Kette**: ...f7a8b9c0d1e2 → a1b2c3d4e5f6 (alert_configs.leap_storm_enabled)
+- **SSTD**: `(SSTD) MyBaby Sprint 10 — Admin UX + Recurring Tasks + Alerts.md`
 
 ## Bekannte UI-Entscheidungen
 
