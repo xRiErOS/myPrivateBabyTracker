@@ -16,6 +16,7 @@ import { PatternChart } from "../components/dashboard/PatternChart";
 import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
+import { HealthWidget } from "../plugins/health/HealthWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
@@ -233,7 +234,7 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      {(isPluginEnabled("temperature") || isPluginEnabled("medication") || isPluginEnabled("weight")) && (
+      {(isPluginEnabled("temperature") || isPluginEnabled("medication") || isPluginEnabled("weight") || isPluginEnabled("health")) && (
         <div className="grid grid-cols-2 gap-3">
           {isPluginEnabled("temperature") && <TemperatureWidget />}
           {isPluginEnabled("medication") && (
@@ -242,6 +243,7 @@ function TodayView({
             </div>
           )}
           {isPluginEnabled("weight") && <WeightWidget />}
+          {isPluginEnabled("health") && <HealthWidget childId={childId} />}
         </div>
       )}
     </div>

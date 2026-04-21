@@ -325,6 +325,38 @@ export interface TodoUpdate {
   is_done?: boolean | null;
 }
 
+export type HealthEntryType = "spit_up" | "tummy_ache";
+export type HealthSeverity = "mild" | "moderate" | "severe";
+export type HealthDuration = "short" | "medium" | "long";
+
+export interface HealthEntry {
+  id: number;
+  child_id: number;
+  entry_type: HealthEntryType;
+  severity: HealthSeverity;
+  duration: HealthDuration | null;
+  time: string;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface HealthCreate {
+  child_id: number;
+  entry_type: HealthEntryType;
+  severity: HealthSeverity;
+  duration?: HealthDuration | null;
+  time: string;
+  notes?: string | null;
+}
+
+export interface HealthUpdate {
+  entry_type?: HealthEntryType | null;
+  severity?: HealthSeverity | null;
+  duration?: HealthDuration | null;
+  time?: string | null;
+  notes?: string | null;
+}
+
 export type ApiKeyScope = "read" | "write" | "admin";
 
 export interface ApiKeyResponse {
