@@ -19,24 +19,32 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create todo_templates table
-    op.create_table(
-        'todo_templates',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('child_id', sa.Integer(), sa.ForeignKey('children.id', ondelete='CASCADE'), nullable=False),
-        sa.Column('title', sa.String(200), nullable=False),
-        sa.Column('details', sa.Text(), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=False, server_default='1'),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.PrimaryKeyConstraint('id'),
-    )
-    op.create_index('ix_todo_templates_child_id', 'todo_templates', ['child_id'])
+    from sqlalchemy import inspect
+    conn = op.get_bind()
+    inspector = inspect(conn)
+    existing_tables = inspector.get_table_names()
 
-    # Add template_id FK to todo_entries
-    op.add_column(
-        'todo_entries',
-        sa.Column('template_id', sa.Integer(), sa.ForeignKey('todo_templates.id', ondelete='SET NULL'), nullable=True),
-    )
+    # Create todo_templates table (idempotent)
+    if 'todo_templates' not in existing_tables:
+        op.create_table(
+            'todo_templates',
+            sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+            sa.Column('child_id', sa.Integer(), sa.ForeignKey('children.id', ondelete='CASCADE'), nullable=False),
+            sa.Column('title', sa.String(200), nullable=False),
+            sa.Column('details', sa.Text(), nullable=True),
+            sa.Column('is_active', sa.Boolean(), nullable=False, server_default='1'),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+            sa.PrimaryKeyConstraint('id'),
+        )
+        op.create_index('ix_todo_templates_child_id', 'todo_templates', ['child_id'])
+
+    # Add template_id FK to todo_entries (idempotent)
+    existing_columns = [c['name'] for c in inspector.get_columns('todo_entries')]
+    if 'template_id' not in existing_columns:
+        op.add_column(
+            'todo_entries',
+            sa.Column('template_id', sa.Integer(), sa.ForeignKey('todo_templates.id', ondelete='SET NULL'), nullable=True),
+        )
 
 
 def downgrade() -> None:
