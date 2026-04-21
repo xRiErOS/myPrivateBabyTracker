@@ -5,6 +5,7 @@ Touch targets: min 44px. Dynamically filters by enabled plugins.
 
 import { useEffect, useState } from "react";
 import {
+  Activity,
   CheckSquare,
   Droplets,
   LayoutDashboard,
@@ -15,6 +16,7 @@ import {
   Settings,
   Tags,
   Thermometer,
+  Timer,
   Utensils,
   X,
 } from "lucide-react";
@@ -35,10 +37,12 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/sleep", icon: Moon, label: "Schlaf", pluginKey: "sleep" },
   { to: "/feeding", icon: Utensils, label: "Mahlzeiten", pluginKey: "feeding" },
   { to: "/diaper", icon: Droplets, label: "Windeln", pluginKey: "diaper" },
-  { to: "/admin/tags", icon: Tags, label: "Tags" },
+  { to: "/admin/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
   { to: "/temperature", icon: Thermometer, label: "Temperatur", pluginKey: "temperature" },
   { to: "/weight", icon: Scale, label: "Gewicht", pluginKey: "weight" },
   { to: "/medication", icon: Pill, label: "Medikamente", pluginKey: "medication" },
+  { to: "/health", icon: Activity, label: "Gesundheit", pluginKey: "health" },
+  { to: "/tummy-time", icon: Timer, label: "Bauchlage", pluginKey: "tummytime" },
   { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];

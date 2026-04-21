@@ -40,7 +40,19 @@ export default function ApiKeyPage() {
 
   async function handleCopy() {
     if (!createdKey) return;
-    await navigator.clipboard.writeText(createdKey);
+    try {
+      await navigator.clipboard.writeText(createdKey);
+    } catch {
+      // Fallback for non-HTTPS contexts
+      const ta = document.createElement("textarea");
+      ta.value = createdKey;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
