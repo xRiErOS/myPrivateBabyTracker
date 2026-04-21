@@ -23,6 +23,7 @@ import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled, isVisibleOnDashboard } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
 import { useLeapStatus } from "../hooks/useMilestones";
+import { useSwipe } from "../hooks/useSwipe";
 import {
   splitSleepByDay,
   groupByDay,
@@ -79,6 +80,18 @@ export default function Dashboard() {
   const leapIndicator = getLeapIndicator();
   const [showLeapPopup, setShowLeapPopup] = useState(false);
 
+  const VIEW_ORDER: DashboardView[] = ["today", "week", "pattern"];
+  const swipeHandlers = useSwipe({
+    onSwipeLeft: () => {
+      const idx = VIEW_ORDER.indexOf(view);
+      if (idx < VIEW_ORDER.length - 1) setView(VIEW_ORDER[idx + 1]);
+    },
+    onSwipeRight: () => {
+      const idx = VIEW_ORDER.indexOf(view);
+      if (idx > 0) setView(VIEW_ORDER[idx - 1]);
+    },
+  });
+
   // Find the leap to show in popup (active or next upcoming)
   const popupLeap = leapStatus?.active_leap
     ?? leapStatus?.leaps.find((l) => l.status === "upcoming")
@@ -131,7 +144,9 @@ export default function Dashboard() {
       {/* View Tabs */}
       <ViewTabs active={view} onChange={setView} />
 
-      {/* Content */}
+      {/* Content — swipeable */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div {...swipeHandlers}>
       {isLoading ? (
         <LoadingSpinner />
       ) : data ? (
@@ -161,6 +176,7 @@ export default function Dashboard() {
           )}
         </>
       ) : null}
+      </div>
 
       {/* Leap Popup */}
       {showLeapPopup && popupLeap && (

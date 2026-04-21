@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { Star } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { useActiveChild } from "../context/ChildContext";
+import { useSwipe } from "../hooks/useSwipe";
 import MilestonesOverview from "../plugins/milestones/MilestonesOverview";
 import { MilestonesList } from "../plugins/milestones/MilestonesList";
 import { LeapCalendar } from "../plugins/milestones/LeapCalendar";
@@ -24,6 +25,18 @@ export default function MilestonesPage() {
   const [activeTab, setActiveTab] = useState<TabKey>(
     TABS.some(t => t.key === initialTab) ? initialTab : "overview"
   );
+
+  const TAB_ORDER: TabKey[] = TABS.map(t => t.key);
+  const swipeHandlers = useSwipe({
+    onSwipeLeft: () => {
+      const idx = TAB_ORDER.indexOf(activeTab);
+      if (idx < TAB_ORDER.length - 1) setActiveTab(TAB_ORDER[idx + 1]);
+    },
+    onSwipeRight: () => {
+      const idx = TAB_ORDER.indexOf(activeTab);
+      if (idx > 0) setActiveTab(TAB_ORDER[idx - 1]);
+    },
+  });
 
   if (!activeChild) {
     return (
@@ -59,10 +72,13 @@ export default function MilestonesPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
-      {activeTab === "overview" && <MilestonesOverview />}
-      {activeTab === "all" && <MilestonesList />}
-      {activeTab === "leaps" && <LeapCalendar />}
+      {/* Tab Content — swipeable */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div {...swipeHandlers}>
+        {activeTab === "overview" && <MilestonesOverview />}
+        {activeTab === "all" && <MilestonesList />}
+        {activeTab === "leaps" && <LeapCalendar />}
+      </div>
     </div>
   );
 }
