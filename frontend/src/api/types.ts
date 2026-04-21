@@ -297,6 +297,7 @@ export interface EntryTag {
   tag_id: number;
   entry_type: string;
   entry_id: number;
+  created_at: string;
   tag: Tag;
 }
 

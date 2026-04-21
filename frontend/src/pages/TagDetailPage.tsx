@@ -60,13 +60,26 @@ export default function TagDetailPage() {
     setSelected(new Set());
   }
 
-  // Group by entry_type
-  const grouped = useMemo(() => {
+  // Sort by created_at descending, then group by date
+  const sortedAndGrouped = useMemo(() => {
+    const sorted = [...entryTags].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    const today = new Date();
+    const todayStr = today.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+
     const map = new Map<string, EntryTag[]>();
-    for (const et of entryTags) {
-      const list = map.get(et.entry_type) ?? [];
+    for (const et of sorted) {
+      const d = new Date(et.created_at);
+      const dateStr = d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+      const label = dateStr === todayStr ? "Heute" : dateStr === yesterdayStr ? "Gestern" : dateStr;
+      const list = map.get(label) ?? [];
       list.push(et);
-      map.set(et.entry_type, list);
+      map.set(label, list);
     }
     return map;
   }, [entryTags]);
@@ -130,11 +143,11 @@ export default function TagDetailPage() {
             )}
           </div>
 
-          {/* Grouped entries */}
-          {[...grouped.entries()].map(([entryType, ets]) => (
-            <div key={entryType} className="flex flex-col gap-2">
+          {/* Grouped entries by date */}
+          {[...sortedAndGrouped.entries()].map(([dateLabel, ets]) => (
+            <div key={dateLabel} className="flex flex-col gap-2">
               <h3 className="font-label text-sm font-medium text-subtext0">
-                {ENTRY_TYPE_LABELS[entryType] ?? entryType} ({ets.length})
+                {dateLabel} ({ets.length})
               </h3>
               {ets.map((et) => (
                 <Card
@@ -154,7 +167,10 @@ export default function TagDetailPage() {
                   />
                   <div className="flex flex-col flex-1 min-w-0">
                     <span className="font-body text-sm text-text">
-                      {ENTRY_TYPE_LABELS[et.entry_type]} #{et.entry_id}
+                      {ENTRY_TYPE_LABELS[et.entry_type] ?? et.entry_type}
+                    </span>
+                    <span className="font-body text-xs text-subtext0">
+                      {new Date(et.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                 </Card>

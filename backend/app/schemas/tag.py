@@ -50,6 +50,7 @@ class EntryTagResponse(BaseModel):
     tag_id: int
     entry_type: str
     entry_id: int
+    created_at: UTCDatetime
     tag: TagResponse
 
     model_config = {"from_attributes": True}
