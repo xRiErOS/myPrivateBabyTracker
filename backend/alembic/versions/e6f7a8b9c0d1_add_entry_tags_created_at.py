@@ -19,10 +19,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # SQLite doesn't support ALTER TABLE ADD COLUMN with non-constant defaults
+    # Use a literal string default, then server_default works for new rows via model
     op.add_column(
         'entry_tags',
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False)
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text("'2026-04-21T00:00:00+00:00'"), nullable=False)
     )
+    # Update existing rows to current timestamp
+    op.execute("UPDATE entry_tags SET created_at = datetime('now')")
 
 
 def downgrade() -> None:
