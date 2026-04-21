@@ -1,32 +1,45 @@
-/** Tags dashboard widget — top 3 most-used tags with non-archived entry counts. */
+/** Tags dashboard widget — top 3 tags with non-archived entry counts. */
 
 import { useMemo } from "react";
 import { Tags } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
-import { useTags } from "../../hooks/useTags";
+import { useTags, useEntryTags } from "../../hooks/useTags";
+
+function TagRow({ tagId, name, color }: { tagId: number; name: string; color: string }) {
+  const navigate = useNavigate();
+  const { data: entryTags = [] } = useEntryTags(undefined, undefined, tagId);
+  const activeCount = entryTags.filter((et) => !et.is_archived).length;
+
+  return (
+    <div
+      className="flex items-center gap-2 cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(`/tags/${tagId}`);
+      }}
+    >
+      <span
+        className="w-3 h-3 rounded-full shrink-0"
+        style={{ backgroundColor: color }}
+      />
+      <span className="font-body text-sm text-text truncate flex-1">{name}</span>
+      {activeCount > 0 && (
+        <span className="font-label text-xs text-subtext0 bg-surface1 rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+          {activeCount}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export function TagsWidget() {
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: tags = [] } = useTags(activeChild?.id);
 
-  // Load all non-archived entry_tags for counting
-  // We need at least one filter — use a dummy that returns all
-  // Actually useEntryTags needs entryId or tagId to be enabled.
-  // We'll count per-tag by loading entry_tags for each tag.
-  // More efficient: load all tags' entry counts from the tags list.
-
-  // For simplicity, compute counts from all tags' entry_tags
-  // by fetching entry_tags for each tag. But that's N queries.
-  // Instead, let's use a different approach: just show tags with
-  // their names and navigate on click. We can add counts later.
-
-  // Simple approach: show top 3 tags (by name, alphabetical)
-  const topTags = useMemo(() => {
-    return tags.slice(0, 3);
-  }, [tags]);
+  const topTags = useMemo(() => tags.slice(0, 3), [tags]);
 
   if (tags.length === 0) {
     return (
@@ -54,20 +67,7 @@ export function TagsWidget() {
       </div>
       <div className="flex flex-col gap-1.5">
         {topTags.map((tag) => (
-          <div
-            key={tag.id}
-            className="flex items-center gap-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/tags/${tag.id}`);
-            }}
-          >
-            <span
-              className="w-3 h-3 rounded-full shrink-0"
-              style={{ backgroundColor: tag.color }}
-            />
-            <span className="font-body text-sm text-text truncate">{tag.name}</span>
-          </div>
+          <TagRow key={tag.id} tagId={tag.id} name={tag.name} color={tag.color} />
         ))}
         {tags.length > 3 && (
           <p className="font-body text-xs text-subtext0">+{tags.length - 3} weitere</p>

@@ -35,13 +35,13 @@ SEVERITY_LABELS = {"mild": "Wenig", "moderate": "Mittel", "severe": "Stark"}
 
 # SQL queries per entry_type to build summary strings
 SUMMARY_QUERIES: dict[str, str] = {
-    "sleep": "SELECT start_time, duration_minutes FROM sleep_entries WHERE id = :id",
-    "feeding": "SELECT start_time, feeding_type, amount_ml FROM feeding_entries WHERE id = :id",
-    "diaper": "SELECT time, diaper_type FROM diaper_entries WHERE id = :id",
-    "temperature": "SELECT measured_at, temperature_celsius FROM temperature_entries WHERE id = :id",
-    "weight": "SELECT measured_at, weight_grams FROM weight_entries WHERE id = :id",
-    "medication": "SELECT given_at, medication_name, dose FROM medication_entries WHERE id = :id",
-    "health": "SELECT time, entry_type, severity FROM health_entries WHERE id = :id",
+    "sleep": "SELECT start_time, duration_minutes, notes FROM sleep_entries WHERE id = :id",
+    "feeding": "SELECT start_time, feeding_type, amount_ml, notes FROM feeding_entries WHERE id = :id",
+    "diaper": "SELECT time, diaper_type, notes FROM diaper_entries WHERE id = :id",
+    "temperature": "SELECT measured_at, temperature_celsius, notes FROM temperature_entries WHERE id = :id",
+    "weight": "SELECT measured_at, weight_grams, notes FROM weight_entries WHERE id = :id",
+    "medication": "SELECT given_at, medication_name, dose, notes FROM medication_entries WHERE id = :id",
+    "health": "SELECT time, entry_type, severity, notes FROM health_entries WHERE id = :id",
     "todo": "SELECT title, completed_at FROM todo_entries WHERE id = :id",
 }
 
@@ -97,7 +97,16 @@ def _build_summary(entry_type: str, row: dict) -> str:
         title = row.get("title") or "ToDo"
         done = "erledigt" if row.get("completed_at") else "offen"
         return f"{title} ({done})"
+
     return ""
+
+
+def _append_notes(summary: str, row: dict) -> str:
+    """Append notes to summary if present (for search)."""
+    notes = row.get("notes")
+    if notes:
+        return f"{summary} — {notes}"
+    return summary
 
 
 async def _enrich_summaries(
@@ -118,7 +127,9 @@ async def _enrich_summaries(
             result = await db.execute(text(query_template), {"id": entry_id})
             row = result.mappings().first()
             if row:
-                summaries[(entry_type, entry_id)] = _build_summary(entry_type, dict(row))
+                row_dict = dict(row)
+                summary = _build_summary(entry_type, row_dict)
+                summaries[(entry_type, entry_id)] = _append_notes(summary, row_dict)
 
     return summaries
 
