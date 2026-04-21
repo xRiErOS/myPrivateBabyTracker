@@ -77,7 +77,7 @@ export default function TummyTimePage() {
         </Card>
       )}
 
-      <TummyTimeList />
+      {!showForm && <TummyTimeList />}
     </div>
   );
 }

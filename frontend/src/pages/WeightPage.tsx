@@ -53,7 +53,7 @@ export default function WeightPage() {
         </Card>
       )}
 
-      <WeightList />
+      {!showForm && <WeightList />}
     </div>
   );
 }

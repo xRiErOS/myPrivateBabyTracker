@@ -53,7 +53,7 @@ export default function MedicationPage() {
         </Card>
       )}
 
-      <MedicationList />
+      {!showForm && <MedicationList />}
     </div>
   );
 }

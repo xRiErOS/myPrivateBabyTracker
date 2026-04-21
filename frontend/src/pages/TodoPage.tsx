@@ -53,7 +53,7 @@ export default function TodoPage() {
         </Card>
       )}
 
-      <TodoList />
+      {!showForm && <TodoList />}
     </div>
   );
 }

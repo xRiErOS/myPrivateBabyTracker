@@ -53,7 +53,7 @@ export default function TemperaturePage() {
         </Card>
       )}
 
-      <TemperatureList />
+      {!showForm && <TemperatureList />}
     </div>
   );
 }

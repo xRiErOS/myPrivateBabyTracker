@@ -53,7 +53,7 @@ export default function DiaperPage() {
         </Card>
       )}
 
-      <DiaperList />
+      {!showForm && <DiaperList />}
     </div>
   );
 }

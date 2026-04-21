@@ -77,7 +77,7 @@ export default function SleepPage() {
         </Card>
       )}
 
-      <SleepList />
+      {!showForm && <SleepList />}
     </div>
   );
 }

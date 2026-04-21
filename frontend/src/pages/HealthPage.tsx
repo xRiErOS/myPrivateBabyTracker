@@ -55,7 +55,7 @@ export default function HealthPage() {
         </Card>
       )}
 
-      <HealthList />
+      {!showForm && <HealthList />}
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default function FeedingPage() {
         </Card>
       )}
 
-      <FeedingList />
+      {!showForm && <FeedingList />}
     </div>
   );
 }
