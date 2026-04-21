@@ -58,6 +58,7 @@ class EntryTagResponse(BaseModel):
     entry_id: int
     is_archived: bool
     created_at: UTCDatetime
+    entry_summary: str | None = None
     tag: TagResponse
 
     model_config = {"from_attributes": True}

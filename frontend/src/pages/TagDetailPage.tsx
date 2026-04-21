@@ -184,7 +184,7 @@ export default function TagDetailPage() {
                       {et.is_archived && <span className="ml-1 text-xs text-overlay0">(archiviert)</span>}
                     </span>
                     <span className="font-body text-xs text-subtext0">
-                      {new Date(et.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                      {et.entry_summary ?? new Date(et.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                   <button

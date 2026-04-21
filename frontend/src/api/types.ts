@@ -299,6 +299,7 @@ export interface EntryTag {
   entry_id: number;
   is_archived: boolean;
   created_at: string;
+  entry_summary: string | null;
   tag: Tag;
 }
 

@@ -1,7 +1,9 @@
 """Tag CRUD router + entry-tag association endpoints."""
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -23,6 +25,102 @@ from app.schemas.tag import (
 logger = get_logger("tags")
 
 router = APIRouter(prefix="/tags", tags=["tags"])
+
+
+# --- Entry summary helpers ---
+
+FEEDING_TYPE_LABELS = {"breast_left": "Brust L", "breast_right": "Brust R", "bottle": "Flasche", "solid": "Beikost"}
+DIAPER_TYPE_LABELS = {"wet": "Nass", "dirty": "Dreckig", "mixed": "Beides", "dry": "Trocken"}
+SEVERITY_LABELS = {"mild": "Wenig", "moderate": "Mittel", "severe": "Stark"}
+
+# SQL queries per entry_type to build summary strings
+SUMMARY_QUERIES: dict[str, str] = {
+    "sleep": "SELECT start_time, duration_minutes FROM sleep_entries WHERE id = :id",
+    "feeding": "SELECT start_time, feeding_type, amount_ml FROM feeding_entries WHERE id = :id",
+    "diaper": "SELECT time, diaper_type FROM diaper_entries WHERE id = :id",
+    "temperature": "SELECT measured_at, temperature_celsius FROM temperature_entries WHERE id = :id",
+    "weight": "SELECT measured_at, weight_grams FROM weight_entries WHERE id = :id",
+    "medication": "SELECT given_at, medication_name, dose FROM medication_entries WHERE id = :id",
+    "health": "SELECT time, entry_type, severity FROM health_entries WHERE id = :id",
+    "todo": "SELECT title, completed_at FROM todo_entries WHERE id = :id",
+}
+
+
+def _fmt_time(ts: datetime | str | None) -> str:
+    if ts is None:
+        return ""
+    if isinstance(ts, str):
+        try:
+            ts = datetime.fromisoformat(ts)
+        except (ValueError, TypeError):
+            return ""
+    return ts.strftime("%H:%M")
+
+
+def _build_summary(entry_type: str, row: dict) -> str:
+    """Build a short summary string from an entry row."""
+    if entry_type == "sleep":
+        dur = row.get("duration_minutes")
+        t = _fmt_time(row.get("start_time"))
+        if dur:
+            h, m = divmod(int(dur), 60)
+            return f"{t}, {h}:{m:02d} h" if h else f"{t}, {m} Min."
+        return f"{t}, laufend"
+    elif entry_type == "feeding":
+        t = _fmt_time(row.get("start_time"))
+        ft = FEEDING_TYPE_LABELS.get(row.get("feeding_type", ""), row.get("feeding_type", ""))
+        amt = row.get("amount_ml")
+        return f"{t}, {ft}" + (f", {int(amt)} ml" if amt else "")
+    elif entry_type == "diaper":
+        t = _fmt_time(row.get("time"))
+        dt = DIAPER_TYPE_LABELS.get(row.get("diaper_type", ""), row.get("diaper_type", ""))
+        return f"{t}, {dt}"
+    elif entry_type == "temperature":
+        t = _fmt_time(row.get("measured_at"))
+        val = row.get("temperature_celsius")
+        return f"{t}, {val} °C" if val else t
+    elif entry_type == "weight":
+        t = _fmt_time(row.get("measured_at"))
+        g = row.get("weight_grams")
+        return f"{t}, {int(g) / 1000:.2f} kg" if g else t
+    elif entry_type == "medication":
+        t = _fmt_time(row.get("given_at"))
+        name = row.get("medication_name") or "Medikament"
+        dose = row.get("dose")
+        return f"{t}, {name}" + (f", {dose}" if dose else "")
+    elif entry_type == "health":
+        t = _fmt_time(row.get("time"))
+        ht = "Spucken" if row.get("entry_type") == "spit_up" else "Bauchschmerzen"
+        sev = SEVERITY_LABELS.get(row.get("severity", ""), "")
+        return f"{t}, {ht}, {sev}" if sev else f"{t}, {ht}"
+    elif entry_type == "todo":
+        title = row.get("title") or "ToDo"
+        done = "erledigt" if row.get("completed_at") else "offen"
+        return f"{title} ({done})"
+    return ""
+
+
+async def _enrich_summaries(
+    entry_tags: list[EntryTag], db: AsyncSession
+) -> dict[tuple[str, int], str]:
+    """Batch-fetch entry summaries for a list of entry-tags."""
+    summaries: dict[tuple[str, int], str] = {}
+    # Group by entry_type to batch queries
+    by_type: dict[str, list[int]] = {}
+    for et in entry_tags:
+        by_type.setdefault(et.entry_type, []).append(et.entry_id)
+
+    for entry_type, ids in by_type.items():
+        query_template = SUMMARY_QUERIES.get(entry_type)
+        if not query_template:
+            continue
+        for entry_id in set(ids):
+            result = await db.execute(text(query_template), {"id": entry_id})
+            row = result.mappings().first()
+            if row:
+                summaries[(entry_type, entry_id)] = _build_summary(entry_type, dict(row))
+
+    return summaries
 
 # Valid entry types matching plugin table names
 VALID_ENTRY_TYPES = frozenset([
@@ -240,7 +338,19 @@ async def list_entry_tags(
         stmt = stmt.where(EntryTag.is_archived == False)
 
     result = await db.execute(stmt)
-    return result.scalars().all()
+    entry_tags = result.scalars().all()
+
+    # Enrich with entry summaries when listing for a specific tag
+    if tag_id is not None and entry_tags:
+        summaries = await _enrich_summaries(entry_tags, db)
+        enriched = []
+        for et in entry_tags:
+            resp = EntryTagResponse.model_validate(et)
+            resp.entry_summary = summaries.get((et.entry_type, et.entry_id))
+            enriched.append(resp)
+        return enriched
+
+    return entry_tags
 
 
 @router.post("/entries/bulk-detach", status_code=204)
