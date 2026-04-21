@@ -20,13 +20,20 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
 export function TummyTimeList() {
   const { activeChild } = useActiveChild();
   const [searchParams] = useSearchParams();
-  const [dateRange, setDateRange] = useState<DateRange>((searchParams.get("range") as DateRange) ?? "week");
+  const specificDate = searchParams.get("date");
+  const [dateRange, setDateRange] = useState<DateRange>(
+    specificDate ? "today" : (searchParams.get("range") as DateRange) ?? "week"
+  );
   const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteTummyTime();
 
+  const dateFrom = specificDate ? `${specificDate}T00:00:00Z` : DATE_RANGE_MAP[dateRange];
+  const dateTo = specificDate ? `${specificDate}T23:59:59Z` : undefined;
+
   const { data: allEntries = [], isLoading } = useTummyTimeEntries({
     child_id: activeChild?.id,
-    date_from: DATE_RANGE_MAP[dateRange],
+    date_from: dateFrom,
+    date_to: dateTo,
   });
 
   // Filter out running entries -- those are shown in TummyTimeForm timer

@@ -28,14 +28,21 @@ export function SleepList() {
   const { activeChild } = useActiveChild();
   const [typeFilter, setTypeFilter] = useState("");
   const [searchParams] = useSearchParams();
-  const [dateRange, setDateRange] = useState<DateRange>((searchParams.get("range") as DateRange) ?? "week");
+  const specificDate = searchParams.get("date");
+  const [dateRange, setDateRange] = useState<DateRange>(
+    specificDate ? "today" : (searchParams.get("range") as DateRange) ?? "week"
+  );
   const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteSleep();
+
+  const dateFrom = specificDate ? `${specificDate}T00:00:00Z` : DATE_RANGE_MAP[dateRange];
+  const dateTo = specificDate ? `${specificDate}T23:59:59Z` : undefined;
 
   const { data: allEntries = [], isLoading } = useSleepEntries({
     child_id: activeChild?.id,
     sleep_type: typeFilter || undefined,
-    date_from: DATE_RANGE_MAP[dateRange],
+    date_from: dateFrom,
+    date_to: dateTo,
   });
 
   // Filter out running entries — those are shown in SleepForm timer

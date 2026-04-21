@@ -26,7 +26,7 @@ interface DayCardProps {
   sleepSegments: SleepSegment[];
   prevTotal: number | null;
   isToday: boolean;
-  onEntityClick?: (category: string) => void;
+  onEntityClick?: (category: string, date?: string) => void;
 }
 
 function DayCard({
@@ -131,7 +131,7 @@ function DayCard({
           <div className="flex flex-col gap-2 mt-3">
             <button
               type="button"
-              onClick={() => onEntityClick?.("feeding")}
+              onClick={() => onEntityClick?.("feeding", date)}
               className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
               <span className="font-label font-medium">Flasche</span>
@@ -144,7 +144,7 @@ function DayCard({
             </button>
             <button
               type="button"
-              onClick={() => onEntityClick?.("diaper")}
+              onClick={() => onEntityClick?.("diaper", date)}
               className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
               <span className="font-label font-medium">Windeln</span>
@@ -152,7 +152,7 @@ function DayCard({
             </button>
             <button
               type="button"
-              onClick={() => onEntityClick?.("sleep")}
+              onClick={() => onEntityClick?.("sleep", date)}
               className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
               <span className="font-label font-medium">Schlaf</span>
@@ -169,7 +169,7 @@ interface WeeklyReportProps {
   feedings: FeedingEntry[];
   diapers: DiaperEntry[];
   sleeps: SleepEntry[];
-  onEntityClick?: (category: string) => void;
+  onEntityClick?: (category: string, date?: string) => void;
 }
 
 export function WeeklyReport({

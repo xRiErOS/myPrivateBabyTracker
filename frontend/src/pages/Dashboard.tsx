@@ -94,8 +94,12 @@ export default function Dashboard() {
     );
   }
 
-  function handleTileClick(category: string) {
-    navigate(`/${category}?range=today`);
+  function handleTileClick(category: string, date?: string) {
+    if (date) {
+      navigate(`/${category}?date=${date}`);
+    } else {
+      navigate(`/${category}?range=today`);
+    }
   }
 
   const today = todayBerlin();
@@ -307,6 +311,7 @@ function parseJsonArray(val: string | null): string[] {
 }
 
 function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusItem; onClose: () => void }) {
+  const nav = useNavigate();
   const isStorm = leap.status === "active_storm";
   const isSun = leap.status === "active_sun";
   const isUpcoming = leap.status === "upcoming" || leap.status === "far_future";
@@ -367,6 +372,14 @@ function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusI
               ))}
             </div>
           )}
+
+          {/* Link to milestones */}
+          <button
+            onClick={() => { onClose(); nav("/milestones?tab=leaps"); }}
+            className="font-label text-sm text-lavender hover:underline mt-2"
+          >
+            Alle Spruenge anzeigen →
+          </button>
         </div>
       </div>
     </div>

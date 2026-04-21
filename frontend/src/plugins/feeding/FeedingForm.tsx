@@ -12,7 +12,7 @@ import { attachTag } from "../../api/tags";
 import type { FeedingEntry, FeedingType } from "../../api/types";
 import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 
-const FEEDING_TYPE_OPTIONS = [
+const ALL_FEEDING_TYPE_OPTIONS = [
   { value: "breast_left", label: "Brust links" },
   { value: "breast_right", label: "Brust rechts" },
   { value: "bottle", label: "Flasche" },
@@ -62,6 +62,11 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const [amountMl, setAmountMl] = useState(entry?.amount_ml?.toString() ?? "");
   const [foodType, setFoodType] = useState(entry?.food_type ?? "");
   const [notes, setNotes] = useState(entry?.notes ?? "");
+
+  const breastfeedingOn = isBreastfeedingEnabled();
+  const FEEDING_TYPE_OPTIONS = breastfeedingOn
+    ? ALL_FEEDING_TYPE_OPTIONS
+    : ALL_FEEDING_TYPE_OPTIONS.filter((o) => o.value !== "breast_left" && o.value !== "breast_right");
 
   const isPending = createMut.isPending || updateMut.isPending;
   const showAmount = feedingType === "bottle";

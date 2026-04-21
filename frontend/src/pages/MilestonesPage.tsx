@@ -1,6 +1,7 @@
 /** Milestones page — 4-tab view: Overview, Timeline, All, Leaps. */
 
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Star } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { useActiveChild } from "../context/ChildContext";
@@ -18,7 +19,11 @@ type TabKey = (typeof TABS)[number]["key"];
 
 export default function MilestonesPage() {
   const { activeChild } = useActiveChild();
-  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get("tab") as TabKey) || "overview";
+  const [activeTab, setActiveTab] = useState<TabKey>(
+    TABS.some(t => t.key === initialTab) ? initialTab : "overview"
+  );
 
   if (!activeChild) {
     return (
