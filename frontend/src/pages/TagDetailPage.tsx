@@ -108,10 +108,23 @@ function SwipeableEntry({
           className="accent-peach flex-shrink-0"
         />
         <div className="flex flex-col flex-1 min-w-0">
-          <span className="font-body text-sm text-text">
-            {et.entry_summary ?? `#${et.entry_id}`}
-            {et.is_archived && <span className="ml-1 text-xs text-overlay0">(archiviert)</span>}
-          </span>
+          {(() => {
+            const raw = et.entry_summary ?? `#${et.entry_id}`;
+            const sep = raw.indexOf(" — ");
+            const main = sep >= 0 ? raw.slice(0, sep) : raw;
+            const notes = sep >= 0 ? raw.slice(sep + 3) : null;
+            return (
+              <>
+                <span className="font-label text-sm font-semibold text-peach">
+                  {main}
+                  {et.is_archived && <span className="ml-1 font-normal text-xs text-overlay0">(archiviert)</span>}
+                </span>
+                {notes && (
+                  <span className="font-body text-sm text-text mt-0.5">{notes}</span>
+                )}
+              </>
+            );
+          })()}
         </div>
       </Card>
     </div>
