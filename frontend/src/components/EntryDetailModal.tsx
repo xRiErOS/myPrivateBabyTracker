@@ -15,6 +15,7 @@ import type {
   MedicationEntry,
   TodoEntry,
   VitaminD3Entry,
+  MilestoneEntry,
 } from "../api/types";
 
 interface EntryDetailModalProps {
@@ -32,6 +33,7 @@ const TYPE_LABELS: Record<string, string> = {
   medication: "Medikament",
   vitamind3: "Vitamin D3",
   todo: "ToDo",
+  milestone: "Meilenstein",
 };
 
 const SLEEP_TYPE_LABELS: Record<string, string> = {
@@ -125,6 +127,15 @@ function EntryFields({ entryType, entry }: { entryType: string; entry: AnyEntry 
       rows.push({ label: "Status", value: e.is_done ? "Erledigt" : "Offen" });
       if (e.due_date) rows.push({ label: "Faellig", value: e.due_date });
       if (e.completed_at) rows.push({ label: "Erledigt am", value: formatDateTime(e.completed_at) });
+      break;
+    }
+    case "milestone": {
+      const e = entry as MilestoneEntry;
+      rows.push({ label: "Titel", value: e.title });
+      rows.push({ label: "Status", value: e.completed ? "Erreicht" : "Offen" });
+      if (e.completed_date) rows.push({ label: "Erreicht am", value: e.completed_date });
+      rows.push({ label: "Konfidenz", value: e.confidence === "exact" ? "Genau" : e.confidence === "approximate" ? "Ungefaehr" : "Unsicher" });
+      if (e.photos?.length > 0) rows.push({ label: "Fotos", value: `${e.photos.length} Foto(s)` });
       break;
     }
   }

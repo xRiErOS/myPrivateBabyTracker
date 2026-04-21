@@ -8,6 +8,7 @@ import { getTemperature, updateTemperature } from "./temperature";
 import { getWeight, updateWeight } from "./weight";
 import { getMedication, updateMedication } from "./medication";
 import { updateTodo } from "./todo";
+import { getMilestone, updateMilestone } from "./milestones";
 import type {
   SleepEntry,
   FeedingEntry,
@@ -17,6 +18,7 @@ import type {
   MedicationEntry,
   TodoEntry,
   VitaminD3Entry,
+  MilestoneEntry,
 } from "./types";
 
 export type AnyEntry =
@@ -27,7 +29,8 @@ export type AnyEntry =
   | WeightEntry
   | MedicationEntry
   | TodoEntry
-  | VitaminD3Entry;
+  | VitaminD3Entry
+  | MilestoneEntry;
 
 /** Fetch a single entry by type and id. */
 export async function getEntry(entryType: string, id: number): Promise<AnyEntry> {
@@ -48,6 +51,8 @@ export async function getEntry(entryType: string, id: number): Promise<AnyEntry>
       return apiFetch<TodoEntry>(`/v1/todo/${id}`);
     case "vitamind3":
       return apiFetch<VitaminD3Entry>(`/v1/vitamind3/${id}`);
+    case "milestone":
+      return getMilestone(id);
     default:
       throw new Error(`Unknown entry type: ${entryType}`);
   }
@@ -74,6 +79,8 @@ export async function updateEntryNotes(
       return updateMedication(id, { notes });
     case "todo":
       return updateTodo(id, { details: notes });
+    case "milestone":
+      return updateMilestone(id, { notes });
     default:
       throw new Error(`Notes update not supported for: ${entryType}`);
   }
