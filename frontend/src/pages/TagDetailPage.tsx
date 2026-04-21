@@ -85,7 +85,7 @@ export default function TagDetailPage() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <button
-          onClick={() => navigate("/admin/tags")}
+          onClick={() => navigate("/tags")}
           className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />

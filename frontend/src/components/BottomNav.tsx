@@ -37,7 +37,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/sleep", icon: Moon, label: "Schlaf", pluginKey: "sleep" },
   { to: "/feeding", icon: Utensils, label: "Mahlzeiten", pluginKey: "feeding" },
   { to: "/diaper", icon: Droplets, label: "Windeln", pluginKey: "diaper" },
-  { to: "/admin/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
+  { to: "/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
   { to: "/temperature", icon: Thermometer, label: "Temperatur", pluginKey: "temperature" },
   { to: "/weight", icon: Scale, label: "Gewicht", pluginKey: "weight" },
   { to: "/medication", icon: Pill, label: "Medikamente", pluginKey: "medication" },

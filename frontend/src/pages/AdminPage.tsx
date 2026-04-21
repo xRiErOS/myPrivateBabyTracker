@@ -1,7 +1,7 @@
 /** Admin hub page — navigation tiles for management pages + Quick Actions config. */
 
 import { useState } from "react";
-import { AlertTriangle, Baby, ClipboardList, KeyRound, Puzzle, Settings, Tags, Zap } from "lucide-react";
+import { AlertTriangle, Baby, ClipboardList, KeyRound, Puzzle, Settings, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { PLUGINS } from "../lib/pluginRegistry";
@@ -27,12 +27,6 @@ const TILES: AdminTile[] = [
     icon: ClipboardList,
     label: "Medikamentenliste",
     description: "Stammdaten fuer Medikamenten-Dropdown",
-  },
-  {
-    to: "/admin/tags",
-    icon: Tags,
-    label: "Tags",
-    description: "Tags verwalten, Farben, umbenennen",
   },
   {
     to: "/admin/alerts",

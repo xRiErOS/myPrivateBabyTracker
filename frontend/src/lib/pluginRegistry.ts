@@ -23,7 +23,7 @@ export const PLUGINS: PluginDef[] = [
   { key: "health", label: "Gesundheit", icon: Activity, route: "/health", isBase: false },
   { key: "todo", label: "ToDo", icon: CheckSquare, route: "/todo", isBase: false },
   { key: "tummytime", label: "Bauchlage", icon: Timer, route: "/tummy-time", isBase: false },
-  { key: "tags", label: "Tags", icon: Tags, route: "/admin/tags", isBase: false },
+  { key: "tags", label: "Tags", icon: Tags, route: "/tags", isBase: false },
 ];
 
 /** Plugins that are always active and cannot be disabled. */

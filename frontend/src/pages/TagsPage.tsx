@@ -168,7 +168,7 @@ export default function TagsPage() {
             <Card
               key={t.id}
               className="flex items-center justify-between p-3 cursor-pointer active:bg-surface1 transition-colors"
-              onClick={() => navigate(`/admin/tags/${t.id}`)}
+              onClick={() => navigate(`/tags/${t.id}`)}
             >
               <div className="flex items-center gap-2 min-h-[44px]">
                 <span

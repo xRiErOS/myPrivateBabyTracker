@@ -24,7 +24,7 @@ const ALL_NAV_ITEMS: SidebarItem[] = [
   { to: "/health", icon: Activity, label: "Gesundheit", pluginKey: "health" },
   { to: "/tummy-time", icon: Timer, label: "Bauchlage", pluginKey: "tummytime" },
   { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
-  { to: "/admin/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
+  { to: "/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 

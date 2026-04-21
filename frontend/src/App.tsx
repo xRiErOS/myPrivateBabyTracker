@@ -42,8 +42,8 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/children" element={<ChildrenPage />} />
           <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
-          <Route path="/admin/tags" element={<TagsPage />} />
-          <Route path="/admin/tags/:tagId" element={<TagDetailPage />} />
+          <Route path="/tags" element={<TagsPage />} />
+          <Route path="/tags/:tagId" element={<TagDetailPage />} />
           <Route path="/admin/alerts" element={<AlertConfigPage />} />
           <Route path="/admin/plugins" element={<PluginConfigPage />} />
           <Route path="/admin/api-keys" element={<ApiKeyPage />} />
