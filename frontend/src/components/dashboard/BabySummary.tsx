@@ -58,6 +58,37 @@ function TileValue({ value, sub, sub2 }: { value: React.ReactNode; sub?: string 
   );
 }
 
+/** Proportional color bar for diaper type distribution. */
+function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
+  const total = diapers.length;
+  if (total === 0) return null;
+
+  const wet = diapers.filter(isWet).length;
+  const dirty = diapers.filter((d) => d.diaper_type === "dirty").length;
+  const mixed = diapers.filter((d) => d.diaper_type === "mixed").length;
+  const dry = total - wet - dirty - mixed;
+
+  const segments = [
+    { count: wet, color: "bg-sapphire", label: "Nass" },
+    { count: dirty, color: "bg-peach", label: "Dreckig" },
+    { count: mixed, color: "bg-mauve", label: "Beides" },
+    { count: dry, color: "bg-overlay0", label: "Trocken" },
+  ].filter((s) => s.count > 0);
+
+  return (
+    <div className="mt-1.5 flex h-2 w-full rounded-full overflow-hidden">
+      {segments.map((s) => (
+        <div
+          key={s.label}
+          className={`${s.color} h-full`}
+          style={{ width: `${(s.count / total) * 100}%` }}
+          title={`${s.label}: ${s.count}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 function changeTypeLabel(d: DiaperEntry | undefined): string {
   if (!d) return "\u2014";
   switch (d.diaper_type) {
@@ -269,6 +300,7 @@ export function BabySummary({
             </div>
           ))}
         </div>
+        <DiaperBar diapers={todayDiapers} />
       </Tile>
 
       <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />
