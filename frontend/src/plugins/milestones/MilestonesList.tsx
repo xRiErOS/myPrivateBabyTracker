@@ -1,7 +1,7 @@
 /** Milestones list with category filter, status toggle, search, and inline edit. */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Circle, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
+import { CheckCircle2, Circle, Eye, EyeOff, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { Input } from "../../components/Input";
@@ -12,10 +12,11 @@ import {
   useCreateMilestone,
   useDeleteMilestone,
   useMilestoneEntries,
+  useTemplates,
   useUpdateMilestone,
 } from "../../hooks/useMilestones";
 import { formatDate } from "../../lib/dateUtils";
-import type { MilestoneCategory, MilestoneEntry } from "../../api/types";
+import type { MilestoneCategory, MilestoneEntry, MilestoneTemplate } from "../../api/types";
 import type { MilestoneListParams } from "../../api/milestones";
 
 function CategoryBadge({ category }: { category: MilestoneCategory | undefined }) {
@@ -32,6 +33,14 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function formatAgeRange(minWeeks: number | null, maxWeeks: number | null): string {
+  if (minWeeks == null) return "";
+  const minMon = Math.round(minWeeks / 4.35);
+  const maxMon = maxWeeks ? Math.round(maxWeeks / 4.35) : minMon;
+  if (minMon === maxMon) return `~${minMon} Mon.`;
+  return `${minMon}-${maxMon} Mon.`;
+}
+
 export function MilestonesList() {
   const { activeChild } = useActiveChild();
 
@@ -44,6 +53,7 @@ export function MilestonesList() {
   // --- UI state ---
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   // --- Create form state ---
   const [newTitle, setNewTitle] = useState("");
@@ -75,6 +85,7 @@ export function MilestonesList() {
   };
 
   const { data: entries = [], isLoading } = useMilestoneEntries(params);
+  const { data: allTemplates = [] } = useTemplates();
   const createMut = useCreateMilestone();
   const updateMut = useUpdateMilestone();
   const deleteMut = useDeleteMilestone();
@@ -86,6 +97,25 @@ export function MilestonesList() {
     for (const c of categories) m.set(c.id, c);
     return m;
   }, [categories]);
+
+  // --- Template lookup (for age range on entries) ---
+  const templateMap = useMemo(() => {
+    const m = new Map<number, MilestoneTemplate>();
+    for (const t of allTemplates) m.set(t.id, t);
+    return m;
+  }, [allTemplates]);
+
+  // --- Templates not yet achieved (for "show all" mode) ---
+  const unreachedTemplates = useMemo(() => {
+    if (!showAll) return [];
+    const entryTemplateIds = new Set(entries.filter((e) => e.template_id).map((e) => e.template_id));
+    return allTemplates.filter(
+      (t) =>
+        !entryTemplateIds.has(t.id) &&
+        (!filterCategory || t.category_id === filterCategory) &&
+        (!debouncedQuery || t.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
+    );
+  }, [showAll, allTemplates, entries, filterCategory, debouncedQuery]);
 
   // --- Sorted entries: open first, then by completed_date desc ---
   const sorted = useMemo(() => {
@@ -283,6 +313,21 @@ export function MilestonesList() {
           ))}
         </div>
 
+        {/* Show all toggle */}
+        <button
+          type="button"
+          onClick={() => setShowAll(!showAll)}
+          className={`min-h-[44px] px-3 py-2 rounded-[8px] font-label text-sm flex items-center gap-1.5 transition-colors ${
+            showAll
+              ? "bg-mauve text-ground font-semibold"
+              : "bg-surface0 text-subtext0 hover:bg-surface1 border border-surface2"
+          }`}
+          title={showAll ? "Nur eigene Eintraege" : "Alle Meilensteine anzeigen"}
+        >
+          {showAll ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          Alle
+        </button>
+
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-overlay0" />
@@ -310,7 +355,7 @@ export function MilestonesList() {
         const cat = categoryMap.get(entry.category_id);
         return (
           <Card
-            key={entry.id}
+            key={`entry-${entry.id}`}
             className={`flex flex-col gap-1 p-3${entry.completed ? " opacity-60" : ""}${isEditing ? " overflow-hidden" : ""}`}
           >
             <div className="flex items-start justify-between">
@@ -337,6 +382,11 @@ export function MilestonesList() {
                   </span>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                     <CategoryBadge category={cat} />
+                    {(() => {
+                      const tmpl = entry.template_id ? templateMap.get(entry.template_id) : undefined;
+                      const ageStr = tmpl ? formatAgeRange(tmpl.suggested_age_weeks_min, tmpl.suggested_age_weeks_max) : "";
+                      return ageStr ? <span className="font-body text-xs text-overlay0">{ageStr}</span> : null;
+                    })()}
                     {entry.completed_date && (
                       <span className="font-body text-xs text-subtext0">
                         {formatDate(entry.completed_date)}
@@ -452,6 +502,64 @@ export function MilestonesList() {
           </Card>
         );
       })}
+
+      {/* Unreached templates (show all mode) */}
+      {showAll && unreachedTemplates.length > 0 && (
+        <>
+          <h3 className="font-heading text-sm text-overlay0 mt-4">Vorgeschlagene Meilensteine</h3>
+          {unreachedTemplates.map((tmpl) => {
+            const cat = categoryMap.get(tmpl.category_id);
+            const ageStr = formatAgeRange(tmpl.suggested_age_weeks_min, tmpl.suggested_age_weeks_max);
+            return (
+              <Card
+                key={`tmpl-${tmpl.id}`}
+                className="flex flex-col gap-1 p-3 opacity-60 border-dashed"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <div className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0">
+                      <Circle className="h-6 w-6" />
+                    </div>
+                    <div className="flex flex-col min-w-0 break-words w-full pt-2.5">
+                      <span className="font-heading text-base text-text break-words">
+                        {tmpl.title}
+                      </span>
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <CategoryBadge category={cat} />
+                        {ageStr && <span className="font-body text-xs text-overlay0">{ageStr}</span>}
+                      </div>
+                      {tmpl.description && (
+                        <p className="font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-1">
+                          {tmpl.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!activeChild) return;
+                      createMut.mutate({
+                        child_id: activeChild.id,
+                        template_id: tmpl.id,
+                        title: tmpl.title,
+                        category_id: tmpl.category_id,
+                        source_type: tmpl.source_type,
+                        completed: true,
+                        completed_date: todayISO(),
+                      });
+                    }}
+                    className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
+                    title="Als erreicht markieren"
+                  >
+                    <CheckCircle2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </Card>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }

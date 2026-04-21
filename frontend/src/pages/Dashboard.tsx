@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Plus, X } from "lucide-react";
+import { CloudLightning, CloudSun, LayoutDashboard, Plus, Sun, X } from "lucide-react";
 import { AlertBanner } from "../components/AlertBanner";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -22,6 +22,7 @@ import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
+import { useLeapStatus } from "../hooks/useMilestones";
 import {
   splitSleepByDay,
   groupByDay,
@@ -50,6 +51,33 @@ export default function Dashboard() {
     VIEW_DAYS[view],
   );
 
+  const { data: leapStatus } = useLeapStatus(activeChild?.id);
+
+  function getLeapIndicator() {
+    if (!leapStatus) return { icon: Sun, color: "text-green", label: "" };
+
+    if (leapStatus.active_leap) {
+      if (leapStatus.active_leap.status === "active_storm") {
+        return { icon: CloudLightning, color: "text-peach", label: "Sturm" };
+      }
+      return { icon: Sun, color: "text-green", label: "Sonne" };
+    }
+
+    const upcoming = leapStatus.leaps.find((l) => l.status === "upcoming");
+    if (upcoming && upcoming.storm_start_date) {
+      const daysUntil = Math.ceil(
+        (new Date(upcoming.storm_start_date).getTime() - Date.now()) / 86400000,
+      );
+      if (daysUntil <= 14) {
+        return { icon: CloudSun, color: "text-sapphire", label: `${daysUntil}d` };
+      }
+    }
+
+    return { icon: Sun, color: "text-green", label: "" };
+  }
+
+  const leapIndicator = getLeapIndicator();
+
   if (!activeChild) {
     return (
       <EmptyState
@@ -74,7 +102,14 @@ export default function Dashboard() {
           {" — "}
           {now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
         </h2>
-        <span className="font-label text-sm text-subtext0">{activeChild.name}</span>
+        <span className="font-label text-sm text-subtext0 flex items-center gap-1.5">
+          {activeChild.name}
+          {isPluginEnabled("milestones") && (
+            <button onClick={() => navigate("/milestones")} className="flex items-center" aria-label="Spruenge">
+              <leapIndicator.icon className={`h-4 w-4 ${leapIndicator.color}`} />
+            </button>
+          )}
+        </span>
       </div>
 
       {/* Alert Banner */}

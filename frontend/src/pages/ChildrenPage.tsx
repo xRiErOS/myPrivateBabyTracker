@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Baby, Plus, Trash2 } from "lucide-react";
+import { Baby, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
@@ -12,29 +12,81 @@ import {
   useChildren,
   useCreateChild,
   useDeleteChild,
+  useUpdateChild,
 } from "../hooks/useChildren";
+import type { Child } from "../api/types";
 
 export default function ChildrenPage() {
   const { data: children = [], isLoading } = useChildren();
   const createChild = useCreateChild();
+  const updateChild = useUpdateChild();
   const deleteChild = useDeleteChild();
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  // Create form state
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [isPreterm, setIsPreterm] = useState(false);
+  const [estimatedBirthDate, setEstimatedBirthDate] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Edit form state
+  const [editName, setEditName] = useState("");
+  const [editBirthDate, setEditBirthDate] = useState("");
+  const [editIsPreterm, setEditIsPreterm] = useState(false);
+  const [editEstimatedBirthDate, setEditEstimatedBirthDate] = useState("");
+
+  const resetCreateForm = () => {
+    setName("");
+    setBirthDate("");
+    setIsPreterm(false);
+    setEstimatedBirthDate("");
+    setShowForm(false);
+  };
+
+  const startEdit = (child: Child) => {
+    setEditingId(child.id);
+    setEditName(child.name);
+    setEditBirthDate(child.birth_date);
+    setEditIsPreterm(child.is_preterm);
+    setEditEstimatedBirthDate(child.estimated_birth_date ?? "");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !birthDate) return;
 
     await createChild.mutateAsync({
       name: name.trim(),
       birth_date: birthDate,
+      is_preterm: isPreterm,
+      estimated_birth_date: isPreterm && estimatedBirthDate ? estimatedBirthDate : null,
     });
 
-    setName("");
-    setBirthDate("");
-    setShowForm(false);
+    resetCreateForm();
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName.trim() || !editBirthDate || editingId === null) return;
+
+    await updateChild.mutateAsync({
+      id: editingId,
+      data: {
+        name: editName.trim(),
+        birth_date: editBirthDate,
+        is_preterm: editIsPreterm,
+        estimated_birth_date:
+          editIsPreterm && editEstimatedBirthDate ? editEstimatedBirthDate : null,
+      },
+    });
+
+    setEditingId(null);
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -55,7 +107,7 @@ export default function ChildrenPage() {
 
       {showForm && (
         <Card>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleCreate} className="space-y-4">
             <Input
               label="Name"
               value={name}
@@ -71,6 +123,38 @@ export default function ChildrenPage() {
               onChange={(e) => setBirthDate(e.target.value)}
               required
             />
+
+            {/* Fruehgeborenes Toggle */}
+            <div className="flex items-center justify-between">
+              <label className="font-label text-sm font-medium text-text">
+                Fruehgeborenes
+              </label>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isPreterm}
+                onClick={() => setIsPreterm(!isPreterm)}
+                className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${
+                  isPreterm ? "bg-green" : "bg-surface2"
+                }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
+                    isPreterm ? "translate-x-[26px]" : "translate-x-[2px]"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {isPreterm && (
+              <Input
+                label="Errechneter Termin"
+                type="date"
+                value={estimatedBirthDate}
+                onChange={(e) => setEstimatedBirthDate(e.target.value)}
+              />
+            )}
+
             <div className="flex gap-2">
               <Button type="submit" disabled={createChild.isPending}>
                 {createChild.isPending ? "Speichern..." : "Speichern"}
@@ -78,7 +162,7 @@ export default function ChildrenPage() {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setShowForm(false)}
+                onClick={resetCreateForm}
               >
                 Abbrechen
               </Button>
@@ -96,27 +180,122 @@ export default function ChildrenPage() {
       ) : (
         <div className="space-y-2">
           {children.map((child) => (
-            <Card key={child.id} className="flex items-center justify-between">
-              <div>
-                <p className="font-label text-sm font-semibold text-text">
-                  {child.name}
-                </p>
-                <p className="font-body text-xs text-subtext0">
-                  {format(new Date(child.birth_date), "dd.MM.yyyy")}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  if (confirm(`"${child.name}" wirklich loeschen?`)) {
-                    deleteChild.mutate(child.id);
-                  }
-                }}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-red transition-colors"
-                aria-label={`${child.name} loeschen`}
-              >
-                <Trash2 size={18} />
-              </button>
-            </Card>
+            <div key={child.id}>
+              <Card className="flex items-center justify-between">
+                <div>
+                  <p className="font-label text-sm font-semibold text-text">
+                    {child.name}
+                  </p>
+                  <p className="font-body text-xs text-subtext0">
+                    {format(new Date(child.birth_date), "dd.MM.yyyy")}
+                    {child.estimated_birth_date && (
+                      <span className="ml-2">
+                        (ET: {format(new Date(child.estimated_birth_date), "dd.MM.yyyy")})
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() =>
+                      editingId === child.id ? cancelEdit() : startEdit(child)
+                    }
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-text transition-colors"
+                    aria-label={`${child.name} bearbeiten`}
+                  >
+                    {editingId === child.id ? (
+                      <X size={18} />
+                    ) : (
+                      <Pencil size={18} />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`"${child.name}" wirklich loeschen?`)) {
+                        deleteChild.mutate(child.id);
+                      }
+                    }}
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-red transition-colors"
+                    aria-label={`${child.name} loeschen`}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </Card>
+
+              {/* Inline Edit Form */}
+              {editingId === child.id && (
+                <Card className="mt-0 rounded-t-none border-t border-surface1">
+                  <form onSubmit={handleUpdate} className="space-y-4">
+                    <Input
+                      label="Name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="Name des Kindes"
+                      required
+                      maxLength={100}
+                    />
+                    <Input
+                      label="Geburtsdatum"
+                      type="date"
+                      value={editBirthDate}
+                      onChange={(e) => setEditBirthDate(e.target.value)}
+                      required
+                    />
+
+                    {/* Fruehgeborenes Toggle */}
+                    <div className="flex items-center justify-between">
+                      <label className="font-label text-sm font-medium text-text">
+                        Fruehgeborenes
+                      </label>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={editIsPreterm}
+                        onClick={() => setEditIsPreterm(!editIsPreterm)}
+                        className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${
+                          editIsPreterm ? "bg-green" : "bg-surface2"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
+                            editIsPreterm
+                              ? "translate-x-[26px]"
+                              : "translate-x-[2px]"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {editIsPreterm && (
+                      <Input
+                        label="Errechneter Termin"
+                        type="date"
+                        value={editEstimatedBirthDate}
+                        onChange={(e) =>
+                          setEditEstimatedBirthDate(e.target.value)
+                        }
+                      />
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button type="submit" disabled={updateChild.isPending}>
+                        {updateChild.isPending
+                          ? "Aktualisieren..."
+                          : "Aktualisieren"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={cancelEdit}
+                      >
+                        Abbrechen
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+              )}
+            </div>
           ))}
         </div>
       )}

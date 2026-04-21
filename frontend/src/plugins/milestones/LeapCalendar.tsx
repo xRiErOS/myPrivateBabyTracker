@@ -23,6 +23,14 @@ function formatDate(d: string | null): string {
   });
 }
 
+function daysUntil(dateStr: string | null): number | null {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : null;
+}
+
 function statusLabel(status: LeapStatus): string {
   switch (status) {
     case "active_storm":
@@ -58,6 +66,30 @@ function isExpandedByDefault(status: LeapStatus): boolean {
   return status === "active_storm" || status === "active_sun";
 }
 
+function useChecklist(leapId: number, key: string): [Set<number>, (idx: number) => void] {
+  const storageKey = `leap_checks_${leapId}_${key}`;
+  const [checked, setChecked] = useState<Set<number>>(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  function toggle(idx: number) {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      localStorage.setItem(storageKey, JSON.stringify([...next]));
+      return next;
+    });
+  }
+
+  return [checked, toggle];
+}
+
 function LeapCard({ leap }: { leap: LeapStatusItem }) {
   const [expanded, setExpanded] = useState(isExpandedByDefault(leap.status));
   const skills = parseJson(leap.new_skills);
@@ -66,12 +98,18 @@ function LeapCard({ leap }: { leap: LeapStatusItem }) {
   const isPast = leap.status === "past";
   const isFarFuture = leap.status === "far_future";
   const isDimmed = isPast || isFarFuture;
+  const isUpcoming = leap.status === "upcoming" || leap.status === "far_future";
+
+  const [checkedSkills, toggleSkill] = useChecklist(leap.id, "skills");
+  const [checkedSigns, toggleSign] = useChecklist(leap.id, "signs");
 
   const borderClass = isActive
     ? leap.status === "active_storm"
       ? "border-l-4 border-peach bg-red/5"
       : "border-l-4 border-green bg-green/5"
     : "";
+
+  const countdown = isUpcoming ? daysUntil(leap.storm_start_date) : null;
 
   return (
     <Card
@@ -97,46 +135,81 @@ function LeapCard({ leap }: { leap: LeapStatusItem }) {
           )}
         </p>
 
-        {/* Upcoming hint */}
-        {leap.status === "upcoming" && leap.storm_start_date && (
-          <p className="font-body text-xs text-subtext1">
-            ab {formatDate(leap.storm_start_date)}
-          </p>
+        {/* Countdown + storm start date for upcoming/far_future */}
+        {isUpcoming && leap.storm_start_date && (
+          <div className="flex flex-col gap-0.5">
+            <p className="font-body text-xs text-subtext1">
+              Sturmphase ab {formatDate(leap.storm_start_date)}
+            </p>
+            {countdown !== null && (
+              <p className="font-body text-xs text-sapphire font-medium">
+                Beginnt in {countdown} Tagen
+              </p>
+            )}
+          </div>
         )}
 
         {/* Expandable details */}
         {expanded && (
-          <div className="mt-2 flex flex-col gap-3">
+          <div className="mt-2 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
             {/* Description */}
             {leap.description && (
               <p className="font-body text-sm text-subtext0">{leap.description}</p>
             )}
 
-            {/* New skills */}
+            {/* New skills — checkboxes */}
             {skills.length > 0 && (
               <div>
                 <h4 className="font-label text-xs text-subtext1 mb-1">Neue Faehigkeiten</h4>
-                <ul className="list-disc list-inside space-y-0.5">
+                <div className="flex flex-col gap-0.5">
                   {skills.map((skill, i) => (
-                    <li key={i} className="font-body text-sm text-text">
-                      {skill}
-                    </li>
+                    <label key={i} className="flex items-center gap-2 min-h-[36px]">
+                      <input
+                        type="checkbox"
+                        checked={checkedSkills.has(i)}
+                        onChange={() => toggleSkill(i)}
+                        className="accent-peach"
+                      />
+                      <span
+                        className={`font-body text-sm ${
+                          checkedSkills.has(i)
+                            ? "text-overlay0 line-through"
+                            : "text-text"
+                        }`}
+                      >
+                        {skill}
+                      </span>
+                    </label>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
-            {/* Storm signs */}
+            {/* Storm signs — checkboxes */}
             {signs.length > 0 && (
               <div>
                 <h4 className="font-label text-xs text-subtext1 mb-1">Sturm-Anzeichen</h4>
-                <ul className="list-disc list-inside space-y-0.5">
+                <div className="flex flex-col gap-0.5">
                   {signs.map((sign, i) => (
-                    <li key={i} className="font-body text-sm text-text">
-                      {sign}
-                    </li>
+                    <label key={i} className="flex items-center gap-2 min-h-[36px]">
+                      <input
+                        type="checkbox"
+                        checked={checkedSigns.has(i)}
+                        onChange={() => toggleSign(i)}
+                        className="accent-peach"
+                      />
+                      <span
+                        className={`font-body text-sm ${
+                          checkedSigns.has(i)
+                            ? "text-overlay0 line-through"
+                            : "text-text"
+                        }`}
+                      >
+                        {sign}
+                      </span>
+                    </label>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
