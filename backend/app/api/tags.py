@@ -33,16 +33,16 @@ FEEDING_TYPE_LABELS = {"breast_left": "Brust L", "breast_right": "Brust R", "bot
 DIAPER_TYPE_LABELS = {"wet": "Nass", "dirty": "Dreckig", "mixed": "Beides", "dry": "Trocken"}
 SEVERITY_LABELS = {"mild": "Wenig", "moderate": "Mittel", "severe": "Stark"}
 
-# SQL queries per entry_type to build summary strings
+# SQL queries per entry_type to build summary strings (batch: WHERE id IN (:ids))
 SUMMARY_QUERIES: dict[str, str] = {
-    "sleep": "SELECT start_time, duration_minutes, notes FROM sleep_entries WHERE id = :id",
-    "feeding": "SELECT start_time, feeding_type, amount_ml, notes FROM feeding_entries WHERE id = :id",
-    "diaper": "SELECT time, diaper_type, notes FROM diaper_entries WHERE id = :id",
-    "temperature": "SELECT measured_at, temperature_celsius, notes FROM temperature_entries WHERE id = :id",
-    "weight": "SELECT measured_at, weight_grams, notes FROM weight_entries WHERE id = :id",
-    "medication": "SELECT given_at, medication_name, dose, notes FROM medication_entries WHERE id = :id",
-    "health": "SELECT time, entry_type, severity, notes FROM health_entries WHERE id = :id",
-    "todo": "SELECT title, completed_at FROM todo_entries WHERE id = :id",
+    "sleep": "SELECT id, start_time, duration_minutes, notes FROM sleep_entries WHERE id IN ({ids})",
+    "feeding": "SELECT id, start_time, feeding_type, amount_ml, notes FROM feeding_entries WHERE id IN ({ids})",
+    "diaper": "SELECT id, time, diaper_type, notes FROM diaper_entries WHERE id IN ({ids})",
+    "temperature": "SELECT id, measured_at, temperature_celsius, notes FROM temperature_entries WHERE id IN ({ids})",
+    "weight": "SELECT id, measured_at, weight_grams, notes FROM weight_entries WHERE id IN ({ids})",
+    "medication": "SELECT id, given_at, medication_name, dose, notes FROM medication_entries WHERE id IN ({ids})",
+    "health": "SELECT id, time, entry_type, severity, notes FROM health_entries WHERE id IN ({ids})",
+    "todo": "SELECT id, title, completed_at FROM todo_entries WHERE id IN ({ids})",
 }
 
 
@@ -112,24 +112,27 @@ def _append_notes(summary: str, row: dict) -> str:
 async def _enrich_summaries(
     entry_tags: list[EntryTag], db: AsyncSession
 ) -> dict[tuple[str, int], str]:
-    """Batch-fetch entry summaries for a list of entry-tags."""
+    """Batch-fetch entry summaries — one query per entry_type instead of per entry."""
     summaries: dict[tuple[str, int], str] = {}
     # Group by entry_type to batch queries
-    by_type: dict[str, list[int]] = {}
+    by_type: dict[str, set[int]] = {}
     for et in entry_tags:
-        by_type.setdefault(et.entry_type, []).append(et.entry_id)
+        by_type.setdefault(et.entry_type, set()).add(et.entry_id)
 
     for entry_type, ids in by_type.items():
         query_template = SUMMARY_QUERIES.get(entry_type)
-        if not query_template:
+        if not query_template or not ids:
             continue
-        for entry_id in set(ids):
-            result = await db.execute(text(query_template), {"id": entry_id})
-            row = result.mappings().first()
-            if row:
-                row_dict = dict(row)
-                summary = _build_summary(entry_type, row_dict)
-                summaries[(entry_type, entry_id)] = _append_notes(summary, row_dict)
+        # Build safe IN clause with positional placeholders
+        placeholders = ", ".join(f":id_{i}" for i in range(len(ids)))
+        query = text(query_template.format(ids=placeholders))
+        params = {f"id_{i}": eid for i, eid in enumerate(ids)}
+        result = await db.execute(query, params)
+        for row in result.mappings().all():
+            row_dict = dict(row)
+            entry_id = row_dict.pop("id")
+            summary = _build_summary(entry_type, row_dict)
+            summaries[(entry_type, entry_id)] = _append_notes(summary, row_dict)
 
     return summaries
 
