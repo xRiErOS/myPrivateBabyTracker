@@ -357,6 +357,29 @@ export interface HealthUpdate {
   notes?: string | null;
 }
 
+export interface TummyTimeEntry {
+  id: number;
+  child_id: number;
+  start_time: string;
+  end_time: string | null;
+  duration_minutes: number | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface TummyTimeCreate {
+  child_id: number;
+  start_time: string;
+  end_time?: string | null;
+  notes?: string | null;
+}
+
+export interface TummyTimeUpdate {
+  start_time?: string;
+  end_time?: string | null;
+  notes?: string | null;
+}
+
 export type ApiKeyScope = "read" | "write" | "admin";
 
 export interface ApiKeyResponse {

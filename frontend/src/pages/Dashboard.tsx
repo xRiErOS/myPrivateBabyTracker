@@ -17,6 +17,7 @@ import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { HealthWidget } from "../plugins/health/HealthWidget";
+import { TummyTimeWidget } from "../plugins/tummytime/TummyTimeWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
@@ -234,7 +235,7 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      {(isPluginEnabled("temperature") || isPluginEnabled("medication") || isPluginEnabled("weight") || isPluginEnabled("health")) && (
+      {(isPluginEnabled("temperature") || isPluginEnabled("medication") || isPluginEnabled("weight") || isPluginEnabled("health") || isPluginEnabled("tummytime")) && (
         <div className="grid grid-cols-2 gap-3">
           {isPluginEnabled("temperature") && <TemperatureWidget />}
           {isPluginEnabled("medication") && (
@@ -244,6 +245,7 @@ function TodayView({
           )}
           {isPluginEnabled("weight") && <WeightWidget />}
           {isPluginEnabled("health") && <HealthWidget childId={childId} />}
+          {isPluginEnabled("tummytime") && <TummyTimeWidget />}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 /** Central plugin registry — single source of truth for plugin metadata. */
 
-import { Activity, CheckSquare, Droplets, Moon, Pill, Scale, Sun, Thermometer, Utensils } from "lucide-react";
+import { Activity, CheckSquare, Droplets, Moon, Pill, Scale, Sun, Thermometer, Timer, Utensils } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface PluginDef {
@@ -22,6 +22,7 @@ export const PLUGINS: PluginDef[] = [
   { key: "vitamind3", label: "Vitamin D3", icon: Sun, route: "", isBase: false },
   { key: "health", label: "Gesundheit", icon: Activity, route: "/health", isBase: false },
   { key: "todo", label: "ToDo", icon: CheckSquare, route: "/todo", isBase: false },
+  { key: "tummytime", label: "Bauchlage", icon: Timer, route: "/tummy-time", isBase: false },
 ];
 
 /** Plugins that are always active and cannot be disabled. */
