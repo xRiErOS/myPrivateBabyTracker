@@ -17,6 +17,7 @@ import {
   useCreateVitaminD3,
   useDeleteVitaminD3,
 } from "../../hooks/useVitaminD3";
+import { isPluginEnabled } from "../../lib/pluginConfig";
 
 function Tile({
   label,
@@ -272,7 +273,7 @@ export function BabySummary({
 
       <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />
 
-      <VitD3Tile childId={childId} />
+      {isPluginEnabled("vitamind3") && <VitD3Tile childId={childId} />}
     </div>
   );
 }

@@ -1,9 +1,9 @@
 /** Adaptive bottom navigation — 4 favorites + "Mehr" menu for additional items.
 
-Touch targets: min 44px. Expands with new plugins automatically.
+Touch targets: min 44px. Dynamically filters by enabled plugins.
 */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CheckSquare,
   Droplets,
@@ -20,32 +20,50 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
+import { isPluginEnabled } from "../lib/pluginConfig";
 
 interface NavItem {
   to: string;
   icon: LucideIcon;
   label: string;
+  /** If set, item is only shown when this plugin is enabled. */
+  pluginKey?: string;
 }
 
 const ALL_ITEMS: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/sleep", icon: Moon, label: "Schlaf" },
-  { to: "/feeding", icon: Utensils, label: "Mahlzeiten" },
-  { to: "/diaper", icon: Droplets, label: "Windeln" },
+  { to: "/sleep", icon: Moon, label: "Schlaf", pluginKey: "sleep" },
+  { to: "/feeding", icon: Utensils, label: "Mahlzeiten", pluginKey: "feeding" },
+  { to: "/diaper", icon: Droplets, label: "Windeln", pluginKey: "diaper" },
   { to: "/admin/tags", icon: Tags, label: "Tags" },
-  { to: "/temperature", icon: Thermometer, label: "Temperatur" },
-  { to: "/weight", icon: Scale, label: "Gewicht" },
-  { to: "/medication", icon: Pill, label: "Medikamente" },
-  { to: "/todo", icon: CheckSquare, label: "ToDo" },
+  { to: "/temperature", icon: Thermometer, label: "Temperatur", pluginKey: "temperature" },
+  { to: "/weight", icon: Scale, label: "Gewicht", pluginKey: "weight" },
+  { to: "/medication", icon: Pill, label: "Medikamente", pluginKey: "medication" },
+  { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 
-const FAVORITES = ALL_ITEMS.slice(0, 5); // Dashboard, Schlaf, Mahlzeiten, Windeln, Tags
-const MORE_ITEMS = ALL_ITEMS.slice(5);
+function useVisibleItems(): NavItem[] {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setTick((t) => t + 1);
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
+
+  return ALL_ITEMS.filter(
+    (item) => !item.pluginKey || isPluginEnabled(item.pluginKey),
+  );
+}
 
 export function BottomNav() {
   const [showMore, setShowMore] = useState(false);
   const location = useLocation();
+  const visibleItems = useVisibleItems();
+
+  const FAVORITES = visibleItems.slice(0, 5);
+  const MORE_ITEMS = visibleItems.slice(5);
 
   // Check if current route is in the "more" section
   const isMoreActive = MORE_ITEMS.some(

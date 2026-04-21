@@ -1,22 +1,43 @@
-/** Desktop sidebar navigation — hidden on mobile. */
+/** Desktop sidebar navigation — hidden on mobile. Dynamically filters by enabled plugins. */
 
+import { useEffect, useState } from "react";
 import { CheckSquare, Droplets, LayoutDashboard, Moon, Pill, Scale, Settings, Tags, Thermometer, Utensils } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import type { LucideIcon } from "lucide-react";
+import { isPluginEnabled } from "../lib/pluginConfig";
 
-const navItems = [
+interface SidebarItem {
+  to: string;
+  icon: LucideIcon;
+  label: string;
+  pluginKey?: string;
+}
+
+const ALL_NAV_ITEMS: SidebarItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/sleep", icon: Moon, label: "Schlaf" },
-  { to: "/feeding", icon: Utensils, label: "Mahlzeiten" },
-  { to: "/diaper", icon: Droplets, label: "Windeln" },
-  { to: "/temperature", icon: Thermometer, label: "Temperatur" },
-  { to: "/weight", icon: Scale, label: "Gewicht" },
-  { to: "/medication", icon: Pill, label: "Medikamente" },
-  { to: "/todo", icon: CheckSquare, label: "ToDo" },
+  { to: "/sleep", icon: Moon, label: "Schlaf", pluginKey: "sleep" },
+  { to: "/feeding", icon: Utensils, label: "Mahlzeiten", pluginKey: "feeding" },
+  { to: "/diaper", icon: Droplets, label: "Windeln", pluginKey: "diaper" },
+  { to: "/temperature", icon: Thermometer, label: "Temperatur", pluginKey: "temperature" },
+  { to: "/weight", icon: Scale, label: "Gewicht", pluginKey: "weight" },
+  { to: "/medication", icon: Pill, label: "Medikamente", pluginKey: "medication" },
+  { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
   { to: "/admin/tags", icon: Tags, label: "Tags" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
-] as const;
+];
 
 export function Sidebar() {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setTick((t) => t + 1);
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
+
+  const navItems = ALL_NAV_ITEMS.filter(
+    (item) => !item.pluginKey || isPluginEnabled(item.pluginKey),
+  );
   return (
     <aside className="hidden md:flex flex-col w-56 bg-surface0 fixed top-[52px] left-0 bottom-0 py-6 px-3 border-r border-surface1 overflow-y-auto">
       <nav className="flex flex-col gap-1">

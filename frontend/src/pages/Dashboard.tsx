@@ -17,6 +17,7 @@ import { TemperatureWidget } from "../plugins/temperature/TemperatureWidget";
 import { MedicationWidget } from "../plugins/medication/MedicationWidget";
 import { WeightWidget } from "../plugins/weight/WeightWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
+import { isPluginEnabled } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
 import {
   splitSleepByDay,
@@ -176,7 +177,7 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            {PLUGINS.map((plugin) => {
+            {PLUGINS.filter((p) => p.route && isPluginEnabled(p.key)).map((plugin) => {
               const Icon = plugin.icon;
               return (
                 <button
@@ -232,13 +233,17 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      <div className="grid grid-cols-2 gap-3">
-        <TemperatureWidget />
-        <div className="row-span-2">
-          <MedicationWidget />
+      {(isPluginEnabled("temperature") || isPluginEnabled("medication") || isPluginEnabled("weight")) && (
+        <div className="grid grid-cols-2 gap-3">
+          {isPluginEnabled("temperature") && <TemperatureWidget />}
+          {isPluginEnabled("medication") && (
+            <div className="row-span-2">
+              <MedicationWidget />
+            </div>
+          )}
+          {isPluginEnabled("weight") && <WeightWidget />}
         </div>
-        <WeightWidget />
-      </div>
+      )}
     </div>
   );
 }

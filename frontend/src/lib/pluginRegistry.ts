@@ -1,6 +1,6 @@
 /** Central plugin registry — single source of truth for plugin metadata. */
 
-import { Droplets, Moon, Pill, Scale, Thermometer, Utensils } from "lucide-react";
+import { CheckSquare, Droplets, Moon, Pill, Scale, Sun, Thermometer, Utensils } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface PluginDef {
@@ -8,13 +8,23 @@ export interface PluginDef {
   label: string;
   icon: LucideIcon;
   route: string;
+  /** Base plugins are always active and cannot be disabled. */
+  isBase: boolean;
 }
 
 export const PLUGINS: PluginDef[] = [
-  { key: "sleep", label: "Schlaf", icon: Moon, route: "/sleep" },
-  { key: "feeding", label: "Mahlzeiten", icon: Utensils, route: "/feeding" },
-  { key: "diaper", label: "Windel", icon: Droplets, route: "/diaper" },
-  { key: "temperature", label: "Temperatur", icon: Thermometer, route: "/temperature" },
-  { key: "weight", label: "Gewicht", icon: Scale, route: "/weight" },
-  { key: "medication", label: "Medikament", icon: Pill, route: "/medication" },
+  { key: "sleep", label: "Schlaf", icon: Moon, route: "/sleep", isBase: true },
+  { key: "feeding", label: "Mahlzeiten", icon: Utensils, route: "/feeding", isBase: true },
+  { key: "diaper", label: "Windel", icon: Droplets, route: "/diaper", isBase: true },
+  { key: "temperature", label: "Temperatur", icon: Thermometer, route: "/temperature", isBase: false },
+  { key: "weight", label: "Gewicht", icon: Scale, route: "/weight", isBase: false },
+  { key: "medication", label: "Medikament", icon: Pill, route: "/medication", isBase: false },
+  { key: "vitamind3", label: "Vitamin D3", icon: Sun, route: "", isBase: false },
+  { key: "todo", label: "ToDo", icon: CheckSquare, route: "/todo", isBase: false },
 ];
+
+/** Plugins that are always active and cannot be disabled. */
+export const BASE_PLUGINS = PLUGINS.filter((p) => p.isBase);
+
+/** Plugins that can be toggled on/off by the user. */
+export const OPTIONAL_PLUGINS = PLUGINS.filter((p) => !p.isBase);
