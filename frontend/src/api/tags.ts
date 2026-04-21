@@ -30,13 +30,21 @@ export async function detachTag(entryTagId: number): Promise<void> {
   return apiFetch<void>(`${BASE}entries/${entryTagId}`, { method: "DELETE" });
 }
 
-export async function listEntryTags(entryType?: string, entryId?: number, tagId?: number): Promise<EntryTag[]> {
+export async function listEntryTags(entryType?: string, entryId?: number, tagId?: number, includeArchived?: boolean): Promise<EntryTag[]> {
   const params = new URLSearchParams();
   if (entryType) params.set("entry_type", entryType);
   if (entryId) params.set("entry_id", String(entryId));
   if (tagId) params.set("tag_id", String(tagId));
+  if (includeArchived) params.set("include_archived", "true");
   const qs = params.toString() ? `?${params}` : "";
   return apiFetch<EntryTag[]>(`${BASE}entries/${qs}`);
+}
+
+export async function archiveEntryTag(entryTagId: number, isArchived: boolean): Promise<EntryTag> {
+  return apiFetch<EntryTag>(`${BASE}entries/${entryTagId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_archived: isArchived }),
+  });
 }
 
 export async function bulkDetachTags(entryTagIds: number[]): Promise<void> {

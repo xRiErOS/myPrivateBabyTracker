@@ -1,7 +1,7 @@
 /** React Query hooks for Tag CRUD and entry-tag associations. */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { attachTag, bulkDetachTags, createTag, deleteTag, detachTag, listEntryTags, listTags, updateTag } from "../api/tags";
+import { archiveEntryTag, attachTag, bulkDetachTags, createTag, deleteTag, detachTag, listEntryTags, listTags, updateTag } from "../api/tags";
 import type { EntryTagCreate, TagCreate, TagUpdate } from "../api/types";
 import { useToast } from "../context/ToastContext";
 
@@ -52,10 +52,10 @@ export function useDeleteTag() {
   });
 }
 
-export function useEntryTags(entryType?: string, entryId?: number, tagId?: number) {
+export function useEntryTags(entryType?: string, entryId?: number, tagId?: number, includeArchived?: boolean) {
   return useQuery({
-    queryKey: [...ENTRY_TAG_KEY, entryType, entryId, tagId],
-    queryFn: () => listEntryTags(entryType, entryId, tagId),
+    queryKey: [...ENTRY_TAG_KEY, entryType, entryId, tagId, includeArchived],
+    queryFn: () => listEntryTags(entryType, entryId, tagId, includeArchived),
     enabled: entryId != null || tagId != null,
   });
 }
@@ -76,6 +76,19 @@ export function useDetachTag() {
     mutationFn: (id: number) => detachTag(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ENTRY_TAG_KEY });
+    },
+  });
+}
+
+export function useArchiveEntryTag() {
+  const qc = useQueryClient();
+  const { showToast } = useToast();
+  return useMutation({
+    mutationFn: ({ id, isArchived }: { id: number; isArchived: boolean }) =>
+      archiveEntryTag(id, isArchived),
+    onSuccess: (_, { isArchived }) => {
+      qc.invalidateQueries({ queryKey: ENTRY_TAG_KEY });
+      showToast(isArchived ? "Archiviert" : "Wiederhergestellt");
     },
   });
 }

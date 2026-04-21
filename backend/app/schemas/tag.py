@@ -43,6 +43,12 @@ class EntryTagCreate(BaseModel):
     entry_id: int = Field(..., gt=0)
 
 
+class EntryTagUpdate(BaseModel):
+    """Schema for updating an entry-tag (archive/unarchive)."""
+
+    is_archived: bool
+
+
 class EntryTagResponse(BaseModel):
     """Schema for entry-tag association responses."""
 
@@ -50,6 +56,7 @@ class EntryTagResponse(BaseModel):
     tag_id: int
     entry_type: str
     entry_id: int
+    is_archived: bool
     created_at: UTCDatetime
     tag: TagResponse
 

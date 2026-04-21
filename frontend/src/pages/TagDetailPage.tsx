@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Tags, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Tags, Trash2 } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
 import { EntryDetailModal } from "../components/EntryDetailModal";
-import { useBulkDetachTags, useEntryTags, useTags } from "../hooks/useTags";
+import { useArchiveEntryTag, useBulkDetachTags, useEntryTags, useTags } from "../hooks/useTags";
 import { useActiveChild } from "../context/ChildContext";
 import type { EntryTag } from "../api/types";
 
@@ -27,8 +27,10 @@ export default function TagDetailPage() {
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: tags = [] } = useTags(activeChild?.id);
-  const { data: entryTags = [] } = useEntryTags(undefined, undefined, tagId ? Number(tagId) : undefined);
+  const [showArchived, setShowArchived] = useState(false);
+  const { data: entryTags = [] } = useEntryTags(undefined, undefined, tagId ? Number(tagId) : undefined, showArchived);
   const bulkDetachMut = useBulkDetachTags();
+  const archiveMut = useArchiveEntryTag();
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [modalEntry, setModalEntry] = useState<{ type: string; id: number } | null>(null);
 
@@ -119,28 +121,39 @@ export default function TagDetailPage() {
         </p>
       ) : (
         <>
-          {/* Bulk actions */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 font-label text-sm text-subtext0">
+          {/* Show archived toggle + Bulk actions */}
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 font-label text-sm text-subtext0 cursor-pointer">
               <input
                 type="checkbox"
-                checked={allSelected}
-                onChange={toggleSelectAll}
-                className="accent-peach"
+                checked={showArchived}
+                onChange={() => setShowArchived(!showArchived)}
+                className="accent-sapphire"
               />
-              Alle auswaehlen ({selected.size}/{entryTags.length})
+              Archivierte anzeigen
             </label>
-            {selected.size > 0 && (
-              <Button
-                variant="danger"
-                onClick={handleBulkRemove}
-                disabled={bulkDetachMut.isPending}
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                {bulkDetachMut.isPending ? "Entferne..." : `${selected.size} entfernen`}
-              </Button>
-            )}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 font-label text-sm text-subtext0">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
+                  className="accent-peach"
+                />
+                Alle auswaehlen ({selected.size}/{entryTags.length})
+              </label>
+              {selected.size > 0 && (
+                <Button
+                  variant="danger"
+                  onClick={handleBulkRemove}
+                  disabled={bulkDetachMut.isPending}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {bulkDetachMut.isPending ? "Entferne..." : `${selected.size} entfernen`}
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Grouped entries by date */}
@@ -152,7 +165,7 @@ export default function TagDetailPage() {
               {ets.map((et) => (
                 <Card
                   key={et.id}
-                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-surface0 transition-colors"
+                  className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-surface0 transition-colors ${et.is_archived ? "opacity-50" : ""}`}
                   onClick={() => setModalEntry({ type: et.entry_type, id: et.entry_id })}
                 >
                   <input
@@ -168,11 +181,25 @@ export default function TagDetailPage() {
                   <div className="flex flex-col flex-1 min-w-0">
                     <span className="font-body text-sm text-text">
                       {ENTRY_TYPE_LABELS[et.entry_type] ?? et.entry_type}
+                      {et.is_archived && <span className="ml-1 text-xs text-overlay0">(archiviert)</span>}
                     </span>
                     <span className="font-body text-xs text-subtext0">
                       {new Date(et.created_at).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      archiveMut.mutate({ id: et.id, isArchived: !et.is_archived });
+                    }}
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors shrink-0"
+                    aria-label={et.is_archived ? "Wiederherstellen" : "Archivieren"}
+                  >
+                    {et.is_archived
+                      ? <ArchiveRestore className="h-4 w-4" />
+                      : <Archive className="h-4 w-4" />
+                    }
+                  </button>
                 </Card>
               ))}
             </div>

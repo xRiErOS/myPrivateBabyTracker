@@ -14,6 +14,7 @@ from app.models.user import User
 from app.schemas.tag import (
     EntryTagCreate,
     EntryTagResponse,
+    EntryTagUpdate,
     TagCreate,
     TagResponse,
     TagUpdate,
@@ -178,6 +179,28 @@ async def attach_tag(
     return entry_tag
 
 
+@router.patch("/entries/{entry_tag_id}", response_model=EntryTagResponse)
+async def update_entry_tag(
+    entry_tag_id: int,
+    data: EntryTagUpdate,
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Update an entry-tag (archive/unarchive)."""
+    result = await db.execute(
+        select(EntryTag).options(selectinload(EntryTag.tag)).where(EntryTag.id == entry_tag_id)
+    )
+    entry_tag = result.scalar_one_or_none()
+    if entry_tag is None:
+        raise NotFoundError(f"EntryTag with id {entry_tag_id} not found")
+
+    entry_tag.is_archived = data.is_archived
+    await db.commit()
+    await db.refresh(entry_tag, attribute_names=["tag"])
+    logger.info("entry_tag_updated", entry_tag_id=entry_tag_id, is_archived=data.is_archived)
+    return entry_tag
+
+
 @router.delete("/entries/{entry_tag_id}", status_code=204)
 async def detach_tag(
     entry_tag_id: int,
@@ -200,6 +223,7 @@ async def list_entry_tags(
     entry_type: str | None = Query(default=None, min_length=1, max_length=50),
     entry_id: int | None = Query(default=None, gt=0),
     tag_id: int | None = Query(default=None, gt=0),
+    include_archived: bool = Query(default=False),
     user: User | None = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
@@ -212,6 +236,8 @@ async def list_entry_tags(
         stmt = stmt.where(EntryTag.entry_id == entry_id)
     if tag_id is not None:
         stmt = stmt.where(EntryTag.tag_id == tag_id)
+    if not include_archived:
+        stmt = stmt.where(EntryTag.is_archived == False)
 
     result = await db.execute(stmt)
     return result.scalars().all()
