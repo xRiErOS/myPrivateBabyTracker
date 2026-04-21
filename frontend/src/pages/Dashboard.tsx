@@ -22,7 +22,7 @@ import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
 import { TodoWidget } from "../plugins/todo/TodoWidget";
 import { TagsWidget } from "../plugins/tags/TagsWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
-import { isPluginEnabled, isVisibleOnDashboard } from "../lib/pluginConfig";
+import { isPluginEnabled, isVisibleOnDashboard, getWidgetOrder } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
 import { useLeapStatus } from "../hooks/useMilestones";
 import { useSwipe } from "../hooks/useSwipe";
@@ -304,22 +304,30 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      {(isVisibleOnDashboard("temperature") || isVisibleOnDashboard("medication") || isVisibleOnDashboard("weight") || isVisibleOnDashboard("health") || isVisibleOnDashboard("tummytime") || isVisibleOnDashboard("milestones") || isVisibleOnDashboard("todo") || isVisibleOnDashboard("tags")) && (
-        <div className="grid grid-cols-2 gap-3">
-          {isVisibleOnDashboard("temperature") && <TemperatureWidget />}
-          {isVisibleOnDashboard("medication") && (
-            <div className="row-span-2">
-              <MedicationWidget />
-            </div>
-          )}
-          {isVisibleOnDashboard("weight") && <WeightWidget />}
-          {isVisibleOnDashboard("health") && <HealthWidget childId={childId} />}
-          {isVisibleOnDashboard("tummytime") && <TummyTimeWidget />}
-          {isVisibleOnDashboard("milestones") && <MilestoneWidget childId={childId} />}
-          {isVisibleOnDashboard("todo") && <TodoWidget />}
-          {isVisibleOnDashboard("tags") && <TagsWidget />}
-        </div>
-      )}
+      {(() => {
+        const WIDGET_MAP: Record<string, React.ReactNode> = {
+          temperature: <TemperatureWidget />,
+          medication: <MedicationWidget />,
+          weight: <WeightWidget />,
+          health: <HealthWidget childId={childId} />,
+          tummytime: <TummyTimeWidget />,
+          milestones: <MilestoneWidget childId={childId} />,
+          todo: <TodoWidget />,
+          tags: <TagsWidget />,
+        };
+        const ROW_SPAN_WIDGETS = new Set(["medication"]);
+        const orderedWidgets = getWidgetOrder().filter((key) => isVisibleOnDashboard(key) && key in WIDGET_MAP);
+        if (orderedWidgets.length === 0) return null;
+        return (
+          <div className="grid grid-cols-2 gap-3">
+            {orderedWidgets.map((key) => (
+              <div key={key} className={ROW_SPAN_WIDGETS.has(key) ? "row-span-2" : ""}>
+                {WIDGET_MAP[key]}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
     </div>
   );

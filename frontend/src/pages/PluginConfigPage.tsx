@@ -1,11 +1,11 @@
 /** Plugin management page — toggle optional plugins on/off. */
 
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { PLUGINS } from "../lib/pluginRegistry";
-import { isPluginEnabled, togglePlugin, isVisibleOnDashboard, toggleDashboardVisibility } from "../lib/pluginConfig";
+import { isPluginEnabled, togglePlugin, isVisibleOnDashboard, toggleDashboardVisibility, getWidgetOrder, moveWidget } from "../lib/pluginConfig";
 
 export default function PluginConfigPage() {
   const navigate = useNavigate();
@@ -107,6 +107,41 @@ export default function PluginConfigPage() {
                 </div>
               </div>
             </Card>
+          );
+        })}
+      </div>
+
+      {/* Widget order section */}
+      <h3 className="font-headline text-base font-semibold mt-6">Widget-Reihenfolge</h3>
+      <p className="font-body text-sm text-subtext0">
+        Reihenfolge der Widgets im Dashboard-Grid anpassen.
+      </p>
+      <div className="space-y-1">
+        {getWidgetOrder().map((key, idx, arr) => {
+          const plugin = PLUGINS.find((p) => p.key === key);
+          if (!plugin) return null;
+          const Icon = plugin.icon;
+          return (
+            <div key={key} className="flex items-center gap-2 bg-surface0 rounded-lg px-3 py-2">
+              <Icon className="h-4 w-4 text-mauve shrink-0" />
+              <span className="font-label text-sm text-text flex-1">{plugin.label}</span>
+              <button
+                onClick={() => { moveWidget(key, "up"); setTick((t) => t + 1); }}
+                disabled={idx === 0}
+                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-subtext0 hover:text-text disabled:opacity-30 transition-colors"
+                aria-label="Nach oben"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => { moveWidget(key, "down"); setTick((t) => t + 1); }}
+                disabled={idx === arr.length - 1}
+                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-subtext0 hover:text-text disabled:opacity-30 transition-colors"
+                aria-label="Nach unten"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </div>
           );
         })}
       </div>

@@ -95,3 +95,49 @@ export function toggleDashboardVisibility(key: string): void {
     : [...current, key];
   setDashboardVisiblePlugins(next);
 }
+
+/* ─── Widget grid order ─── */
+
+const ORDER_KEY = "mybaby_widget_order";
+
+/** Default widget order for the dashboard grid. */
+const DEFAULT_WIDGET_ORDER = [
+  "temperature", "medication", "weight", "health",
+  "tummytime", "milestones", "todo", "tags",
+];
+
+/** Read widget order from localStorage. */
+export function getWidgetOrder(): string[] {
+  try {
+    const raw = localStorage.getItem(ORDER_KEY);
+    if (!raw) return DEFAULT_WIDGET_ORDER;
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return DEFAULT_WIDGET_ORDER;
+    const valid = new Set(DEFAULT_WIDGET_ORDER);
+    const ordered = parsed.filter((k): k is string => typeof k === "string" && valid.has(k));
+    // Add any new widgets that aren't in stored order
+    for (const key of DEFAULT_WIDGET_ORDER) {
+      if (!ordered.includes(key)) ordered.push(key);
+    }
+    return ordered;
+  } catch {
+    return DEFAULT_WIDGET_ORDER;
+  }
+}
+
+/** Save widget order to localStorage. */
+export function setWidgetOrder(order: string[]): void {
+  localStorage.setItem(ORDER_KEY, JSON.stringify(order));
+  window.dispatchEvent(new StorageEvent("storage", { key: ORDER_KEY }));
+}
+
+/** Move a widget up or down in the order. */
+export function moveWidget(key: string, direction: "up" | "down"): void {
+  const order = getWidgetOrder();
+  const idx = order.indexOf(key);
+  if (idx < 0) return;
+  const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= order.length) return;
+  [order[idx], order[targetIdx]] = [order[targetIdx], order[idx]];
+  setWidgetOrder(order);
+}
