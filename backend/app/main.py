@@ -185,6 +185,11 @@ def create_app(testing: bool = False) -> FastAPI:
     for plugin in plugins:
         plugin.register_routes(app)
 
+    # --- Upload file serving (milestone photos etc.) ---
+    uploads_dir = Path("data/uploads")
+    if uploads_dir.exists():
+        app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
     # --- Static file serving (production: frontend build) ---
     index_html = STATIC_DIR / "index.html"
     assets_dir = STATIC_DIR / "assets"

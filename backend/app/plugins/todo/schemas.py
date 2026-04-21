@@ -38,6 +38,39 @@ class TodoResponse(BaseModel):
     due_date: UTCDatetime | None
     is_done: bool
     completed_at: UTCDatetime | None
+    template_id: int | None = None
+    created_at: UTCDatetime
+
+    model_config = {"from_attributes": True}
+
+
+# --- Todo Templates (Recurring Tasks) ---
+
+
+class TodoTemplateCreate(BaseModel):
+    """Schema for creating a todo template."""
+
+    child_id: int = Field(..., gt=0)
+    title: str = Field(..., min_length=1, max_length=200)
+    details: str | None = Field(default=None, max_length=2000)
+
+
+class TodoTemplateUpdate(BaseModel):
+    """Schema for updating a todo template."""
+
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    details: str | None = Field(default=None, max_length=2000)
+    is_active: bool | None = None
+
+
+class TodoTemplateResponse(BaseModel):
+    """Schema for todo template API responses."""
+
+    id: int
+    child_id: int
+    title: str
+    details: str | None
+    is_active: bool
     created_at: UTCDatetime
 
     model_config = {"from_attributes": True}

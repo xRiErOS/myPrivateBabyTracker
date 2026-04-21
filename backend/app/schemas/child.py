@@ -15,6 +15,8 @@ class ChildCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100)
     birth_date: date
+    estimated_birth_date: date | None = None
+    is_preterm: bool = False
     notes: str | None = Field(default=None, max_length=2000)
 
 
@@ -23,6 +25,8 @@ class ChildUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=100)
     birth_date: date | None = None
+    estimated_birth_date: date | None = None
+    is_preterm: bool | None = None
     notes: str | None = Field(default=None, max_length=2000)
     is_active: bool | None = None
 
@@ -33,6 +37,8 @@ class ChildResponse(BaseModel):
     id: int
     name: str
     birth_date: date
+    estimated_birth_date: date | None
+    is_preterm: bool
     notes: str | None
     is_active: bool
     created_at: UTCDatetime

@@ -1,4 +1,4 @@
-"""Todo plugin CRUD router — all endpoints require auth."""
+"""Todo plugin CRUD router — entries + templates for recurring tasks."""
 
 from datetime import datetime, timezone
 
@@ -11,8 +11,15 @@ from app.database import get_session
 from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
-from app.plugins.todo.models import TodoEntry
-from app.plugins.todo.schemas import TodoCreate, TodoResponse, TodoUpdate
+from app.plugins.todo.models import TodoEntry, TodoTemplate
+from app.plugins.todo.schemas import (
+    TodoCreate,
+    TodoResponse,
+    TodoTemplateCreate,
+    TodoTemplateResponse,
+    TodoTemplateUpdate,
+    TodoUpdate,
+)
 
 logger = get_logger("todo")
 
@@ -118,3 +125,115 @@ async def delete_todo(
     await db.delete(entry)
     await db.commit()
     logger.info("todo_deleted", entry_id=entry_id)
+
+
+# ---------------------------------------------------------------------------
+# Todo Templates (Recurring Tasks)
+# ---------------------------------------------------------------------------
+
+template_router = APIRouter(prefix="/todo-templates", tags=["todo-templates"])
+
+
+@template_router.post("/", response_model=TodoTemplateResponse, status_code=201)
+async def create_template(
+    data: TodoTemplateCreate,
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Create a new todo template."""
+    template = TodoTemplate(
+        child_id=data.child_id,
+        title=data.title,
+        details=data.details,
+    )
+    db.add(template)
+    await db.commit()
+    await db.refresh(template)
+    logger.info("todo_template_created", template_id=template.id, child_id=template.child_id)
+    return template
+
+
+@template_router.get("/", response_model=list[TodoTemplateResponse])
+async def list_templates(
+    child_id: int | None = Query(default=None, gt=0),
+    active_only: bool = Query(default=True),
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """List todo templates with optional filters."""
+    stmt = select(TodoTemplate).order_by(TodoTemplate.title)
+
+    if child_id is not None:
+        stmt = stmt.where(TodoTemplate.child_id == child_id)
+    if active_only:
+        stmt = stmt.where(TodoTemplate.is_active == True)  # noqa: E712
+
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
+@template_router.patch("/{template_id}", response_model=TodoTemplateResponse)
+async def update_template(
+    template_id: int,
+    data: TodoTemplateUpdate,
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Update a todo template."""
+    result = await db.execute(select(TodoTemplate).where(TodoTemplate.id == template_id))
+    template = result.scalar_one_or_none()
+    if template is None:
+        raise NotFoundError(f"Todo template with id {template_id} not found")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(template, field, value)
+
+    await db.commit()
+    await db.refresh(template)
+    logger.info("todo_template_updated", template_id=template.id)
+    return template
+
+
+@template_router.delete("/{template_id}", status_code=204)
+async def delete_template(
+    template_id: int,
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Delete a todo template."""
+    result = await db.execute(select(TodoTemplate).where(TodoTemplate.id == template_id))
+    template = result.scalar_one_or_none()
+    if template is None:
+        raise NotFoundError(f"Todo template with id {template_id} not found")
+
+    await db.delete(template)
+    await db.commit()
+    logger.info("todo_template_deleted", template_id=template_id)
+
+
+@template_router.post("/{template_id}/clone", response_model=TodoResponse, status_code=201)
+async def clone_template_to_today(
+    template_id: int,
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Clone a template to a new todo entry with due_date = today."""
+    result = await db.execute(select(TodoTemplate).where(TodoTemplate.id == template_id))
+    template = result.scalar_one_or_none()
+    if template is None:
+        raise NotFoundError(f"Todo template with id {template_id} not found")
+
+    now = datetime.now(timezone.utc)
+    entry = TodoEntry(
+        child_id=template.child_id,
+        title=template.title,
+        details=template.details,
+        due_date=now,
+        template_id=template.id,
+    )
+    db.add(entry)
+    await db.commit()
+    await db.refresh(entry)
+    logger.info("todo_cloned_from_template", entry_id=entry.id, template_id=template_id)
+    return entry

@@ -16,6 +16,8 @@ class Child(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     birth_date: Mapped[date] = mapped_column(Date, nullable=False)
+    estimated_birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    is_preterm: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     gender: Mapped[str | None] = mapped_column(String(20))
     notes: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
