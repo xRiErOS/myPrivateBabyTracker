@@ -115,12 +115,17 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (User-Testing Sprint 4a abgeschlossen, v0.4.0b)
+## Aktueller Stand (Sprint 5 abgeschlossen, v0.5.1)
 
-- **v0.4.0b**: 313 Backend-Tests + 52 Frontend-Tests = 365 total
+- **v0.5.1**: 367 Backend-Tests + 83 Frontend-Tests = 450 total
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
-- **Auth**: AUTH_MODE=disabled (verschoben — erst Features)
-- **8 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo
+- **Auth**: AUTH_MODE=disabled (verschoben) + API-Key-Auth fuer Machine-to-Machine (Argon2, Scopes, Rate-Limiting)
+- **10 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime
+- **Plugin-Management**: Basis-Plugins (sleep, feeding, diaper) immer aktiv. Optionale Plugins per Toggle in /admin/plugins konfigurierbar. Nav, Dashboard, Widgets reagieren dynamisch.
+- **API-Key-Auth**: ApiKey Model (Argon2 Hash, Prefix-Matching, Scopes read/write/admin), CRUD Router, FastAPI Dependency, Verwaltungsseite /admin/api-keys
+- **Health-Plugin**: Spucken + Bauchschmerzen (entry_type, severity, duration nur bei Bauchschmerzen), Dashboard-Widget
+- **Tummy-Time-Plugin**: Timer-basiertes Bauchlage-Tracking mit Start/Stop, Dauer-Berechnung, Dashboard-Widget
+- **Windeln-Widget Balken**: Proportionale farbige Balken (sapphire=nass, peach=dreckig, mauve=beides) im BabySummary
 - **Tag-System**: Polymorphes Tagging (tags + entry_tags Tables), CRUD API, TagSelector (bound + pending Modus) + TagBadges in allen Listen
 - **TagSelector Pending-Modus**: Tags direkt im Formular waehlbar bei neuen Eintraegen, kein Zwischenschritt
 - **Entry-Detail-Modal**: Getaggte Eintraege auf Tag-Detail-Seite klickbar, Notizen editierbar
@@ -128,20 +133,20 @@ Details: `DESIGN.md`
 - **Medikamenten-Stammdaten**: MedicationMaster Model, CRUD API, FK in MedicationEntry, Dropdown in MedicationForm
 - **Warnhinweise**: AlertConfig pro Kind, 5 Regeln (+ Fuetterungsintervall-Alarm) + Untertemperatur < 36.5 (blau), Konfigurationsseite unter /admin/alerts
 - **Stillmodus**: Deaktivierbar in Verwaltung (localStorage Toggle). Bei deaktiviert: "Letzte Flasche"-Tile + bottle Preset im FeedingForm
-- **Dashboard BabySummary 2x3**: Flasche/Brust | Heute gesamt | Letzte Windel | Windeln heute | Schlaf+Timer | VitD3
-- **Dashboard Widget-Grid**: Temperatur + Gewicht links, Medikamente rechts (row-span-2)
+- **Dashboard BabySummary 2x3**: Flasche/Brust | Heute gesamt | Letzte Windel | Windeln heute (+ Balken) | Schlaf+Timer | VitD3
+- **Dashboard Widget-Grid**: Temperatur + Gewicht + Health + TummyTime links, Medikamente rechts (row-span-2)
 - **Add-Menu**: Zentriertes Modal (nicht Bottom-Sheet), scrollbar auf Mobile
 - **VitD3-Widget**: Inline im BabySummary-Grid (nicht mehr im Widget-Grid)
 - **Tagesverlauf**: Konfigurierbare Track-Sichtbarkeit (Zahnrad + localStorage)
 - **Edit-Form**: Visuell im Stamm-Element eingebettet (Card-Einheit, border-t Trennlinie)
-- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags + Warnhinweise + Quick Actions + Stillmodus
+- **Navigation**: Verwaltungs-Hub (/admin) mit Kacheln: Kinder + Medikamentenliste + Tags + Warnhinweise + Quick Actions + Stillmodus + Plugins + API-Keys
 - **Layout**: Header fixed (nicht sticky), Sidebar fixed auf Desktop, Spacer-Div fuer Zentrierung
-- **BottomNav**: Adaptiv — 4 Favoriten + Mehr-Menü (Temperatur, Gewicht, Medikamente, ToDo, Verwaltung)
+- **BottomNav**: Adaptiv — dynamisch basierend auf aktiven Plugins + Mehr-Menü
 - **PWA**: manifest.json, PNG-Icons (180/192/512px), apple-touch-icon, standalone display
 - **UI-Polish**: Pflichtfelder mit *, ViewTabs visuell getrennt, Temperatur +/- Stepper, Icons in BabySummary, Catppuccin-Toggles (iOS-Stil)
 - **Farben**: Header bg-mantle (unterscheidbar von Cards bg-surface0), mantle Token in CSS + Tailwind
 - **ADRs**: 10 aktiv
-- **SSTD**: `(SSTD) MyBaby User-Testing Sprint 4a — Dashboard-Layout + Stillmodus + Alerts.md`
+- **SSTD**: `(SSTD) MyBaby Sprint 5 — Plugins + API-Keys + Health + TummyTime.md`
 
 ## Bekannte UI-Entscheidungen
 
@@ -177,6 +182,11 @@ Details: `DESIGN.md`
 - Header: bg-mantle (Catppuccin Latte #e6e9ef / Macchiato #1e2030), fixed statt sticky
 - Sidebar: fixed auf Desktop, Spacer-Div fuer Content-Zentrierung
 - Warnhinweise-UI: /admin/alerts mit 5 Regeln (Toggle + Schwellwert), auto-save
+- Plugin-Management: pluginRegistry.ts mit isBase Flag, pluginConfig.ts (localStorage), /admin/plugins Seite, Nav/Dashboard dynamisch
+- API-Keys: Argon2 Hash, Prefix-Matching (erste 8 Zeichen), Scopes (read/write/admin), Key nur einmal sichtbar nach Erstellung, /admin/api-keys
+- Gesundheit (Health): Zwei Typen (spit_up, tummy_ache), Severity (mild/moderate/severe), Duration nur bei Bauchschmerzen (short/medium/long)
+- Bauchlage (TummyTime): Timer-basiert analog Sleep, "Jetzt starten" erstellt DB-Eintrag, laufende Sessions nicht in Liste
+- Windeln-Balken: Proportionale farbige Balken unter Mini-Kacheln (sapphire=nass, peach=dreckig, mauve=beides, overlay0=trocken)
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 
