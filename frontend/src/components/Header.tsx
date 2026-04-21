@@ -1,10 +1,11 @@
-/** App header with title, child selector, refresh button, and theme toggle. */
+/** App header with child selector, refresh, theme toggle, and mobile burger menu. */
 
 import { useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { Menu, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Theme } from "../hooks/useTheme";
 import { ChildSelector } from "./ChildSelector";
+import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 import { useToast } from "../context/ToastContext";
 
@@ -16,6 +17,7 @@ interface HeaderProps {
 export function Header({ theme, onToggleTheme }: HeaderProps) {
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { showToast } = useToast();
 
   function handleRefresh() {
@@ -26,18 +28,29 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
   }
 
   return (
-    <header className="bg-mantle px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
-      <ChildSelector />
-      <div className="flex items-center gap-1">
-        <button
-          onClick={handleRefresh}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
-          aria-label="Daten aktualisieren"
-        >
-          <RefreshCw size={20} className={spinning ? "animate-spin-once" : ""} />
-        </button>
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-      </div>
-    </header>
+    <>
+      <header className="bg-mantle px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
+        <ChildSelector />
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleRefresh}
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
+            aria-label="Daten aktualisieren"
+          >
+            <RefreshCw size={20} className={spinning ? "animate-spin-once" : ""} />
+          </button>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          {/* Burger menu — mobile only */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors md:hidden"
+            aria-label="Navigation oeffnen"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
+      </header>
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+    </>
   );
 }
