@@ -7,6 +7,7 @@
 import { PLUGINS, OPTIONAL_PLUGINS } from "./pluginRegistry";
 
 const STORAGE_KEY = "mybaby_enabled_plugins";
+const DASHBOARD_KEY = "mybaby_dashboard_visible";
 
 /** All optional plugin keys — used as default when no config exists. */
 const ALL_OPTIONAL_KEYS = OPTIONAL_PLUGINS.map((p) => p.key);
@@ -52,4 +53,45 @@ export function togglePlugin(key: string): void {
     ? current.filter((k) => k !== key)
     : [...current, key];
   setEnabledPlugins(next);
+}
+
+/* ─── Dashboard visibility (independent of plugin activation) ─── */
+
+/** All plugin keys — used as default when no dashboard config exists. */
+const ALL_PLUGIN_KEYS = PLUGINS.map((p) => p.key);
+
+/** Read dashboard-visible plugin keys from localStorage. */
+export function getDashboardVisiblePlugins(): string[] {
+  try {
+    const raw = localStorage.getItem(DASHBOARD_KEY);
+    if (!raw) return ALL_PLUGIN_KEYS;
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return ALL_PLUGIN_KEYS;
+    const validKeys = new Set(ALL_PLUGIN_KEYS);
+    return parsed.filter((k): k is string => typeof k === "string" && validKeys.has(k));
+  } catch {
+    return ALL_PLUGIN_KEYS;
+  }
+}
+
+/** Persist dashboard-visible plugin keys to localStorage. */
+export function setDashboardVisiblePlugins(keys: string[]): void {
+  localStorage.setItem(DASHBOARD_KEY, JSON.stringify(keys));
+  window.dispatchEvent(new StorageEvent("storage", { key: DASHBOARD_KEY }));
+}
+
+/** Check whether a plugin is visible on the dashboard.
+ *  Only relevant if the plugin is also enabled. */
+export function isVisibleOnDashboard(key: string): boolean {
+  if (!isPluginEnabled(key)) return false;
+  return getDashboardVisiblePlugins().includes(key);
+}
+
+/** Toggle dashboard visibility for a plugin. */
+export function toggleDashboardVisibility(key: string): void {
+  const current = getDashboardVisiblePlugins();
+  const next = current.includes(key)
+    ? current.filter((k) => k !== key)
+    : [...current, key];
+  setDashboardVisiblePlugins(next);
 }

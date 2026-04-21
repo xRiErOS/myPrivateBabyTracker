@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { PLUGINS } from "../lib/pluginRegistry";
-import { isPluginEnabled, togglePlugin } from "../lib/pluginConfig";
+import { isPluginEnabled, togglePlugin, isVisibleOnDashboard, toggleDashboardVisibility } from "../lib/pluginConfig";
 
 export default function PluginConfigPage() {
   const navigate = useNavigate();
@@ -14,6 +14,11 @@ export default function PluginConfigPage() {
 
   function handleToggle(key: string) {
     togglePlugin(key);
+    setTick((t) => t + 1);
+  }
+
+  function handleDashboardToggle(key: string) {
+    toggleDashboardVisibility(key);
     setTick((t) => t + 1);
   }
 
@@ -38,6 +43,7 @@ export default function PluginConfigPage() {
         {PLUGINS.map((plugin) => {
           const Icon = plugin.icon;
           const enabled = isPluginEnabled(plugin.key);
+          const dashboardVisible = isVisibleOnDashboard(plugin.key);
 
           return (
             <Card key={plugin.key} className="p-4">
@@ -55,23 +61,50 @@ export default function PluginConfigPage() {
                     )}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={enabled}
-                  aria-label={`${plugin.label} ${enabled ? "deaktivieren" : "aktivieren"}`}
-                  disabled={plugin.isBase}
-                  onClick={() => handleToggle(plugin.key)}
-                  className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${
-                    enabled ? "bg-green" : "bg-surface2"
-                  } ${plugin.isBase ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-                >
-                  <span
-                    className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
-                      enabled ? "translate-x-[26px]" : "translate-x-[2px]"
-                    }`}
-                  />
-                </button>
+                <div className="flex items-center gap-3 shrink-0">
+                  {/* Dashboard visibility toggle */}
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="font-body text-[10px] text-subtext0">Dashboard</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={dashboardVisible}
+                      aria-label={`${plugin.label} auf Dashboard ${dashboardVisible ? "ausblenden" : "anzeigen"}`}
+                      disabled={!enabled}
+                      onClick={() => handleDashboardToggle(plugin.key)}
+                      className={`relative inline-flex h-6 w-[40px] shrink-0 items-center rounded-full transition-colors ${
+                        dashboardVisible ? "bg-sapphire" : "bg-surface2"
+                      } ${!enabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform ${
+                          dashboardVisible ? "translate-x-[20px]" : "translate-x-[2px]"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  {/* Plugin active toggle */}
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="font-body text-[10px] text-subtext0">Aktiv</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={enabled}
+                      aria-label={`${plugin.label} ${enabled ? "deaktivieren" : "aktivieren"}`}
+                      disabled={plugin.isBase}
+                      onClick={() => handleToggle(plugin.key)}
+                      className={`relative inline-flex h-6 w-[40px] shrink-0 items-center rounded-full transition-colors ${
+                        enabled ? "bg-green" : "bg-surface2"
+                      } ${plugin.isBase ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 rounded-full bg-white shadow-md transition-transform ${
+                          enabled ? "translate-x-[20px]" : "translate-x-[2px]"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
             </Card>
           );

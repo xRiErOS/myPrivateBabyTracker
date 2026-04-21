@@ -20,7 +20,7 @@ import { HealthWidget } from "../plugins/health/HealthWidget";
 import { TummyTimeWidget } from "../plugins/tummytime/TummyTimeWidget";
 import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
-import { isPluginEnabled } from "../lib/pluginConfig";
+import { isPluginEnabled, isVisibleOnDashboard } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
 import { useLeapStatus } from "../hooks/useMilestones";
 import {
@@ -114,7 +114,7 @@ export default function Dashboard() {
         </h2>
         <span className="font-label text-sm text-subtext0 flex items-center gap-1.5">
           {activeChild.name}
-          {isPluginEnabled("milestones") && (
+          {isVisibleOnDashboard("milestones") && (
             <button onClick={() => setShowLeapPopup(true)} className="flex items-center min-h-[44px] min-w-[44px] justify-center" aria-label="Spruenge">
               <leapIndicator.icon className={`h-4 w-4 ${leapIndicator.color}`} />
             </button>
@@ -286,18 +286,18 @@ function TodayView({
         sleepSegments={todaySleepSegments}
         isToday
       />
-      {(isPluginEnabled("temperature") || isPluginEnabled("medication") || isPluginEnabled("weight") || isPluginEnabled("health") || isPluginEnabled("tummytime")) && (
+      {(isVisibleOnDashboard("temperature") || isVisibleOnDashboard("medication") || isVisibleOnDashboard("weight") || isVisibleOnDashboard("health") || isVisibleOnDashboard("tummytime") || isVisibleOnDashboard("milestones")) && (
         <div className="grid grid-cols-2 gap-3">
-          {isPluginEnabled("temperature") && <TemperatureWidget />}
-          {isPluginEnabled("medication") && (
+          {isVisibleOnDashboard("temperature") && <TemperatureWidget />}
+          {isVisibleOnDashboard("medication") && (
             <div className="row-span-2">
               <MedicationWidget />
             </div>
           )}
-          {isPluginEnabled("weight") && <WeightWidget />}
-          {isPluginEnabled("health") && <HealthWidget childId={childId} />}
-          {isPluginEnabled("tummytime") && <TummyTimeWidget />}
-          {isPluginEnabled("milestones") && <MilestoneWidget childId={childId} />}
+          {isVisibleOnDashboard("weight") && <WeightWidget />}
+          {isVisibleOnDashboard("health") && <HealthWidget childId={childId} />}
+          {isVisibleOnDashboard("tummytime") && <TummyTimeWidget />}
+          {isVisibleOnDashboard("milestones") && <MilestoneWidget childId={childId} />}
         </div>
       )}
 
