@@ -1,7 +1,7 @@
 /** Milestones list with category filter, status toggle, search, and inline edit. */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Circle, Eye, EyeOff, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
+import { CheckCircle2, Circle, Pencil, Plus, Search, Star, Trash2, X } from "lucide-react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { Input } from "../../components/Input";
@@ -12,6 +12,7 @@ import {
   useCreateMilestone,
   useDeleteMilestone,
   useMilestoneEntries,
+  useSuggestions,
   useTemplates,
   useUpdateMilestone,
 } from "../../hooks/useMilestones";
@@ -53,7 +54,6 @@ export function MilestonesList() {
   // --- UI state ---
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [showAll, setShowAll] = useState(true);
 
   // --- Create form state ---
   const [newTitle, setNewTitle] = useState("");
@@ -86,6 +86,7 @@ export function MilestonesList() {
 
   const { data: entries = [], isLoading } = useMilestoneEntries(params);
   const { data: allTemplates = [] } = useTemplates();
+  const { data: suggestions = [] } = useSuggestions(activeChild?.id);
   const createMut = useCreateMilestone();
   const updateMut = useUpdateMilestone();
   const deleteMut = useDeleteMilestone();
@@ -105,20 +106,19 @@ export function MilestonesList() {
     return m;
   }, [allTemplates]);
 
-  // --- Templates without any entry (for "show all" mode) ---
-  const unreachedTemplates = useMemo(() => {
-    if (!showAll) return [];
-    // Exclude templates that already have an entry (to avoid duplicates)
+  // --- Age-relevant suggestions without existing entry ---
+  const openSuggestions = useMemo(() => {
     const entryTemplateIds = new Set(
       entries.filter((e) => e.template_id).map((e) => e.template_id),
     );
-    return allTemplates.filter(
-      (t) =>
-        !entryTemplateIds.has(t.id) &&
-        (!filterCategory || t.category_id === filterCategory) &&
-        (!debouncedQuery || t.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
+    return suggestions.filter(
+      (s) =>
+        !s.is_completed &&
+        !entryTemplateIds.has(s.id) &&
+        (!filterCategory || s.category_id === filterCategory) &&
+        (!debouncedQuery || s.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
     );
-  }, [showAll, allTemplates, entries, filterCategory, debouncedQuery]);
+  }, [suggestions, entries, filterCategory, debouncedQuery]);
 
   // --- Sorted entries: open first, then by completed_date desc ---
   const sorted = useMemo(() => {
@@ -316,21 +316,6 @@ export function MilestonesList() {
           ))}
         </div>
 
-        {/* Show all toggle */}
-        <button
-          type="button"
-          onClick={() => setShowAll(!showAll)}
-          className={`min-h-[44px] px-3 py-2 rounded-[8px] font-label text-sm flex items-center gap-1.5 transition-colors ${
-            showAll
-              ? "bg-mauve text-ground font-semibold"
-              : "bg-surface0 text-subtext0 hover:bg-surface1 border border-surface2"
-          }`}
-          title={showAll ? "Nur eigene Eintraege" : "Alle Meilensteine anzeigen"}
-        >
-          {showAll ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          Alle
-        </button>
-
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-overlay0" />
@@ -506,57 +491,50 @@ export function MilestonesList() {
         );
       })}
 
-      {/* Unreached templates (show all mode) */}
-      {showAll && unreachedTemplates.length > 0 && (
+      {/* Age-relevant suggestions without entry */}
+      {openSuggestions.length > 0 && filterStatus !== "completed" && (
         <>
-          <h3 className="font-heading text-sm text-overlay0 mt-4">Vorgeschlagene Meilensteine</h3>
-          {unreachedTemplates.map((tmpl) => {
-            const cat = categoryMap.get(tmpl.category_id);
-            const ageStr = formatAgeRange(tmpl.suggested_age_weeks_min, tmpl.suggested_age_weeks_max);
+          {sorted.length > 0 && (
+            <h3 className="font-heading text-sm text-overlay0 mt-4">Altersempfehlung</h3>
+          )}
+          {openSuggestions.map((sug) => {
+            const cat = categoryMap.get(sug.category_id);
+            const ageStr = formatAgeRange(sug.suggested_age_weeks_min, sug.suggested_age_weeks_max);
             return (
               <Card
-                key={`tmpl-${tmpl.id}`}
-                className="flex flex-col gap-1 p-3 opacity-60 border-dashed"
+                key={`sug-${sug.id}`}
+                className="flex flex-col gap-1 p-3"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
-                    <div className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!activeChild) return;
+                        createMut.mutate({
+                          child_id: activeChild.id,
+                          template_id: sug.id,
+                          title: sug.title,
+                          category_id: sug.category_id,
+                          source_type: sug.source_type,
+                          completed: true,
+                          completed_date: todayISO(),
+                        });
+                      }}
+                      className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
+                    >
                       <Circle className="h-6 w-6" />
-                    </div>
+                    </button>
                     <div className="flex flex-col min-w-0 break-words w-full pt-2.5">
                       <span className="font-heading text-base text-text break-words">
-                        {tmpl.title}
+                        {sug.title}
                       </span>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <CategoryBadge category={cat} />
                         {ageStr && <span className="font-body text-xs text-overlay0">{ageStr}</span>}
                       </div>
-                      {tmpl.description && (
-                        <p className="font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-1">
-                          {tmpl.description}
-                        </p>
-                      )}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!activeChild) return;
-                      createMut.mutate({
-                        child_id: activeChild.id,
-                        template_id: tmpl.id,
-                        title: tmpl.title,
-                        category_id: tmpl.category_id,
-                        source_type: tmpl.source_type,
-                        completed: true,
-                        completed_date: todayISO(),
-                      });
-                    }}
-                    className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
-                    title="Als erreicht markieren"
-                  >
-                    <CheckCircle2 className="h-5 w-5" />
-                  </button>
                 </div>
               </Card>
             );
