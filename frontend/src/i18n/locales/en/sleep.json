@@ -1,0 +1,28 @@
+{
+  "title": "Sleep",
+  "list_title": "Sleep entries",
+  "type": {
+    "nap": "Nap",
+    "night": "Night sleep"
+  },
+  "type_filter": {
+    "all": "All types"
+  },
+  "label_type": "Sleep type",
+  "label_start": "Start",
+  "label_end": "End",
+  "timer_running": "Running since",
+  "start_now": "Start now",
+  "starting": "Starting...",
+  "stop_now": "Stop now",
+  "stopping": "Stopping...",
+  "duration": "Duration: {{duration}}",
+  "empty": "No sleep entries yet",
+  "total_today": "Total today",
+  "entries_count": "{{count}} entry",
+  "entries_count_other": "{{count}} entries",
+  "last_sleep": "Last sleep",
+  "sleep_timer": "Sleep timer",
+  "summary_sleep": "Sleep",
+  "summary_total": "Total today"
+}

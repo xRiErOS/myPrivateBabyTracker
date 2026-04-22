@@ -1,0 +1,35 @@
+{
+  "title": "Meilensteine",
+  "tab_overview": "Uebersicht",
+  "tab_all": "Alle",
+  "tab_leaps": "Spruenge",
+  "suggestions": "Vorschlaege",
+  "new_skills": "Neue Faehigkeiten",
+  "storm_signs": "Anzeichen",
+  "completed": "Erreicht",
+  "not_completed": "Noch nicht erreicht",
+  "complete_now": "Jetzt erreicht",
+  "confidence": {
+    "certain": "Sicher",
+    "likely": "Wahrscheinlich",
+    "uncertain": "Unsicher"
+  },
+  "leap": "Sprung",
+  "leap_number": "Sprung {{number}}",
+  "leap_status": {
+    "past": "Vergangen",
+    "active_storm": "Sturmphase",
+    "active_sun": "Sonnenphase",
+    "upcoming": "Bevorstehend",
+    "far_future": "Weit entfernt"
+  },
+  "photo_upload": "Foto hochladen",
+  "disclaimer": "Jedes Kind entwickelt sich in eigenem Tempo",
+  "empty": "Noch keine Meilensteine erfasst",
+  "widget_title": "Meilensteine",
+  "widget_next": "Naechster Meilenstein",
+  "category": "Kategorie",
+  "filter_category": "Kategorie filtern",
+  "filter_status": "Status filtern",
+  "all_categories": "Alle Kategorien"
+}

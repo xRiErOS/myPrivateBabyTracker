@@ -1,0 +1,19 @@
+{
+  "title": "Dashboard",
+  "no_child": "Kein Kind angelegt",
+  "no_child_hint": "Lege zuerst ein Kind an, um das Dashboard zu sehen.",
+  "go_to_children": "Kinder verwalten",
+  "tab_today": "Heute",
+  "tab_timeline": "Tagesverlauf",
+  "tab_pattern": "Muster",
+  "tab_weekly": "Woche",
+  "day_timeline": "Tagesverlauf",
+  "weekly_report": "Wochenbericht",
+  "pattern_chart": "Schlafmuster",
+  "track_visibility": "Sichtbarkeit",
+  "track_sleep": "Schlaf",
+  "track_bottle": "Flasche",
+  "track_diaper": "Windeln",
+  "quick_actions": "Schnellaktionen",
+  "add_menu_title": "Neuer Eintrag"
+}

@@ -1,0 +1,32 @@
+{
+  "title": "Diapers",
+  "list_title": "Diaper entries",
+  "type": {
+    "wet": "Wet",
+    "dirty": "Dirty",
+    "mixed": "Mixed",
+    "dry": "Dry"
+  },
+  "type_short": {
+    "wet": "Wet",
+    "dirty": "Dirty",
+    "mixed": "Both",
+    "dry": "Dry"
+  },
+  "type_filter": {
+    "all": "All types"
+  },
+  "label_type": "Diaper type",
+  "label_time": "Time",
+  "empty": "No diaper entries yet",
+  "last_diaper": "Last diaper",
+  "today_count": "Diapers today",
+  "today_summary": "{{wet}}x wet, {{dirty}}x dirty",
+  "entries_count": "{{count}} entry",
+  "entries_count_other": "{{count}} entries",
+  "summary_wet": "wet",
+  "summary_dirty": "dirty",
+  "summary_dry": "dry",
+  "summary_none": "none",
+  "change_rash": "Diaper rash"
+}

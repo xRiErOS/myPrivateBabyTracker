@@ -1,0 +1,15 @@
+{
+  "title": "Temperature",
+  "list_title": "Temperature entries",
+  "label_temperature": "Temperature (°C)",
+  "label_time": "Time",
+  "empty": "No temperature entries yet",
+  "widget_title": "Temperature",
+  "status": {
+    "fever": "Fever",
+    "elevated": "Elevated temperature",
+    "hypothermia": "Hypothermia",
+    "normal": "Normal"
+  },
+  "unit": "°C"
+}

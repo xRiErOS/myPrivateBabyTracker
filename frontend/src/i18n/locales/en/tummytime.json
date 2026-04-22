@@ -1,0 +1,17 @@
+{
+  "title": "Tummy Time",
+  "list_title": "Tummy time entries",
+  "label_start": "Start",
+  "label_end": "End",
+  "start_now": "Start now",
+  "starting": "Starting...",
+  "stop_now": "Stop now",
+  "stopping": "Stopping...",
+  "timer_running": "Running since",
+  "empty": "No tummy time entries yet",
+  "widget_title": "Tummy Time",
+  "no_session": "No session yet",
+  "session_count": "{{count}} session",
+  "session_count_other": "{{count}} sessions",
+  "total_today": "Total today"
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Medikamente",
+  "list_title": "Medikamenten-Eintraege",
+  "label_name": "Medikament",
+  "label_dose": "Dosis",
+  "label_time": "Zeitpunkt",
+  "name_required": "Medikamentenname ist erforderlich",
+  "select_medication": "-- Medikament waehlen --",
+  "other_freetext": "Anderes (Freitext)",
+  "from_list": "Aus Liste waehlen",
+  "create_list": "Medikamentenliste anlegen",
+  "empty": "Noch keine Medikamenten-Eintraege",
+  "masters_title": "Medikamentenliste",
+  "active_ingredient": "Wirkstoff",
+  "default_unit": "Standardeinheit"
+}

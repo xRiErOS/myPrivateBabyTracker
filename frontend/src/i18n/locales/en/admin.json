@@ -1,0 +1,80 @@
+{
+  "title": "Settings",
+  "children": {
+    "title": "Manage children",
+    "add": "Add child",
+    "birth_date": "Birth date",
+    "active": "Active child",
+    "set_active": "Set as active",
+    "no_children": "Add your first child...",
+    "preterm": "Preterm",
+    "estimated_birth_date": "Due date"
+  },
+  "medication_masters": {
+    "title": "Medication list",
+    "add": "Add medication",
+    "name": "Name",
+    "active_ingredient": "Active ingredient",
+    "default_unit": "Default unit"
+  },
+  "tags": {
+    "title": "Tags",
+    "add": "Create tag",
+    "name": "Name",
+    "color": "Color",
+    "no_child": "No child selected"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "feeding_interval": "Feeding interval",
+    "temperature_high": "Temperature high",
+    "temperature_low": "Temperature low",
+    "diaper_interval": "Diaper interval",
+    "sleep_duration": "Sleep duration",
+    "leap_storm": "Stormy phase",
+    "threshold": "Threshold",
+    "enabled": "Enabled",
+    "severity_warning": "Warning",
+    "severity_critical": "Critical"
+  },
+  "plugins": {
+    "title": "Plugins",
+    "active": "Plugin active",
+    "show_dashboard": "Show on dashboard",
+    "base_plugin": "Base plugin (always active)",
+    "widget_order": "Widget order"
+  },
+  "api_keys": {
+    "title": "API keys",
+    "add": "Create new key",
+    "name": "Name",
+    "scopes": "Permissions",
+    "key_visible_once": "The key is only shown once!",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "users": {
+    "title": "Users",
+    "add": "Create user",
+    "username": "Username",
+    "display_name": "Display name",
+    "role": "Role",
+    "role_admin": "Admin",
+    "role_caregiver": "Caregiver",
+    "active": "Active",
+    "inactive": "Inactive",
+    "set_password": "Set password",
+    "delete_confirm": "Really delete user?",
+    "create_failed": "Creation failed",
+    "update_success": "User updated"
+  },
+  "quick_actions": {
+    "title": "Quick actions",
+    "configure": "Configure"
+  },
+  "breastfeeding": {
+    "title": "Breastfeeding mode",
+    "enabled": "Breastfeeding active",
+    "disabled": "Breastfeeding disabled"
+  }
+}

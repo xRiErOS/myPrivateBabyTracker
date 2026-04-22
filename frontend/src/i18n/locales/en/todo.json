@@ -1,0 +1,19 @@
+{
+  "title": "ToDo",
+  "tab_tasks": "Tasks",
+  "tab_templates": "Templates",
+  "add_task": "Add task",
+  "add_template": "Add template",
+  "label_title": "Title",
+  "label_details": "Details",
+  "label_due_date": "Due date",
+  "clone_today": "Create for today",
+  "all_done": "All done!",
+  "empty": "No tasks yet",
+  "empty_templates": "No templates yet",
+  "progress": "{{done}} of {{total}} done",
+  "active": "Active",
+  "inactive": "Inactive",
+  "widget_title": "ToDo",
+  "widget_all_done": "All done!"
+}

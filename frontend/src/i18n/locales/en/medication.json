@@ -1,0 +1,16 @@
+{
+  "title": "Medication",
+  "list_title": "Medication entries",
+  "label_name": "Medication",
+  "label_dose": "Dose",
+  "label_time": "Time",
+  "name_required": "Medication name is required",
+  "select_medication": "-- Select medication --",
+  "other_freetext": "Other (free text)",
+  "from_list": "Select from list",
+  "create_list": "Create medication list",
+  "empty": "No medication entries yet",
+  "masters_title": "Medication list",
+  "active_ingredient": "Active ingredient",
+  "default_unit": "Default unit"
+}

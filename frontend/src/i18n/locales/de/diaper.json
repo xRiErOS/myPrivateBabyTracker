@@ -1,0 +1,32 @@
+{
+  "title": "Windeln",
+  "list_title": "Windel-Eintraege",
+  "type": {
+    "wet": "Nass",
+    "dirty": "Stuhl",
+    "mixed": "Gemischt",
+    "dry": "Trocken"
+  },
+  "type_short": {
+    "wet": "Nass",
+    "dirty": "Dreckig",
+    "mixed": "Beides",
+    "dry": "Trocken"
+  },
+  "type_filter": {
+    "all": "Alle Typen"
+  },
+  "label_type": "Windeltyp",
+  "label_time": "Zeitpunkt",
+  "empty": "Noch keine Windel-Eintraege",
+  "last_diaper": "Letzte Windel",
+  "today_count": "Windeln heute",
+  "today_summary": "{{wet}}x nass, {{dirty}}x dreckig",
+  "entries_count": "{{count}} Eintrag",
+  "entries_count_other": "{{count}} Eintraege",
+  "summary_wet": "nass",
+  "summary_dirty": "dreckig",
+  "summary_dry": "trocken",
+  "summary_none": "keine",
+  "change_rash": "Windelausschlag"
+}

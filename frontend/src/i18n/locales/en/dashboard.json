@@ -1,0 +1,19 @@
+{
+  "title": "Dashboard",
+  "no_child": "No child set up",
+  "no_child_hint": "Add a child first to see the dashboard.",
+  "go_to_children": "Manage children",
+  "tab_today": "Today",
+  "tab_timeline": "Timeline",
+  "tab_pattern": "Pattern",
+  "tab_weekly": "Week",
+  "day_timeline": "Day timeline",
+  "weekly_report": "Weekly report",
+  "pattern_chart": "Sleep pattern",
+  "track_visibility": "Visibility",
+  "track_sleep": "Sleep",
+  "track_bottle": "Bottle",
+  "track_diaper": "Diapers",
+  "quick_actions": "Quick actions",
+  "add_menu_title": "New entry"
+}

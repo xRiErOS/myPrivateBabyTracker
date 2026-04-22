@@ -1,0 +1,80 @@
+{
+  "title": "Verwaltung",
+  "children": {
+    "title": "Kinder verwalten",
+    "add": "Kind hinzufuegen",
+    "birth_date": "Geburtsdatum",
+    "active": "Aktives Kind",
+    "set_active": "Als aktiv setzen",
+    "no_children": "Lege dein erstes Kind an...",
+    "preterm": "Fruehgeboren",
+    "estimated_birth_date": "Errechneter Termin"
+  },
+  "medication_masters": {
+    "title": "Medikamentenliste",
+    "add": "Medikament hinzufuegen",
+    "name": "Name",
+    "active_ingredient": "Wirkstoff",
+    "default_unit": "Standardeinheit"
+  },
+  "tags": {
+    "title": "Tags",
+    "add": "Tag erstellen",
+    "name": "Name",
+    "color": "Farbe",
+    "no_child": "Kein Kind ausgewaehlt"
+  },
+  "alerts": {
+    "title": "Warnhinweise",
+    "feeding_interval": "Fuetterungsintervall",
+    "temperature_high": "Temperatur hoch",
+    "temperature_low": "Temperatur niedrig",
+    "diaper_interval": "Windelintervall",
+    "sleep_duration": "Schlafdauer",
+    "leap_storm": "Sturmphase",
+    "threshold": "Schwellwert",
+    "enabled": "Aktiv",
+    "severity_warning": "Warnung",
+    "severity_critical": "Kritisch"
+  },
+  "plugins": {
+    "title": "Plugins",
+    "active": "Plugin aktiv",
+    "show_dashboard": "Zeige auf Dashboard",
+    "base_plugin": "Basis-Plugin (immer aktiv)",
+    "widget_order": "Widget-Reihenfolge"
+  },
+  "api_keys": {
+    "title": "API-Schluessel",
+    "add": "Neuen Schluessel erstellen",
+    "name": "Name",
+    "scopes": "Berechtigungen",
+    "key_visible_once": "Der Schluessel wird nur einmal angezeigt!",
+    "copy": "Kopieren",
+    "copied": "Kopiert!"
+  },
+  "users": {
+    "title": "Benutzer",
+    "add": "Benutzer erstellen",
+    "username": "Benutzername",
+    "display_name": "Anzeigename",
+    "role": "Rolle",
+    "role_admin": "Admin",
+    "role_caregiver": "Betreuer",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "set_password": "Passwort setzen",
+    "delete_confirm": "Benutzer wirklich loeschen?",
+    "create_failed": "Erstellen fehlgeschlagen",
+    "update_success": "Benutzer aktualisiert"
+  },
+  "quick_actions": {
+    "title": "Schnellaktionen",
+    "configure": "Konfigurieren"
+  },
+  "breastfeeding": {
+    "title": "Stillmodus",
+    "enabled": "Stillen aktiv",
+    "disabled": "Stillen deaktiviert"
+  }
+}

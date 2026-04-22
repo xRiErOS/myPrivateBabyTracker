@@ -1,0 +1,35 @@
+{
+  "title": "Milestones",
+  "tab_overview": "Overview",
+  "tab_all": "All",
+  "tab_leaps": "Leaps",
+  "suggestions": "Suggestions",
+  "new_skills": "New skills",
+  "storm_signs": "Signs",
+  "completed": "Completed",
+  "not_completed": "Not completed yet",
+  "complete_now": "Mark as completed",
+  "confidence": {
+    "certain": "Certain",
+    "likely": "Likely",
+    "uncertain": "Uncertain"
+  },
+  "leap": "Leap",
+  "leap_number": "Leap {{number}}",
+  "leap_status": {
+    "past": "Past",
+    "active_storm": "Stormy phase",
+    "active_sun": "Sunny phase",
+    "upcoming": "Upcoming",
+    "far_future": "Far future"
+  },
+  "photo_upload": "Upload photo",
+  "disclaimer": "Every child develops at their own pace",
+  "empty": "No milestones recorded yet",
+  "widget_title": "Milestones",
+  "widget_next": "Next milestone",
+  "category": "Category",
+  "filter_category": "Filter by category",
+  "filter_status": "Filter by status",
+  "all_categories": "All categories"
+}

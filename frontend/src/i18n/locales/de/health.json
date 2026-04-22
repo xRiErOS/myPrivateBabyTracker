@@ -1,0 +1,26 @@
+{
+  "title": "Gesundheit",
+  "list_title": "Gesundheit-Eintraege",
+  "entry_type": {
+    "spit_up": "Spucken",
+    "tummy_ache": "Bauchschmerzen"
+  },
+  "severity": {
+    "mild": "Wenig",
+    "moderate": "Mittel",
+    "severe": "Stark"
+  },
+  "duration": {
+    "short": "Kurz (~1h)",
+    "medium": "Mittel (1-2h)",
+    "long": "Lang (>2h)"
+  },
+  "label_type": "Art",
+  "label_severity": "Staerke",
+  "label_duration": "Dauer",
+  "label_time": "Zeitpunkt",
+  "empty": "Noch keine Gesundheit-Eintraege",
+  "widget_title": "Gesundheit",
+  "no_feedings_today": "Heute keine Mahlzeiten erfasst",
+  "feeding_linked": "Zugehoerige Mahlzeit"
+}

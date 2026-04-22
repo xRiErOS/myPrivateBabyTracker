@@ -1,0 +1,19 @@
+{
+  "title": "ToDo",
+  "tab_tasks": "Aufgaben",
+  "tab_templates": "Vorlagen",
+  "add_task": "Aufgabe hinzufuegen",
+  "add_template": "Vorlage hinzufuegen",
+  "label_title": "Titel",
+  "label_details": "Details",
+  "label_due_date": "Faellig am",
+  "clone_today": "Fuer heute erstellen",
+  "all_done": "Alles erledigt!",
+  "empty": "Noch keine Aufgaben",
+  "empty_templates": "Noch keine Vorlagen",
+  "progress": "{{done}} von {{total}} erledigt",
+  "active": "Aktiv",
+  "inactive": "Inaktiv",
+  "widget_title": "ToDo",
+  "widget_all_done": "Alles erledigt!"
+}

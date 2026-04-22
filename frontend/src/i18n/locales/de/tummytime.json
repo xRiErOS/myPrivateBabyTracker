@@ -1,0 +1,17 @@
+{
+  "title": "Bauchlage",
+  "list_title": "Bauchlage-Eintraege",
+  "label_start": "Beginn",
+  "label_end": "Ende",
+  "start_now": "Jetzt starten",
+  "starting": "Starte...",
+  "stop_now": "Jetzt stoppen",
+  "stopping": "Stoppe...",
+  "timer_running": "Laeuft seit",
+  "empty": "Noch keine Bauchlage-Eintraege",
+  "widget_title": "Bauchlage",
+  "no_session": "Noch keine Session",
+  "session_count": "{{count}} Session",
+  "session_count_other": "{{count}} Sessions",
+  "total_today": "Heute gesamt"
+}

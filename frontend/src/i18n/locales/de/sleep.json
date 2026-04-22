@@ -1,0 +1,28 @@
+{
+  "title": "Schlaf",
+  "list_title": "Schlaf-Eintraege",
+  "type": {
+    "nap": "Nickerchen",
+    "night": "Nachtschlaf"
+  },
+  "type_filter": {
+    "all": "Alle Typen"
+  },
+  "label_type": "Schlaftyp",
+  "label_start": "Beginn",
+  "label_end": "Ende",
+  "timer_running": "Laeuft seit",
+  "start_now": "Jetzt starten",
+  "starting": "Starte...",
+  "stop_now": "Jetzt stoppen",
+  "stopping": "Stoppe...",
+  "duration": "Dauer: {{duration}}",
+  "empty": "Noch keine Schlaf-Eintraege",
+  "total_today": "Gesamt heute",
+  "entries_count": "{{count}} Eintrag",
+  "entries_count_other": "{{count}} Eintraege",
+  "last_sleep": "Letzter Schlaf",
+  "sleep_timer": "Schlaf-Timer",
+  "summary_sleep": "Schlaf",
+  "summary_total": "Gesamt heute"
+}

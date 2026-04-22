@@ -1,0 +1,30 @@
+{
+  "title": "Mahlzeiten",
+  "list_title": "Mahlzeit-Eintraege",
+  "type": {
+    "breast_left": "Brust links",
+    "breast_right": "Brust rechts",
+    "bottle": "Flasche",
+    "solid": "Beikost"
+  },
+  "type_filter": {
+    "all": "Alle Typen"
+  },
+  "label_type": "Art",
+  "label_time": "Zeitpunkt",
+  "label_amount": "Menge (ml)",
+  "label_amount_solid": "Menge (g)",
+  "amount_ml": "{{amount}} ml",
+  "amount_g": "{{amount}} g",
+  "empty": "Noch keine Mahlzeit-Eintraege",
+  "last_feeding": "Letzte Mahlzeit",
+  "last_bottle": "Letzte Flasche",
+  "last_breast": "Stillseite",
+  "today_total": "Heute gesamt",
+  "today_total_ml": "{{amount}} ml",
+  "entries_count": "{{count}} Eintrag",
+  "entries_count_other": "{{count}} Eintraege",
+  "summary_feeding": "Mahlzeit",
+  "summary_total": "Gesamt",
+  "hybrid_mode": "Hybridmodus"
+}

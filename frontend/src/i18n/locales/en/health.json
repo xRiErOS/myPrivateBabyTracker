@@ -1,0 +1,26 @@
+{
+  "title": "Health",
+  "list_title": "Health entries",
+  "entry_type": {
+    "spit_up": "Spit-up",
+    "tummy_ache": "Tummy ache"
+  },
+  "severity": {
+    "mild": "Mild",
+    "moderate": "Moderate",
+    "severe": "Severe"
+  },
+  "duration": {
+    "short": "Short (~1h)",
+    "medium": "Medium (1-2h)",
+    "long": "Long (>2h)"
+  },
+  "label_type": "Type",
+  "label_severity": "Severity",
+  "label_duration": "Duration",
+  "label_time": "Time",
+  "empty": "No health entries yet",
+  "widget_title": "Health",
+  "no_feedings_today": "No feedings recorded today",
+  "feeding_linked": "Related feeding"
+}

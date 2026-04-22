@@ -1,0 +1,12 @@
+{
+  "title": "Weight",
+  "list_title": "Weight entries",
+  "label_weight": "Weight (g)",
+  "label_time": "Time",
+  "empty": "No weight entries yet",
+  "widget_title": "Weight",
+  "trend_up": "+{{diff}} kg",
+  "trend_down": "{{diff}} kg",
+  "unit_kg": "kg",
+  "unit_g": "g"
+}

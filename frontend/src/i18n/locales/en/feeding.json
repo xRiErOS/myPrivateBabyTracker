@@ -1,0 +1,30 @@
+{
+  "title": "Feeding",
+  "list_title": "Feeding entries",
+  "type": {
+    "breast_left": "Left breast",
+    "breast_right": "Right breast",
+    "bottle": "Bottle",
+    "solid": "Solids"
+  },
+  "type_filter": {
+    "all": "All types"
+  },
+  "label_type": "Type",
+  "label_time": "Time",
+  "label_amount": "Amount (ml)",
+  "label_amount_solid": "Amount (g)",
+  "amount_ml": "{{amount}} ml",
+  "amount_g": "{{amount}} g",
+  "empty": "No feeding entries yet",
+  "last_feeding": "Last feeding",
+  "last_bottle": "Last bottle",
+  "last_breast": "Nursing side",
+  "today_total": "Today total",
+  "today_total_ml": "{{amount}} ml",
+  "entries_count": "{{count}} entry",
+  "entries_count_other": "{{count}} entries",
+  "summary_feeding": "Feeding",
+  "summary_total": "Total",
+  "hybrid_mode": "Hybrid mode"
+}
