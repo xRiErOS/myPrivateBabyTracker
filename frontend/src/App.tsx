@@ -27,6 +27,7 @@ const ApiKeyPage = lazy(() => import("./pages/ApiKeyPage"));
 const TummyTimePage = lazy(() => import("./pages/TummyTimePage"));
 const MilestonesPage = lazy(() => import("./pages/MilestonesPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const AuthSettingsPage = lazy(() => import("./pages/AuthSettingsPage"));
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, authMode, loading } = useAuth();
@@ -68,6 +69,7 @@ function AppRoutes() {
               <Route path="/admin/alerts" element={<AlertConfigPage />} />
               <Route path="/admin/plugins" element={<PluginConfigPage />} />
               <Route path="/admin/api-keys" element={<ApiKeyPage />} />
+              <Route path="/admin/auth" element={<AuthSettingsPage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>
