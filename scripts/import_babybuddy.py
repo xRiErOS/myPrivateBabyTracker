@@ -35,6 +35,7 @@ from app.models.child import Child  # noqa: E402
 from app.plugins.diaper.models import DiaperEntry  # noqa: E402
 from app.plugins.feeding.models import FeedingEntry  # noqa: E402
 from app.plugins.sleep.models import SleepEntry  # noqa: E402
+from app.plugins.temperature.models import TemperatureEntry  # noqa: E402
 
 app = typer.Typer(help="Import data from Baby Buddy into MyBaby.")
 
@@ -50,28 +51,32 @@ class ImportStats:
     sleep_imported: int = 0
     feeding_imported: int = 0
     diaper_imported: int = 0
+    temperature_imported: int = 0
     duplicates_skipped: int = 0
     errors: int = 0
     # Dry-run counters
     sleep_would_import: int = 0
     feeding_would_import: int = 0
     diaper_would_import: int = 0
+    temperature_would_import: int = 0
 
     def summary(self) -> str:
         """Return human-readable summary."""
-        if any([self.sleep_would_import, self.feeding_would_import, self.diaper_would_import]):
+        if any([self.sleep_would_import, self.feeding_would_import, self.diaper_would_import, self.temperature_would_import]):
             return (
                 f"DRY RUN - Would import: "
                 f"{self.sleep_would_import} sleep, "
                 f"{self.feeding_would_import} feeding, "
-                f"{self.diaper_would_import} diaper. "
+                f"{self.diaper_would_import} diaper, "
+                f"{self.temperature_would_import} temperature. "
                 f"Skipped: {self.duplicates_skipped} duplicates."
             )
         return (
             f"Imported: {self.children_imported} children, "
             f"{self.sleep_imported} sleep, "
             f"{self.feeding_imported} feeding, "
-            f"{self.diaper_imported} diaper. "
+            f"{self.diaper_imported} diaper, "
+            f"{self.temperature_imported} temperature. "
             f"Skipped: {self.duplicates_skipped} duplicates. "
             f"Errors: {self.errors}."
         )
@@ -165,6 +170,16 @@ def map_feeding(data: dict, child_id: int) -> dict:
     }
 
 
+def map_temperature(data: dict, child_id: int) -> dict:
+    """Map Baby Buddy temperature entry to MyBaby TemperatureEntry fields."""
+    return {
+        "child_id": child_id,
+        "measured_at": _parse_dt(data["time"]),
+        "temperature_celsius": float(data["temperature"]),
+        "notes": _clean_str(data.get("notes")),
+    }
+
+
 def map_diaper(data: dict, child_id: int) -> dict:
     """Map Baby Buddy change entry to MyBaby DiaperEntry fields."""
     wet = data.get("wet", False)
@@ -251,6 +266,19 @@ async def is_diaper_duplicate(
     return result.scalar_one_or_none() is not None
 
 
+async def is_temperature_duplicate(
+    session: AsyncSession, child_id: int, measured_at: datetime
+) -> bool:
+    """Check if a temperature entry with same child_id + measured_at exists."""
+    result = await session.execute(
+        select(TemperatureEntry.id).where(
+            TemperatureEntry.child_id == child_id,
+            TemperatureEntry.measured_at == measured_at,
+        )
+    )
+    return result.scalar_one_or_none() is not None
+
+
 async def is_child_duplicate(
     session: AsyncSession, name: str, birth_date: date
 ) -> Child | None:
@@ -272,20 +300,10 @@ async def import_entries(
     sleep_entries: list[dict],
     feeding_entries: list[dict],
     diaper_entries: list[dict],
+    temperature_entries: list[dict],
     dry_run: bool = False,
 ) -> ImportStats:
-    """Import mapped entries into the database.
-
-    Args:
-        session: Active async DB session.
-        sleep_entries: Pre-mapped sleep dicts.
-        feeding_entries: Pre-mapped feeding dicts.
-        diaper_entries: Pre-mapped diaper dicts.
-        dry_run: If True, count but don't insert.
-
-    Returns:
-        ImportStats with counts.
-    """
+    """Import mapped entries into the database."""
     stats = ImportStats()
 
     # Sleep
@@ -320,6 +338,17 @@ async def import_entries(
         else:
             session.add(DiaperEntry(**entry))
             stats.diaper_imported += 1
+
+    # Temperature
+    for entry in temperature_entries:
+        if await is_temperature_duplicate(session, entry["child_id"], entry["measured_at"]):
+            stats.duplicates_skipped += 1
+            continue
+        if dry_run:
+            stats.temperature_would_import += 1
+        else:
+            session.add(TemperatureEntry(**entry))
+            stats.temperature_imported += 1
 
     if not dry_run:
         await session.commit()
@@ -392,10 +421,15 @@ async def _run_import(
         bb_diapers = await fetch_all_pages(client, "/api/changes/")
         typer.echo(f"  Found {len(bb_diapers)} diaper changes")
 
+        typer.echo("Fetching temperature entries...")
+        bb_temperatures = await fetch_all_pages(client, "/api/temperature/")
+        typer.echo(f"  Found {len(bb_temperatures)} temperature entries")
+
     # 3. Map all entries
     sleep_entries: list[dict] = []
     feeding_entries: list[dict] = []
     diaper_entries: list[dict] = []
+    temperature_entries: list[dict] = []
     errors: list[str] = []
 
     for entry in bb_sleep:
@@ -428,6 +462,16 @@ async def _run_import(
         except Exception as e:
             errors.append(f"Diaper #{entry.get('id', '?')}: {e}")
 
+    for entry in bb_temperatures:
+        try:
+            cid = child_id_map.get(entry["child"])
+            if cid is None:
+                errors.append(f"Temperature #{entry['id']}: unknown child {entry['child']}")
+                continue
+            temperature_entries.append(map_temperature(entry, child_id=cid))
+        except Exception as e:
+            errors.append(f"Temperature #{entry.get('id', '?')}: {e}")
+
     # 4. Import
     typer.echo(f"\nImporting {'(DRY RUN) ' if dry_run else ''}...")
     async with factory() as session:
@@ -436,6 +480,7 @@ async def _run_import(
             sleep_entries=sleep_entries,
             feeding_entries=feeding_entries,
             diaper_entries=diaper_entries,
+            temperature_entries=temperature_entries,
             dry_run=dry_run,
         )
 
