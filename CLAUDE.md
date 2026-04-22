@@ -121,9 +121,12 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 13 abgeschlossen, v0.6.1)
+## Aktueller Stand (Sprint 14 abgeschlossen, v0.6.2)
 
-- **v0.6.1**: 35 Auth-Tests + 387 Backend-Tests + 83 Frontend-Tests, Sprint 13: 4 Commits, 2 Migrationen (timezone, user_preferences)
+- **v0.6.2**: 387 Backend-Tests + 83 Frontend-Tests, Sprint 14: 4 Commits, 1 Migration (leap_weeks_fix)
+- **i18n**: react-i18next, 15 Namespaces (common, sleep, feeding, diaper, medication, temperature, weight, vitamind3, health, tummytime, milestones, todo, dashboard, admin, auth), de/en, Inline-Resources
+- **Spracheinstellung**: User.locale in Preferences-API, ProfilePage Dropdown (de/en), i18next-Sync beim Login + Sprachwechsel
+- **Wonder-Weeks-Fix**: Alle 10 Sprungzeitraeume korrigiert (seed_data.py + Alembic UPDATE-Migration n5o6p7q8r9s0)
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: Vollstaendiges Auth-System mit 4 Modi (disabled/local/forward/both), JWT httpOnly Cookie, 2FA TOTP, Passkeys WebAuthn, API-Key-Auth fuer M2M
 - **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
