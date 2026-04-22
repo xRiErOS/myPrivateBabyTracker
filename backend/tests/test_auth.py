@@ -515,3 +515,106 @@ class TestTotpEndpoints:
 
             status = await c.get("/api/v1/auth/2fa/status")
             assert status.json()["enabled"] is False
+
+
+class TestUserCRUD:
+    """User management: list, create, update, delete, set-password."""
+
+    @pytest.mark.asyncio
+    async def test_list_users(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, username="erik", role="admin")
+        await _seed_local_user(auth_session, username="julia", role="caregiver")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.get("/api/v1/users/")
+            assert resp.status_code == 200
+            users = resp.json()
+            assert len(users) == 2
+            assert users[0]["username"] == "erik"
+
+    @pytest.mark.asyncio
+    async def test_create_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, role="admin")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.post("/api/v1/users/", json={
+                "username": "julia",
+                "password": "JuliaPass1!",
+                "display_name": "Julia",
+                "role": "caregiver",
+            })
+            assert resp.status_code == 201
+            assert resp.json()["username"] == "julia"
+            assert resp.json()["role"] == "caregiver"
+            assert resp.json()["is_active"] is True
+
+    @pytest.mark.asyncio
+    async def test_create_duplicate_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, role="admin")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.post("/api/v1/users/", json={
+                "username": "erik",
+                "password": "Whatever1!",
+            })
+            assert resp.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_update_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, role="admin")
+        julia = await _seed_local_user(auth_session, username="julia", role="caregiver")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.patch(f"/api/v1/users/{julia.id}", json={
+                "display_name": "Julia R.",
+                "role": "admin",
+            })
+            assert resp.status_code == 200
+            assert resp.json()["display_name"] == "Julia R."
+            assert resp.json()["role"] == "admin"
+
+    @pytest.mark.asyncio
+    async def test_deactivate_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, role="admin")
+        julia = await _seed_local_user(auth_session, username="julia", role="caregiver")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.patch(f"/api/v1/users/{julia.id}", json={"is_active": False})
+            assert resp.status_code == 200
+            assert resp.json()["is_active"] is False
+
+    @pytest.mark.asyncio
+    async def test_set_password(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, role="admin")
+        julia = await _seed_local_user(auth_session, username="julia", role="caregiver")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.post(f"/api/v1/users/{julia.id}/set-password", json={
+                "password": "NewJulia1!",
+            })
+            assert resp.status_code == 204
+
+    @pytest.mark.asyncio
+    async def test_delete_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, role="admin")
+        julia = await _seed_local_user(auth_session, username="julia", role="caregiver")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.delete(f"/api/v1/users/{julia.id}")
+            assert resp.status_code == 204
+
+    @pytest.mark.asyncio
+    async def test_cannot_delete_self(self, auth_engine, auth_session):
+        admin = await _seed_local_user(auth_session, role="admin")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "erik", "password": "Test1234!"})
+            resp = await c.delete(f"/api/v1/users/{admin.id}")
+            assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_non_admin_denied(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, username="julia", role="caregiver")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={"username": "julia", "password": "Test1234!"})
+            resp = await c.get("/api/v1/users/")
+            assert resp.status_code == 403

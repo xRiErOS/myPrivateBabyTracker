@@ -188,6 +188,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # WebAuthn (Passkeys): register, login, credential management
     from app.api.webauthn import router as webauthn_router
     app.include_router(webauthn_router, prefix="/api/v1")
+    # User management (admin CRUD)
+    from app.api.users import router as users_router
+    app.include_router(users_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()
