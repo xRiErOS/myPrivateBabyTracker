@@ -20,7 +20,8 @@ interface AuthState {
   user: AuthUser | null;
   authMode: string;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  requiresTotp: boolean;
+  login: (username: string, password: string, totpCode?: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authMode, setAuthMode] = useState<string>("disabled");
   const [loading, setLoading] = useState(true);
+  const [requiresTotp, setRequiresTotp] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -49,9 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = useCallback(
-    async (username: string, password: string) => {
-      const u = await apiLogin(username, password);
-      setUser(u);
+    async (username: string, password: string, totpCode?: string) => {
+      const resp = await apiLogin(username, password, totpCode);
+      if (resp.requires_totp) {
+        setRequiresTotp(true);
+        return;
+      }
+      setRequiresTotp(false);
+      setUser(resp.user);
     },
     [],
   );
@@ -59,11 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     await apiLogout();
     setUser(null);
+    setRequiresTotp(false);
   }, []);
 
   return createElement(
     AuthContext.Provider,
-    { value: { user, authMode, loading, login, logout, refresh } },
+    { value: { user, authMode, loading, requiresTotp, login, logout, refresh } },
     children,
   );
 }

@@ -1,10 +1,16 @@
-/** Auth settings page — shows auth mode, current user, password change, logout. */
+/** Auth settings page — shows auth mode, current user, password change, 2FA, logout. */
 
 import { useState } from "react";
-import { Shield, LogOut, KeyRound, User, Info } from "lucide-react";
+import { Shield, LogOut, KeyRound, User, Info, Smartphone } from "lucide-react";
 import { Card } from "../components/Card";
 import { useAuth } from "../hooks/useAuth";
-import { changePassword } from "../api/auth";
+import {
+  changePassword,
+  totpSetup,
+  totpVerify,
+  totpDisable,
+  type TotpSetup,
+} from "../api/auth";
 
 const AUTH_MODE_LABELS: Record<string, string> = {
   disabled: "Deaktiviert (kein Login)",
@@ -14,11 +20,18 @@ const AUTH_MODE_LABELS: Record<string, string> = {
 };
 
 export default function AuthSettingsPage() {
-  const { user, authMode, logout } = useAuth();
+  const { user, authMode, logout, refresh } = useAuth();
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // 2FA state
+  const [totpSetupData, setTotpSetupData] = useState<TotpSetup | null>(null);
+  const [totpSetupCode, setTotpSetupCode] = useState("");
+  const [totpDisableCode, setTotpDisableCode] = useState("");
+  const [totpMsg, setTotpMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [totpSaving, setTotpSaving] = useState(false);
 
   const canChangePassword = user?.auth_type === "local";
 
@@ -121,6 +134,165 @@ export default function AuthSettingsPage() {
               {saving ? "Speichern..." : "Passwort aendern"}
             </button>
           </form>
+        </Card>
+      )}
+
+      {/* 2FA TOTP (local users only) */}
+      {user?.auth_type === "local" && (
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Smartphone className="h-4 w-4 text-green" />
+            <h3 className="font-headline text-base font-semibold text-text">
+              Zwei-Faktor-Authentifizierung (2FA)
+            </h3>
+          </div>
+
+          {user.totp_enabled && !totpSetupData ? (
+            // TOTP is enabled — show disable form
+            <div className="space-y-2">
+              <p className="text-sm text-green font-medium">2FA ist aktiviert</p>
+              <p className="text-xs text-subtext0">
+                Gib einen aktuellen Code ein, um 2FA zu deaktivieren.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  value={totpDisableCode}
+                  onChange={(e) => setTotpDisableCode(e.target.value.replace(/\D/g, ""))}
+                  placeholder="000000"
+                  className="flex-1 px-3 py-2 text-base text-center tracking-[0.3em] bg-ground text-text rounded-lg border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
+                />
+                <button
+                  disabled={totpSaving || totpDisableCode.length !== 6}
+                  onClick={async () => {
+                    setTotpSaving(true);
+                    setTotpMsg(null);
+                    try {
+                      await totpDisable(totpDisableCode);
+                      setTotpDisableCode("");
+                      setTotpMsg({ ok: true, text: "2FA deaktiviert" });
+                      await refresh();
+                    } catch {
+                      setTotpMsg({ ok: false, text: "Ungueltiger Code" });
+                    } finally {
+                      setTotpSaving(false);
+                    }
+                  }}
+                  className="px-4 py-2 bg-red/15 text-red font-semibold rounded-lg disabled:opacity-50"
+                >
+                  Deaktivieren
+                </button>
+              </div>
+            </div>
+          ) : totpSetupData ? (
+            // Setup in progress — show QR + verify
+            <div className="space-y-3">
+              <p className="text-sm text-subtext0">
+                Scanne den QR-Code mit deiner Authenticator-App (z.B. Google Authenticator, Authy).
+              </p>
+              <div className="flex justify-center">
+                <img
+                  src={`data:image/png;base64,${totpSetupData.qr_code_base64}`}
+                  alt="TOTP QR Code"
+                  className="w-48 h-48 rounded-lg"
+                />
+              </div>
+              <details className="text-xs text-subtext0">
+                <summary className="cursor-pointer">Manueller Schluessel</summary>
+                <code className="block mt-1 p-2 bg-ground rounded text-text break-all">
+                  {totpSetupData.secret}
+                </code>
+              </details>
+              <div className="p-3 bg-ground rounded-lg">
+                <p className="text-xs text-subtext0 font-semibold mb-1">
+                  Backup-Codes (einmalig, sicher aufbewahren):
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  {totpSetupData.backup_codes.map((c) => (
+                    <code key={c} className="text-xs text-text">{c}</code>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-subtext0 mb-1">
+                  Bestaetigungscode eingeben *
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    value={totpSetupCode}
+                    onChange={(e) => setTotpSetupCode(e.target.value.replace(/\D/g, ""))}
+                    placeholder="000000"
+                    className="flex-1 px-3 py-2 text-base text-center tracking-[0.3em] bg-ground text-text rounded-lg border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
+                  />
+                  <button
+                    disabled={totpSaving || totpSetupCode.length !== 6}
+                    onClick={async () => {
+                      setTotpSaving(true);
+                      setTotpMsg(null);
+                      try {
+                        await totpVerify(totpSetupCode);
+                        setTotpSetupData(null);
+                        setTotpSetupCode("");
+                        setTotpMsg({ ok: true, text: "2FA aktiviert" });
+                        await refresh();
+                      } catch {
+                        setTotpMsg({ ok: false, text: "Ungueltiger Code" });
+                      } finally {
+                        setTotpSaving(false);
+                      }
+                    }}
+                    className="px-4 py-2 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50"
+                  >
+                    Aktivieren
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={() => { setTotpSetupData(null); setTotpSetupCode(""); }}
+                className="text-sm text-subtext0 underline"
+              >
+                Abbrechen
+              </button>
+            </div>
+          ) : (
+            // Not enabled — show setup button
+            <div className="space-y-2">
+              <p className="text-xs text-subtext0">
+                Schuetze dein Konto mit einer Authenticator-App.
+              </p>
+              <button
+                disabled={totpSaving}
+                onClick={async () => {
+                  setTotpSaving(true);
+                  setTotpMsg(null);
+                  try {
+                    const data = await totpSetup();
+                    setTotpSetupData(data);
+                  } catch {
+                    setTotpMsg({ ok: false, text: "Setup fehlgeschlagen" });
+                  } finally {
+                    setTotpSaving(false);
+                  }
+                }}
+                className="px-4 py-2 bg-green/15 text-green font-semibold rounded-lg disabled:opacity-50"
+              >
+                2FA einrichten
+              </button>
+            </div>
+          )}
+
+          {totpMsg && (
+            <p className={`text-sm ${totpMsg.ok ? "text-green" : "text-red"}`}>
+              {totpMsg.text}
+            </p>
+          )}
         </Card>
       )}
 

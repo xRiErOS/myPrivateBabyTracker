@@ -20,6 +20,7 @@ from app.schemas.auth import (
     AuthStatusResponse,
     ChangePasswordRequest,
     LoginRequest,
+    LoginResponse,
     UserResponse,
 )
 
@@ -61,13 +62,13 @@ def _clear_session_cookie(response: Response) -> None:
     response.delete_cookie(key=COOKIE_NAME, path="/")
 
 
-@router.post("/login", response_model=UserResponse)
+@router.post("/login", response_model=LoginResponse)
 async def login(
     data: LoginRequest,
     response: Response,
     db: AsyncSession = Depends(get_session),
 ):
-    """Authenticate with username + password. Sets session cookie."""
+    """Authenticate with username + password + optional TOTP code."""
     settings = get_settings()
 
     if settings.auth_mode not in ("local", "both"):
@@ -102,11 +103,31 @@ async def login(
             detail="Benutzerkonto ist deaktiviert",
         )
 
+    # Check TOTP if enabled
+    if user.totp_enabled:
+        if not data.totp_code:
+            # Password OK but 2FA required — signal to frontend
+            return LoginResponse(requires_totp=True)
+
+        # Verify TOTP code
+        from app.models.totp import TotpSecret
+        totp_result = await db.execute(
+            select(TotpSecret).where(TotpSecret.user_id == user.id)
+        )
+        totp_secret = totp_result.scalar_one_or_none()
+        if not totp_secret or not totp_secret.is_verified:
+            raise HTTPException(status_code=400, detail="TOTP nicht konfiguriert")
+
+        import pyotp
+        totp = pyotp.TOTP(totp_secret.secret)
+        if not totp.verify(data.totp_code, valid_window=1):
+            raise HTTPException(status_code=401, detail="Ungueltiger 2FA-Code")
+
     token = _create_token(user.id, settings.secret_key)
     _set_session_cookie(response, token)
 
     logger.info("login_success", user_id=user.id, username=user.username)
-    return user
+    return LoginResponse(requires_totp=False, user=UserResponse.model_validate(user))
 
 
 @router.post("/logout", status_code=204)

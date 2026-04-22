@@ -21,3 +21,4 @@ class User(TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="caregiver")
     locale: Mapped[str] = mapped_column(String(10), nullable=False, default="de")
+    totp_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

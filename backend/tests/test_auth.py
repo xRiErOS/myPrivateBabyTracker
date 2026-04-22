@@ -269,7 +269,9 @@ class TestAuthRouterLogin:
                 "username": "erik", "password": "Test1234!"
             })
             assert resp.status_code == 200
-            assert resp.json()["username"] == "erik"
+            data = resp.json()
+            assert data["requires_totp"] is False
+            assert data["user"]["username"] == "erik"
             assert "mybaby_session" in resp.cookies
 
     @pytest.mark.asyncio
@@ -417,3 +419,99 @@ class TestChangePassword:
                 "new_password": "NewPass99!",
             })
             assert resp.status_code == 400
+
+
+class TestTotpEndpoints:
+    """TOTP 2FA: setup, verify, disable, login with 2FA."""
+
+    @pytest.mark.asyncio
+    async def test_totp_setup_and_verify(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+
+            # Setup
+            resp = await c.post("/api/v1/auth/2fa/setup")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert "secret" in data
+            assert "qr_code_base64" in data
+            assert len(data["backup_codes"]) == 8
+
+            # Verify with real TOTP code
+            import pyotp
+            totp = pyotp.TOTP(data["secret"])
+            code = totp.now()
+            verify_resp = await c.post("/api/v1/auth/2fa/verify", json={"code": code})
+            assert verify_resp.status_code == 204
+
+            # Status should show enabled
+            status_resp = await c.get("/api/v1/auth/2fa/status")
+            assert status_resp.json()["enabled"] is True
+            assert status_resp.json()["verified"] is True
+
+    @pytest.mark.asyncio
+    async def test_totp_verify_wrong_code(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            await c.post("/api/v1/auth/2fa/setup")
+            resp = await c.post("/api/v1/auth/2fa/verify", json={"code": "000000"})
+            assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_totp_login_requires_code(self, auth_engine, auth_session):
+        """Login with 2FA enabled but no code returns requires_totp=True."""
+        user = await _seed_local_user(auth_session)
+        # Enable TOTP directly in DB
+        import pyotp
+        secret = pyotp.random_base32()
+        from app.models.totp import TotpSecret
+        totp_secret = TotpSecret(user_id=user.id, secret=secret, is_verified=True)
+        auth_session.add(totp_secret)
+        user.totp_enabled = True
+        await auth_session.commit()
+
+        async with await _auth_client(auth_engine) as c:
+            # Login without TOTP code
+            resp = await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            assert resp.status_code == 200
+            assert resp.json()["requires_totp"] is True
+            assert resp.json()["user"] is None
+
+            # Login with correct TOTP code
+            code = pyotp.TOTP(secret).now()
+            resp2 = await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!", "totp_code": code
+            })
+            assert resp2.status_code == 200
+            assert resp2.json()["requires_totp"] is False
+            assert resp2.json()["user"]["username"] == "erik"
+
+    @pytest.mark.asyncio
+    async def test_totp_disable(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            setup_resp = await c.post("/api/v1/auth/2fa/setup")
+            secret = setup_resp.json()["secret"]
+
+            import pyotp
+            code = pyotp.TOTP(secret).now()
+            await c.post("/api/v1/auth/2fa/verify", json={"code": code})
+
+            # Disable with current code
+            code2 = pyotp.TOTP(secret).now()
+            resp = await c.post("/api/v1/auth/2fa/disable", json={"code": code2})
+            assert resp.status_code == 204
+
+            status = await c.get("/api/v1/auth/2fa/status")
+            assert status.json()["enabled"] is False
