@@ -1,8 +1,9 @@
 /** Auth settings page — shows auth mode, current user, password change, 2FA, passkeys, logout. */
 
 import { useState, useEffect } from "react";
-import { Shield, LogOut, KeyRound, User, Info, Smartphone, Fingerprint, Trash2, Pencil } from "lucide-react";
+import { LogOut, KeyRound, User, Info, Smartphone, Fingerprint, Trash2, Pencil } from "lucide-react";
 import { Card } from "../components/Card";
+import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../hooks/useAuth";
 import {
   changePassword,
@@ -115,10 +116,7 @@ export default function AuthSettingsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Shield className="h-5 w-5 text-mauve" />
-        <h2 className="font-headline text-lg font-semibold">Authentifizierung</h2>
-      </div>
+      <PageHeader title="Authentifizierung" />
 
       {/* Auth Mode Info */}
       <Card className="p-4 space-y-2">

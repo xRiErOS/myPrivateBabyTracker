@@ -105,13 +105,18 @@ export function MilestonesList() {
     return m;
   }, [allTemplates]);
 
-  // --- Templates not yet achieved (for "show all" mode) ---
+  // --- Templates not yet completed (for "show all" mode) ---
   const unreachedTemplates = useMemo(() => {
     if (!showAll) return [];
-    const entryTemplateIds = new Set(entries.filter((e) => e.template_id).map((e) => e.template_id));
+    // Only exclude templates where a COMPLETED entry exists
+    const completedTemplateIds = new Set(
+      entries
+        .filter((e) => e.template_id && e.completed)
+        .map((e) => e.template_id),
+    );
     return allTemplates.filter(
       (t) =>
-        !entryTemplateIds.has(t.id) &&
+        !completedTemplateIds.has(t.id) &&
         (!filterCategory || t.category_id === filterCategory) &&
         (!debouncedQuery || t.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
     );

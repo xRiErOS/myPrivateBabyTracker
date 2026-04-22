@@ -1,16 +1,15 @@
 /** API Key management page — list, create, toggle, delete keys. */
 
 import { useState } from "react";
-import { ArrowLeft, Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Check, Copy, Plus, Trash2 } from "lucide-react";
 import { Card } from "../components/Card";
+import { PageHeader } from "../components/PageHeader";
 import { useApiKeys, useCreateApiKey, useDeleteApiKey, useUpdateApiKey } from "../hooks/useApiKeys";
 import type { ApiKeyScope } from "../api/types";
 
 const ALL_SCOPES: ApiKeyScope[] = ["read", "write", "admin"];
 
 export default function ApiKeyPage() {
-  const navigate = useNavigate();
   const { data: keys, isLoading } = useApiKeys();
   const createKey = useCreateApiKey();
   const updateKey = useUpdateApiKey();
@@ -68,17 +67,7 @@ export default function ApiKeyPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => navigate("/admin")}
-          className="p-2 -ml-2 rounded-lg active:bg-surface1"
-          aria-label="Zurueck"
-        >
-          <ArrowLeft className="h-5 w-5 text-subtext0" />
-        </button>
-        <KeyRound className="h-5 w-5 text-mauve" />
-        <h2 className="font-headline text-lg font-semibold">API-Keys</h2>
-      </div>
+      <PageHeader title="API-Keys" />
 
       {/* Created key display (one-time) */}
       {createdKey && (

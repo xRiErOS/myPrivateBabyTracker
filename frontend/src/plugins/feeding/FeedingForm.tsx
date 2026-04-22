@@ -1,15 +1,17 @@
 /** Feeding entry form — type-switch changes visible fields. */
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { Droplets } from "lucide-react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateFeeding, useFeedingEntries, useUpdateFeeding } from "../../hooks/useFeeding";
+import { useCreateHealth } from "../../hooks/useHealth";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { attachTag } from "../../api/tags";
-import type { FeedingEntry, FeedingType } from "../../api/types";
+import type { FeedingEntry, FeedingType, HealthSeverity } from "../../api/types";
 import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 
 const ALL_FEEDING_TYPE_OPTIONS = [
@@ -25,11 +27,20 @@ interface FeedingFormProps {
   onCancel?: () => void;
 }
 
+const SPIT_SEVERITIES: { value: HealthSeverity; label: string; color: string }[] = [
+  { value: "mild", label: "Wenig", color: "bg-green text-ground" },
+  { value: "moderate", label: "Mittel", color: "bg-peach text-ground" },
+  { value: "severe", label: "Stark", color: "bg-red text-ground" },
+];
+
 export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateFeeding();
   const updateMut = useUpdateFeeding();
+  const createHealthMut = useCreateHealth();
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
+  const [showSpitOverlay, setShowSpitOverlay] = useState(false);
+  const [savedFeedingId, setSavedFeedingId] = useState<number | null>(entry?.id ?? null);
 
   const { data: recentEntries = [] } = useFeedingEntries({
     child_id: activeChild?.id,
@@ -91,6 +102,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       onDone?.();
     } else {
       const result = await createMut.mutateAsync(payload);
+      setSavedFeedingId(result.id);
       if (pendingTagIds.length > 0) {
         await Promise.all(pendingTagIds.map(tagId =>
           attachTag({ tag_id: tagId, entry_type: "feeding", entry_id: result.id })
@@ -132,10 +144,57 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       </div>
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+        {savedFeedingId && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setShowSpitOverlay(true)}
+            className="flex items-center gap-1.5"
+          >
+            <Droplets className="h-3.5 w-3.5" />
+            Spucken
+          </Button>
+        )}
         <Button type="submit" disabled={isPending || !startTime}>
           {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Eintragen"}
         </Button>
       </div>
+
+      {/* Quick spit-up overlay */}
+      {showSpitOverlay && savedFeedingId && activeChild && (
+        <div className="border-t border-surface1 pt-3 mt-1">
+          <p className="font-label text-sm font-medium text-text mb-2">Spucken erfassen</p>
+          <div className="grid grid-cols-3 gap-2">
+            {SPIT_SEVERITIES.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                disabled={createHealthMut.isPending}
+                onClick={async () => {
+                  await createHealthMut.mutateAsync({
+                    child_id: activeChild.id,
+                    entry_type: "spit_up",
+                    severity: s.value,
+                    time: nowISO(),
+                    feeding_id: savedFeedingId,
+                  });
+                  setShowSpitOverlay(false);
+                }}
+                className={`min-h-[44px] rounded-[8px] font-label text-sm font-medium transition-colors ${s.color} hover:opacity-90 disabled:opacity-50`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowSpitOverlay(false)}
+            className="mt-2 font-body text-xs text-overlay0 hover:text-text transition-colors"
+          >
+            Abbrechen
+          </button>
+        </div>
+      )}
     </form>
   );
 }

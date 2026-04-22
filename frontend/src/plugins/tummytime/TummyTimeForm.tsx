@@ -280,9 +280,16 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
         </form>
       )}
 
-      {/* Running entry: only notes editable below timer */}
+      {/* Running entry: start time + notes editable below timer */}
       {isRunning && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Input
+            label="Beginn"
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            required
+          />
           <Input
             label="Notizen"
             value={notes}
@@ -296,7 +303,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
           <div className="flex justify-end gap-2">
             {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Speichern..." : "Notizen aktualisieren"}
+              {isPending ? "Speichern..." : "Aktualisieren"}
             </Button>
           </div>
         </form>

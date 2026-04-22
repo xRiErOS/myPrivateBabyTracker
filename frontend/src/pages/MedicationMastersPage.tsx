@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { Pencil, Pill, Plus, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
+import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import {
@@ -123,8 +124,7 @@ export default function MedicationMastersPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">Medikamenten-Stammdaten</h2>
+      <PageHeader title="Medikamenten-Stammdaten">
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => {
@@ -143,7 +143,7 @@ export default function MedicationMastersPage() {
             </>
           )}
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && <MasterForm master={editMaster} onDone={handleDone} />}
 

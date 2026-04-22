@@ -6,6 +6,7 @@ import { Activity, Plus } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
+import { PageHeader } from "../components/PageHeader";
 import { useActiveChild } from "../context/ChildContext";
 import { HealthForm } from "../plugins/health/HealthForm";
 import { HealthList } from "../plugins/health/HealthList";
@@ -38,8 +39,7 @@ export default function HealthPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">Gesundheit</h2>
+      <PageHeader title="Gesundheit">
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => setShowForm(!showForm)}
@@ -47,7 +47,7 @@ export default function HealthPage() {
         >
           {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <Card>

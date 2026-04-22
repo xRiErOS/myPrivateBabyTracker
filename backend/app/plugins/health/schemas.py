@@ -44,6 +44,7 @@ class HealthCreate(BaseModel):
     duration: HealthDuration | None = None
     time: datetime
     notes: str | None = Field(default=None, max_length=2000)
+    feeding_id: int | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def validate_duration(self):
@@ -61,6 +62,7 @@ class HealthUpdate(BaseModel):
     duration: HealthDuration | None = None
     time: datetime | None = None
     notes: str | None = Field(default=None, max_length=2000)
+    feeding_id: int | None = Field(default=None, gt=0)
 
 
 class HealthResponse(BaseModel):
@@ -73,6 +75,7 @@ class HealthResponse(BaseModel):
     duration: HealthDuration | None
     time: UTCDatetime
     notes: str | None
+    feeding_id: int | None
     created_at: UTCDatetime
 
     model_config = {"from_attributes": True}

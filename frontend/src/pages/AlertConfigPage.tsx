@@ -1,8 +1,7 @@
 /** Alert configuration page — toggle and configure all 5 alert rules. */
 
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
+import { PageHeader } from "../components/PageHeader";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useActiveChild } from "../context/ChildContext";
 import { useAlertConfig, useUpdateAlertConfig } from "../hooks/useAlertConfig";
@@ -94,7 +93,6 @@ function ToggleButton({
 }
 
 export default function AlertConfigPage() {
-  const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: config, isLoading } = useAlertConfig(activeChild?.id);
   const updateMut = useUpdateAlertConfig(activeChild?.id ?? 0);
@@ -121,17 +119,7 @@ export default function AlertConfigPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-[8px] active:bg-surface1"
-        >
-          <ArrowLeft className="h-5 w-5 text-text" />
-        </button>
-        <h2 className="font-headline text-lg font-semibold text-text">
-          Warnhinweise
-        </h2>
-      </div>
+      <PageHeader title="Warnhinweise" />
 
       {RULES.map((rule) => {
         const enabled = config[rule.enabledKey] as boolean;

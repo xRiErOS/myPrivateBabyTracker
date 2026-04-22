@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pencil, Plus, Tags, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
+import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/Card";
 import { Input } from "../components/Input";
 import { useActiveChild } from "../context/ChildContext";
@@ -126,8 +127,7 @@ export default function TagsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">Tags</h2>
+      <PageHeader title="Tags">
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => {
@@ -146,7 +146,7 @@ export default function TagsPage() {
             </>
           )}
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <TagForm tag={editTag} childId={activeChild.id} onDone={handleDone} />

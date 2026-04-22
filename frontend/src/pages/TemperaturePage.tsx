@@ -6,6 +6,7 @@ import { Plus, Thermometer } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
+import { PageHeader } from "../components/PageHeader";
 import { useActiveChild } from "../context/ChildContext";
 import { TemperatureForm } from "../plugins/temperature/TemperatureForm";
 import { TemperatureList } from "../plugins/temperature/TemperatureList";
@@ -36,8 +37,7 @@ export default function TemperaturePage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">Temperatur</h2>
+      <PageHeader title="Temperatur">
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => setShowForm(!showForm)}
@@ -45,7 +45,7 @@ export default function TemperaturePage() {
         >
           {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <Card>

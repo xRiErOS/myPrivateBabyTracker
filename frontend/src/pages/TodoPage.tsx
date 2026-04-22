@@ -6,6 +6,7 @@ import { CheckSquare, FileText, Plus } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
+import { PageHeader } from "../components/PageHeader";
 import { useActiveChild } from "../context/ChildContext";
 import { TodoForm } from "../plugins/todo/TodoForm";
 import { TodoList } from "../plugins/todo/TodoList";
@@ -41,8 +42,7 @@ export default function TodoPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">ToDo-Liste</h2>
+      <PageHeader title="ToDo-Liste">
         {activeTab === "tasks" && (
           <Button
             variant={showForm ? "danger" : "primary"}
@@ -52,7 +52,7 @@ export default function TodoPage() {
             {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       {/* Tab bar */}
       <div className="flex bg-surface0 rounded-card p-1 gap-1">

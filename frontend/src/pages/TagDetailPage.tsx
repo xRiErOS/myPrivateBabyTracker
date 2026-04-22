@@ -1,8 +1,9 @@
 /** Tag detail page — entries grouped by type, swipe gestures, search, archive. */
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Search, Tags, Trash2 } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Search, Tags, Trash2 } from "lucide-react";
+import { PageHeader } from "../components/PageHeader";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
@@ -133,7 +134,6 @@ function SwipeableEntry({
 
 export default function TagDetailPage() {
   const { tagId } = useParams<{ tagId: string }>();
-  const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: tags = [] } = useTags(activeChild?.id);
   const [showArchived, setShowArchived] = useState(false);
@@ -210,22 +210,15 @@ export default function TagDetailPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate("/tags")}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+      <PageHeader title={tag.name}>
         <span
           className="w-4 h-4 rounded-full flex-shrink-0"
           style={{ backgroundColor: tag.color }}
         />
-        <h2 className="font-headline text-lg font-semibold">{tag.name}</h2>
         <span className="font-body text-sm text-subtext0">
           {entryTags.length} Eintrag{entryTags.length !== 1 ? "e" : ""}
         </span>
-      </div>
+      </PageHeader>
 
       {/* Search field */}
       <div className="relative">

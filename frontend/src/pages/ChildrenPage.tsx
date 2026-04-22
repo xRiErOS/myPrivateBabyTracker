@@ -4,6 +4,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { Baby, Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
+import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/Card";
 import { EmptyState } from "../components/EmptyState";
 import { Input } from "../components/Input";
@@ -92,8 +93,7 @@ export default function ChildrenPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-headline text-lg font-semibold">Kinder</h2>
+      <PageHeader title="Kinder">
         <Button
           variant="primary"
           onClick={() => setShowForm(!showForm)}
@@ -102,7 +102,7 @@ export default function ChildrenPage() {
           <Plus size={16} />
           Hinzufuegen
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <Card>

@@ -1,14 +1,13 @@
 /** Plugin management page — toggle optional plugins on/off. */
 
 import { useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "../components/Card";
+import { PageHeader } from "../components/PageHeader";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled, togglePlugin, isVisibleOnDashboard, toggleDashboardVisibility, getWidgetOrder, moveWidget } from "../lib/pluginConfig";
 
 export default function PluginConfigPage() {
-  const navigate = useNavigate();
   // Force re-render after toggle
   const [, setTick] = useState(0);
 
@@ -24,16 +23,7 @@ export default function PluginConfigPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => navigate("/admin")}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-surface1 text-subtext0"
-          aria-label="Zurueck"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h2 className="font-headline text-lg font-semibold">Plugins</h2>
-      </div>
+      <PageHeader title="Plugins" />
 
       <p className="font-body text-sm text-subtext0">
         Aktiviere oder deaktiviere optionale Module. Basis-Plugins sind immer aktiv.

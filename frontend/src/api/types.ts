@@ -347,6 +347,7 @@ export interface HealthEntry {
   duration: HealthDuration | null;
   time: string;
   notes: string | null;
+  feeding_id: number | null;
   created_at: string;
 }
 
@@ -357,6 +358,7 @@ export interface HealthCreate {
   duration?: HealthDuration | null;
   time: string;
   notes?: string | null;
+  feeding_id?: number | null;
 }
 
 export interface HealthUpdate {
@@ -365,6 +367,7 @@ export interface HealthUpdate {
   duration?: HealthDuration | null;
   time?: string | null;
   notes?: string | null;
+  feeding_id?: number | null;
 }
 
 export interface TummyTimeEntry {

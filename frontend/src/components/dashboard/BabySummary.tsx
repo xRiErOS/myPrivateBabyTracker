@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { Droplets, Moon, Play, Square, Sun, Utensils, X } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDuration, formatTime, nowISO, startOfTodayISO } from "../../lib/dateUtils";
+import { formatDuration, formatTime, nowISO, daysAgoISO } from "../../lib/dateUtils";
 import {
   hoursAgo,
   isWet,
   todayBerlin,
   groupByDay,
+  splitSleepByDay,
 } from "../../lib/timelineUtils";
 import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 import {
@@ -103,14 +104,22 @@ function changeTypeLabel(d: DiaperEntry | undefined): string {
 
 /** Compact sleep tile with timer start/stop. */
 function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void }) {
+  // Fetch from yesterday to catch overnight sleep that extends into today
   const { data: entries = [] } = useSleepEntries({
     child_id: childId,
-    date_from: startOfTodayISO(),
+    date_from: daysAgoISO(1),
   });
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
 
-  const totalMinutes = entries.reduce((sum, e) => sum + (e.duration_minutes ?? 0), 0);
+  // Use splitSleepByDay to correctly count only today's portion of overnight sleep
+  const today = todayBerlin();
+  const todaySegments = splitSleepByDay(entries)[today] ?? [];
+  const totalMinutes = todaySegments.reduce((sum, seg) => {
+    const start = new Date(seg._splitStart).getTime();
+    const end = new Date(seg._splitEnd).getTime();
+    return sum + (end - start) / 60000;
+  }, 0);
   const running = entries.find((e) => !e.end_time);
 
   // Live elapsed seconds for running timer
@@ -244,10 +253,11 @@ export function BabySummary({
   const lastBottleAll = allSortedFeedings.find((f) => f.feeding_type === "bottle");
   const breastfeedingEnabled = isBreastfeedingEnabled();
 
-  const sortedDiapers = [...todayDiapers].sort(
+  // Last diaper across ALL fetched diapers (not just today)
+  const allSortedDiapers = [...diapers].sort(
     (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
   );
-  const lastDiaper = sortedDiapers[0];
+  const lastDiaper = allSortedDiapers[0];
 
   return (
     <div className="grid grid-cols-2 gap-3">

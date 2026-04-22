@@ -110,7 +110,7 @@ function SuggestionCard({ suggestion, categoryInfo, onComplete, isLoading }: Sug
         type="button"
         onClick={() => onComplete(suggestion)}
         disabled={isLoading}
-        className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-green text-ground hover:opacity-80 transition-opacity disabled:opacity-50"
+        className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-surface1 text-overlay0 hover:bg-green hover:text-ground transition-colors disabled:opacity-50"
         aria-label={`${suggestion.title} als erreicht markieren`}
       >
         <Check size={20} />

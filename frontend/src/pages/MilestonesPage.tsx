@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Star } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
+import { PageHeader } from "../components/PageHeader";
 import { useActiveChild } from "../context/ChildContext";
 import { useSwipe } from "../hooks/useSwipe";
 import MilestonesOverview from "../plugins/milestones/MilestonesOverview";
@@ -50,10 +51,7 @@ export default function MilestonesPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Star className="h-5 w-5 text-peach" />
-        <h2 className="font-headline text-lg font-semibold">Meilensteine</h2>
-      </div>
+      <PageHeader title="Meilensteine" />
 
       {/* Tab Bar */}
       <div className="flex gap-1 bg-surface0 rounded-[8px] p-1">

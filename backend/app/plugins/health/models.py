@@ -32,9 +32,13 @@ class HealthEntry(TimestampMixin, Base):
     )  # "short" | "medium" | "long" — only for tummy_ache
     time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feeding_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("feeding_entries.id", ondelete="SET NULL"), nullable=True
+    )
 
-    # Relationship
+    # Relationships
     child = relationship("Child", backref="health_entries", lazy="selectin")
+    feeding = relationship("FeedingEntry", lazy="selectin")
 
     # Indexes for common queries (W4)
     __table_args__ = (

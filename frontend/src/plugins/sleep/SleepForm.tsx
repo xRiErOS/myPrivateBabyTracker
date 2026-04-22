@@ -303,7 +303,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
         </form>
       )}
 
-      {/* Running entry: only notes editable below timer */}
+      {/* Running entry: start time + notes editable below timer */}
       {isRunning && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Select
@@ -311,6 +311,13 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             options={SLEEP_TYPE_OPTIONS}
             value={sleepType}
             onChange={(e) => setSleepType(e.target.value as SleepType)}
+          />
+          <Input
+            label="Beginn"
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            required
           />
           <Input
             label="Notizen"
@@ -325,7 +332,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
           <div className="flex justify-end gap-2">
             {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Speichern..." : "Notizen aktualisieren"}
+              {isPending ? "Speichern..." : "Aktualisieren"}
             </Button>
           </div>
         </form>

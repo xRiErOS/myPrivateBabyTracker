@@ -38,6 +38,7 @@ async def create_health(
         duration=data.duration.value if data.duration else None,
         time=data.time,
         notes=data.notes,
+        feeding_id=data.feeding_id,
     )
     db.add(entry)
     await db.commit()

@@ -6,7 +6,8 @@ import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateHealth, useUpdateHealth } from "../../hooks/useHealth";
-import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
+import { useFeedingEntries } from "../../hooks/useFeeding";
+import { formatDateTime, isoToLocalInput, localInputToISO, nowISO, daysAgoISO } from "../../lib/dateUtils";
 import { ApiError } from "../../api/client";
 import { attachTag } from "../../api/tags";
 import type { HealthEntry, HealthEntryType, HealthSeverity, HealthDuration } from "../../api/types";
@@ -28,13 +29,22 @@ const DURATIONS: { value: HealthDuration; label: string }[] = [
   { value: "long", label: "Lang (>2h)" },
 ];
 
+const FEEDING_TYPE_LABELS: Record<string, string> = {
+  breast_left: "Brust L",
+  breast_right: "Brust R",
+  bottle: "Flasche",
+  solid: "Beikost",
+};
+
 interface HealthFormProps {
   entry?: HealthEntry;
+  /** Pre-select a feeding (when opened from FeedingForm). */
+  defaultFeedingId?: number;
   onDone?: () => void;
   onCancel?: () => void;
 }
 
-export function HealthForm({ entry, onDone, onCancel }: HealthFormProps) {
+export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: HealthFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateHealth();
   const updateMut = useUpdateHealth();
@@ -46,8 +56,18 @@ export function HealthForm({ entry, onDone, onCancel }: HealthFormProps) {
     entry?.time ? isoToLocalInput(entry.time) : isoToLocalInput(nowISO()),
   );
   const [notes, setNotes] = useState(entry?.notes ?? "");
+  const [feedingId, setFeedingId] = useState<number | null>(entry?.feeding_id ?? defaultFeedingId ?? null);
   const [error, setError] = useState<string | null>(null);
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
+
+  // Fetch last 4 feedings for linking
+  const { data: recentFeedings = [] } = useFeedingEntries({
+    child_id: activeChild?.id,
+    date_from: daysAgoISO(2),
+  });
+  const last4Feedings = [...recentFeedings]
+    .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+    .slice(0, 4);
 
   const isEditing = entry != null;
   const isPending = createMut.isPending || updateMut.isPending;
@@ -75,6 +95,7 @@ export function HealthForm({ entry, onDone, onCancel }: HealthFormProps) {
       duration: entryType === "tummy_ache" ? duration : null,
       time: localInputToISO(time),
       notes: notes || null,
+      feeding_id: feedingId,
     };
 
     try {
@@ -191,6 +212,33 @@ export function HealthForm({ entry, onDone, onCancel }: HealthFormProps) {
         onChange={(e) => setTime(e.target.value)}
         required
       />
+
+      {/* Feeding link — last 4 feedings */}
+      {last4Feedings.length > 0 && (
+        <div>
+          <label className="font-label text-sm font-medium text-text block mb-1">
+            Mahlzeit zuordnen
+          </label>
+          <div className="flex flex-col gap-1.5">
+            {last4Feedings.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFeedingId(feedingId === f.id ? null : f.id)}
+                className={`min-h-[44px] rounded-[8px] px-3 text-left font-body text-sm transition-colors ${
+                  feedingId === f.id
+                    ? "bg-peach text-ground"
+                    : "bg-surface1 text-text hover:bg-surface2"
+                }`}
+              >
+                <span className="font-medium">{FEEDING_TYPE_LABELS[f.feeding_type] ?? f.feeding_type}</span>
+                {f.amount_ml ? ` ${f.amount_ml} ml` : ""}
+                <span className="text-xs opacity-70 ml-2">{formatDateTime(f.start_time)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Notes */}
       <Input
