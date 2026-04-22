@@ -1,6 +1,6 @@
 /** Milestones overview — Leap status, suggestions, recently completed. */
 
-import { Check, CloudSun, CloudLightning, Star } from "lucide-react";
+import { CheckCircle2, CloudSun, CloudLightning, Star } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
 import {
@@ -96,25 +96,33 @@ interface SuggestionCardProps {
 
 function SuggestionCard({ suggestion, categoryInfo, onComplete, isLoading }: SuggestionCardProps) {
   return (
-    <Card className="flex items-center justify-between gap-3">
-      <div className="flex-1 min-w-0">
-        <p className="font-body text-text text-sm truncate">{suggestion.title}</p>
-        <span
-          className="inline-block font-label text-xs mt-1 px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: categoryInfo.color + "33", color: categoryInfo.color }}
-        >
-          {categoryInfo.name}
-        </span>
+    <Card className="flex flex-col gap-1 p-3">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          <button
+            type="button"
+            onClick={() => onComplete(suggestion)}
+            disabled={isLoading}
+            className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors disabled:opacity-50"
+            aria-label={`${suggestion.title} als erreicht markieren`}
+          >
+            <CheckCircle2 className="h-6 w-6" />
+          </button>
+          <div className="flex flex-col min-w-0 break-words w-full pt-2.5">
+            <span className="font-heading text-base text-text break-words">
+              {suggestion.title}
+            </span>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span
+                className="inline-block font-label text-xs px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: categoryInfo.color + "33", color: categoryInfo.color }}
+              >
+                {categoryInfo.name}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={() => onComplete(suggestion)}
-        disabled={isLoading}
-        className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-surface1 text-overlay0 hover:bg-green hover:text-ground transition-colors disabled:opacity-50"
-        aria-label={`${suggestion.title} als erreicht markieren`}
-      >
-        <Check size={20} />
-      </button>
     </Card>
   );
 }
@@ -218,23 +226,29 @@ export default function MilestonesOverview() {
             {recentCompleted.map((entry) => {
               const catInfo = getCategoryInfo(cats, entry.category_id);
               return (
-                <Card key={entry.id} className="flex items-center gap-3">
-                  <Check size={16} className="text-green flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-body text-text text-sm truncate">{entry.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className="inline-block font-label text-xs px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: catInfo.color + "33",
-                          color: catInfo.color,
-                        }}
-                      >
-                        {catInfo.name}
+                <Card key={entry.id} className="flex flex-col gap-1 p-3 opacity-60">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-green">
+                      <CheckCircle2 className="h-6 w-6" />
+                    </div>
+                    <div className="flex flex-col min-w-0 break-words w-full pt-2.5">
+                      <span className="font-heading text-base text-text break-words line-through text-overlay0">
+                        {entry.title}
                       </span>
-                      <span className="font-body text-overlay0 text-xs">
-                        {formatDate(entry.completed_date!)}
-                      </span>
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span
+                          className="inline-block font-label text-xs px-2 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: catInfo.color + "33",
+                            color: catInfo.color,
+                          }}
+                        >
+                          {catInfo.name}
+                        </span>
+                        <span className="font-body text-xs text-subtext0">
+                          {formatDate(entry.completed_date!)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Card>

@@ -82,6 +82,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const isPending = createMut.isPending || updateMut.isPending;
   const showAmount = feedingType === "bottle";
   const showFoodType = feedingType === "solid";
+  const justSaved = savedFeedingId != null && !entry;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -108,8 +109,69 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
           attachTag({ tag_id: tagId, entry_type: "feeding", entry_id: result.id })
         ));
       }
-      onDone?.();
+      // Don't close — show success state with spit-up option
     }
+  }
+
+  // After saving a new entry: show success view with spit-up option
+  if (justSaved) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="rounded-[8px] border border-green bg-green/10 p-3 text-sm text-green font-label">
+          Mahlzeit gespeichert
+        </div>
+
+        {!showSpitOverlay ? (
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowSpitOverlay(true)}
+              className="flex-1 flex items-center justify-center gap-1.5"
+            >
+              <Droplets className="h-3.5 w-3.5" />
+              Spucken erfassen
+            </Button>
+            <Button type="button" onClick={() => onDone?.()} className="flex-1">
+              Fertig
+            </Button>
+          </div>
+        ) : (
+          <div>
+            <p className="font-label text-sm font-medium text-text mb-2">Spucken erfassen</p>
+            <div className="grid grid-cols-3 gap-2">
+              {SPIT_SEVERITIES.map((s) => (
+                <button
+                  key={s.value}
+                  type="button"
+                  disabled={createHealthMut.isPending}
+                  onClick={async () => {
+                    await createHealthMut.mutateAsync({
+                      child_id: activeChild!.id,
+                      entry_type: "spit_up",
+                      severity: s.value,
+                      time: nowISO(),
+                      feeding_id: savedFeedingId,
+                    });
+                    onDone?.();
+                  }}
+                  className={`min-h-[44px] rounded-[8px] font-label text-sm font-medium transition-colors ${s.color} hover:opacity-90 disabled:opacity-50`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => { setShowSpitOverlay(false); onDone?.(); }}
+              className="mt-2 font-body text-xs text-overlay0 hover:text-text transition-colors"
+            >
+              Abbrechen
+            </button>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -144,57 +206,10 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       </div>
       <div className="flex justify-end gap-2">
         {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
-        {savedFeedingId && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setShowSpitOverlay(true)}
-            className="flex items-center gap-1.5"
-          >
-            <Droplets className="h-3.5 w-3.5" />
-            Spucken
-          </Button>
-        )}
         <Button type="submit" disabled={isPending || !startTime}>
           {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Eintragen"}
         </Button>
       </div>
-
-      {/* Quick spit-up overlay */}
-      {showSpitOverlay && savedFeedingId && activeChild && (
-        <div className="border-t border-surface1 pt-3 mt-1">
-          <p className="font-label text-sm font-medium text-text mb-2">Spucken erfassen</p>
-          <div className="grid grid-cols-3 gap-2">
-            {SPIT_SEVERITIES.map((s) => (
-              <button
-                key={s.value}
-                type="button"
-                disabled={createHealthMut.isPending}
-                onClick={async () => {
-                  await createHealthMut.mutateAsync({
-                    child_id: activeChild.id,
-                    entry_type: "spit_up",
-                    severity: s.value,
-                    time: nowISO(),
-                    feeding_id: savedFeedingId,
-                  });
-                  setShowSpitOverlay(false);
-                }}
-                className={`min-h-[44px] rounded-[8px] font-label text-sm font-medium transition-colors ${s.color} hover:opacity-90 disabled:opacity-50`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowSpitOverlay(false)}
-            className="mt-2 font-body text-xs text-overlay0 hover:text-text transition-colors"
-          >
-            Abbrechen
-          </button>
-        </div>
-      )}
     </form>
   );
 }

@@ -115,11 +115,11 @@ function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void
   // Use splitSleepByDay to correctly count only today's portion of overnight sleep
   const today = todayBerlin();
   const todaySegments = splitSleepByDay(entries)[today] ?? [];
-  const totalMinutes = todaySegments.reduce((sum, seg) => {
+  const totalMinutes = Math.round(todaySegments.reduce((sum, seg) => {
     const start = new Date(seg._splitStart).getTime();
     const end = new Date(seg._splitEnd).getTime();
     return sum + (end - start) / 60000;
-  }, 0);
+  }, 0));
   const running = entries.find((e) => !e.end_time);
 
   // Live elapsed seconds for running timer
