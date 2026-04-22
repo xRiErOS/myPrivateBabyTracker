@@ -185,6 +185,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # TOTP 2FA: setup, verify, disable
     from app.api.totp import router as totp_router
     app.include_router(totp_router, prefix="/api/v1")
+    # WebAuthn (Passkeys): register, login, credential management
+    from app.api.webauthn import router as webauthn_router
+    app.include_router(webauthn_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

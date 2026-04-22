@@ -1,7 +1,8 @@
-/** Login page — username + password form with optional 2FA step. */
+/** Login page — username + password form with optional 2FA step + passkey login. */
 
 import { useState, useRef, type FormEvent } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { loginBegin, loginFinish } from "../api/webauthn";
 
 export default function LoginPage() {
   const { login, requiresTotp } = useAuth();
@@ -111,6 +112,38 @@ export default function LoginPage() {
           >
             {submitting ? "Anmelden..." : "Anmelden"}
           </button>
+
+          {!requiresTotp && typeof window !== "undefined" && window.PublicKeyCredential && (
+            <>
+              <div className="flex items-center gap-2 text-xs text-subtext0">
+                <span className="flex-1 border-t border-surface1" />
+                oder
+                <span className="flex-1 border-t border-surface1" />
+              </div>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={async () => {
+                  setError(null);
+                  setSubmitting(true);
+                  try {
+                    const options = await loginBegin();
+                    const credential = await navigator.credentials.get({ publicKey: options });
+                    if (!credential) throw new Error("Abgebrochen");
+                    await loginFinish(credential as PublicKeyCredential);
+                    window.location.reload();
+                  } catch {
+                    setError("Passkey-Anmeldung fehlgeschlagen");
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+                className="w-full py-3 bg-sapphire/15 text-sapphire font-semibold rounded-lg disabled:opacity-50"
+              >
+                Mit Passkey anmelden
+              </button>
+            </>
+          )}
         </form>
       </div>
     </div>

@@ -1,7 +1,7 @@
-/** Auth settings page — shows auth mode, current user, password change, 2FA, logout. */
+/** Auth settings page — shows auth mode, current user, password change, 2FA, passkeys, logout. */
 
-import { useState } from "react";
-import { Shield, LogOut, KeyRound, User, Info, Smartphone } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, LogOut, KeyRound, User, Info, Smartphone, Fingerprint, Trash2, Pencil } from "lucide-react";
 import { Card } from "../components/Card";
 import { useAuth } from "../hooks/useAuth";
 import {
@@ -11,6 +11,14 @@ import {
   totpDisable,
   type TotpSetup,
 } from "../api/auth";
+import {
+  registerBegin,
+  registerFinish,
+  listCredentials,
+  deleteCredential,
+  renameCredential,
+  type WebAuthnCredential,
+} from "../api/webauthn";
 
 const AUTH_MODE_LABELS: Record<string, string> = {
   disabled: "Deaktiviert (kein Login)",
@@ -33,7 +41,61 @@ export default function AuthSettingsPage() {
   const [totpMsg, setTotpMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [totpSaving, setTotpSaving] = useState(false);
 
+  // Passkeys state
+  const [passkeys, setPasskeys] = useState<WebAuthnCredential[]>([]);
+  const [passkeyMsg, setPasskeyMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [passkeySaving, setPasskeySaving] = useState(false);
+  const [editingPasskey, setEditingPasskey] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+
   const canChangePassword = user?.auth_type === "local";
+  const supportsWebAuthn = typeof window !== "undefined" && !!window.PublicKeyCredential;
+
+  useEffect(() => {
+    if (user && supportsWebAuthn) {
+      listCredentials().then(setPasskeys).catch(() => {});
+    }
+  }, [user, supportsWebAuthn]);
+
+  async function handleRegisterPasskey() {
+    setPasskeySaving(true);
+    setPasskeyMsg(null);
+    try {
+      const options = await registerBegin();
+      const credential = await navigator.credentials.create({ publicKey: options });
+      if (!credential) throw new Error("Registrierung abgebrochen");
+      await registerFinish(credential as PublicKeyCredential);
+      setPasskeyMsg({ ok: true, text: "Passkey registriert" });
+      const updated = await listCredentials();
+      setPasskeys(updated);
+    } catch (e) {
+      setPasskeyMsg({ ok: false, text: "Passkey-Registrierung fehlgeschlagen" });
+    } finally {
+      setPasskeySaving(false);
+    }
+  }
+
+  async function handleDeletePasskey(id: number) {
+    try {
+      await deleteCredential(id);
+      setPasskeys((prev) => prev.filter((p) => p.id !== id));
+    } catch {
+      setPasskeyMsg({ ok: false, text: "Loeschen fehlgeschlagen" });
+    }
+  }
+
+  async function handleRenamePasskey(id: number) {
+    try {
+      await renameCredential(id, editName);
+      setPasskeys((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, device_name: editName } : p)),
+      );
+      setEditingPasskey(null);
+      setEditName("");
+    } catch {
+      setPasskeyMsg({ ok: false, text: "Umbenennen fehlgeschlagen" });
+    }
+  }
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -291,6 +353,84 @@ export default function AuthSettingsPage() {
           {totpMsg && (
             <p className={`text-sm ${totpMsg.ok ? "text-green" : "text-red"}`}>
               {totpMsg.text}
+            </p>
+          )}
+        </Card>
+      )}
+
+      {/* Passkeys (WebAuthn) */}
+      {user && supportsWebAuthn && (
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Fingerprint className="h-4 w-4 text-sapphire" />
+            <h3 className="font-headline text-base font-semibold text-text">Passkeys</h3>
+          </div>
+          <p className="text-xs text-subtext0">
+            Melde dich mit Fingerabdruck oder Face ID an — kein Passwort noetig.
+          </p>
+
+          {passkeys.length > 0 && (
+            <div className="space-y-2">
+              {passkeys.map((pk) => (
+                <div key={pk.id} className="flex items-center justify-between bg-ground rounded-lg px-3 py-2">
+                  {editingPasskey === pk.id ? (
+                    <div className="flex gap-2 flex-1">
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="flex-1 px-2 py-1 text-sm bg-surface0 text-text rounded border border-surface1"
+                        placeholder="Geraetename"
+                      />
+                      <button
+                        onClick={() => handleRenamePasskey(pk.id)}
+                        className="text-xs text-green font-semibold"
+                      >
+                        OK
+                      </button>
+                      <button
+                        onClick={() => setEditingPasskey(null)}
+                        className="text-xs text-subtext0"
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-sm text-text">
+                        {pk.device_name || `Passkey ${pk.id}`}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { setEditingPasskey(pk.id); setEditName(pk.device_name || ""); }}
+                          className="p-1 text-subtext0"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePasskey(pk.id)}
+                          className="p-1 text-red"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            disabled={passkeySaving}
+            onClick={handleRegisterPasskey}
+            className="px-4 py-2 bg-sapphire/15 text-sapphire font-semibold rounded-lg disabled:opacity-50"
+          >
+            {passkeySaving ? "Registriere..." : "Passkey hinzufuegen"}
+          </button>
+
+          {passkeyMsg && (
+            <p className={`text-sm ${passkeyMsg.ok ? "text-green" : "text-red"}`}>
+              {passkeyMsg.text}
             </p>
           )}
         </Card>
