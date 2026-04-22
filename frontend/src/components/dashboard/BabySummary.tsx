@@ -250,10 +250,6 @@ export function BabySummary({
     todayTotal > yesterdayTotal ? "\u2191" : todayTotal < yesterdayTotal ? "\u2193" : "\u2194";
   const trendColor = todayTotal >= yesterdayTotal ? "text-green" : "text-red";
 
-  const sortedFeedings = [...todayFeedings].sort(
-    (a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
-  );
-
   // Last breast feeding across ALL feedings (not just today)
   const allSortedFeedings = [...feedings].sort(
     (a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
@@ -263,9 +259,6 @@ export function BabySummary({
   );
   const lastBreastSide = lastBreast?.feeding_type === "breast_left" ? tFeeding("side_left") : lastBreast?.feeding_type === "breast_right" ? tFeeding("side_right") : null;
   const nextBreastSide = lastBreast?.feeding_type === "breast_left" ? tFeeding("side_right") : lastBreast?.feeding_type === "breast_right" ? tFeeding("side_left") : null;
-
-  // Last bottle feeding for sub-info in "Heute gesamt"
-  const lastBottle = sortedFeedings.find((f) => f.feeding_type === "bottle");
 
   // Last bottle across ALL feedings (for non-breastfeeding mode)
   const lastBottleAll = allSortedFeedings.find((f) => f.feeding_type === "bottle");
