@@ -174,6 +174,8 @@ Details: `DESIGN.md`
 - **entry_summary Batch**: N+1 auf max 8 Queries reduziert — eine IN-Clause pro Plugin-Typ statt einzelne Abfragen
 - **test_alerts.py Fix**: Hardcoded Timestamps durch relative ersetzt (_recent Helper), alle 16 Tests zeitunabhaengig
 - **Migrations-Kette**: ...f7a8b9c0d1e2 → g8h9i0j1k2l3 (alert_configs.leap_storm_enabled)
+- **Baby Buddy Migration**: 729 Eintraege importiert (217 Schlaf, 308 Mahlzeiten, 197 Windeln, 7 Temperatur) + 21 VitD3 manuell. Import-Script um Temperatur erweitert.
+- **Kind**: Anna Viktoria Riedel (ID 2), Test Baby geloescht
 - **SSTD**: `(SSTD) MyBaby Sprint 10 — Admin UX + Recurring Tasks + Alerts.md`
 
 ## Bekannte UI-Entscheidungen
