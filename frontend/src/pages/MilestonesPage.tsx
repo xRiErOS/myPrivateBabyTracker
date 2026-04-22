@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Star } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { PageHeader } from "../components/PageHeader";
@@ -11,23 +12,25 @@ import MilestonesOverview from "../plugins/milestones/MilestonesOverview";
 import { MilestonesList } from "../plugins/milestones/MilestonesList";
 import { LeapCalendar } from "../plugins/milestones/LeapCalendar";
 
-const TABS = [
-  { key: "overview", label: "Uebersicht" },
-  { key: "all", label: "Alle" },
-  { key: "leaps", label: "Spruenge" },
+const TAB_KEYS = [
+  { key: "overview", labelKey: "tab_overview" },
+  { key: "all", labelKey: "tab_all" },
+  { key: "leaps", labelKey: "tab_leaps" },
 ] as const;
 
-type TabKey = (typeof TABS)[number]["key"];
+type TabKey = (typeof TAB_KEYS)[number]["key"];
 
 export default function MilestonesPage() {
+  const { t } = useTranslation("milestones");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as TabKey) || "overview";
   const [activeTab, setActiveTab] = useState<TabKey>(
-    TABS.some(t => t.key === initialTab) ? initialTab : "overview"
+    TAB_KEYS.some(tk => tk.key === initialTab) ? initialTab : "overview"
   );
 
-  const TAB_ORDER: TabKey[] = TABS.map(t => t.key);
+  const TAB_ORDER: TabKey[] = TAB_KEYS.map(tk => tk.key);
   const swipeHandlers = useSwipe({
     onSwipeLeft: () => {
       const idx = TAB_ORDER.indexOf(activeTab);
@@ -43,19 +46,19 @@ export default function MilestonesPage() {
     return (
       <EmptyState
         icon={Star}
-        title="Kein Kind ausgewaehlt"
-        description="Waehle zuerst ein Kind aus."
+        title={tc("no_child_selected")}
+        description={tc("no_child_selected_hint")}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Meilensteine" />
+      <PageHeader title={t("title")} />
 
       {/* Tab Bar */}
       <div className="flex gap-1 bg-surface0 rounded-[8px] p-1">
-        {TABS.map(({ key, label }) => (
+        {TAB_KEYS.map(({ key, labelKey }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -65,7 +68,7 @@ export default function MilestonesPage() {
                 : "text-subtext0 hover:text-text hover:bg-surface1"
             }`}
           >
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </div>

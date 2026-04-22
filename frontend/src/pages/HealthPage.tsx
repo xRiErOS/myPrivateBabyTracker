@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Activity, Plus } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -12,6 +13,8 @@ import { HealthForm } from "../plugins/health/HealthForm";
 import { HealthList } from "../plugins/health/HealthList";
 
 export default function HealthPage() {
+  const { t } = useTranslation("health");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
@@ -31,21 +34,21 @@ export default function HealthPage() {
     return (
       <EmptyState
         icon={Activity}
-        title="Kein Kind ausgewaehlt"
-        description="Waehle zuerst ein Kind aus."
+        title={tc("no_child_selected")}
+        description={tc("no_child_selected_hint")}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Gesundheit">
+      <PageHeader title={t("title")}>
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2"
         >
-          {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
+          {showForm ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
         </Button>
       </PageHeader>
 

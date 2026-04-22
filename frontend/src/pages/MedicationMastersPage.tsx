@@ -1,6 +1,7 @@
 /** Medication Masters management page — CRUD for predefined medications. */
 
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pencil, Pill, Plus, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
 import { PageHeader } from "../components/PageHeader";
@@ -31,6 +32,8 @@ function MasterForm({
   const [unit, setUnit] = useState(master?.default_unit ?? "Tablette");
   const [notes, setNotes] = useState(master?.notes ?? "");
 
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const isPending = createMut.isPending || updateMut.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,7 +59,7 @@ function MasterForm({
     <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
-          label="Name"
+          label={t("medication_masters.name")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="z.B. Paracetamol"
@@ -64,7 +67,7 @@ function MasterForm({
           required
         />
         <Input
-          label="Wirkstoff"
+          label={t("medication_masters.active_ingredient")}
           value={ingredient}
           onChange={(e) => setIngredient(e.target.value)}
           placeholder="z.B. Paracetamol 125mg"
@@ -72,7 +75,7 @@ function MasterForm({
         />
         <div className="flex flex-col gap-1">
           <label className="font-label text-sm font-medium text-subtext0">
-            Masseinheit <span className="text-red">*</span>
+            {t("medication_masters.default_unit")} <span className="text-red">*</span>
           </label>
           <div className="flex flex-wrap gap-1.5">
             {UNIT_PRESETS.map((u) => (
@@ -92,14 +95,14 @@ function MasterForm({
           </div>
         </div>
         <Input
-          label="Notizen"
+          label={t("medication_masters.notes")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optionale Notizen..."
           maxLength={2000}
         />
         <Button type="submit" disabled={isPending || !name.trim()}>
-          {isPending ? "Speichern..." : master ? "Aktualisieren" : "Anlegen"}
+          {isPending ? tc("saving") : master ? tc("update") : tc("create")}
         </Button>
       </form>
     </Card>
@@ -107,6 +110,8 @@ function MasterForm({
 }
 
 export default function MedicationMastersPage() {
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const { data: masters = [], isLoading } = useMedicationMasters(false);
   const deleteMut = useDeleteMedicationMaster();
   const [showForm, setShowForm] = useState(false);
@@ -124,7 +129,7 @@ export default function MedicationMastersPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Medikamenten-Stammdaten">
+      <PageHeader title={t("medication_masters.title")}>
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => {
@@ -135,11 +140,11 @@ export default function MedicationMastersPage() {
         >
           {showForm ? (
             <>
-              <X className="h-4 w-4" /> Abbrechen
+              <X className="h-4 w-4" /> {tc("cancel")}
             </>
           ) : (
             <>
-              <Plus className="h-4 w-4" /> Neu
+              <Plus className="h-4 w-4" /> {tc("new")}
             </>
           )}
         </Button>
@@ -148,12 +153,12 @@ export default function MedicationMastersPage() {
       {showForm && <MasterForm master={editMaster} onDone={handleDone} />}
 
       {isLoading ? (
-        <p className="font-body text-sm text-overlay0">Laden...</p>
+        <p className="font-body text-sm text-overlay0">{tc("loading")}</p>
       ) : masters.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
           <Pill className="h-8 w-8" />
-          <p className="font-body text-sm">Noch keine Medikamente angelegt</p>
-          <p className="font-body text-xs">Lege Medikamente an, um sie in Formularen per Dropdown auszuwaehlen.</p>
+          <p className="font-body text-sm">{t("medication_masters.no_entries")}</p>
+          <p className="font-body text-xs">{t("medication_masters.no_entries_hint")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -181,7 +186,7 @@ export default function MedicationMastersPage() {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm(`"${m.name}" loeschen?`)) deleteMut.mutate(m.id);
+                    if (confirm(t("medication_masters.confirm_delete", { name: m.name }))) deleteMut.mutate(m.id);
                   }}
                   className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red"
                   style={{ minWidth: 44, minHeight: 44 }}

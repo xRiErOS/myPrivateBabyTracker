@@ -228,7 +228,7 @@ export default function UserManagementPage() {
             {modal === "create" && (
               <form onSubmit={handleCreate} className="space-y-3">
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Benutzername *</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.username")} *</label>
                   <input
                     type="text" required minLength={1} maxLength={100}
                     value={formUsername} onChange={(e) => setFormUsername(e.target.value)}
@@ -236,7 +236,7 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Passwort * (min. 8)</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.password_min")}</label>
                   <input
                     type="password" required minLength={8} maxLength={200}
                     value={formPassword} onChange={(e) => setFormPassword(e.target.value)}
@@ -244,7 +244,7 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Anzeigename</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.display_name")}</label>
                   <input
                     type="text" maxLength={200}
                     value={formDisplayName} onChange={(e) => setFormDisplayName(e.target.value)}
@@ -252,19 +252,19 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Rolle</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.role")}</label>
                   <select
                     value={formRole} onChange={(e) => setFormRole(e.target.value)}
                     className="w-full px-3 py-2 text-base bg-ground text-text rounded-lg border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
                   >
-                    <option value="caregiver">Caregiver</option>
-                    <option value="admin">Admin</option>
+                    <option value="caregiver">{t("users.role_caregiver")}</option>
+                    <option value="admin">{t("users.role_admin")}</option>
                   </select>
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-subtext0">Abbrechen</button>
+                  <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-subtext0">{tc("cancel")}</button>
                   <button type="submit" disabled={saving} className="px-4 py-2 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50">
-                    {saving ? "Erstelle..." : "Erstellen"}
+                    {saving ? tc("creating") : tc("create")}
                   </button>
                 </div>
               </form>
@@ -273,7 +273,7 @@ export default function UserManagementPage() {
             {modal === "edit" && (
               <form onSubmit={handleEdit} className="space-y-3">
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Anzeigename</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.display_name")}</label>
                   <input
                     type="text" maxLength={200}
                     value={formDisplayName} onChange={(e) => setFormDisplayName(e.target.value)}
@@ -281,19 +281,19 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Rolle</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.role")}</label>
                   <select
                     value={formRole} onChange={(e) => setFormRole(e.target.value)}
                     className="w-full px-3 py-2 text-base bg-ground text-text rounded-lg border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
                   >
-                    <option value="caregiver">Caregiver</option>
-                    <option value="admin">Admin</option>
+                    <option value="caregiver">{t("users.role_caregiver")}</option>
+                    <option value="admin">{t("users.role_admin")}</option>
                   </select>
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-subtext0">Abbrechen</button>
+                  <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-subtext0">{tc("cancel")}</button>
                   <button type="submit" disabled={saving} className="px-4 py-2 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50">
-                    {saving ? "Speichere..." : "Speichern"}
+                    {saving ? tc("saving") : tc("save")}
                   </button>
                 </div>
               </form>
@@ -302,7 +302,7 @@ export default function UserManagementPage() {
             {modal === "password" && (
               <form onSubmit={handleSetPassword} className="space-y-3">
                 <div>
-                  <label className="block text-sm text-subtext0 mb-1">Neues Passwort * (min. 8)</label>
+                  <label className="block text-sm text-subtext0 mb-1">{t("users.password_new_label")}</label>
                   <input
                     type="password" required minLength={8} maxLength={200}
                     value={formPassword} onChange={(e) => setFormPassword(e.target.value)}
@@ -310,9 +310,9 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-subtext0">Abbrechen</button>
+                  <button type="button" onClick={() => setModal(null)} className="px-4 py-2 text-subtext0">{tc("cancel")}</button>
                   <button type="submit" disabled={saving} className="px-4 py-2 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50">
-                    {saving ? "Setze..." : "Passwort setzen"}
+                    {saving ? tc("saving") : t("users.set_password")}
                   </button>
                 </div>
               </form>

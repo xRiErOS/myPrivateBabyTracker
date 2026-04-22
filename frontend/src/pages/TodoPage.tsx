@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CheckSquare, FileText, Plus } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -15,6 +16,8 @@ import { TemplateList } from "../plugins/todo/TemplateList";
 type TodoTab = "tasks" | "templates";
 
 export default function TodoPage() {
+  const { t } = useTranslation("todo");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
@@ -34,22 +37,22 @@ export default function TodoPage() {
     return (
       <EmptyState
         icon={CheckSquare}
-        title="Kein Kind ausgewaehlt"
-        description="Waehle zuerst ein Kind aus."
+        title={tc("no_child_selected")}
+        description={tc("no_child_selected_hint")}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <PageHeader title="ToDo-Liste">
+      <PageHeader title={t("title")}>
         {activeTab === "tasks" && (
           <Button
             variant={showForm ? "danger" : "primary"}
             onClick={() => setShowForm(!showForm)}
             className="flex items-center gap-2"
           >
-            {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
+            {showForm ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
           </Button>
         )}
       </PageHeader>
@@ -66,7 +69,7 @@ export default function TodoPage() {
           }`}
         >
           <CheckSquare className="h-4 w-4" />
-          Aufgaben
+          {t("tab_tasks")}
         </button>
         <button
           type="button"
@@ -78,7 +81,7 @@ export default function TodoPage() {
           }`}
         >
           <FileText className="h-4 w-4" />
-          Vorlagen
+          {t("tab_templates")}
         </button>
       </div>
 

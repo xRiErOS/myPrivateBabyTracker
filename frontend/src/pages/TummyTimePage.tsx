@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Timer, Plus } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -13,6 +14,8 @@ import { TummyTimeForm } from "../plugins/tummytime/TummyTimeForm";
 import { TummyTimeList } from "../plugins/tummytime/TummyTimeList";
 
 export default function TummyTimePage() {
+  const { t } = useTranslation("tummytime");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
@@ -47,21 +50,21 @@ export default function TummyTimePage() {
     return (
       <EmptyState
         icon={Timer}
-        title="Kein Kind ausgewaehlt"
-        description="Waehle zuerst ein Kind aus."
+        title={tc("no_child_selected")}
+        description={tc("no_child_selected_hint")}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Bauchlage">
+      <PageHeader title={t("title")}>
         <Button
           variant={showForm && !runningEntry ? "danger" : "primary"}
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2"
         >
-          {showForm && !runningEntry ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
+          {showForm && !runningEntry ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
         </Button>
       </PageHeader>
 

@@ -380,7 +380,7 @@ export default function AuthSettingsPage() {
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         className="flex-1 px-2 py-1 text-sm bg-surface0 text-text rounded border border-surface1"
-                        placeholder="Geraetename"
+                        placeholder={t("passkey.name_placeholder")}
                       />
                       <button
                         onClick={() => handleRenamePasskey(pk.id)}
@@ -392,7 +392,7 @@ export default function AuthSettingsPage() {
                         onClick={() => setEditingPasskey(null)}
                         className="text-xs text-subtext0"
                       >
-                        Abbrechen
+                        {tc("cancel")}
                       </button>
                     </div>
                   ) : (
@@ -426,7 +426,7 @@ export default function AuthSettingsPage() {
             onClick={handleRegisterPasskey}
             className="px-4 py-2 bg-sapphire/15 text-sapphire font-semibold rounded-lg disabled:opacity-50"
           >
-            {passkeySaving ? "Registriere..." : "Passkey hinzufuegen"}
+            {passkeySaving ? t("passkey.adding") : t("passkey.add")}
           </button>
 
           {passkeyMsg && (
@@ -445,7 +445,7 @@ export default function AuthSettingsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-red/15 text-red font-semibold rounded-lg"
           >
             <LogOut className="h-4 w-4" />
-            Abmelden
+            {t("logout")}
           </button>
         </Card>
       )}

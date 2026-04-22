@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Pencil, Plus, Tags, Trash2, X } from "lucide-react";
 import { Button } from "../components/Button";
 import { PageHeader } from "../components/PageHeader";
@@ -45,6 +46,8 @@ function TagForm({
   const [name, setName] = useState(tag?.name ?? "");
   const [color, setColor] = useState(tag?.color ?? "#8839ef");
 
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const isPending = createMut.isPending || updateMut.isPending;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -64,16 +67,16 @@ function TagForm({
     <Card>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
-          label="Name"
+          label={t("tags.name")}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="z.B. Kinderarzt"
+          placeholder={t("tags.name_placeholder")}
           maxLength={100}
           required
         />
         <div className="flex flex-col gap-1">
           <label className="font-label text-sm font-medium text-subtext0">
-            Farbe <span className="text-red">*</span>
+            {t("tags.color")} <span className="text-red">*</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {COLOR_PRESETS.map((c) => (
@@ -90,7 +93,7 @@ function TagForm({
           </div>
         </div>
         <Button type="submit" disabled={isPending || !name.trim()}>
-          {isPending ? "Speichern..." : tag ? "Aktualisieren" : "Anlegen"}
+          {isPending ? tc("saving") : tag ? tc("update") : tc("create")}
         </Button>
       </form>
     </Card>
@@ -98,6 +101,8 @@ function TagForm({
 }
 
 export default function TagsPage() {
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const navigate = useNavigate();
   const { data: tags = [], isLoading } = useTags(activeChild?.id);
@@ -119,15 +124,15 @@ export default function TagsPage() {
     return (
       <EmptyState
         icon={Tags}
-        title="Kein Kind ausgewaehlt"
-        description="Waehle zuerst ein Kind aus."
+        title={tc("no_child_selected")}
+        description={tc("no_child_selected_hint")}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Tags">
+      <PageHeader title={t("tags.title")}>
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => {
@@ -138,11 +143,11 @@ export default function TagsPage() {
         >
           {showForm ? (
             <>
-              <X className="h-4 w-4" /> Abbrechen
+              <X className="h-4 w-4" /> {tc("cancel")}
             </>
           ) : (
             <>
-              <Plus className="h-4 w-4" /> Neu
+              <Plus className="h-4 w-4" /> {tc("new")}
             </>
           )}
         </Button>
@@ -153,33 +158,33 @@ export default function TagsPage() {
       )}
 
       {isLoading ? (
-        <p className="font-body text-sm text-overlay0">Laden...</p>
+        <p className="font-body text-sm text-overlay0">{tc("loading")}</p>
       ) : tags.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
           <Tags className="h-8 w-8" />
-          <p className="font-body text-sm">Noch keine Tags angelegt</p>
+          <p className="font-body text-sm">{t("tags.no_tags")}</p>
           <p className="font-body text-xs">
-            Tags helfen, Eintraege fuer Kinderarzt oder Hebamme zu markieren.
+            {t("tags.no_tags_hint")}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {tags.map((t) => (
+          {tags.map((tg) => (
             <Card
-              key={t.id}
+              key={tg.id}
               className="flex items-center justify-between p-3 cursor-pointer active:bg-surface1 transition-colors"
-              onClick={() => navigate(`/tags/${t.id}`)}
+              onClick={() => navigate(`/tags/${tg.id}`)}
             >
               <div className="flex items-center gap-2 min-h-[44px]">
                 <span
                   className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: t.color }}
+                  style={{ backgroundColor: tg.color }}
                 />
-                <span className="font-heading text-base text-text">{t.name}</span>
+                <span className="font-heading text-base text-text">{tg.name}</span>
               </div>
               <div className="flex gap-1">
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleEdit(t); }}
+                  onClick={(e) => { e.stopPropagation(); handleEdit(tg); }}
                   className="rounded p-1.5 text-overlay0 hover:bg-surface1"
                   style={{ minWidth: 44, minHeight: 44 }}
                 >
@@ -188,7 +193,7 @@ export default function TagsPage() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (confirm(`Tag "${t.name}" loeschen?`)) deleteMut.mutate(t.id);
+                    if (confirm(t("tags.confirm_delete", { name: tg.name }))) deleteMut.mutate(tg.id);
                   }}
                   className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red"
                   style={{ minWidth: 44, minHeight: 44 }}

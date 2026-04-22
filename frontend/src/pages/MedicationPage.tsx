@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Pill, Plus } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -12,6 +13,8 @@ import { MedicationForm } from "../plugins/medication/MedicationForm";
 import { MedicationList } from "../plugins/medication/MedicationList";
 
 export default function MedicationPage() {
+  const { t } = useTranslation("medication");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
@@ -29,21 +32,21 @@ export default function MedicationPage() {
     return (
       <EmptyState
         icon={Pill}
-        title="Kein Kind ausgewaehlt"
-        description="Waehle zuerst ein Kind aus."
+        title={tc("no_child_selected")}
+        description={tc("no_child_selected_hint")}
       />
     );
   }
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Medikamente">
+      <PageHeader title={t("title")}>
         <Button
           variant={showForm ? "danger" : "primary"}
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2"
         >
-          {showForm ? "Abbrechen" : <><Plus className="h-4 w-4" /> Neu</>}
+          {showForm ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
         </Button>
       </PageHeader>
 
