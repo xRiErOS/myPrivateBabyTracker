@@ -1,6 +1,7 @@
 /** User management page — list, create, edit, deactivate users (admin only). */
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, KeyRound, UserX, UserCheck, Trash2 } from "lucide-react";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
@@ -17,6 +18,8 @@ import {
 type ModalMode = "create" | "edit" | "password" | null;
 
 export default function UserManagementPage() {
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<ModalMode>(null);
@@ -35,7 +38,7 @@ export default function UserManagementPage() {
       const data = await listUsers();
       setUsers(data);
     } catch {
-      setMsg({ ok: false, text: "Benutzer konnten nicht geladen werden" });
+      setMsg({ ok: false, text: t("users.load_failed") });
     } finally {
       setLoading(false);
     }
@@ -84,9 +87,9 @@ export default function UserManagementPage() {
       await createUser(data);
       setModal(null);
       await loadUsers();
-      setMsg({ ok: true, text: `Benutzer "${formUsername}" erstellt` });
+      setMsg({ ok: true, text: t("users.created", { name: formUsername }) });
     } catch {
-      setMsg({ ok: false, text: "Erstellen fehlgeschlagen" });
+      setMsg({ ok: false, text: t("users.create_failed") });
     } finally {
       setSaving(false);
     }
@@ -104,9 +107,9 @@ export default function UserManagementPage() {
       });
       setModal(null);
       await loadUsers();
-      setMsg({ ok: true, text: "Benutzer aktualisiert" });
+      setMsg({ ok: true, text: t("users.update_success") });
     } catch {
-      setMsg({ ok: false, text: "Aktualisieren fehlgeschlagen" });
+      setMsg({ ok: false, text: t("users.update_failed") });
     } finally {
       setSaving(false);
     }
@@ -120,9 +123,9 @@ export default function UserManagementPage() {
     try {
       await setUserPassword(editUser.id, formPassword);
       setModal(null);
-      setMsg({ ok: true, text: `Passwort fuer "${editUser.username}" gesetzt` });
+      setMsg({ ok: true, text: t("users.password_set_success", { name: editUser.username }) });
     } catch {
-      setMsg({ ok: false, text: "Passwort setzen fehlgeschlagen" });
+      setMsg({ ok: false, text: t("users.password_set_failed") });
     } finally {
       setSaving(false);
     }
@@ -133,33 +136,33 @@ export default function UserManagementPage() {
       await updateUser(u.id, { is_active: !u.is_active });
       await loadUsers();
     } catch {
-      setMsg({ ok: false, text: "Status-Aenderung fehlgeschlagen" });
+      setMsg({ ok: false, text: t("users.status_change_failed") });
     }
   }
 
   async function handleDelete(u: AdminUser) {
-    if (!confirm(`Benutzer "${u.username}" wirklich loeschen?`)) return;
+    if (!confirm(t("users.delete_confirm", { name: u.username }))) return;
     try {
       await deleteUser(u.id);
       await loadUsers();
-      setMsg({ ok: true, text: `Benutzer "${u.username}" geloescht` });
+      setMsg({ ok: true, text: t("users.deleted", { name: u.username }) });
     } catch {
-      setMsg({ ok: false, text: "Loeschen fehlgeschlagen" });
+      setMsg({ ok: false, text: t("users.delete_failed") });
     }
   }
 
-  if (loading) return <div className="text-center text-subtext0 py-8">Laden...</div>;
+  if (loading) return <div className="text-center text-subtext0 py-8">{tc("loading")}</div>;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <PageHeader title="Benutzerverwaltung" />
+        <PageHeader title={t("users.title")} />
         <button
           onClick={openCreate}
           className="flex items-center gap-1 px-3 py-2 bg-peach text-ground font-semibold rounded-lg text-sm"
         >
           <Plus className="h-4 w-4" />
-          Neu
+          {t("users.add")}
         </button>
       </div>
 
@@ -208,7 +211,7 @@ export default function UserManagementPage() {
           </Card>
         ))}
         {users.length === 0 && (
-          <p className="text-sm text-subtext0 text-center py-4">Keine Benutzer vorhanden</p>
+          <p className="text-sm text-subtext0 text-center py-4">{t("users.no_users")}</p>
         )}
       </div>
 
@@ -217,9 +220,9 @@ export default function UserManagementPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-sm bg-surface0 rounded-card p-5 space-y-4">
             <h3 className="font-headline text-base font-semibold text-text">
-              {modal === "create" && "Neuer Benutzer"}
-              {modal === "edit" && `${editUser?.username} bearbeiten`}
-              {modal === "password" && `Passwort: ${editUser?.username}`}
+              {modal === "create" && t("users.new_user")}
+              {modal === "edit" && t("users.edit_user", { name: editUser?.username })}
+              {modal === "password" && t("users.password_title", { name: editUser?.username })}
             </h3>
 
             {modal === "create" && (

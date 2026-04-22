@@ -27,6 +27,7 @@ def _to_response(prefs: UserPreferences, user: User) -> PreferencesResponse:
         widget_order=json.loads(prefs.widget_order) if prefs.widget_order else None,
         track_visibility=json.loads(prefs.track_visibility) if prefs.track_visibility else None,
         timezone=user.timezone,
+        locale=user.locale,
     )
 
 
@@ -80,9 +81,11 @@ async def update_preferences(
     if "track_visibility" in update:
         prefs.track_visibility = json.dumps(update.pop("track_visibility")) if update["track_visibility"] is not None else None
 
-    # Handle timezone (stored on User, not Preferences)
+    # Handle timezone and locale (stored on User, not Preferences)
     if "timezone" in update:
         user.timezone = update.pop("timezone")
+    if "locale" in update:
+        user.locale = update.pop("locale")
 
     # Simple fields
     for field, value in update.items():

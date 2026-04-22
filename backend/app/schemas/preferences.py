@@ -12,6 +12,7 @@ class PreferencesResponse(BaseModel):
     widget_order: list[str] | None = None
     track_visibility: dict[str, bool] | None = None
     timezone: str = "Europe/Berlin"
+    locale: str = "de"
 
     model_config = {"from_attributes": True}
 
@@ -25,3 +26,4 @@ class PreferencesUpdate(BaseModel):
     widget_order: list[str] | None = None
     track_visibility: dict[str, bool] | None = None
     timezone: str | None = Field(default=None, max_length=50)
+    locale: str | None = Field(default=None, max_length=10)
