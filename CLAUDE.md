@@ -62,7 +62,7 @@ SELECT * FROM conversation_snapshots ORDER BY session_timestamp DESC LIMIT 1;
 | Backend | Python 3.12, FastAPI, SQLAlchemy 2.0, Alembic, Pydantic 2 |
 | Frontend | React 18, TypeScript, Tailwind CSS 3, Vite 6 |
 | Database | SQLite WAL |
-| Auth | Forward-Auth (Authelia) + Local Auth (Argon2) |
+| Auth | Forward-Auth (Authelia) + Local Auth (Argon2, JWT) + 2FA (TOTP) + Passkeys (WebAuthn) |
 | Logging | structlog (JSON) |
 | Security | starlette-csrf, slowapi, CSP headers |
 | CLI | Typer |
@@ -115,11 +115,11 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 10 abgeschlossen, v0.5.4)
+## Aktueller Stand (Sprint 12 abgeschlossen, v0.6.0)
 
-- **v0.5.4**: 387 Backend-Tests + 83 Frontend-Tests, Sprint 10: 4 Commits (697d858..970591f), 1 Migration
+- **v0.6.0**: 26 Auth-Tests + 387 Backend-Tests + 83 Frontend-Tests, Sprint 12: 6 Commits, 2 Migrationen
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
-- **Auth**: AUTH_MODE=disabled (verschoben) + API-Key-Auth fuer Machine-to-Machine (Argon2, Scopes, Rate-Limiting)
+- **Auth**: Vollstaendiges Auth-System mit 4 Modi (disabled/local/forward/both), JWT httpOnly Cookie, 2FA TOTP, Passkeys WebAuthn, API-Key-Auth fuer M2M
 - **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
 - **Milestones-Plugin**: 5 Tabellen (categories, templates, entries, photos, leaps), Seed-Daten (8 Kategorien, 107 Vorlagen, 10 Spruenge), CRUD + Quick-Complete + Photo-Upload + Leap-Status-API
 - **Fruehgeborenen-Modus**: Child-Model: estimated_birth_date + is_preterm, korrigiertes Alter fuer Leap-Berechnung und Suggestions
@@ -177,6 +177,14 @@ Details: `DESIGN.md`
 - **Baby Buddy Migration**: 729 Eintraege importiert (217 Schlaf, 308 Mahlzeiten, 197 Windeln, 7 Temperatur) + 21 VitD3 manuell. Import-Script um Temperatur erweitert.
 - **Kind**: Anna Viktoria Riedel (ID 2), Test Baby geloescht
 - **SSTD**: `(SSTD) MyBaby Sprint 10 — Admin UX + Recurring Tasks + Alerts.md`
+- **Auth-System (Sprint 12)**: JWT httpOnly Cookie (1 Woche, secure nur prod), LoginResponse mit requires_totp Signal, AuthProvider + AuthGuard im Frontend
+- **Login-Endpoints**: POST /auth/login (Passwort + opt. TOTP), POST /auth/logout, GET /auth/me, GET /auth/status, POST /auth/change-password
+- **2FA TOTP**: TotpSecret Model (secret + backup_codes), pyotp + qrcode[pil], Setup/Verify/Disable Endpoints, QR-Code + 8 Backup-Codes
+- **Passkeys WebAuthn**: WebAuthnCredential Model (credential_id + public_key + sign_count), py_webauthn, Register/Login Begin+Finish, Credential CRUD
+- **LoginPage**: 2-Step (Passwort → TOTP wenn aktiviert), Passkey-Button als Alternative
+- **AuthSettingsPage**: /admin/auth — Auth-Modus Info, User-Info, Passwort aendern, 2FA Setup/Disable, Passkey verwalten, Logout
+- **Migrations-Kette**: ...g8h9i0j1k2l3 → h9i0j1k2l3m4 (totp_secrets + users.totp_enabled) → i0j1k2l3m4n5 (webauthn_credentials)
+- **SSTD**: `(SSTD) MyBaby Sprint 6 — Milestones Backend + Fruehgeborenen + Recurring Tasks.md` (wird erstellt)
 
 ## Bekannte UI-Entscheidungen
 
