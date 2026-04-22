@@ -18,6 +18,7 @@ import {
   Tags,
   Thermometer,
   Timer,
+  User,
   Utensils,
   X,
 } from "lucide-react";
@@ -45,6 +46,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/tummy-time", icon: Timer, label: "Bauchlage", pluginKey: "tummytime" },
   { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
   { to: "/milestones", icon: Star, label: "Meilensteine", pluginKey: "milestones" },
+  { to: "/profile", icon: User, label: "Mein Profil" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 

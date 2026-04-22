@@ -191,6 +191,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # User management (admin CRUD)
     from app.api.users import router as users_router
     app.include_router(users_router, prefix="/api/v1")
+    # User preferences (per-user settings)
+    from app.api.preferences import router as preferences_router
+    app.include_router(preferences_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()
