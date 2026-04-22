@@ -53,7 +53,7 @@ export function MilestonesList() {
   // --- UI state ---
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
 
   // --- Create form state ---
   const [newTitle, setNewTitle] = useState("");
@@ -105,18 +105,16 @@ export function MilestonesList() {
     return m;
   }, [allTemplates]);
 
-  // --- Templates not yet completed (for "show all" mode) ---
+  // --- Templates without any entry (for "show all" mode) ---
   const unreachedTemplates = useMemo(() => {
     if (!showAll) return [];
-    // Only exclude templates where a COMPLETED entry exists
-    const completedTemplateIds = new Set(
-      entries
-        .filter((e) => e.template_id && e.completed)
-        .map((e) => e.template_id),
+    // Exclude templates that already have an entry (to avoid duplicates)
+    const entryTemplateIds = new Set(
+      entries.filter((e) => e.template_id).map((e) => e.template_id),
     );
     return allTemplates.filter(
       (t) =>
-        !completedTemplateIds.has(t.id) &&
+        !entryTemplateIds.has(t.id) &&
         (!filterCategory || t.category_id === filterCategory) &&
         (!debouncedQuery || t.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
     );

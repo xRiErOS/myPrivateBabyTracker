@@ -1,6 +1,6 @@
 /** Milestones overview — Leap status, suggestions, recently completed. */
 
-import { CheckCircle2, CloudSun, CloudLightning, Star } from "lucide-react";
+import { CheckCircle2, Circle, CloudSun, CloudLightning, Star } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
 import {
@@ -106,7 +106,7 @@ function SuggestionCard({ suggestion, categoryInfo, onComplete, isLoading }: Sug
             className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors disabled:opacity-50"
             aria-label={`${suggestion.title} als erreicht markieren`}
           >
-            <CheckCircle2 className="h-6 w-6" />
+            <Circle className="h-6 w-6" />
           </button>
           <div className="flex flex-col min-w-0 break-words w-full pt-2.5">
             <span className="font-heading text-base text-text break-words">
