@@ -1,6 +1,7 @@
 /** Tags dashboard widget — top 3 tags with non-archived entry counts. */
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Tags } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
@@ -35,6 +36,7 @@ function TagRow({ tagId, name, color }: { tagId: number; name: string; color: st
 }
 
 export function TagsWidget() {
+  const { t } = useTranslation("common");
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: tags = [] } = useTags(activeChild?.id);
@@ -49,9 +51,9 @@ export function TagsWidget() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Tags className="h-5 w-5 text-lavender" />
-          <p className="font-label text-sm font-medium text-subtext0">Tags</p>
+          <p className="font-label text-sm font-medium text-subtext0">{t("nav.tags")}</p>
         </div>
-        <p className="font-body text-sm text-overlay0">Keine Tags</p>
+        <p className="font-body text-sm text-overlay0">{t("no_tags")}</p>
       </Card>
     );
   }
@@ -63,14 +65,14 @@ export function TagsWidget() {
     >
       <div className="flex items-center gap-2 mb-3">
         <Tags className="h-5 w-5 text-lavender" />
-        <p className="font-label text-sm font-medium text-subtext0">Tags</p>
+        <p className="font-label text-sm font-medium text-subtext0">{t("nav.tags")}</p>
       </div>
       <div className="flex flex-col gap-1.5">
         {topTags.map((tag) => (
           <TagRow key={tag.id} tagId={tag.id} name={tag.name} color={tag.color} />
         ))}
         {tags.length > 3 && (
-          <p className="font-body text-xs text-subtext0">+{tags.length - 3} weitere</p>
+          <p className="font-body text-xs text-subtext0">{t("more_tags", { count: tags.length - 3 })}</p>
         )}
       </div>
     </Card>

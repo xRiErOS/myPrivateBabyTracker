@@ -1,5 +1,6 @@
 /** ToDo dashboard widget — open count + progress bar. */
 
+import { useTranslation } from "react-i18next";
 import { CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
@@ -7,6 +8,7 @@ import { useTodos } from "../../hooks/useTodos";
 import { useActiveChild } from "../../context/ChildContext";
 
 export function TodoWidget() {
+  const { t } = useTranslation("todo");
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: entries = [], isLoading } = useTodos(activeChild?.id);
@@ -23,22 +25,22 @@ export function TodoWidget() {
     >
       <div className="flex items-center gap-2 mb-3">
         <CheckSquare className="h-5 w-5 text-green" />
-        <p className="font-label text-sm font-medium text-subtext0">ToDo</p>
+        <p className="font-label text-sm font-medium text-subtext0">{t("widget_title")}</p>
       </div>
 
       {isLoading ? (
-        <p className="font-body text-sm text-subtext0">Laden...</p>
+        <p className="font-body text-sm text-subtext0">{t("widget_loading")}</p>
       ) : total === 0 ? (
-        <p className="font-body text-sm text-overlay0">Keine Aufgaben</p>
+        <p className="font-body text-sm text-overlay0">{t("widget_no_tasks")}</p>
       ) : open.length === 0 ? (
-        <p className="font-body text-sm text-green">Alles erledigt!</p>
+        <p className="font-body text-sm text-green">{t("widget_all_done")}</p>
       ) : open.length === 1 ? (
         <p className="font-body text-sm text-text truncate">{open[0].title}</p>
       ) : (
         <div className="flex flex-col gap-2">
           <p className="font-body text-sm">
             <span className="font-semibold text-peach">{open.length}</span>
-            <span className="text-subtext0"> offen</span>
+            <span className="text-subtext0"> {t("widget_open_count")}</span>
           </p>
           {/* Progress bar */}
           <div className="h-2 bg-surface2 rounded-full overflow-hidden">
@@ -47,7 +49,7 @@ export function TodoWidget() {
               style={{ width: `${pct}%` }}
             />
           </div>
-          <p className="font-body text-xs text-subtext0">{pct}% erledigt</p>
+          <p className="font-body text-xs text-subtext0">{t("widget_done_pct", { pct })}</p>
         </div>
       )}
     </Card>

@@ -28,5 +28,9 @@
   "summary_dirty": "dreckig",
   "summary_dry": "trocken",
   "summary_none": "keine",
-  "change_rash": "Windelausschlag"
+  "has_rash": "Ausschlag vorhanden",
+  "change_rash": "Windelausschlag",
+  "summary_total_short": "Ges.",
+  "summary_both_short": "Beid.",
+  "summary_wet_short": "Nass"
 }

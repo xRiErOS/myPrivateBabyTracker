@@ -12,5 +12,11 @@
   "empty": "No medication entries yet",
   "masters_title": "Medication list",
   "active_ingredient": "Active ingredient",
-  "default_unit": "Default unit"
+  "default_unit": "Default unit",
+  "confirm_delete": "Delete entry?",
+  "summary": {
+    "doses": "Doses",
+    "medications": "Medications",
+    "last_dose": "Last dose"
+  }
 }

@@ -1,6 +1,7 @@
 /** Sleep entry form — create/edit sleep with start/stop timer + live running display. */
 
 import { type FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
@@ -11,11 +12,6 @@ import { formatDateTime, isoToLocalInput, localInputToISO, nowISO } from "../../
 import { ApiError } from "../../api/client";
 import { attachTag } from "../../api/tags";
 import type { SleepEntry, SleepType } from "../../api/types";
-
-const SLEEP_TYPE_OPTIONS = [
-  { value: "nap", label: "Nickerchen" },
-  { value: "night", label: "Nachtschlaf" },
-];
 
 interface SleepFormProps {
   entry?: SleepEntry;
@@ -32,9 +28,16 @@ function formatElapsed(seconds: number): string {
 }
 
 export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
+  const { t } = useTranslation("sleep");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
+
+  const SLEEP_TYPE_OPTIONS = [
+    { value: "nap", label: t("type.nap") },
+    { value: "night", label: t("type.night") },
+  ];
 
   const [sleepType, setSleepType] = useState<SleepType>(entry?.sleep_type ?? "nap");
   const [startTime, setStartTime] = useState(
@@ -132,7 +135,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
     } else if (err instanceof Error) {
       setError(localizeTimestamps(err.message));
     } else {
-      setError("Unbekannter Fehler");
+      setError(tc("errors.unknown"));
     }
   }
 
@@ -176,7 +179,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
         <div className="rounded-[8px] border-2 border-green bg-green/10 p-3 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="font-label text-sm font-semibold text-green">
-              Schlaf laeuft
+              {t("timer_running")}
             </span>
             <span className="font-mono text-lg font-bold text-green">
               {formatElapsed(elapsed)}
@@ -188,7 +191,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             onClick={handleStopAndSave}
             disabled={isPending}
           >
-            {isPending ? "Stoppe..." : "Jetzt stoppen"}
+            {isPending ? t("stopping") : t("stop_now")}
           </Button>
         </div>
       )}
@@ -204,7 +207,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
       {isNew && (
         <>
           <Select
-            label="Typ"
+            label={tc("type")}
             options={SLEEP_TYPE_OPTIONS}
             value={sleepType}
             onChange={(e) => setSleepType(e.target.value as SleepType)}
@@ -221,41 +224,41 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             disabled={isPending}
             className="bg-mauve text-ground"
           >
-            {isPending ? "Starte..." : "Jetzt starten"}
+            {isPending ? t("starting") : t("start_now")}
           </Button>
 
           <div className="flex items-center gap-2 my-1">
             <div className="flex-1 h-px bg-overlay0/30" />
-            <span className="font-label text-xs text-overlay0">oder nachtragen</span>
+            <span className="font-label text-xs text-overlay0">{tc("add")}</span>
             <div className="flex-1 h-px bg-overlay0/30" />
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <Input
-              label="Beginn"
+              label={t("label_start")}
               type="datetime-local"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
               required
             />
             <Input
-              label="Ende"
+              label={t("label_end")}
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
               required
             />
             <Input
-              label="Notizen"
+              label={tc("notes")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optionale Notizen..."
+              placeholder={tc("notes_placeholder")}
               maxLength={2000}
             />
             <div className="flex justify-end gap-2">
-              {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+              {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
               <Button type="submit" disabled={isPending || !startTime || !endTime}>
-                {isPending ? "Speichern..." : "Eintragen"}
+                {isPending ? tc("saving") : tc("add")}
               </Button>
             </div>
           </form>
@@ -266,7 +269,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
       {isEditing && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Select
-            label="Typ"
+            label={tc("type")}
             options={SLEEP_TYPE_OPTIONS}
             value={sleepType}
             onChange={(e) => setSleepType(e.target.value as SleepType)}
@@ -295,9 +298,9 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             <TagSelector entryType="sleep" entryId={entry!.id} />
           </div>
           <div className="flex justify-end gap-2">
-            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
             <Button type="submit" disabled={isPending || !startTime}>
-              {isPending ? "Speichern..." : "Aktualisieren"}
+              {isPending ? tc("saving") : tc("update")}
             </Button>
           </div>
         </form>
@@ -307,7 +310,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
       {isRunning && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Select
-            label="Typ"
+            label={tc("type")}
             options={SLEEP_TYPE_OPTIONS}
             value={sleepType}
             onChange={(e) => setSleepType(e.target.value as SleepType)}
@@ -330,9 +333,9 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             <TagSelector entryType="sleep" entryId={entry!.id} />
           </div>
           <div className="flex justify-end gap-2">
-            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Speichern..." : "Aktualisieren"}
+              {isPending ? tc("saving") : tc("update")}
             </Button>
           </div>
         </form>

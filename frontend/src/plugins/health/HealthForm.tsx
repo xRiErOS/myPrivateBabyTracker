@@ -1,6 +1,7 @@
 /** Health entry form — create/edit spit-up and tummy ache entries. */
 
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
@@ -12,30 +13,6 @@ import { ApiError } from "../../api/client";
 import { attachTag } from "../../api/tags";
 import type { HealthEntry, HealthEntryType, HealthSeverity, HealthDuration } from "../../api/types";
 
-const ENTRY_TYPES: { value: HealthEntryType; label: string }[] = [
-  { value: "spit_up", label: "Spucken" },
-  { value: "tummy_ache", label: "Bauchschmerzen" },
-];
-
-const SEVERITIES: { value: HealthSeverity; label: string }[] = [
-  { value: "mild", label: "Wenig" },
-  { value: "moderate", label: "Mittel" },
-  { value: "severe", label: "Stark" },
-];
-
-const DURATIONS: { value: HealthDuration; label: string }[] = [
-  { value: "short", label: "Kurz (~1h)" },
-  { value: "medium", label: "Mittel (1-2h)" },
-  { value: "long", label: "Lang (>2h)" },
-];
-
-const FEEDING_TYPE_LABELS: Record<string, string> = {
-  breast_left: "Brust L",
-  breast_right: "Brust R",
-  bottle: "Flasche",
-  solid: "Beikost",
-};
-
 interface HealthFormProps {
   entry?: HealthEntry;
   /** Pre-select a feeding (when opened from FeedingForm). */
@@ -45,9 +22,35 @@ interface HealthFormProps {
 }
 
 export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: HealthFormProps) {
+  const { t } = useTranslation("health");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const createMut = useCreateHealth();
   const updateMut = useUpdateHealth();
+
+  const ENTRY_TYPES: { value: HealthEntryType; label: string }[] = [
+    { value: "spit_up", label: t("entry_type.spit_up") },
+    { value: "tummy_ache", label: t("entry_type.tummy_ache") },
+  ];
+
+  const SEVERITIES: { value: HealthSeverity; label: string }[] = [
+    { value: "mild", label: t("severity.mild") },
+    { value: "moderate", label: t("severity.moderate") },
+    { value: "severe", label: t("severity.severe") },
+  ];
+
+  const DURATIONS: { value: HealthDuration; label: string }[] = [
+    { value: "short", label: t("duration.short") },
+    { value: "medium", label: t("duration.medium") },
+    { value: "long", label: t("duration.long") },
+  ];
+
+  const FEEDING_TYPE_LABELS: Record<string, string> = {
+    breast_left: t("feeding_type.breast_left"),
+    breast_right: t("feeding_type.breast_right"),
+    bottle: t("feeding_type.bottle"),
+    solid: t("feeding_type.solid"),
+  };
 
   const [entryType, setEntryType] = useState<HealthEntryType>(entry?.entry_type ?? "spit_up");
   const [severity, setSeverity] = useState<HealthSeverity>(entry?.severity ?? "mild");
@@ -78,7 +81,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
     } else if (err instanceof Error) {
       setError(err.message);
     } else {
-      setError("Unbekannter Fehler");
+      setError(tc("errors.unknown"));
     }
   }
 
@@ -128,7 +131,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
       {/* Entry type selector */}
       <div>
         <label className="font-label text-sm font-medium text-text block mb-1">
-          Typ *
+          {t("label_type")} *
         </label>
         <div className="grid grid-cols-2 gap-2">
           {ENTRY_TYPES.map((t) => (
@@ -154,7 +157,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
       {/* Severity selector */}
       <div>
         <label className="font-label text-sm font-medium text-text block mb-1">
-          Intensitaet *
+          {t("label_intensity")} *
         </label>
         <div className="grid grid-cols-3 gap-2">
           {SEVERITIES.map((s) => (
@@ -182,7 +185,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
       {entryType === "tummy_ache" && (
         <div>
           <label className="font-label text-sm font-medium text-text block mb-1">
-            Dauer
+            {t("label_duration")}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {DURATIONS.map((d) => (
@@ -205,7 +208,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
 
       {/* Time input */}
       <Input
-        label="Zeitpunkt *"
+        label={`${t("label_time")} *`}
         type="datetime-local"
         value={time}
         onChange={(e) => setTime(e.target.value)}
@@ -216,7 +219,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
       {sortedTodayFeedings.length > 0 && (
         <div>
           <label className="font-label text-sm font-medium text-text block mb-1">
-            Mahlzeit zuordnen
+            {t("label_assign_feeding")}
           </label>
           <div className="flex flex-col gap-1.5">
             {sortedTodayFeedings.map((f) => (
@@ -243,10 +246,10 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
 
       {/* Notes */}
       <Input
-        label="Notizen"
+        label={tc("notes")}
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optionale Notizen..."
+        placeholder={tc("notes_placeholder")}
         maxLength={2000}
       />
 
@@ -261,9 +264,9 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
 
       {/* Submit */}
       <div className="flex justify-end gap-2">
-        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
         <Button type="submit" disabled={isPending || !time}>
-          {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Eintragen"}
+          {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
         </Button>
       </div>
     </form>

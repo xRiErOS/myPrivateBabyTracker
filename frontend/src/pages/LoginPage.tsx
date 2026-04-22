@@ -1,10 +1,13 @@
 /** Login page — username + password form with optional 2FA step + passkey login. */
 
 import { useState, useRef, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { loginBegin, loginFinish } from "../api/webauthn";
 
 export default function LoginPage() {
+  const { t } = useTranslation("auth");
+  const { t: tc } = useTranslation("common");
   const { login, requiresTotp } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +29,8 @@ export default function LoginPage() {
     } catch {
       setError(
         requiresTotp
-          ? "Ungueltiger 2FA-Code"
-          : "Benutzername oder Passwort falsch",
+          ? t("login.error_totp")
+          : t("login.error_credentials"),
       );
     } finally {
       setSubmitting(false);
@@ -43,7 +46,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-ground flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-surface0 rounded-card p-6">
         <h1 className="text-xl font-semibold text-text mb-6 text-center">
-          MyBaby Login
+          {t("login.title")}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -51,7 +54,7 @@ export default function LoginPage() {
             <>
               <div>
                 <label htmlFor="username" className="block text-sm text-subtext0 mb-1">
-                  Benutzername *
+                  {t("login.username")} *
                 </label>
                 <input
                   id="username"
@@ -66,7 +69,7 @@ export default function LoginPage() {
 
               <div>
                 <label htmlFor="password" className="block text-sm text-subtext0 mb-1">
-                  Passwort *
+                  {t("login.password")} *
                 </label>
                 <input
                   id="password"
@@ -82,7 +85,7 @@ export default function LoginPage() {
           ) : (
             <div>
               <p className="text-sm text-subtext0 mb-3">
-                Gib den 6-stelligen Code aus deiner Authenticator-App ein.
+                {t("login.totp_hint")}
               </p>
               <input
                 ref={totpRef}
@@ -110,14 +113,14 @@ export default function LoginPage() {
             disabled={submitting}
             className="w-full py-3 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50"
           >
-            {submitting ? "Anmelden..." : "Anmelden"}
+            {submitting ? t("login.logging_in") : t("login.submit")}
           </button>
 
           {!requiresTotp && typeof window !== "undefined" && window.PublicKeyCredential && (
             <>
               <div className="flex items-center gap-2 text-xs text-subtext0">
                 <span className="flex-1 border-t border-surface1" />
-                oder
+                {tc("or")}
                 <span className="flex-1 border-t border-surface1" />
               </div>
               <button
@@ -129,18 +132,18 @@ export default function LoginPage() {
                   try {
                     const options = await loginBegin();
                     const credential = await navigator.credentials.get({ publicKey: options });
-                    if (!credential) throw new Error("Abgebrochen");
+                    if (!credential) throw new Error(t("login.error_cancelled"));
                     await loginFinish(credential as PublicKeyCredential);
                     window.location.reload();
                   } catch {
-                    setError("Passkey-Anmeldung fehlgeschlagen");
+                    setError(t("login.error_passkey"));
                   } finally {
                     setSubmitting(false);
                   }
                 }}
                 className="w-full py-3 bg-sapphire/15 text-sapphire font-semibold rounded-lg disabled:opacity-50"
               >
-                Mit Passkey anmelden
+                {t("login.use_passkey")}
               </button>
             </>
           )}

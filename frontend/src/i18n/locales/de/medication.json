@@ -12,5 +12,11 @@
   "empty": "Noch keine Medikamenten-Eintraege",
   "masters_title": "Medikamentenliste",
   "active_ingredient": "Wirkstoff",
-  "default_unit": "Standardeinheit"
+  "default_unit": "Standardeinheit",
+  "confirm_delete": "Eintrag loeschen?",
+  "summary": {
+    "doses": "Gaben",
+    "medications": "Medikamente",
+    "last_dose": "Letzte Gabe"
+  }
 }

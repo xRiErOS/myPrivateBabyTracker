@@ -1,6 +1,7 @@
 /** Tummy time entry form -- create/edit with start/stop timer + live running display. */
 
 import { type FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
@@ -26,6 +27,8 @@ function formatElapsed(seconds: number): string {
 }
 
 export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
+  const { t } = useTranslation("tummytime");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const createMut = useCreateTummyTime();
   const updateMut = useUpdateTummyTime();
@@ -123,7 +126,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
     } else if (err instanceof Error) {
       setError(localizeTimestamps(err.message));
     } else {
-      setError("Unbekannter Fehler");
+      setError(tc("errors.unknown"));
     }
   }
 
@@ -166,7 +169,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
         <div className="rounded-[8px] border-2 border-green bg-green/10 p-3 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="font-label text-sm font-semibold text-green">
-              Bauchlage laeuft
+              {t("timer_running_label")}
             </span>
             <span className="font-mono text-lg font-bold text-green">
               {formatElapsed(elapsed)}
@@ -178,7 +181,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
             onClick={handleStopAndSave}
             disabled={isPending}
           >
-            {isPending ? "Stoppe..." : "Jetzt stoppen"}
+            {isPending ? t("stopping") : t("stop_now")}
           </Button>
         </div>
       )}
@@ -204,41 +207,41 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
             disabled={isPending}
             className="bg-mauve text-ground"
           >
-            {isPending ? "Starte..." : "Jetzt starten"}
+            {isPending ? t("starting") : t("start_now")}
           </Button>
 
           <div className="flex items-center gap-2 my-1">
             <div className="flex-1 h-px bg-overlay0/30" />
-            <span className="font-label text-xs text-overlay0">oder nachtragen</span>
+            <span className="font-label text-xs text-overlay0">{t("or_add_manually")}</span>
             <div className="flex-1 h-px bg-overlay0/30" />
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <Input
-              label="Beginn"
+              label={t("label_start")}
               type="datetime-local"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
               required
             />
             <Input
-              label="Ende"
+              label={t("label_end")}
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
               required
             />
             <Input
-              label="Notizen"
+              label={tc("notes")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optionale Notizen..."
+              placeholder={tc("notes_placeholder")}
               maxLength={2000}
             />
             <div className="flex justify-end gap-2">
-              {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+              {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
               <Button type="submit" disabled={isPending || !startTime || !endTime}>
-                {isPending ? "Speichern..." : "Eintragen"}
+                {isPending ? tc("saving") : tc("add")}
               </Button>
             </div>
           </form>
@@ -249,32 +252,32 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
       {isEditing && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Input
-            label="Beginn"
+            label={t("label_start")}
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
           />
           <Input
-            label="Ende"
+            label={t("label_end")}
             type="datetime-local"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
           />
           <Input
-            label="Notizen"
+            label={tc("notes")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optionale Notizen..."
+            placeholder={tc("notes_placeholder")}
             maxLength={2000}
           />
           <div className="pt-3 border-t border-surface1">
             <TagSelector entryType="tummytime" entryId={entry!.id} />
           </div>
           <div className="flex justify-end gap-2">
-            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
             <Button type="submit" disabled={isPending || !startTime}>
-              {isPending ? "Speichern..." : "Aktualisieren"}
+              {isPending ? tc("saving") : tc("update")}
             </Button>
           </div>
         </form>
@@ -284,26 +287,26 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
       {isRunning && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Input
-            label="Beginn"
+            label={t("label_start")}
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
           />
           <Input
-            label="Notizen"
+            label={tc("notes")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optionale Notizen..."
+            placeholder={tc("notes_placeholder")}
             maxLength={2000}
           />
           <div className="pt-3 border-t border-surface1">
             <TagSelector entryType="tummytime" entryId={entry!.id} />
           </div>
           <div className="flex justify-end gap-2">
-            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+            {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Speichern..." : "Aktualisieren"}
+              {isPending ? tc("saving") : tc("update")}
             </Button>
           </div>
         </form>

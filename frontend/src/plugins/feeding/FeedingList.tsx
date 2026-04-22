@@ -1,6 +1,7 @@
 /** Feeding entry list with inline edit. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Activity, Droplets, Pencil, Trash2, Utensils, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -15,37 +16,39 @@ import { formatDateTime, formatTimeSince, nowISO, startOfTodayISO, daysAgoISO } 
 import { FeedingForm } from "./FeedingForm";
 import type { FeedingType, HealthSeverity } from "../../api/types";
 
-const TYPE_OPTIONS = [
-  { value: "", label: "Alle Typen" },
-  { value: "breast_left", label: "Brust links" },
-  { value: "breast_right", label: "Brust rechts" },
-  { value: "bottle", label: "Flasche" },
-  { value: "solid", label: "Beikost" },
-];
-
-const TYPE_LABELS: Record<FeedingType, string> = {
-  breast_left: "Brust links",
-  breast_right: "Brust rechts",
-  bottle: "Flasche",
-  solid: "Beikost",
-};
-
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
   all: undefined,
 };
 
-const SPIT_SEVERITIES: { value: HealthSeverity; label: string; color: string }[] = [
-  { value: "mild", label: "Wenig", color: "bg-green text-ground" },
-  { value: "moderate", label: "Mittel", color: "bg-peach text-ground" },
-  { value: "severe", label: "Stark", color: "bg-red text-ground" },
-];
-
 type HealthOverlay = { feedingId: number; type: "spit_up" | "tummy_ache" };
 
 export function FeedingList() {
+  const { t } = useTranslation("feeding");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+
+  const TYPE_OPTIONS = [
+    { value: "", label: t("type_filter.all") },
+    { value: "breast_left", label: t("type.breast_left") },
+    { value: "breast_right", label: t("type.breast_right") },
+    { value: "bottle", label: t("type.bottle") },
+    { value: "solid", label: t("type.solid") },
+  ];
+
+  const TYPE_LABELS: Record<FeedingType, string> = {
+    breast_left: t("type.breast_left"),
+    breast_right: t("type.breast_right"),
+    bottle: t("type.bottle"),
+    solid: t("type.solid"),
+  };
+
+  const SPIT_SEVERITIES: { value: HealthSeverity; label: string; color: string }[] = [
+    { value: "mild", label: t("spit.mild"), color: "bg-green text-ground" },
+    { value: "moderate", label: t("spit.moderate"), color: "bg-peach text-ground" },
+    { value: "severe", label: t("spit.severe"), color: "bg-red text-ground" },
+  ];
   const [typeFilter, setTypeFilter] = useState("");
   const [searchParams] = useSearchParams();
   const specificDate = searchParams.get("date");
@@ -85,14 +88,14 @@ export function FeedingList() {
   }
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Utensils className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Fuetterungs-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -116,14 +119,14 @@ export function FeedingList() {
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label="Mahlzeiten" value={entries.length} />
-              <MetricPill label="Gesamt" value={`${totalMl} ml`} />
-              {bottleCount > 0 && <MetricPill label="Flasche" value={bottleCount} />}
-              {breastCount > 0 && <MetricPill label="Brust" value={breastCount} />}
+              <MetricPill label={t("summary.meals")} value={entries.length} />
+              <MetricPill label={t("summary.total")} value={`${totalMl} ml`} />
+              {bottleCount > 0 && <MetricPill label={t("type.bottle")} value={bottleCount} />}
+              {breastCount > 0 && <MetricPill label={t("summary.breast")} value={breastCount} />}
             </div>
             {lastEntry && (
               <p className="font-body text-xs text-subtext0">
-                Letzte: {TYPE_LABELS[lastEntry.feeding_type as FeedingType] ?? lastEntry.feeding_type} — {formatTimeSince(lastEntry.start_time)}
+                {t("summary.last")}: {TYPE_LABELS[lastEntry.feeding_type as FeedingType] ?? lastEntry.feeding_type} — {formatTimeSince(lastEntry.start_time)}
               </p>
             )}
           </ListSummaryBar>
@@ -180,7 +183,7 @@ export function FeedingList() {
                   }`}
                 >
                   <Droplets className="h-3.5 w-3.5" />
-                  Spucken
+                  {t("health.spit_up")}
                 </button>
                 <button
                   type="button"
@@ -192,14 +195,14 @@ export function FeedingList() {
                   }`}
                 >
                   <Activity className="h-3.5 w-3.5" />
-                  Bauchweh
+                  {t("health.tummy_ache")}
                 </button>
               </div>
             )}
             {healthOverlay?.feedingId === entry.id && (
               <div className="border-t border-surface1 mt-2 pt-2">
                 <p className="font-label text-xs font-medium text-text mb-2">
-                  {healthOverlay.type === "spit_up" ? "Spucken" : "Bauchweh"} erfassen
+                  {healthOverlay.type === "spit_up" ? t("health.spit_up") : t("health.tummy_ache")} {t("health.record")}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {SPIT_SEVERITIES.map((s) => (
@@ -228,7 +231,7 @@ export function FeedingList() {
                   onClick={() => setHealthOverlay(null)}
                   className="mt-2 font-body text-xs text-overlay0 hover:text-text transition-colors"
                 >
-                  Abbrechen
+                  {tc("cancel")}
                 </button>
               </div>
             )}

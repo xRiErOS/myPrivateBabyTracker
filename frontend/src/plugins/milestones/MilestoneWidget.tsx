@@ -1,5 +1,6 @@
 /** Milestones dashboard widget — active leap + recent milestone + progress. */
 
+import { useTranslation } from "react-i18next";
 import { CloudLightning, CloudSun, Star, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
@@ -18,6 +19,7 @@ function daysUntil(dateStr: string | null): number | null {
 }
 
 export function MilestoneWidget({ childId }: MilestoneWidgetProps) {
+  const { t } = useTranslation("milestones");
   const navigate = useNavigate();
   const { data: leapStatus } = useLeapStatus(childId);
   const { data: entries = [] } = useMilestoneEntries({
@@ -58,7 +60,7 @@ export function MilestoneWidget({ childId }: MilestoneWidgetProps) {
     >
       <div className="flex items-center gap-2 mb-3">
         <Star className="h-5 w-5 text-peach" />
-        <p className="font-label text-sm font-medium text-subtext0">Meilensteine</p>
+        <p className="font-label text-sm font-medium text-subtext0">{t("widget_title")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -67,11 +69,11 @@ export function MilestoneWidget({ childId }: MilestoneWidgetProps) {
           <StatusIcon />
           {activeLeap ? (
             <span className={`font-body text-sm truncate ${isStorm ? "text-peach" : "text-green"}`}>
-              Sprung {activeLeap.leap_number} &mdash; {isStorm ? "Sturm" : "Sonne"}
+              {isStorm ? t("widget_leap_storm", { number: activeLeap.leap_number }) : t("widget_leap_sun", { number: activeLeap.leap_number })}
             </span>
           ) : (
             <span className={`font-body text-sm ${hasUpcoming ? "text-sapphire" : "text-green"}`}>
-              {isCalm ? "Kein Sprung" : `Naechster: Sprung ${upcomingLeap!.leap_number}`}
+              {isCalm ? t("widget_no_leap") : t("widget_next_leap", { number: upcomingLeap!.leap_number })}
             </span>
           )}
         </div>
@@ -79,7 +81,7 @@ export function MilestoneWidget({ childId }: MilestoneWidgetProps) {
         {/* Countdown for upcoming */}
         {!activeLeap && countdown !== null && (
           <p className="font-body text-xs text-sapphire">
-            Naechster Sprung in {countdown} Tagen
+            {t("widget_next_leap_in_days", { count: countdown })}
           </p>
         )}
 
@@ -101,10 +103,10 @@ export function MilestoneWidget({ childId }: MilestoneWidgetProps) {
         {/* Last completed milestone */}
         {lastCompleted ? (
           <p className="font-body text-xs text-subtext0 truncate">
-            Zuletzt: {lastCompleted.title}
+            {t("widget_last_completed", { title: lastCompleted.title })}
           </p>
         ) : (
-          <p className="font-body text-xs text-overlay0">Noch keine Meilensteine</p>
+          <p className="font-body text-xs text-overlay0">{t("widget_no_milestones_yet")}</p>
         )}
       </div>
     </Card>

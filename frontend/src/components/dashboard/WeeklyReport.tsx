@@ -4,6 +4,7 @@
  *  Ported from home-dashboard WeeklyReport.jsx. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { FeedingEntry, DiaperEntry, SleepEntry } from "../../api/types";
 import {
   groupByDay,
@@ -38,6 +39,8 @@ function DayCard({
   isToday,
   onEntityClick,
 }: DayCardProps) {
+  const { t } = useTranslation("dashboard");
+  const { t: tDiaper } = useTranslation("diaper");
   const [expanded, setExpanded] = useState(false);
 
   const d = new Date(date + "T12:00:00");
@@ -58,9 +61,9 @@ function DayCard({
 
   const dryCount = diapers.filter((dd) => dd.diaper_type === "dry").length;
   const wParts: string[] = [];
-  if (wet) wParts.push(`${wet} nass`);
-  if (solid) wParts.push(`${solid} dreckig`);
-  if (dryCount) wParts.push(`${dryCount} trocken`);
+  if (wet) wParts.push(`${wet} ${tDiaper("summary_wet")}`);
+  if (solid) wParts.push(`${solid} ${tDiaper("summary_dirty")}`);
+  if (dryCount) wParts.push(`${dryCount} ${tDiaper("summary_dry")}`);
   const windelDetail = `${changeCount}${wParts.length > 0 ? ` (${wParts.join(", ")})` : ""}`;
 
   let trend: { arrow: string; color: string } | null = null;
@@ -82,7 +85,7 @@ function DayCard({
           <div
             className={`font-label font-semibold text-sm ${isToday ? "text-peach" : "text-text"}`}
           >
-            {isToday ? "Heute" : dayLabel}
+            {isToday ? t("today_label") : dayLabel}
           </div>
           <div className="text-subtext0 text-[12px]">
             {expanded ? "\u25B2" : "\u25BC"}
@@ -92,7 +95,7 @@ function DayCard({
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-surface1 rounded-lg px-2 py-1.5 text-center">
               <div className="text-[11px] text-subtext0 font-label">
-                Flasche
+                {t("track_bottle")}
               </div>
               <div className="text-sm font-medium text-text">
                 {totalMl} ml{" "}
@@ -105,12 +108,12 @@ function DayCard({
             </div>
             <div className="bg-surface1 rounded-lg px-2 py-1.5 text-center">
               <div className="text-[11px] text-subtext0 font-label">
-                Windeln
+                {t("track_diaper")}
               </div>
               <div className="text-sm font-medium text-text">{changeCount}</div>
             </div>
             <div className="bg-surface1 rounded-lg px-2 py-1.5 text-center">
-              <div className="text-[11px] text-subtext0 font-label">Schlaf</div>
+              <div className="text-[11px] text-subtext0 font-label">{t("track_sleep")}</div>
               <div className="text-sm font-medium text-text">
                 {sleepDisplay}
               </div>
@@ -134,7 +137,7 @@ function DayCard({
               onClick={() => onEntityClick?.("feeding", date)}
               className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
-              <span className="font-label font-medium">Flasche</span>
+              <span className="font-label font-medium">{t("track_bottle")}</span>
               <span className="text-[13px]">
                 {totalMl} ml ({feedCount}x)
                 {trend && (
@@ -147,7 +150,7 @@ function DayCard({
               onClick={() => onEntityClick?.("diaper", date)}
               className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
-              <span className="font-label font-medium">Windeln</span>
+              <span className="font-label font-medium">{t("track_diaper")}</span>
               <span className="text-[13px]">{windelDetail}</span>
             </button>
             <button
@@ -155,7 +158,7 @@ function DayCard({
               onClick={() => onEntityClick?.("sleep", date)}
               className="flex items-center justify-between px-4 py-3 rounded-card text-sm transition-all bg-surface1 text-text active:bg-peach active:text-ground min-h-[44px]"
             >
-              <span className="font-label font-medium">Schlaf</span>
+              <span className="font-label font-medium">{t("track_sleep")}</span>
               <span className="text-[13px]">{sleepDisplay}</span>
             </button>
           </div>

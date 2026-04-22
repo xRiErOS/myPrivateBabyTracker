@@ -23,31 +23,32 @@ import {
   X,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { LucideIcon } from "lucide-react";
 import { isPluginEnabled } from "../lib/pluginConfig";
 
 interface NavItem {
   to: string;
   icon: LucideIcon;
-  label: string;
+  labelKey: string;
   pluginKey?: string;
 }
 
 const ALL_ITEMS: NavItem[] = [
-  { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/sleep", icon: Moon, label: "Schlaf", pluginKey: "sleep" },
-  { to: "/feeding", icon: Utensils, label: "Mahlzeiten", pluginKey: "feeding" },
-  { to: "/diaper", icon: Droplets, label: "Windeln", pluginKey: "diaper" },
-  { to: "/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
-  { to: "/temperature", icon: Thermometer, label: "Temperatur", pluginKey: "temperature" },
-  { to: "/weight", icon: Scale, label: "Gewicht", pluginKey: "weight" },
-  { to: "/medication", icon: Pill, label: "Medikamente", pluginKey: "medication" },
-  { to: "/health", icon: Activity, label: "Gesundheit", pluginKey: "health" },
-  { to: "/tummy-time", icon: Timer, label: "Bauchlage", pluginKey: "tummytime" },
-  { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
-  { to: "/milestones", icon: Star, label: "Meilensteine", pluginKey: "milestones" },
-  { to: "/profile", icon: User, label: "Mein Profil" },
-  { to: "/admin", icon: Settings, label: "Verwaltung" },
+  { to: "/", icon: LayoutDashboard, labelKey: "nav.dashboard" },
+  { to: "/sleep", icon: Moon, labelKey: "nav.sleep", pluginKey: "sleep" },
+  { to: "/feeding", icon: Utensils, labelKey: "nav.feeding", pluginKey: "feeding" },
+  { to: "/diaper", icon: Droplets, labelKey: "nav.diaper", pluginKey: "diaper" },
+  { to: "/tags", icon: Tags, labelKey: "nav.tags", pluginKey: "tags" },
+  { to: "/temperature", icon: Thermometer, labelKey: "nav.temperature", pluginKey: "temperature" },
+  { to: "/weight", icon: Scale, labelKey: "nav.weight", pluginKey: "weight" },
+  { to: "/medication", icon: Pill, labelKey: "nav.medication", pluginKey: "medication" },
+  { to: "/health", icon: Activity, labelKey: "nav.health", pluginKey: "health" },
+  { to: "/tummy-time", icon: Timer, labelKey: "nav.tummytime", pluginKey: "tummytime" },
+  { to: "/todo", icon: CheckSquare, labelKey: "nav.todo", pluginKey: "todo" },
+  { to: "/milestones", icon: Star, labelKey: "nav.milestones", pluginKey: "milestones" },
+  { to: "/profile", icon: User, labelKey: "nav.profile" },
+  { to: "/admin", icon: Settings, labelKey: "nav.admin" },
 ];
 
 function useVisibleItems(): NavItem[] {
@@ -72,6 +73,7 @@ interface MobileMenuProps {
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const location = useLocation();
   const items = useVisibleItems();
+  const { t: tc } = useTranslation("common");
 
   // Close on navigation
   useEffect(() => {
@@ -91,7 +93,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       {/* Drawer — slides down from top */}
       <div className="fixed top-[52px] left-0 right-0 z-[56] bg-surface0 border-b border-surface1 rounded-b-2xl px-4 py-4 md:hidden animate-fade-in max-h-[70vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
-          <span className="font-headline text-sm font-semibold text-text">Navigation</span>
+          <span className="font-headline text-sm font-semibold text-text">{tc("navigation")}</span>
           <button
             onClick={onClose}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text"
@@ -100,7 +102,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           </button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {items.map(({ to, icon: Icon, label }) => (
+          {items.map(({ to, icon: Icon, labelKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -114,7 +116,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               }
             >
               <Icon size={22} />
-              <span className="mt-1">{label}</span>
+              <span className="mt-1">{tc(labelKey)}</span>
             </NavLink>
           ))}
         </div>

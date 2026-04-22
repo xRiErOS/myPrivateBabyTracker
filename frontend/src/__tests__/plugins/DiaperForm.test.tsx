@@ -43,9 +43,9 @@ function renderForm(props = {}) {
 describe("DiaperForm", () => {
   it("renders all base form fields", () => {
     renderForm();
-    expect(screen.getByLabelText(/Typ/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Windeltyp/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Zeitpunkt/)).toBeInTheDocument();
-    expect(screen.getByText("Ausschlag vorhanden")).toBeInTheDocument();
+    expect(screen.getByText(/Ausschlag/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Notizen/)).toBeInTheDocument();
   });
 

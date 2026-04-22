@@ -1,6 +1,7 @@
 /** Tummy time entry list with inline edit (running entries excluded). */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Timer, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -19,6 +20,8 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
 };
 
 export function TummyTimeList() {
+  const { t } = useTranslation("tummytime");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams] = useSearchParams();
   const specificDate = searchParams.get("date");
@@ -41,14 +44,14 @@ export function TummyTimeList() {
   const entries = allEntries.filter((e) => e.end_time != null);
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Timer className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Bauchlage-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -62,10 +65,10 @@ export function TummyTimeList() {
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label="Gesamt" value={formatDuration(totalMinutes)} />
+              <MetricPill label={t("summary.total")} value={formatDuration(totalMinutes)} />
               <MetricPill
-                label="Sessions"
-                value={entries.length === 1 ? "1 Session" : `${entries.length} Sessions`}
+                label={t("summary.sessions")}
+                value={entries.length === 1 ? t("session_count", { count: 1 }) : t("session_count_other", { count: entries.length })}
               />
             </div>
           </ListSummaryBar>
@@ -78,7 +81,7 @@ export function TummyTimeList() {
             <div className="flex items-center gap-2">
               <Timer className="h-4 w-4 text-teal" />
               <span className="font-label text-sm font-medium">
-                Bauchlage
+                {t("tummy_time_label")}
               </span>
             </div>
             <div className="flex gap-1">
@@ -101,7 +104,7 @@ export function TummyTimeList() {
             {entry.end_time ? ` - ${formatDateTime(entry.end_time)}` : ""}
           </p>
           <p className="font-body text-sm text-overlay0">
-            Dauer: {formatDuration(entry.duration_minutes)}
+            {t("label_duration")}: {formatDuration(entry.duration_minutes)}
           </p>
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>

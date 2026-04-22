@@ -5,5 +5,10 @@
   "give": "Give",
   "given_today": "Given today",
   "not_given_today": "Not given today",
-  "widget_title": "Vitamin D3"
+  "widget_title": "Vitamin D3",
+  "tile_title": "Vit. D3",
+  "today_at": "Today {{time}}",
+  "last_yesterday": "Last: yesterday",
+  "last_days_ago": "Last: {{count}} days ago",
+  "never_given": "Never given"
 }

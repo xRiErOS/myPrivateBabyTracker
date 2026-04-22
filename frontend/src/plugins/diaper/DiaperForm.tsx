@@ -1,6 +1,7 @@
 /** Diaper entry form — color buttons as visual selection. */
 
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
@@ -11,14 +12,6 @@ import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { attachTag } from "../../api/tags";
 import type { DiaperEntry, DiaperType } from "../../api/types";
 
-const DIAPER_TYPE_OPTIONS = [
-  { value: "wet", label: "Nass" },
-  { value: "dirty", label: "Stuhl" },
-  { value: "mixed", label: "Gemischt" },
-  { value: "dry", label: "Trocken" },
-];
-
-
 interface DiaperFormProps {
   entry?: DiaperEntry;
   onDone?: () => void;
@@ -26,7 +19,16 @@ interface DiaperFormProps {
 }
 
 export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
+  const { t } = useTranslation("diaper");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+
+  const DIAPER_TYPE_OPTIONS = [
+    { value: "wet", label: t("type.wet") },
+    { value: "dirty", label: t("type.dirty") },
+    { value: "mixed", label: t("type.mixed") },
+    { value: "dry", label: t("type.dry") },
+  ];
   const createMut = useCreateDiaper();
   const updateMut = useUpdateDiaper();
 
@@ -71,7 +73,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <Select
-        label="Typ"
+        label={t("label_type")}
         options={DIAPER_TYPE_OPTIONS}
         value={diaperType}
         onChange={(e) => setDiaperType(e.target.value as DiaperType)}
@@ -79,7 +81,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
       />
 
       <Input
-        label="Zeitpunkt"
+        label={t("label_time")}
         type="datetime-local"
         value={time}
         onChange={(e) => setTime(e.target.value)}
@@ -94,15 +96,15 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
           className="h-5 w-5 rounded accent-red"
         />
         <span className="font-label text-sm font-medium text-subtext0">
-          Ausschlag vorhanden
+          {t("has_rash")}
         </span>
       </label>
 
       <Input
-        label="Notizen"
+        label={tc("notes")}
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optionale Notizen..."
+        placeholder={tc("notes_placeholder")}
         maxLength={2000}
       />
 
@@ -114,9 +116,9 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
         )}
       </div>
       <div className="flex justify-end gap-2">
-        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
         <Button type="submit" disabled={isPending || !time}>
-          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Eintragen"}
+          {isPending ? tc("saving") : entry ? tc("update") : tc("add")}
         </Button>
       </div>
     </form>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, Pencil } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "./Button";
 import { TagBadges } from "./TagBadges";
 import { getEntry, updateEntryNotes, type AnyEntry } from "../api/entries";
@@ -24,35 +25,16 @@ interface EntryDetailModalProps {
   onClose: () => void;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  sleep: "Schlaf",
-  feeding: "Mahlzeit",
-  diaper: "Windel",
-  temperature: "Temperatur",
-  weight: "Gewicht",
-  medication: "Medikament",
-  vitamind3: "Vitamin D3",
-  todo: "ToDo",
-  milestone: "Meilenstein",
-};
-
-const SLEEP_TYPE_LABELS: Record<string, string> = {
-  nap: "Nickerchen",
-  night: "Nachtschlaf",
-};
-
-const FEEDING_TYPE_LABELS: Record<string, string> = {
-  breast_left: "Brust links",
-  breast_right: "Brust rechts",
-  bottle: "Flasche",
-  solid: "Beikost",
-};
-
-const DIAPER_TYPE_LABELS: Record<string, string> = {
-  wet: "Nass",
-  dirty: "Dreckig",
-  mixed: "Beides",
-  dry: "Trocken",
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  sleep: "entry_detail.type_sleep",
+  feeding: "entry_detail.type_feeding",
+  diaper: "entry_detail.type_diaper",
+  temperature: "entry_detail.type_temperature",
+  weight: "entry_detail.type_weight",
+  medication: "entry_detail.type_medication",
+  vitamind3: "entry_detail.type_vitamind3",
+  todo: "entry_detail.type_todo",
+  milestone: "entry_detail.type_milestone",
 };
 
 /** Check if notes field is supported for this entry type. */
@@ -69,73 +51,77 @@ function getNotesValue(entryType: string, entry: AnyEntry): string {
 
 /** Render type-specific detail rows. */
 function EntryFields({ entryType, entry }: { entryType: string; entry: AnyEntry }) {
+  const { t: tc } = useTranslation("common");
+  const { t: tSleep } = useTranslation("sleep");
+  const { t: tFeeding } = useTranslation("feeding");
+  const { t: tDiaper } = useTranslation("diaper");
   const rows: Array<{ label: string; value: string }> = [];
 
   switch (entryType) {
     case "sleep": {
       const e = entry as SleepEntry;
-      rows.push({ label: "Typ", value: SLEEP_TYPE_LABELS[e.sleep_type] ?? e.sleep_type });
-      rows.push({ label: "Start", value: formatDateTime(e.start_time) });
-      if (e.end_time) rows.push({ label: "Ende", value: formatDateTime(e.end_time) });
-      if (e.duration_minutes != null) rows.push({ label: "Dauer", value: formatDuration(e.duration_minutes) });
+      rows.push({ label: tc("entry_detail.label_type"), value: tSleep(`type.${e.sleep_type}`, { defaultValue: e.sleep_type }) });
+      rows.push({ label: tc("entry_detail.label_start"), value: formatDateTime(e.start_time) });
+      if (e.end_time) rows.push({ label: tc("entry_detail.label_end"), value: formatDateTime(e.end_time) });
+      if (e.duration_minutes != null) rows.push({ label: tc("entry_detail.label_duration"), value: formatDuration(e.duration_minutes) });
       break;
     }
     case "feeding": {
       const e = entry as FeedingEntry;
-      rows.push({ label: "Typ", value: FEEDING_TYPE_LABELS[e.feeding_type] ?? e.feeding_type });
-      rows.push({ label: "Zeitpunkt", value: formatDateTime(e.start_time) });
-      if (e.amount_ml != null) rows.push({ label: "Menge", value: `${e.amount_ml} ml` });
-      if (e.food_type) rows.push({ label: "Nahrung", value: e.food_type });
-      if (e.duration_minutes != null) rows.push({ label: "Dauer", value: formatDuration(e.duration_minutes) });
+      rows.push({ label: tc("entry_detail.label_type"), value: tFeeding(`type.${e.feeding_type}`, { defaultValue: e.feeding_type }) });
+      rows.push({ label: tc("entry_detail.label_time"), value: formatDateTime(e.start_time) });
+      if (e.amount_ml != null) rows.push({ label: tc("entry_detail.label_amount"), value: `${e.amount_ml} ml` });
+      if (e.food_type) rows.push({ label: tc("entry_detail.label_food"), value: e.food_type });
+      if (e.duration_minutes != null) rows.push({ label: tc("entry_detail.label_duration"), value: formatDuration(e.duration_minutes) });
       break;
     }
     case "diaper": {
       const e = entry as DiaperEntry;
-      rows.push({ label: "Typ", value: DIAPER_TYPE_LABELS[e.diaper_type] ?? e.diaper_type });
-      rows.push({ label: "Zeitpunkt", value: formatDateTime(e.time) });
-      if (e.has_rash) rows.push({ label: "Ausschlag", value: "Ja" });
+      rows.push({ label: tc("entry_detail.label_type"), value: tDiaper(`type_short.${e.diaper_type}`, { defaultValue: e.diaper_type }) });
+      rows.push({ label: tc("entry_detail.label_time"), value: formatDateTime(e.time) });
+      if (e.has_rash) rows.push({ label: tc("entry_detail.label_rash"), value: tc("entry_detail.label_rash_yes") });
       break;
     }
     case "temperature": {
       const e = entry as TemperatureEntry;
-      rows.push({ label: "Temperatur", value: `${e.temperature_celsius.toFixed(1)} °C` });
-      rows.push({ label: "Zeitpunkt", value: formatDateTime(e.measured_at) });
+      rows.push({ label: tc("entry_detail.label_temperature"), value: `${e.temperature_celsius.toFixed(1)} °C` });
+      rows.push({ label: tc("entry_detail.label_time"), value: formatDateTime(e.measured_at) });
       break;
     }
     case "weight": {
       const e = entry as WeightEntry;
-      rows.push({ label: "Gewicht", value: `${(e.weight_grams / 1000).toFixed(2)} kg` });
-      rows.push({ label: "Zeitpunkt", value: formatDateTime(e.measured_at) });
+      rows.push({ label: tc("entry_detail.label_weight"), value: `${(e.weight_grams / 1000).toFixed(2)} kg` });
+      rows.push({ label: tc("entry_detail.label_time"), value: formatDateTime(e.measured_at) });
       break;
     }
     case "medication": {
       const e = entry as MedicationEntry;
-      rows.push({ label: "Medikament", value: e.medication_name });
-      if (e.dose) rows.push({ label: "Dosis", value: e.dose });
-      rows.push({ label: "Zeitpunkt", value: formatDateTime(e.given_at) });
+      rows.push({ label: tc("entry_detail.label_medication"), value: e.medication_name });
+      if (e.dose) rows.push({ label: tc("entry_detail.label_dose"), value: e.dose });
+      rows.push({ label: tc("entry_detail.label_time"), value: formatDateTime(e.given_at) });
       break;
     }
     case "vitamind3": {
       const e = entry as VitaminD3Entry;
-      rows.push({ label: "Datum", value: e.date });
-      rows.push({ label: "Gegeben um", value: formatDateTime(e.given_at) });
+      rows.push({ label: tc("entry_detail.label_date"), value: e.date });
+      rows.push({ label: tc("entry_detail.label_given_at"), value: formatDateTime(e.given_at) });
       break;
     }
     case "todo": {
       const e = entry as TodoEntry;
-      rows.push({ label: "Titel", value: e.title });
-      rows.push({ label: "Status", value: e.is_done ? "Erledigt" : "Offen" });
-      if (e.due_date) rows.push({ label: "Faellig", value: e.due_date });
-      if (e.completed_at) rows.push({ label: "Erledigt am", value: formatDateTime(e.completed_at) });
+      rows.push({ label: tc("entry_detail.label_title"), value: e.title });
+      rows.push({ label: tc("entry_detail.label_status"), value: e.is_done ? tc("entry_detail.status_done") : tc("entry_detail.status_open") });
+      if (e.due_date) rows.push({ label: tc("entry_detail.label_due"), value: e.due_date });
+      if (e.completed_at) rows.push({ label: tc("entry_detail.label_completed_at"), value: formatDateTime(e.completed_at) });
       break;
     }
     case "milestone": {
       const e = entry as MilestoneEntry;
-      rows.push({ label: "Titel", value: e.title });
-      rows.push({ label: "Status", value: e.completed ? "Erreicht" : "Offen" });
-      if (e.completed_date) rows.push({ label: "Erreicht am", value: e.completed_date });
-      rows.push({ label: "Konfidenz", value: e.confidence === "exact" ? "Genau" : e.confidence === "approximate" ? "Ungefaehr" : "Unsicher" });
-      if (e.photos?.length > 0) rows.push({ label: "Fotos", value: `${e.photos.length} Foto(s)` });
+      rows.push({ label: tc("entry_detail.label_title"), value: e.title });
+      rows.push({ label: tc("entry_detail.label_status"), value: e.completed ? tc("entry_detail.status_completed") : tc("entry_detail.status_open") });
+      if (e.completed_date) rows.push({ label: tc("entry_detail.label_completed_date"), value: e.completed_date });
+      rows.push({ label: tc("entry_detail.label_confidence"), value: e.confidence === "exact" ? tc("entry_detail.confidence_exact") : e.confidence === "approximate" ? tc("entry_detail.confidence_approximate") : tc("entry_detail.confidence_uncertain") });
+      if (e.photos?.length > 0) rows.push({ label: tc("entry_detail.label_photos"), value: tc("entry_detail.photos_count", { count: e.photos.length }) });
       break;
     }
   }
@@ -153,6 +139,7 @@ function EntryFields({ entryType, entry }: { entryType: string; entry: AnyEntry 
 }
 
 export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailModalProps) {
+  const { t: tc } = useTranslation("common");
   const [entry, setEntry] = useState<AnyEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -172,7 +159,7 @@ export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailMod
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err.message ?? "Fehler beim Laden");
+        setError(err.message ?? tc("error_loading"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -189,7 +176,7 @@ export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailMod
       setEntry(updated);
       setEditing(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Fehler beim Speichern";
+      const msg = err instanceof Error ? err.message : tc("error_saving");
       setError(msg);
     } finally {
       setSaving(false);
@@ -223,7 +210,7 @@ export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailMod
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-surface0">
           <h3 className="font-headline text-base font-semibold text-text">
-            {TYPE_LABELS[entryType] ?? entryType}
+            {tc(TYPE_LABEL_KEYS[entryType] ?? entryType)}
           </h3>
           <button
             onClick={onClose}
@@ -236,7 +223,7 @@ export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailMod
         {/* Body */}
         <div className="p-4 space-y-4">
           {loading && (
-            <p className="font-body text-sm text-overlay0 text-center py-4">Laden...</p>
+            <p className="font-body text-sm text-overlay0 text-center py-4">{tc("loading")}</p>
           )}
 
           {error && (
@@ -255,7 +242,7 @@ export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailMod
                 <div className="space-y-2 pt-2 border-t border-surface0">
                   <div className="flex items-center justify-between">
                     <span className="font-label text-sm text-subtext0">
-                      {entryType === "todo" ? "Details" : "Notizen"}
+                      {entryType === "todo" ? tc("details") : tc("notes")}
                     </span>
                     {!editing && (
                       <button
@@ -274,21 +261,21 @@ export function EntryDetailModal({ entryType, entryId, onClose }: EntryDetailMod
                         onChange={(e) => setNotes(e.target.value)}
                         rows={4}
                         className="w-full rounded-[8px] border border-surface1 bg-ground text-text font-body text-base p-3 focus:outline-none focus:ring-2 focus:ring-peach resize-y"
-                        placeholder="Notizen hinzufuegen..."
+                        placeholder={tc("notes_add_placeholder")}
                       />
                       <div className="flex gap-2 justify-end">
                         <Button variant="secondary" onClick={handleCancel} disabled={saving}>
-                          Abbrechen
+                          {tc("cancel")}
                         </Button>
                         <Button onClick={handleSave} disabled={saving}>
-                          {saving ? "Speichern..." : "Speichern"}
+                          {saving ? tc("saving") : tc("save")}
                         </Button>
                       </div>
                     </div>
                   ) : (
                     <p className="font-body text-sm text-text whitespace-pre-wrap">
                       {getNotesValue(entryType, entry) || (
-                        <span className="text-overlay0">Keine Notizen</span>
+                        <span className="text-overlay0">{tc("no_notes")}</span>
                       )}
                     </p>
                   )}

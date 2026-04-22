@@ -2,6 +2,7 @@
 
 import { Activity, CheckSquare, Droplets, Moon, Pill, Scale, Star, Sun, Tags, Thermometer, Timer, Utensils } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import i18n from "../i18n";
 
 export interface PluginDef {
   key: string;
@@ -32,3 +33,8 @@ export const BASE_PLUGINS = PLUGINS.filter((p) => p.isBase);
 
 /** Plugins that can be toggled on/off by the user. */
 export const OPTIONAL_PLUGINS = PLUGINS.filter((p) => !p.isBase);
+
+/** Get translated plugin label using i18n common.nav namespace. */
+export function getPluginLabel(key: string): string {
+  return i18n.t(`nav.${key}`, { ns: "common" });
+}

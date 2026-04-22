@@ -1,28 +1,58 @@
 {
   "title": "Settings",
+  "tiles": {
+    "children": "Children",
+    "children_desc": "Manage children, birth dates, active child",
+    "medication_masters": "Medication list",
+    "medication_masters_desc": "Master data for medication dropdown",
+    "alerts": "Alerts",
+    "alerts_desc": "Configure alarms and thresholds",
+    "plugins": "Plugins",
+    "plugins_desc": "Enable/disable modules",
+    "api_keys": "API Keys",
+    "api_keys_desc": "Manage keys for external systems",
+    "auth": "Authentication",
+    "auth_desc": "Auth mode, users, security",
+    "users": "Users",
+    "users_desc": "Create, edit, deactivate users"
+  },
   "children": {
-    "title": "Manage children",
-    "add": "Add child",
+    "title": "Children",
+    "add": "Add",
     "birth_date": "Birth date",
     "active": "Active child",
     "set_active": "Set as active",
-    "no_children": "Add your first child...",
+    "no_children": "No children yet",
+    "no_children_hint": "Add your first child to start tracking.",
     "preterm": "Preterm",
-    "estimated_birth_date": "Due date"
+    "estimated_birth_date": "Due date (EDT)",
+    "estimated_birth_date_hint": "Important for calculating developmental leaps.",
+    "name": "Name",
+    "name_placeholder": "Child's name",
+    "confirm_delete": "Really delete \"{{name}}\"?"
   },
   "medication_masters": {
-    "title": "Medication list",
+    "title": "Medication master data",
     "add": "Add medication",
     "name": "Name",
     "active_ingredient": "Active ingredient",
-    "default_unit": "Default unit"
+    "default_unit": "Unit",
+    "no_entries": "No medications yet",
+    "no_entries_hint": "Add medications to use them in dropdown menus.",
+    "notes": "Notes",
+    "confirm_delete": "Delete \"{{name}}\"?"
   },
   "tags": {
     "title": "Tags",
     "add": "Create tag",
     "name": "Name",
     "color": "Color",
-    "no_child": "No child selected"
+    "no_child": "No child selected",
+    "no_child_hint": "Please select a child first.",
+    "no_tags": "No tags yet",
+    "no_tags_hint": "Tags help mark entries for pediatrician or midwife.",
+    "confirm_delete": "Delete tag \"{{name}}\"?",
+    "name_placeholder": "e.g. Pediatrician"
   },
   "alerts": {
     "title": "Alerts",
@@ -54,8 +84,8 @@
     "copied": "Copied!"
   },
   "users": {
-    "title": "Users",
-    "add": "Create user",
+    "title": "User management",
+    "add": "New",
     "username": "Username",
     "display_name": "Display name",
     "role": "Role",
@@ -64,17 +94,37 @@
     "active": "Active",
     "inactive": "Inactive",
     "set_password": "Set password",
-    "delete_confirm": "Really delete user?",
+    "delete_confirm": "Really delete user \"{{name}}\"?",
     "create_failed": "Creation failed",
-    "update_success": "User updated"
+    "update_success": "User updated",
+    "update_failed": "Update failed",
+    "password_set_success": "Password set for \"{{name}}\"",
+    "password_set_failed": "Setting password failed",
+    "status_change_failed": "Status change failed",
+    "delete_failed": "Deletion failed",
+    "deleted": "User \"{{name}}\" deleted",
+    "created": "User \"{{name}}\" created",
+    "load_failed": "Could not load users",
+    "no_users": "No users",
+    "new_user": "New user",
+    "edit_user": "Edit {{name}}",
+    "password_title": "Password: {{name}}",
+    "password_label": "Password",
+    "password_new_label": "New password * (min. 8)",
+    "password_min": "Password * (min. 8)",
+    "device_name": "Device name"
   },
   "quick_actions": {
-    "title": "Quick actions",
-    "configure": "Configure"
+    "title": "Quick Actions",
+    "description": "Configure the 3 quick action buttons on the dashboard.",
+    "favorite": "Favorite {{number}}"
   },
   "breastfeeding": {
     "title": "Breastfeeding mode",
+    "description": "Shows the last breastfeeding side on the dashboard. Disable if you are not breastfeeding.",
     "enabled": "Breastfeeding active",
-    "disabled": "Breastfeeding disabled"
+    "disabled": "Breastfeeding disabled",
+    "hybrid": "Hybrid mode",
+    "hybrid_desc": "Shows breast and bottle tiles simultaneously on the dashboard."
   }
 }

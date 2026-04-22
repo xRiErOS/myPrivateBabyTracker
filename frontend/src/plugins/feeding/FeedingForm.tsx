@@ -1,6 +1,7 @@
 /** Feeding entry form — type-switch changes visible fields. */
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { Select } from "../../components/Select";
@@ -12,13 +13,6 @@ import { attachTag } from "../../api/tags";
 import type { FeedingEntry, FeedingType } from "../../api/types";
 import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 
-const ALL_FEEDING_TYPE_OPTIONS = [
-  { value: "breast_left", label: "Brust links" },
-  { value: "breast_right", label: "Brust rechts" },
-  { value: "bottle", label: "Flasche" },
-  { value: "solid", label: "Beikost" },
-];
-
 interface FeedingFormProps {
   entry?: FeedingEntry;
   onDone?: () => void;
@@ -26,7 +20,16 @@ interface FeedingFormProps {
 }
 
 export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
+  const { t } = useTranslation("feeding");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+
+  const ALL_FEEDING_TYPE_OPTIONS = [
+    { value: "breast_left", label: t("type.breast_left") },
+    { value: "breast_right", label: t("type.breast_right") },
+    { value: "bottle", label: t("type.bottle") },
+    { value: "solid", label: t("type.solid") },
+  ];
   const createMut = useCreateFeeding();
   const updateMut = useUpdateFeeding();
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
@@ -102,26 +105,26 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <Select
-        label="Typ"
+        label={t("label_type")}
         options={FEEDING_TYPE_OPTIONS}
         value={feedingType}
         onChange={(e) => setFeedingType(e.target.value as FeedingType)}
         required
       />
       <Input
-        label="Zeitpunkt"
+        label={t("label_time")}
         type="datetime-local"
         value={startTime}
         onChange={(e) => setStartTime(e.target.value)}
         required
       />
       {showAmount && (
-        <Input label="Menge (ml)" type="number" value={amountMl} onChange={(e) => setAmountMl(e.target.value)} min={0} max={1000} placeholder="0" />
+        <Input label={t("label_amount")} type="number" value={amountMl} onChange={(e) => setAmountMl(e.target.value)} min={0} max={1000} placeholder="0" />
       )}
       {showFoodType && (
-        <Input label="Beikost" value={foodType} onChange={(e) => setFoodType(e.target.value)} placeholder="z.B. Karotten, Brei" maxLength={100} />
+        <Input label={t("label_food_type")} value={foodType} onChange={(e) => setFoodType(e.target.value)} placeholder={t("food_type_placeholder")} maxLength={100} />
       )}
-      <Input label="Notizen" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optionale Notizen..." maxLength={2000} />
+      <Input label={tc("notes")} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={tc("notes_placeholder")} maxLength={2000} />
       <div className="pt-3 border-t border-surface1">
         {entry ? (
           <TagSelector entryType="feeding" entryId={entry.id} />
@@ -130,9 +133,9 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
         )}
       </div>
       <div className="flex justify-end gap-2">
-        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+        {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
         <Button type="submit" disabled={isPending || !startTime}>
-          {isPending ? "Speichern..." : entry ? "Aktualisieren" : "Eintragen"}
+          {isPending ? tc("saving") : entry ? tc("update") : tc("add")}
         </Button>
       </div>
     </form>

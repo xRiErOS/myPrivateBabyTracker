@@ -7,9 +7,19 @@
   "widget_title": "Temperatur",
   "status": {
     "fever": "Fieber",
-    "elevated": "Erhoehte Temperatur",
+    "elevated": "Erhoehte Temp.",
     "hypothermia": "Unterkuehlung",
     "normal": "Normal"
   },
-  "unit": "°C"
+  "unit": "°C",
+  "no_measurement": "Keine Messung",
+  "confirm_delete": "Eintrag loeschen?",
+  "validation": {
+    "range": "Temperatur muss zwischen 34.0 und 43.0 °C liegen"
+  },
+  "summary": {
+    "measurements": "Messungen",
+    "range": "Bereich",
+    "last_measurement": "Letzte Messung"
+  }
 }

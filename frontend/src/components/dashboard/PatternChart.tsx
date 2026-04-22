@@ -3,6 +3,7 @@
  *  (h-2.5, bg-surface1), sapphire for diapers, opacity-80 on past days. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { FeedingEntry, DiaperEntry, SleepEntry } from "../../api/types";
 import {
   groupByDay,
@@ -94,6 +95,7 @@ interface PatternChartProps {
 }
 
 export function PatternChart({ feedings, diapers, sleeps }: PatternChartProps) {
+  const { t } = useTranslation("dashboard");
   const today = todayBerlin();
   const days = lastNDays(14).reverse();
 
@@ -114,7 +116,7 @@ export function PatternChart({ feedings, diapers, sleeps }: PatternChartProps) {
   return (
     <div className="bg-surface0 rounded-card p-4">
       <div className="text-[11px] uppercase tracking-wider text-subtext0 font-label mb-3">
-        14-Tage Muster
+        {t("14_day_pattern")}
       </div>
 
       <div className="flex gap-1 mb-2 ml-16">
@@ -124,7 +126,7 @@ export function PatternChart({ feedings, diapers, sleeps }: PatternChartProps) {
           className={`flex items-center gap-1 text-[10px] text-subtext0 font-label transition-opacity ${visible.sleep ? "opacity-100" : "opacity-30"}`}
         >
           <span className="w-2 h-2 rounded-full bg-lavender inline-block" />{" "}
-          Schlaf
+          {t("track_sleep")}
         </button>
         <button
           type="button"
@@ -132,7 +134,7 @@ export function PatternChart({ feedings, diapers, sleeps }: PatternChartProps) {
           className={`flex items-center gap-1 text-[10px] text-subtext0 font-label ml-2 transition-opacity ${visible.feeding ? "opacity-100" : "opacity-30"}`}
         >
           <span className="w-2 h-2 rounded-full bg-peach inline-block" />{" "}
-          Flasche
+          {t("track_bottle")}
         </button>
         <button
           type="button"
@@ -140,7 +142,7 @@ export function PatternChart({ feedings, diapers, sleeps }: PatternChartProps) {
           className={`flex items-center gap-1 text-[10px] text-subtext0 font-label ml-2 transition-opacity ${visible.diaper ? "opacity-100" : "opacity-30"}`}
         >
           <span className="w-2 h-2 rounded-full bg-sapphire inline-block" />{" "}
-          Windeln
+          {t("track_diaper")}
         </button>
       </div>
 
@@ -178,7 +180,7 @@ export function PatternChart({ feedings, diapers, sleeps }: PatternChartProps) {
             <div
               className={`text-[11px] font-label w-16 text-right shrink-0 pt-0.5 ${isToday ? "text-peach font-semibold" : "text-subtext0"}`}
             >
-              {isToday ? "Heute" : `${dayLabel} ${dateShort}`}
+              {isToday ? t("today_label") : `${dayLabel} ${dateShort}`}
             </div>
             <div className="flex-1">
               {hasData ? (

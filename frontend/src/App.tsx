@@ -6,6 +6,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Layout } from "./components/Layout";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { useLocaleSync } from "./hooks/useLocale";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const SleepPage = lazy(() => import("./pages/SleepPage"));
@@ -46,6 +47,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  useLocaleSync();
+
   return (
     <AuthGuard>
       <Layout>

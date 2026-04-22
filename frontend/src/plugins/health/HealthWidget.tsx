@@ -1,5 +1,6 @@
 /** Health dashboard widget — today's entries count + last entry. */
 
+import { useTranslation } from "react-i18next";
 import { Activity, Droplets } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
@@ -11,6 +12,7 @@ interface HealthWidgetProps {
 }
 
 export function HealthWidget({ childId }: HealthWidgetProps) {
+  const { t } = useTranslation("health");
   const navigate = useNavigate();
   const { data: entries = [], isLoading } = useHealthEntries({
     child_id: childId,
@@ -28,13 +30,13 @@ export function HealthWidget({ childId }: HealthWidgetProps) {
     >
       <div className="flex items-center gap-2 mb-3">
         <Activity className="h-5 w-5 text-mauve" />
-        <p className="font-label text-sm font-medium text-subtext0">Gesundheit</p>
+        <p className="font-label text-sm font-medium text-subtext0">{t("widget_title")}</p>
       </div>
 
       {isLoading ? (
-        <p className="font-body text-sm text-subtext0">Laden...</p>
+        <p className="font-body text-sm text-subtext0">{t("loading")}</p>
       ) : entries.length === 0 ? (
-        <p className="font-body text-sm text-overlay0">Heute keine Eintraege</p>
+        <p className="font-body text-sm text-overlay0">{t("no_entries_today")}</p>
       ) : (
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
@@ -53,7 +55,7 @@ export function HealthWidget({ childId }: HealthWidgetProps) {
           </div>
           {lastEntry && (
             <p className="font-body text-xs text-subtext0">
-              Zuletzt: {formatTime(lastEntry.time)}
+              {t("last_entry", { time: formatTime(lastEntry.time) })}
             </p>
           )}
         </div>

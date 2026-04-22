@@ -1,6 +1,7 @@
 /** Medication entry list with inline edit. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Pencil, Pill, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -19,6 +20,8 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
 };
 
 export function MedicationList() {
+  const { t } = useTranslation("medication");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams] = useSearchParams();
   const [dateRange, setDateRange] = useState<DateRange>((searchParams.get("range") as DateRange) ?? "week");
@@ -31,14 +34,14 @@ export function MedicationList() {
   });
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Pill className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Medikamenten-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -52,12 +55,12 @@ export function MedicationList() {
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label="Gaben" value={entries.length} />
-              <MetricPill label="Medikamente" value={uniqueMeds.size} />
+              <MetricPill label={t("summary.doses")} value={entries.length} />
+              <MetricPill label={t("summary.medications")} value={uniqueMeds.size} />
             </div>
             {entries[0] && (
               <p className="font-body text-xs text-subtext0">
-                Letzte Gabe: {entries[0].medication_name} — {formatTimeSince(entries[0].given_at)}
+                {t("summary.last_dose")}: {entries[0].medication_name} — {formatTimeSince(entries[0].given_at)}
               </p>
             )}
           </ListSummaryBar>
@@ -85,7 +88,7 @@ export function MedicationList() {
               </button>
               <button
                 onClick={() => {
-                  if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
+                  if (confirm(t("confirm_delete"))) deleteMut.mutate(entry.id);
                 }}
                 className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
                 style={{ minWidth: 44, minHeight: 44 }}

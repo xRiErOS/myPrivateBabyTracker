@@ -9,6 +9,7 @@ export interface UserPreferences {
   widget_order: string[] | null;
   track_visibility: Record<string, boolean> | null;
   timezone: string;
+  locale: string;
 }
 
 export async function getPreferences(): Promise<UserPreferences> {

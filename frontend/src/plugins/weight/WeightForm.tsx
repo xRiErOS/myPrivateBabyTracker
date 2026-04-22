@@ -1,6 +1,7 @@
 /** Weight entry form — create/edit weight measurements. */
 
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
@@ -26,6 +27,8 @@ function kgToGrams(kg: string): number {
 }
 
 export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
+  const { t } = useTranslation("weight");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const createMut = useCreateWeight();
   const updateMut = useUpdateWeight();
@@ -49,7 +52,7 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
 
     const grams = kgToGrams(weightKg);
     if (isNaN(grams) || grams < 500 || grams > 30000) {
-      setError("Gewicht muss zwischen 0.50 und 30.00 kg liegen");
+      setError(t("validation.range"));
       return;
     }
 
@@ -91,13 +94,13 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
-          label="Zeitpunkt"
+          label={t("label_time")}
           type="datetime-local"
           value={measuredAt}
           onChange={(e) => setMeasuredAt(e.target.value)}
         />
         <Input
-          label="Gewicht (kg)"
+          label={t("label_weight")}
           type="number"
           value={weightKg}
           onChange={(e) => setWeightKg(e.target.value)}
@@ -106,10 +109,10 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
           step="0.01"
         />
         <Input
-          label="Notizen"
+          label={tc("notes")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optionale Notizen..."
+          placeholder={tc("notes_placeholder")}
           maxLength={2000}
         />
         <div className="pt-3 border-t border-surface1">
@@ -120,9 +123,9 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
           )}
         </div>
         <div className="flex justify-end gap-2">
-          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
           <Button type="submit" disabled={isPending || !measuredAt}>
-            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Eintragen"}
+            {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
           </Button>
         </div>
       </form>

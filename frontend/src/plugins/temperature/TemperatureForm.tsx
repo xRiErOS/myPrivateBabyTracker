@@ -1,6 +1,7 @@
 /** Temperature entry form — create/edit temperature measurements. */
 
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
@@ -18,6 +19,8 @@ interface TemperatureFormProps {
 }
 
 export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProps) {
+  const { t } = useTranslation("temperature");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const createMut = useCreateTemperature();
   const updateMut = useUpdateTemperature();
@@ -41,7 +44,7 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
 
     const tempValue = parseFloat(temperature);
     if (isNaN(tempValue) || tempValue < 34 || tempValue > 43) {
-      setError("Temperatur muss zwischen 34.0 und 43.0 °C liegen");
+      setError(t("validation.range"));
       return;
     }
 
@@ -83,14 +86,14 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input
-          label="Zeitpunkt"
+          label={t("label_time")}
           type="datetime-local"
           value={measuredAt}
           onChange={(e) => setMeasuredAt(e.target.value)}
         />
         <div className="flex flex-col gap-1">
           <label className="font-label text-sm font-medium text-subtext0">
-            Temperatur (°C) <span className="text-red">*</span>
+            {t("label_temperature")} <span className="text-red">*</span>
           </label>
           <div className="flex items-center gap-2">
             <button
@@ -125,10 +128,10 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
           </div>
         </div>
         <Input
-          label="Notizen"
+          label={tc("notes")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optionale Notizen..."
+          placeholder={tc("notes_placeholder")}
           maxLength={2000}
         />
         <div className="pt-3 border-t border-surface1">
@@ -139,9 +142,9 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
           )}
         </div>
         <div className="flex justify-end gap-2">
-          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
           <Button type="submit" disabled={isPending || !measuredAt}>
-            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Eintragen"}
+            {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
           </Button>
         </div>
       </form>

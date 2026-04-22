@@ -1,12 +1,23 @@
 {
   "title": "Weight",
   "list_title": "Weight entries",
-  "label_weight": "Weight (g)",
+  "label_weight": "Weight (kg)",
   "label_time": "Time",
   "empty": "No weight entries yet",
   "widget_title": "Weight",
   "trend_up": "+{{diff}} kg",
   "trend_down": "{{diff}} kg",
   "unit_kg": "kg",
-  "unit_g": "g"
+  "unit_g": "g",
+  "no_measurement": "No measurement",
+  "confirm_delete": "Delete entry?",
+  "validation": {
+    "range": "Weight must be between 0.50 and 30.00 kg"
+  },
+  "summary": {
+    "current": "Current",
+    "trend": "Trend",
+    "measurements": "Measurements",
+    "last_measurement": "Last measurement"
+  }
 }

@@ -1,5 +1,6 @@
 /** Tummy time dashboard widget -- shows today's total duration. */
 
+import { useTranslation } from "react-i18next";
 import { Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
@@ -8,6 +9,7 @@ import { useTummyTimeEntries } from "../../hooks/useTummyTime";
 import { startOfTodayISO, formatDuration } from "../../lib/dateUtils";
 
 export function TummyTimeWidget() {
+  const { t } = useTranslation("tummytime");
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: entries = [] } = useTummyTimeEntries({
@@ -29,7 +31,7 @@ export function TummyTimeWidget() {
     >
       <div className="flex items-center gap-2">
         <Timer className="h-4 w-4 text-overlay0" />
-        <span className="font-label text-xs text-overlay0">Bauchlage</span>
+        <span className="font-label text-xs text-overlay0">{t("widget_title")}</span>
       </div>
 
       <span className="font-heading text-lg font-semibold text-text">
@@ -38,10 +40,10 @@ export function TummyTimeWidget() {
 
       <p className="font-body text-xs text-overlay0">
         {sessionCount === 0
-          ? "Noch keine Session"
+          ? t("no_session")
           : sessionCount === 1
-            ? "1 Session heute"
-            : `${sessionCount} Sessions heute`}
+            ? t("session_today")
+            : t("sessions_today", { count: sessionCount })}
       </p>
     </Card>
   );

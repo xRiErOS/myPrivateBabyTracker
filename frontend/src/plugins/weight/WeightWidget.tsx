@@ -1,5 +1,6 @@
 /** Weight dashboard widget — shows latest measurement + trend. */
 
+import { useTranslation } from "react-i18next";
 import { Scale } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/Card";
@@ -13,6 +14,7 @@ function formatWeight(grams: number): string {
 }
 
 export function WeightWidget() {
+  const { t } = useTranslation("weight");
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const { data: entries = [] } = useWeightEntries({
@@ -30,7 +32,7 @@ export function WeightWidget() {
     <Card className="h-full flex flex-col gap-2 p-3 cursor-pointer active:bg-surface1 transition-colors" onClick={() => navigate("/weight")}>
       <div className="flex items-center gap-2">
         <Scale className="h-4 w-4 text-overlay0" />
-        <span className="font-label text-xs text-overlay0">Gewicht</span>
+        <span className="font-label text-xs text-overlay0">{t("widget_title")}</span>
       </div>
 
       {latest ? (
@@ -45,7 +47,7 @@ export function WeightWidget() {
           )}
         </div>
       ) : (
-        <p className="font-body text-sm text-overlay0">Keine Messung</p>
+        <p className="font-body text-sm text-overlay0">{t("no_measurement")}</p>
       )}
 
       {latest && (

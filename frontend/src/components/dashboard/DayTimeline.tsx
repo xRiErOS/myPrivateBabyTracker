@@ -3,6 +3,7 @@
  *  labels on all modes, sapphire diaper dots, axis at bottom. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Settings } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import {
@@ -143,6 +144,7 @@ export function DayTimeline({
   sleepSegments,
   isToday = false,
 }: DayTimelineProps) {
+  const { t } = useTranslation("dashboard");
   const [showSettings, setShowSettings] = useState(false);
   const [visibility, setVisibility] = useState<TrackVisibility>(() => {
     try {
@@ -178,7 +180,7 @@ export function DayTimeline({
     <div className="bg-surface0 rounded-card p-4">
       <div className="flex items-center justify-between mb-2">
         <div className="text-[11px] uppercase tracking-wider text-subtext0 font-label">
-          Tagesverlauf
+          {t("day_timeline")}
         </div>
         <button
           onClick={() => setShowSettings(!showSettings)}
@@ -190,9 +192,9 @@ export function DayTimeline({
       {showSettings && (
         <div className="flex gap-3 mb-2">
           {([
-            { key: "sleep", label: "Schlaf", color: "bg-lavender" },
-            { key: "feeding", label: "Flasche", color: "bg-peach" },
-            { key: "diaper", label: "Windeln", color: "bg-sapphire" },
+            { key: "sleep", label: t("track_sleep"), color: "bg-lavender" },
+            { key: "feeding", label: t("track_bottle"), color: "bg-peach" },
+            { key: "diaper", label: t("track_diaper"), color: "bg-sapphire" },
           ] as const).map(({ key, label, color }) => (
             <button
               key={key}
@@ -213,13 +215,13 @@ export function DayTimeline({
       )}
       <div className="relative">
         {visibility.sleep && (
-          <TrackRow label="Schlaf" color="bg-lavender" items={sleepItems} />
+          <TrackRow label={t("track_sleep")} color="bg-lavender" items={sleepItems} />
         )}
         {visibility.feeding && (
-          <DotRow label="Flasche" color="bg-peach" items={feedItems} />
+          <DotRow label={t("track_bottle")} color="bg-peach" items={feedItems} />
         )}
         {visibility.diaper && (
-          <DotRow label="Windeln" color="bg-sapphire" items={changeItems} />
+          <DotRow label={t("track_diaper")} color="bg-sapphire" items={changeItems} />
         )}
 
         <div className="flex items-center gap-2">
@@ -248,6 +250,7 @@ export function MiniTimeline({
   showAxis?: boolean;
   isToday?: boolean;
 }) {
+  const { t: tDash } = useTranslation("dashboard");
   const { sleepItems, feedItems, changeItems } = buildTimelineItems(
     feedings,
     diapers,
@@ -263,10 +266,10 @@ export function MiniTimeline({
 
   return (
     <div className="relative mt-2">
-      <TrackRow label="Schlaf" color="bg-lavender" items={sleepItems} compact />
-      <DotRow label="Flasche" color="bg-peach" items={feedItems} compact />
+      <TrackRow label={tDash("track_sleep")} color="bg-lavender" items={sleepItems} compact />
+      <DotRow label={tDash("track_bottle")} color="bg-peach" items={feedItems} compact />
       <DotRow
-        label="Windeln"
+        label={tDash("track_diaper")}
         color="bg-sapphire"
         items={changeItems}
         compact

@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useActiveChild } from "../context/ChildContext";
 
 export function ChildSelector() {
   const { activeChild, children, setActiveChild, isLoading } =
     useActiveChild();
+  const { t: tc } = useTranslation("common");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,7 +39,7 @@ export function ChildSelector() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-[8px] bg-surface0 font-headline text-base font-bold text-text hover:opacity-80 transition-opacity"
       >
-        {activeChild?.name ?? "Kind waehlen"}
+        {activeChild?.name ?? tc("child.child")}
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 

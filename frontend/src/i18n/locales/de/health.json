@@ -22,5 +22,28 @@
   "empty": "Noch keine Gesundheit-Eintraege",
   "widget_title": "Gesundheit",
   "no_feedings_today": "Heute keine Mahlzeiten erfasst",
-  "feeding_linked": "Zugehoerige Mahlzeit"
+  "feeding_linked": "Zugehoerige Mahlzeit",
+  "loading": "Laden...",
+  "no_entries_today": "Heute keine Eintraege",
+  "last_entry": "Zuletzt: {{time}}",
+  "label_intensity": "Intensitaet",
+  "label_assign_feeding": "Mahlzeit zuordnen",
+  "assign_feeding": "Mahlzeit zuordnen",
+  "feeding": "Mahlzeit",
+  "cancel_link": "Abbrechen",
+  "type_filter": {
+    "all": "Alle Typen"
+  },
+  "summary": {
+    "total": "Gesamt",
+    "spit_up": "Spucken",
+    "tummy_ache": "Bauchschm.",
+    "last": "Zuletzt"
+  },
+  "feeding_type": {
+    "breast_left": "Brust L",
+    "breast_right": "Brust R",
+    "bottle": "Flasche",
+    "solid": "Beikost"
+  }
 }

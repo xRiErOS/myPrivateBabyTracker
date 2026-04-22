@@ -14,6 +14,8 @@
   "label_time": "Time",
   "label_amount": "Amount (ml)",
   "label_amount_solid": "Amount (g)",
+  "label_food_type": "Food type",
+  "food_type_placeholder": "e.g. puree, cereal...",
   "amount_ml": "{{amount}} ml",
   "amount_g": "{{amount}} g",
   "empty": "No feeding entries yet",
@@ -26,5 +28,13 @@
   "entries_count_other": "{{count}} entries",
   "summary_feeding": "Feeding",
   "summary_total": "Total",
-  "hybrid_mode": "Hybrid mode"
+  "hybrid_mode": "Hybrid mode",
+  "side_left": "Left",
+  "side_right": "Right",
+  "next_side": "Next: {{side}}",
+  "today_nursed": "Nursed today",
+  "not_nursed_yet": "Not nursed yet",
+  "last_bottle_sub": "Last bottle: {{amount}} ml",
+  "yesterday_total": "Yesterday: {{amount}} ml",
+  "last_entry": "Last: {{time}}"
 }

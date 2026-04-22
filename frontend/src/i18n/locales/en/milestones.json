@@ -31,5 +31,12 @@
   "category": "Category",
   "filter_category": "Filter by category",
   "filter_status": "Filter by status",
-  "all_categories": "All categories"
+  "all_categories": "All categories",
+  "widget_leap_storm": "Leap {{number}} — Storm",
+  "widget_leap_sun": "Leap {{number}} — Sun",
+  "widget_no_leap": "No leap",
+  "widget_next_leap": "Next: Leap {{number}}",
+  "widget_next_leap_in_days": "Next leap in {{count}} days",
+  "widget_last_completed": "Last: {{title}}",
+  "widget_no_milestones_yet": "No milestones yet"
 }

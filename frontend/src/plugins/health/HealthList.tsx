@@ -1,6 +1,7 @@
 /** Health entry list with inline edit. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Activity, Droplets, Pencil, Trash2, Utensils, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -15,19 +16,6 @@ import { formatDateTime, formatTime, startOfTodayISO, daysAgoISO } from "../../l
 import { HealthForm } from "./HealthForm";
 import type { FeedingType } from "../../api/types";
 
-const FEEDING_TYPE_LABELS: Record<FeedingType, string> = {
-  breast_left: "Brust L",
-  breast_right: "Brust R",
-  bottle: "Flasche",
-  solid: "Beikost",
-};
-
-const TYPE_OPTIONS = [
-  { value: "", label: "Alle Typen" },
-  { value: "spit_up", label: "Spucken" },
-  { value: "tummy_ache", label: "Bauchschmerzen" },
-];
-
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
@@ -40,18 +28,6 @@ const SEVERITY_COLORS: Record<string, string> = {
   severe: "text-red",
 };
 
-const SEVERITY_LABELS: Record<string, string> = {
-  mild: "Wenig",
-  moderate: "Mittel",
-  severe: "Stark",
-};
-
-const DURATION_LABELS: Record<string, string> = {
-  short: "Kurz (~1h)",
-  medium: "Mittel (1-2h)",
-  long: "Lang (>2h)",
-};
-
 function EntryIcon({ type }: { type: string }) {
   if (type === "spit_up") {
     return <Droplets className="h-4 w-4 text-sapphire" />;
@@ -60,7 +36,35 @@ function EntryIcon({ type }: { type: string }) {
 }
 
 export function HealthList() {
+  const { t } = useTranslation("health");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+
+  const FEEDING_TYPE_LABELS: Record<FeedingType, string> = {
+    breast_left: t("feeding_type.breast_left"),
+    breast_right: t("feeding_type.breast_right"),
+    bottle: t("feeding_type.bottle"),
+    solid: t("feeding_type.solid"),
+  };
+
+  const TYPE_OPTIONS = [
+    { value: "", label: t("type_filter.all") },
+    { value: "spit_up", label: t("entry_type.spit_up") },
+    { value: "tummy_ache", label: t("entry_type.tummy_ache") },
+  ];
+
+  const SEVERITY_LABELS: Record<string, string> = {
+    mild: t("severity.mild"),
+    moderate: t("severity.moderate"),
+    severe: t("severity.severe"),
+  };
+
+  const DURATION_LABELS: Record<string, string> = {
+    short: t("duration.short"),
+    medium: t("duration.medium"),
+    long: t("duration.long"),
+  };
+
   const [typeFilter, setTypeFilter] = useState("");
   const [searchParams] = useSearchParams();
   const specificDate = searchParams.get("date");
@@ -91,14 +95,14 @@ export function HealthList() {
     .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Activity className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Gesundheits-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -120,23 +124,23 @@ export function HealthList() {
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label="Gesamt" value={entries.length} />
+              <MetricPill label={t("summary.total")} value={entries.length} />
               {spitUps.length > 0 && (
                 <MetricPill
-                  label="Spucken"
+                  label={t("summary.spit_up")}
                   value={<span className="flex items-center justify-center gap-1"><Droplets className="h-3 w-3 text-sapphire" />{spitUps.length}x</span>}
                 />
               )}
               {tummyAches.length > 0 && (
                 <MetricPill
-                  label="Bauchschm."
+                  label={t("summary.tummy_ache")}
                   value={<span className="flex items-center justify-center gap-1"><Activity className="h-3 w-3 text-mauve" />{tummyAches.length}x</span>}
                 />
               )}
             </div>
             {entries[0] && (
               <p className="font-body text-xs text-subtext0">
-                Zuletzt: {formatTime(entries[0].time)}
+                {t("summary.last")}: {formatTime(entries[0].time)}
               </p>
             )}
           </ListSummaryBar>
@@ -149,7 +153,7 @@ export function HealthList() {
             <div className="flex items-center gap-2">
               <EntryIcon type={entry.entry_type} />
               <span className="font-label text-sm font-medium">
-                {entry.entry_type === "spit_up" ? "Spucken" : "Bauchschmerzen"}
+                {entry.entry_type === "spit_up" ? t("entry_type.spit_up") : t("entry_type.tummy_ache")}
               </span>
               <span className={`font-label text-xs font-medium ${SEVERITY_COLORS[entry.severity] ?? "text-text"}`}>
                 {SEVERITY_LABELS[entry.severity] ?? entry.severity}
@@ -175,7 +179,7 @@ export function HealthList() {
           </p>
           {entry.duration && (
             <p className="font-body text-xs text-overlay0">
-              Dauer: {DURATION_LABELS[entry.duration] ?? entry.duration}
+              {t("label_duration")}: {DURATION_LABELS[entry.duration] ?? entry.duration}
             </p>
           )}
           {entry.notes && (
@@ -195,13 +199,13 @@ export function HealthList() {
                 }`}
               >
                 <Utensils className="h-3.5 w-3.5" />
-                Mahlzeit
+                {t("feeding")}
               </button>
             </div>
           )}
           {linkingId === entry.id && (
             <div className="border-t border-surface1 mt-2 pt-2">
-              <p className="font-label text-xs font-medium text-text mb-2">Mahlzeit zuordnen</p>
+              <p className="font-label text-xs font-medium text-text mb-2">{t("assign_feeding")}</p>
               <div className="flex flex-col gap-1.5">
                 {sortedTodayFeedings.map((f) => (
                   <button
@@ -222,7 +226,7 @@ export function HealthList() {
                   </button>
                 ))}
                 {sortedTodayFeedings.length === 0 && (
-                  <p className="font-body text-xs text-overlay0">Heute keine Mahlzeiten erfasst</p>
+                  <p className="font-body text-xs text-overlay0">{t("no_feedings_today")}</p>
                 )}
               </div>
               <button
@@ -230,7 +234,7 @@ export function HealthList() {
                 onClick={() => setLinkingId(null)}
                 className="mt-2 font-body text-xs text-overlay0 hover:text-text transition-colors"
               >
-                Abbrechen
+                {t("cancel_link")}
               </button>
             </div>
           )}

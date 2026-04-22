@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CloudLightning, CloudSun, LayoutDashboard, Plus, Sun, X } from "lucide-react";
 import { AlertBanner } from "../components/AlertBanner";
 import { EmptyState } from "../components/EmptyState";
@@ -41,6 +42,7 @@ const VIEW_DAYS: Record<DashboardView, number> = {
 export default function Dashboard() {
   const { activeChild } = useActiveChild();
   const navigate = useNavigate();
+  const { t } = useTranslation("dashboard");
   const [view, setView] = useState<DashboardView>("today");
 
   const [now, setNow] = useState(new Date());
@@ -103,8 +105,8 @@ export default function Dashboard() {
     return (
       <EmptyState
         icon={LayoutDashboard}
-        title="Kein Kind angelegt"
-        description="Lege zuerst ein Kind an, um das Dashboard zu sehen."
+        title={t("no_child")}
+        description={t("no_child_hint")}
       />
     );
   }
@@ -189,6 +191,7 @@ export default function Dashboard() {
 }
 
 function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
+  const { t } = useTranslation("dashboard");
   const [menuOpen, setMenuOpen] = useState(false);
   const quickActionKeys = getQuickActions();
   const quickPlugins = quickActionKeys
@@ -238,7 +241,7 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-headline text-base font-semibold text-text">
-                Neuer Eintrag
+                {t("add_menu_title")}
               </h3>
               <button
                 onClick={closeMenu}
@@ -340,6 +343,7 @@ function parseJsonArray(val: string | null): string[] {
 
 function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusItem; onClose: () => void }) {
   const nav = useNavigate();
+  const { t } = useTranslation("dashboard");
   const isStorm = leap.status === "active_storm";
   const isSun = leap.status === "active_sun";
   const isUpcoming = leap.status === "upcoming" || leap.status === "far_future";
@@ -358,7 +362,7 @@ function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusI
       <div className="bg-ground rounded-[12px] shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-surface0">
           <h3 className="font-headline text-base font-semibold text-text">
-            Sprung {leap.leap_number} &mdash; {leap.title}
+            {t("leap_popup.title", { number: leap.leap_number, name: leap.title })}
           </h3>
           <button onClick={onClose} className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text">
             <X className="h-5 w-5" />
@@ -371,10 +375,10 @@ function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusI
             {isSun && <Sun className="h-5 w-5 text-green" />}
             {isUpcoming && <CloudSun className="h-5 w-5 text-sapphire" />}
             <span className={`font-label text-sm font-medium ${isStorm ? "text-peach" : isSun ? "text-green" : "text-sapphire"}`}>
-              {isStorm ? "Sturmphase" : isSun ? "Sonnenphase" : "Bevorstehend"}
+              {isStorm ? t("leap_popup.storm") : isSun ? t("leap_popup.sun") : t("leap_popup.upcoming")}
             </span>
             {isUpcoming && countdown !== null && countdown > 0 && (
-              <span className="font-body text-xs text-sapphire">in {countdown} Tagen (ab {stormStart})</span>
+              <span className="font-body text-xs text-sapphire">{t("leap_popup.days_until", { count: countdown, date: stormStart })}</span>
             )}
           </div>
 
@@ -384,7 +388,7 @@ function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusI
           {/* Skills */}
           {skills.length > 0 && (
             <div>
-              <h4 className="font-headline text-sm font-semibold text-green mb-2">Neue Faehigkeiten</h4>
+              <h4 className="font-headline text-sm font-semibold text-green mb-2">{t("leap_popup.new_skills")}</h4>
               {skills.map((s, i) => (
                 <p key={i} className="font-body text-sm text-text py-0.5">• {s}</p>
               ))}
@@ -394,7 +398,7 @@ function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusI
           {/* Storm signs */}
           {signs.length > 0 && (
             <div>
-              <h4 className="font-headline text-sm font-semibold text-peach mb-2">Sturm-Anzeichen</h4>
+              <h4 className="font-headline text-sm font-semibold text-peach mb-2">{t("leap_popup.storm_signs")}</h4>
               {signs.map((s, i) => (
                 <p key={i} className="font-body text-sm text-text py-0.5">• {s}</p>
               ))}
@@ -406,7 +410,7 @@ function LeapPopup({ leap, onClose }: { leap: import("../api/types").LeapStatusI
             onClick={() => { onClose(); nav("/milestones?tab=leaps"); }}
             className="font-label text-sm text-lavender hover:underline mt-2"
           >
-            Alle Spruenge anzeigen →
+            {t("leap_popup.show_all_leaps")} →
           </button>
         </div>
       </div>

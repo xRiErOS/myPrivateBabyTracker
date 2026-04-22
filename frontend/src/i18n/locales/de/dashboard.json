@@ -15,5 +15,17 @@
   "track_bottle": "Flasche",
   "track_diaper": "Windeln",
   "quick_actions": "Schnellaktionen",
-  "add_menu_title": "Neuer Eintrag"
+  "add_menu_title": "Neuer Eintrag",
+  "14_day_pattern": "14-Tage Muster",
+  "today_label": "Heute",
+  "leap_popup": {
+    "title": "Sprung {{number}} — {{name}}",
+    "storm": "Sturmphase",
+    "sun": "Sonnenphase",
+    "upcoming": "Bevorstehend",
+    "days_until": "in {{count}} Tagen (ab {{date}})",
+    "new_skills": "Neue Faehigkeiten",
+    "storm_signs": "Sturm-Anzeichen",
+    "show_all_leaps": "Alle Spruenge anzeigen"
+  }
 }

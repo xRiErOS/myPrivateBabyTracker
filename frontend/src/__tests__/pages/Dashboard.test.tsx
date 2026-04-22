@@ -73,10 +73,9 @@ describe("Dashboard", () => {
 
   it("renders summary tiles in today view", () => {
     renderDashboard();
-    expect(screen.getByText("Stillseite")).toBeInTheDocument();
-    expect(screen.getByText("Heute gesamt")).toBeInTheDocument();
-    expect(screen.getByText("Windeln heute")).toBeInTheDocument();
-    expect(screen.getAllByText("Schlaf").length).toBeGreaterThan(0);
+    // BabySummary renders feeding + diaper + sleep tiles
+    expect(screen.getByText(/Windeln heute/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Schlaf/).length).toBeGreaterThan(0);
   });
 
   it("renders VitaminD3 tile", () => {

@@ -1,6 +1,7 @@
 /** Diaper entry list with inline edit. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { AlertTriangle, Droplets, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -15,35 +16,14 @@ import { isWet } from "../../lib/timelineUtils";
 import { DiaperForm } from "./DiaperForm";
 import type { DiaperEntry, DiaperType } from "../../api/types";
 
-const TYPE_OPTIONS = [
-  { value: "", label: "Alle Typen" },
-  { value: "wet", label: "Nass" },
-  { value: "dirty", label: "Stuhl" },
-  { value: "mixed", label: "Gemischt" },
-  { value: "dry", label: "Trocken" },
-];
-
-const TYPE_LABELS: Record<DiaperType, string> = {
-  wet: "Nass",
-  dirty: "Stuhl",
-  mixed: "Gemischt",
-  dry: "Trocken",
-};
-
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
   all: undefined,
 };
 
-const CHANGE_LABELS: Record<DiaperType, string> = {
-  wet: "Nass",
-  dirty: "Stuhl",
-  mixed: "Beides",
-  dry: "Trocken",
-};
-
 function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
+  const { t } = useTranslation("diaper");
   const total = diapers.length;
   if (total === 0) return null;
 
@@ -53,10 +33,10 @@ function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
   const dry = total - wet - dirty - mixed;
 
   const segments = [
-    { count: wet, color: "bg-sapphire", label: "Nass" },
-    { count: dirty, color: "bg-peach", label: "Stuhl" },
-    { count: mixed, color: "bg-mauve", label: "Beides" },
-    { count: dry, color: "bg-overlay0", label: "Trocken" },
+    { count: wet, color: "bg-sapphire", label: t("type.wet") },
+    { count: dirty, color: "bg-peach", label: t("type.dirty") },
+    { count: mixed, color: "bg-mauve", label: t("change.mixed") },
+    { count: dry, color: "bg-overlay0", label: t("type.dry") },
   ].filter((s) => s.count > 0);
 
   return (
@@ -74,7 +54,31 @@ function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
 }
 
 export function DiaperList() {
+  const { t } = useTranslation("diaper");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+
+  const TYPE_OPTIONS = [
+    { value: "", label: t("type_filter.all") },
+    { value: "wet", label: t("type.wet") },
+    { value: "dirty", label: t("type.dirty") },
+    { value: "mixed", label: t("type.mixed") },
+    { value: "dry", label: t("type.dry") },
+  ];
+
+  const TYPE_LABELS: Record<DiaperType, string> = {
+    wet: t("type.wet"),
+    dirty: t("type.dirty"),
+    mixed: t("type.mixed"),
+    dry: t("type.dry"),
+  };
+
+  const CHANGE_LABELS: Record<DiaperType, string> = {
+    wet: t("type.wet"),
+    dirty: t("type.dirty"),
+    mixed: t("change.mixed"),
+    dry: t("type.dry"),
+  };
   const [typeFilter, setTypeFilter] = useState("");
   const [searchParams] = useSearchParams();
   const specificDate = searchParams.get("date");
@@ -95,14 +99,14 @@ export function DiaperList() {
   });
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Droplets className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Windel-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -121,18 +125,18 @@ export function DiaperList() {
       {entries.length > 0 && (
         <ListSummaryBar>
           <div className="flex gap-1.5">
-            <MetricPill label="Ges." value={entries.length} />
-            <MetricPill label="Nass" value={entries.filter(isWet).length} />
-            <MetricPill label="Stuhl" value={entries.filter((e) => e.diaper_type === "dirty").length} />
-            <MetricPill label="Beides" value={entries.filter((e) => e.diaper_type === "mixed").length} />
+            <MetricPill label={t("summary.total")} value={entries.length} />
+            <MetricPill label={t("type.wet")} value={entries.filter(isWet).length} />
+            <MetricPill label={t("type.dirty")} value={entries.filter((e) => e.diaper_type === "dirty").length} />
+            <MetricPill label={t("change.mixed")} value={entries.filter((e) => e.diaper_type === "mixed").length} />
           </div>
           <div className="flex items-center justify-between">
             <p className="font-body text-xs text-subtext0">
-              Trocken: {entries.filter((e) => e.diaper_type === "dry").length}
+              {t("type.dry")}: {entries.filter((e) => e.diaper_type === "dry").length}
             </p>
             {entries[0] && (
               <p className="font-body text-xs text-subtext0">
-                Letzte: {CHANGE_LABELS[entries[0].diaper_type] ?? entries[0].diaper_type} — {formatTimeSince(entries[0].time)}
+                {t("summary.last")}: {CHANGE_LABELS[entries[0].diaper_type] ?? entries[0].diaper_type} — {formatTimeSince(entries[0].time)}
               </p>
             )}
           </div>
@@ -140,7 +144,7 @@ export function DiaperList() {
           {entries.some((e) => e.has_rash) && (
             <div className="flex items-center gap-1.5">
               <AlertTriangle className="h-3.5 w-3.5 text-red" />
-              <span className="font-body text-xs text-red font-medium">Ausschlag beobachtet</span>
+              <span className="font-body text-xs text-red font-medium">{t("rash_observed")}</span>
             </div>
           )}
         </ListSummaryBar>
@@ -157,7 +161,7 @@ export function DiaperList() {
               {entry.has_rash && (
                 <span className="flex items-center gap-1 text-red">
                   <AlertTriangle className="h-3 w-3" />
-                  <span className="font-label text-xs">Ausschlag</span>
+                  <span className="font-label text-xs">{t("rash")}</span>
                 </span>
               )}
             </div>
@@ -180,7 +184,7 @@ export function DiaperList() {
             {formatDateTime(entry.time)}
           </p>
           {entry.color && (
-            <p className="font-body text-sm text-overlay0">Farbe: {entry.color}</p>
+            <p className="font-body text-sm text-overlay0">{t("color")}: {entry.color}</p>
           )}
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>

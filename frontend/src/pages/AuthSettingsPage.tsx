@@ -1,6 +1,7 @@
 /** Auth settings page — shows auth mode, current user, password change, 2FA, passkeys, logout. */
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { LogOut, KeyRound, User, Info, Smartphone, Fingerprint, Trash2, Pencil } from "lucide-react";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
@@ -21,14 +22,16 @@ import {
   type WebAuthnCredential,
 } from "../api/webauthn";
 
-const AUTH_MODE_LABELS: Record<string, string> = {
-  disabled: "Deaktiviert (kein Login)",
-  local: "Lokales Login (Passwort)",
-  forward: "SSO (Authelia Forward-Auth)",
-  both: "SSO + Lokales Login",
+const AUTH_MODE_KEYS: Record<string, string> = {
+  disabled: "settings.mode_disabled",
+  local: "settings.mode_local",
+  forward: "settings.mode_forward",
+  both: "settings.mode_both",
 };
 
 export default function AuthSettingsPage() {
+  const { t } = useTranslation("auth");
+  const { t: tc } = useTranslation("common");
   const { user, authMode, logout, refresh } = useAuth();
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
@@ -64,13 +67,13 @@ export default function AuthSettingsPage() {
     try {
       const options = await registerBegin();
       const credential = await navigator.credentials.create({ publicKey: options });
-      if (!credential) throw new Error("Registrierung abgebrochen");
+      if (!credential) throw new Error(t("passkey.register_cancelled"));
       await registerFinish(credential as PublicKeyCredential);
-      setPasskeyMsg({ ok: true, text: "Passkey registriert" });
+      setPasskeyMsg({ ok: true, text: t("passkey.registered") });
       const updated = await listCredentials();
       setPasskeys(updated);
     } catch (e) {
-      setPasskeyMsg({ ok: false, text: "Passkey-Registrierung fehlgeschlagen" });
+      setPasskeyMsg({ ok: false, text: t("passkey.register_failed") });
     } finally {
       setPasskeySaving(false);
     }
@@ -81,7 +84,7 @@ export default function AuthSettingsPage() {
       await deleteCredential(id);
       setPasskeys((prev) => prev.filter((p) => p.id !== id));
     } catch {
-      setPasskeyMsg({ ok: false, text: "Loeschen fehlgeschlagen" });
+      setPasskeyMsg({ ok: false, text: t("passkey.delete_failed") });
     }
   }
 
@@ -94,7 +97,7 @@ export default function AuthSettingsPage() {
       setEditingPasskey(null);
       setEditName("");
     } catch {
-      setPasskeyMsg({ ok: false, text: "Umbenennen fehlgeschlagen" });
+      setPasskeyMsg({ ok: false, text: t("passkey.rename_failed") });
     }
   }
 
@@ -104,11 +107,11 @@ export default function AuthSettingsPage() {
     setSaving(true);
     try {
       await changePassword(currentPw, newPw);
-      setPwMsg({ ok: true, text: "Passwort geaendert" });
+      setPwMsg({ ok: true, text: t("settings.password_changed") });
       setCurrentPw("");
       setNewPw("");
     } catch {
-      setPwMsg({ ok: false, text: "Passwort-Aenderung fehlgeschlagen" });
+      setPwMsg({ ok: false, text: t("settings.password_change_failed") });
     } finally {
       setSaving(false);
     }
@@ -116,19 +119,19 @@ export default function AuthSettingsPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Authentifizierung" />
+      <PageHeader title={t("settings.title")} />
 
       {/* Auth Mode Info */}
       <Card className="p-4 space-y-2">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-sapphire" />
-          <h3 className="font-headline text-base font-semibold text-text">Auth-Modus</h3>
+          <h3 className="font-headline text-base font-semibold text-text">{t("settings.auth_mode")}</h3>
         </div>
         <p className="font-body text-sm text-text">
-          {AUTH_MODE_LABELS[authMode] ?? authMode}
+          {t(AUTH_MODE_KEYS[authMode] ?? authMode)}
         </p>
         <p className="font-body text-xs text-subtext0">
-          Konfigurierbar per Umgebungsvariable AUTH_MODE im Container.
+          {t("settings.mode_env_hint")}
         </p>
       </Card>
 
@@ -137,16 +140,16 @@ export default function AuthSettingsPage() {
         <Card className="p-4 space-y-2">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-sapphire" />
-            <h3 className="font-headline text-base font-semibold text-text">Angemeldet als</h3>
+            <h3 className="font-headline text-base font-semibold text-text">{t("settings.logged_in_as")}</h3>
           </div>
           <div className="grid grid-cols-2 gap-y-1 text-sm">
-            <span className="text-subtext0">Benutzername</span>
+            <span className="text-subtext0">{t("settings.user_info.username")}</span>
             <span className="text-text">{user.username}</span>
-            <span className="text-subtext0">Anzeigename</span>
+            <span className="text-subtext0">{t("settings.user_info.display_name")}</span>
             <span className="text-text">{user.display_name ?? "-"}</span>
-            <span className="text-subtext0">Rolle</span>
+            <span className="text-subtext0">{t("settings.user_info.role")}</span>
             <span className="text-text">{user.role}</span>
-            <span className="text-subtext0">Auth-Typ</span>
+            <span className="text-subtext0">{t("settings.user_info.auth_type")}</span>
             <span className="text-text">{user.auth_type}</span>
           </div>
         </Card>
@@ -157,11 +160,11 @@ export default function AuthSettingsPage() {
         <Card className="p-4 space-y-3">
           <div className="flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-peach" />
-            <h3 className="font-headline text-base font-semibold text-text">Passwort aendern</h3>
+            <h3 className="font-headline text-base font-semibold text-text">{t("settings.change_password")}</h3>
           </div>
           <form onSubmit={handleChangePassword} className="space-y-3">
             <div>
-              <label className="block text-sm text-subtext0 mb-1">Aktuelles Passwort *</label>
+              <label className="block text-sm text-subtext0 mb-1">{t("settings.current_password")} *</label>
               <input
                 type="password"
                 autoComplete="current-password"
@@ -172,7 +175,7 @@ export default function AuthSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-subtext0 mb-1">Neues Passwort * (min. 8 Zeichen)</label>
+              <label className="block text-sm text-subtext0 mb-1">{t("settings.new_password")}</label>
               <input
                 type="password"
                 autoComplete="new-password"
@@ -191,7 +194,7 @@ export default function AuthSettingsPage() {
               disabled={saving}
               className="px-4 py-2 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50"
             >
-              {saving ? "Speichern..." : "Passwort aendern"}
+              {saving ? tc("saving") : t("settings.change_password")}
             </button>
           </form>
         </Card>
@@ -203,16 +206,16 @@ export default function AuthSettingsPage() {
           <div className="flex items-center gap-2">
             <Smartphone className="h-4 w-4 text-green" />
             <h3 className="font-headline text-base font-semibold text-text">
-              Zwei-Faktor-Authentifizierung (2FA)
+              {t("totp.title")}
             </h3>
           </div>
 
           {user.totp_enabled && !totpSetupData ? (
             // TOTP is enabled — show disable form
             <div className="space-y-2">
-              <p className="text-sm text-green font-medium">2FA ist aktiviert</p>
+              <p className="text-sm text-green font-medium">{t("totp.enabled")}</p>
               <p className="text-xs text-subtext0">
-                Gib einen aktuellen Code ein, um 2FA zu deaktivieren.
+                {t("totp.disable_hint")}
               </p>
               <div className="flex gap-2">
                 <input
@@ -233,17 +236,17 @@ export default function AuthSettingsPage() {
                     try {
                       await totpDisable(totpDisableCode);
                       setTotpDisableCode("");
-                      setTotpMsg({ ok: true, text: "2FA deaktiviert" });
+                      setTotpMsg({ ok: true, text: t("totp.deactivated") });
                       await refresh();
                     } catch {
-                      setTotpMsg({ ok: false, text: "Ungueltiger Code" });
+                      setTotpMsg({ ok: false, text: t("totp.invalid_code") });
                     } finally {
                       setTotpSaving(false);
                     }
                   }}
                   className="px-4 py-2 bg-red/15 text-red font-semibold rounded-lg disabled:opacity-50"
                 >
-                  Deaktivieren
+                  {t("totp.disable")}
                 </button>
               </div>
             </div>
@@ -251,7 +254,7 @@ export default function AuthSettingsPage() {
             // Setup in progress — show QR + verify
             <div className="space-y-3">
               <p className="text-sm text-subtext0">
-                Scanne den QR-Code mit deiner Authenticator-App (z.B. Google Authenticator, Authy).
+                {t("totp.scan_qr")}
               </p>
               <div className="flex justify-center">
                 <img
@@ -261,14 +264,14 @@ export default function AuthSettingsPage() {
                 />
               </div>
               <details className="text-xs text-subtext0">
-                <summary className="cursor-pointer">Manueller Schluessel</summary>
+                <summary className="cursor-pointer">{t("totp.manual_key")}</summary>
                 <code className="block mt-1 p-2 bg-ground rounded text-text break-all">
                   {totpSetupData.secret}
                 </code>
               </details>
               <div className="p-3 bg-ground rounded-lg">
                 <p className="text-xs text-subtext0 font-semibold mb-1">
-                  Backup-Codes (einmalig, sicher aufbewahren):
+                  {t("totp.backup_codes")}
                 </p>
                 <div className="grid grid-cols-2 gap-1">
                   {totpSetupData.backup_codes.map((c) => (
@@ -278,7 +281,7 @@ export default function AuthSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm text-subtext0 mb-1">
-                  Bestaetigungscode eingeben *
+                  {t("totp.verify_code")} *
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -300,17 +303,17 @@ export default function AuthSettingsPage() {
                         await totpVerify(totpSetupCode);
                         setTotpSetupData(null);
                         setTotpSetupCode("");
-                        setTotpMsg({ ok: true, text: "2FA aktiviert" });
+                        setTotpMsg({ ok: true, text: t("totp.activated") });
                         await refresh();
                       } catch {
-                        setTotpMsg({ ok: false, text: "Ungueltiger Code" });
+                        setTotpMsg({ ok: false, text: t("totp.invalid_code") });
                       } finally {
                         setTotpSaving(false);
                       }
                     }}
                     className="px-4 py-2 bg-peach text-ground font-semibold rounded-lg disabled:opacity-50"
                   >
-                    Aktivieren
+                    {t("totp.activate")}
                   </button>
                 </div>
               </div>
@@ -318,14 +321,14 @@ export default function AuthSettingsPage() {
                 onClick={() => { setTotpSetupData(null); setTotpSetupCode(""); }}
                 className="text-sm text-subtext0 underline"
               >
-                Abbrechen
+                {tc("cancel")}
               </button>
             </div>
           ) : (
             // Not enabled — show setup button
             <div className="space-y-2">
               <p className="text-xs text-subtext0">
-                Schuetze dein Konto mit einer Authenticator-App.
+                {t("totp.protect_hint")}
               </p>
               <button
                 disabled={totpSaving}
@@ -336,14 +339,14 @@ export default function AuthSettingsPage() {
                     const data = await totpSetup();
                     setTotpSetupData(data);
                   } catch {
-                    setTotpMsg({ ok: false, text: "Setup fehlgeschlagen" });
+                    setTotpMsg({ ok: false, text: t("totp.setup_failed") });
                   } finally {
                     setTotpSaving(false);
                   }
                 }}
                 className="px-4 py-2 bg-green/15 text-green font-semibold rounded-lg disabled:opacity-50"
               >
-                2FA einrichten
+                {t("totp.enable")}
               </button>
             </div>
           )}
@@ -361,10 +364,10 @@ export default function AuthSettingsPage() {
         <Card className="p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Fingerprint className="h-4 w-4 text-sapphire" />
-            <h3 className="font-headline text-base font-semibold text-text">Passkeys</h3>
+            <h3 className="font-headline text-base font-semibold text-text">{t("passkey.title")}</h3>
           </div>
           <p className="text-xs text-subtext0">
-            Melde dich mit Fingerabdruck oder Face ID an — kein Passwort noetig.
+            {t("passkey.hint")}
           </p>
 
           {passkeys.length > 0 && (

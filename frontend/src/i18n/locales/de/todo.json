@@ -15,5 +15,9 @@
   "active": "Aktiv",
   "inactive": "Inaktiv",
   "widget_title": "ToDo",
-  "widget_all_done": "Alles erledigt!"
+  "widget_all_done": "Alles erledigt!",
+  "widget_loading": "Laden...",
+  "widget_no_tasks": "Keine Aufgaben",
+  "widget_open_count": "offen",
+  "widget_done_pct": "{{pct}}% erledigt"
 }

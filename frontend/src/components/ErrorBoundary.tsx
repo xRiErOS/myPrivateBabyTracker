@@ -3,6 +3,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "./Button";
+import i18n from "../i18n";
 
 interface Props {
   children: ReactNode;
@@ -32,9 +33,9 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
           <AlertTriangle className="h-12 w-12 text-peach" />
-          <h2 className="font-headline text-lg font-semibold">Etwas ist schiefgelaufen</h2>
+          <h2 className="font-headline text-lg font-semibold">{i18n.t("error_boundary.title")}</h2>
           <p className="font-body text-sm text-subtext0 max-w-md">
-            {this.state.error?.message ?? "Unbekannter Fehler"}
+            {this.state.error?.message ?? i18n.t("errors.unknown")}
           </p>
           <Button
             onClick={() => {
@@ -42,7 +43,7 @@ export class ErrorBoundary extends Component<Props, State> {
               window.location.href = "/";
             }}
           >
-            Zum Dashboard
+            {i18n.t("error_boundary.go_to_dashboard")}
           </Button>
         </div>
       );

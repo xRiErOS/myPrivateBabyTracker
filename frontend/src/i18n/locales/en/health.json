@@ -22,5 +22,28 @@
   "empty": "No health entries yet",
   "widget_title": "Health",
   "no_feedings_today": "No feedings recorded today",
-  "feeding_linked": "Related feeding"
+  "feeding_linked": "Related feeding",
+  "loading": "Loading...",
+  "no_entries_today": "No entries today",
+  "last_entry": "Last: {{time}}",
+  "label_intensity": "Intensity",
+  "label_assign_feeding": "Link feeding",
+  "assign_feeding": "Link feeding",
+  "feeding": "Feeding",
+  "cancel_link": "Cancel",
+  "type_filter": {
+    "all": "All types"
+  },
+  "summary": {
+    "total": "Total",
+    "spit_up": "Spit-up",
+    "tummy_ache": "Tummy ache",
+    "last": "Last"
+  },
+  "feeding_type": {
+    "breast_left": "Breast L",
+    "breast_right": "Breast R",
+    "bottle": "Bottle",
+    "solid": "Solid"
+  }
 }

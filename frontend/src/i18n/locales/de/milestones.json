@@ -31,5 +31,12 @@
   "category": "Kategorie",
   "filter_category": "Kategorie filtern",
   "filter_status": "Status filtern",
-  "all_categories": "Alle Kategorien"
+  "all_categories": "Alle Kategorien",
+  "widget_leap_storm": "Sprung {{number}} — Sturm",
+  "widget_leap_sun": "Sprung {{number}} — Sonne",
+  "widget_no_leap": "Kein Sprung",
+  "widget_next_leap": "Naechster: Sprung {{number}}",
+  "widget_next_leap_in_days": "Naechster Sprung in {{count}} Tagen",
+  "widget_last_completed": "Zuletzt: {{title}}",
+  "widget_no_milestones_yet": "Noch keine Meilensteine"
 }

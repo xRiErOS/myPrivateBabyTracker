@@ -13,5 +13,15 @@
   "no_session": "Noch keine Session",
   "session_count": "{{count}} Session",
   "session_count_other": "{{count}} Sessions",
-  "total_today": "Heute gesamt"
+  "total_today": "Heute gesamt",
+  "session_today": "1 Session heute",
+  "sessions_today": "{{count}} Sessions heute",
+  "timer_running_label": "Bauchlage laeuft",
+  "or_add_manually": "oder nachtragen",
+  "tummy_time_label": "Bauchlage",
+  "label_duration": "Dauer",
+  "summary": {
+    "total": "Gesamt",
+    "sessions": "Sessions"
+  }
 }

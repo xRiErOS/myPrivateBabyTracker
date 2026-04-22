@@ -1,6 +1,7 @@
 /** Dashboard today summary — 2x3 grid with feeding, diaper, sleep tiles. */
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Droplets, Moon, Play, Square, Sun, Utensils, X } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
@@ -61,6 +62,7 @@ function TileValue({ value, sub, sub2 }: { value: React.ReactNode; sub?: string 
 
 /** Proportional color bar for diaper type distribution. */
 function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
+  const { t: tDiaper } = useTranslation("diaper");
   const total = diapers.length;
   if (total === 0) return null;
 
@@ -70,10 +72,10 @@ function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
   const dry = total - wet - dirty - mixed;
 
   const segments = [
-    { count: wet, color: "bg-sapphire", label: "Nass" },
-    { count: dirty, color: "bg-peach", label: "Dreckig" },
-    { count: mixed, color: "bg-mauve", label: "Beides" },
-    { count: dry, color: "bg-overlay0", label: "Trocken" },
+    { count: wet, color: "bg-sapphire", label: tDiaper("type_short.wet") },
+    { count: dirty, color: "bg-peach", label: tDiaper("type_short.dirty") },
+    { count: mixed, color: "bg-mauve", label: tDiaper("type_short.mixed") },
+    { count: dry, color: "bg-overlay0", label: tDiaper("type_short.dry") },
   ].filter((s) => s.count > 0);
 
   return (
@@ -90,13 +92,13 @@ function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
   );
 }
 
-function changeTypeLabel(d: DiaperEntry | undefined): string {
+function changeTypeLabel(d: DiaperEntry | undefined, tDiaper: (key: string) => string): string {
   if (!d) return "\u2014";
   switch (d.diaper_type) {
-    case "mixed": return "Beides";
-    case "wet": return "Nass";
-    case "dirty": return "Dreckig";
-    case "dry": return "Trocken";
+    case "mixed": return tDiaper("type_short.mixed");
+    case "wet": return tDiaper("type_short.wet");
+    case "dirty": return tDiaper("type_short.dirty");
+    case "dry": return tDiaper("type_short.dry");
     default: return "\u2014";
   }
 }
@@ -104,6 +106,7 @@ function changeTypeLabel(d: DiaperEntry | undefined): string {
 
 /** Compact sleep tile with timer start/stop. */
 function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void }) {
+  const { t: tSleep } = useTranslation("sleep");
   // Fetch from yesterday to catch overnight sleep that extends into today
   const { data: entries = [] } = useSleepEntries({
     child_id: childId,
@@ -154,7 +157,7 @@ function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void
   if (running) {
     return (
       <Tile
-        label="Schlaf"
+        label={tSleep("summary_sleep")}
         icon={<Moon className="h-3 w-3 text-green" />}
         className="ring-1 ring-green/30 bg-green/5"
       >
@@ -165,7 +168,7 @@ function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void
             </div>
             <div className="font-body text-xs text-green flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
-              seit {formatTime(running.start_time)}
+              {tSleep("since", { time: formatTime(running.start_time) })}
             </div>
           </div>
           <button
@@ -181,12 +184,12 @@ function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void
   }
 
   return (
-    <Tile label="Schlaf" icon={<Moon className="h-3 w-3 text-subtext0" />} onClick={onClick}>
+    <Tile label={tSleep("summary_sleep")} icon={<Moon className="h-3 w-3 text-subtext0" />} onClick={onClick}>
       <div className="flex items-center justify-between">
         <div>
           <TileValue
             value={formatDuration(totalMinutes)}
-            sub={entries[0] ? `Letzter: ${hoursAgo(entries[0].end_time ?? entries[0].start_time)}` : null}
+            sub={entries[0] ? tSleep("last_entry_sub", { time: hoursAgo(entries[0].end_time ?? entries[0].start_time) }) : null}
           />
         </div>
         <button
@@ -214,6 +217,8 @@ export function BabySummary({
   childId,
   onTileClick,
 }: BabySummaryProps) {
+  const { t: tFeeding } = useTranslation("feeding");
+  const { t: tDiaper } = useTranslation("diaper");
   const today = todayBerlin();
   const yesterday = new Date(Date.now() - 86400000).toLocaleDateString("sv-SE", {
     timeZone: "Europe/Berlin",
@@ -243,8 +248,8 @@ export function BabySummary({
   const lastBreast = allSortedFeedings.find(
     (f) => f.feeding_type === "breast_left" || f.feeding_type === "breast_right",
   );
-  const lastBreastSide = lastBreast?.feeding_type === "breast_left" ? "Links" : lastBreast?.feeding_type === "breast_right" ? "Rechts" : null;
-  const nextBreastSide = lastBreastSide === "Links" ? "Rechts" : lastBreastSide === "Rechts" ? "Links" : null;
+  const lastBreastSide = lastBreast?.feeding_type === "breast_left" ? tFeeding("side_left") : lastBreast?.feeding_type === "breast_right" ? tFeeding("side_right") : null;
+  const nextBreastSide = lastBreast?.feeding_type === "breast_left" ? tFeeding("side_right") : lastBreast?.feeding_type === "breast_right" ? tFeeding("side_left") : null;
 
   // Last bottle feeding for sub-info in "Heute gesamt"
   const lastBottle = sortedFeedings.find((f) => f.feeding_type === "bottle");
@@ -270,26 +275,26 @@ export function BabySummary({
     <div className="grid grid-cols-2 gap-3">
       {/* --- Feeding tiles: breast / bottle / hybrid --- */}
       {(breastfeedingEnabled || hybridMode) && (
-        <Tile label="Stillseite" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
+        <Tile label={tFeeding("last_breast")} icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
           <TileValue
             value={lastBreastSide ?? "\u2014"}
             sub={lastBreast ? hoursAgo(lastBreast.start_time) : null}
-            sub2={nextBreastSide ? `N\u00e4chste: ${nextBreastSide}` : null}
+            sub2={nextBreastSide ? tFeeding("next_side", { side: nextBreastSide }) : null}
           />
         </Tile>
       )}
 
       {(breastfeedingEnabled || hybridMode) && (
-        <Tile label="Heute gestillt" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
+        <Tile label={tFeeding("today_nursed")} icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
           <TileValue
             value={`${todayBreast.length}x`}
-            sub={lastTodayBreast ? `Zuletzt: ${hoursAgo(lastTodayBreast.start_time)}` : "Noch nicht gestillt"}
+            sub={lastTodayBreast ? tFeeding("last_entry", { time: hoursAgo(lastTodayBreast.start_time) }) : tFeeding("not_nursed_yet")}
           />
         </Tile>
       )}
 
       {(!breastfeedingEnabled || hybridMode) && (
-        <Tile label="Letzte Flasche" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
+        <Tile label={tFeeding("last_bottle")} icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
           <TileValue
             value={lastBottleAll?.amount_ml ? `${lastBottleAll.amount_ml} ml` : "\u2014"}
             sub={lastBottleAll ? hoursAgo(lastBottleAll.start_time) : null}
@@ -298,7 +303,7 @@ export function BabySummary({
       )}
 
       {(!breastfeedingEnabled || hybridMode) && (
-        <Tile label="Heute gesamt" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
+        <Tile label={tFeeding("today_total")} icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
           <TileValue
             value={
               <>
@@ -306,24 +311,24 @@ export function BabySummary({
                 <span className={`text-[12px] ${trendColor}`}>{trend}</span>
               </>
             }
-            sub={lastBottle ? `Letzte Flasche: ${lastBottle.amount_ml ?? 0} ml` : `Gestern: ${yesterdayTotal} ml`}
+            sub={lastBottle ? tFeeding("last_bottle_sub", { amount: lastBottle.amount_ml ?? 0 }) : tFeeding("yesterday_total", { amount: yesterdayTotal })}
           />
         </Tile>
       )}
 
-      <Tile label="Letzte Windel" icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")}>
+      <Tile label={tDiaper("last_diaper")} icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")}>
         <TileValue
-          value={changeTypeLabel(lastDiaper)}
+          value={changeTypeLabel(lastDiaper, tDiaper)}
           sub={lastDiaper ? hoursAgo(lastDiaper.time) : null}
         />
       </Tile>
 
-      <Tile label="Windeln heute" icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")}>
+      <Tile label={tDiaper("today_count")} icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")}>
         <div className="flex gap-1.5">
           {[
-            { value: todayDiapers.length, label: "Ges." },
-            { value: todayDiapers.filter(isWet).length, label: "Nass" },
-            { value: todayDiapers.filter(d => d.diaper_type === "mixed").length, label: "Beid." },
+            { value: todayDiapers.length, label: tDiaper("summary_total_short") },
+            { value: todayDiapers.filter(isWet).length, label: tDiaper("summary_wet_short") },
+            { value: todayDiapers.filter(d => d.diaper_type === "mixed").length, label: tDiaper("summary_both_short") },
           ].map(({ value, label }) => (
             <div key={label} className="bg-surface1 rounded-lg px-1.5 py-1 text-center flex-1">
               <p className="font-headline text-sm font-semibold">{value}</p>
@@ -343,6 +348,7 @@ export function BabySummary({
 
 /** Vitamin D3 tile — tap opens modal with toggle. */
 function VitD3Tile({ childId }: { childId: number }) {
+  const { t: tVitD3 } = useTranslation("vitamind3");
   const [modalOpen, setModalOpen] = useState(false);
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -361,15 +367,16 @@ function VitD3Tile({ childId }: { childId: number }) {
 
   function subLabel(): string {
     if (givenToday && todayEntry) {
-      return `Heute ${new Date(todayEntry.given_at).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" })}`;
+      const time = new Date(todayEntry.given_at).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" });
+      return tVitD3("today_at", { time });
     }
     if (lastEntry) {
       const diffMs = new Date(today).getTime() - new Date(lastEntry.date).getTime();
       const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays === 1) return "Zuletzt: gestern";
-      return `Zuletzt: vor ${diffDays} Tagen`;
+      if (diffDays === 1) return tVitD3("last_yesterday");
+      return tVitD3("last_days_ago", { count: diffDays });
     }
-    return "Noch nie gegeben";
+    return tVitD3("never_given");
   }
 
   function handleToggle() {
@@ -382,9 +389,9 @@ function VitD3Tile({ childId }: { childId: number }) {
 
   return (
     <>
-      <Tile label="Vit. D3" icon={<Sun className="h-3 w-3 text-yellow" />} onClick={() => setModalOpen(true)}>
+      <Tile label={tVitD3("tile_title")} icon={<Sun className="h-3 w-3 text-yellow" />} onClick={() => setModalOpen(true)}>
         <TileValue
-          value={<span className={givenToday ? "text-green" : "text-peach"}>{givenToday ? "Gegeben" : "Ausstehend"}</span>}
+          value={<span className={givenToday ? "text-green" : "text-peach"}>{givenToday ? tVitD3("given") : tVitD3("pending")}</span>}
           sub={subLabel()}
         />
       </Tile>
@@ -402,7 +409,7 @@ function VitD3Tile({ childId }: { childId: number }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sun className="h-5 w-5 text-yellow" />
-                <h3 className="font-headline text-base font-semibold text-text">Vitamin D3</h3>
+                <h3 className="font-headline text-base font-semibold text-text">{tVitD3("title")}</h3>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
@@ -414,13 +421,13 @@ function VitD3Tile({ childId }: { childId: number }) {
 
             <div className="text-center py-2">
               <p className={`font-headline text-xl font-semibold ${givenToday ? "text-green" : "text-peach"}`}>
-                {givenToday ? "Gegeben" : "Ausstehend"}
+                {givenToday ? tVitD3("given") : tVitD3("pending")}
               </p>
               <p className="font-body text-sm text-subtext0 mt-1">{subLabel()}</p>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="font-label text-sm text-text">Heute gegeben</span>
+              <span className="font-label text-sm text-text">{tVitD3("given_today")}</span>
               <button
                 type="button"
                 role="switch"

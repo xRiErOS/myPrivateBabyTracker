@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Baby, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../components/Button";
 import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/Card";
@@ -18,6 +19,8 @@ import {
 import type { Child } from "../api/types";
 
 export default function ChildrenPage() {
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const { data: children = [], isLoading } = useChildren();
   const createChild = useCreateChild();
   const updateChild = useUpdateChild();
@@ -93,14 +96,14 @@ export default function ChildrenPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Kinder">
+      <PageHeader title={t("children.title")}>
         <Button
           variant="primary"
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2"
         >
           <Plus size={16} />
-          Hinzufuegen
+          {t("children.add")}
         </Button>
       </PageHeader>
 
@@ -108,15 +111,15 @@ export default function ChildrenPage() {
         <Card>
           <form onSubmit={handleCreate} className="space-y-4">
             <Input
-              label="Name"
+              label={t("children.name")}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Name des Kindes"
+              placeholder={t("children.name_placeholder")}
               required
               maxLength={100}
             />
             <Input
-              label="Geburtsdatum"
+              label={t("children.birth_date")}
               type="date"
               value={birthDate}
               onChange={(e) => setBirthDate(e.target.value)}
@@ -124,25 +127,25 @@ export default function ChildrenPage() {
             />
 
             <Input
-              label="Errechneter Termin (ET)"
+              label={t("children.estimated_birth_date")}
               type="date"
               value={estimatedBirthDate}
               onChange={(e) => setEstimatedBirthDate(e.target.value)}
             />
             <p className="font-body text-xs text-subtext0 -mt-2">
-              Wichtig fuer die Berechnung der Entwicklungsspruenge.
+              {t("children.estimated_birth_date_hint")}
             </p>
 
             <div className="flex gap-2">
               <Button type="submit" disabled={createChild.isPending}>
-                {createChild.isPending ? "Speichern..." : "Speichern"}
+                {createChild.isPending ? tc("saving") : tc("save")}
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 onClick={resetCreateForm}
               >
-                Abbrechen
+                {tc("cancel")}
               </Button>
             </div>
           </form>
@@ -152,8 +155,8 @@ export default function ChildrenPage() {
       {children.length === 0 ? (
         <EmptyState
           icon={Baby}
-          title="Keine Kinder angelegt"
-          description="Lege dein erstes Kind an, um mit dem Tracking zu beginnen."
+          title={t("children.no_children")}
+          description={t("children.no_children_hint")}
         />
       ) : (
         <div className="space-y-2">
@@ -189,7 +192,7 @@ export default function ChildrenPage() {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm(`"${child.name}" wirklich loeschen?`)) {
+                      if (confirm(t("children.confirm_delete", { name: child.name }))) {
                         deleteChild.mutate(child.id);
                       }
                     }}
@@ -206,15 +209,15 @@ export default function ChildrenPage() {
                 <Card className="mt-0 rounded-t-none border-t border-surface1">
                   <form onSubmit={handleUpdate} className="space-y-4">
                     <Input
-                      label="Name"
+                      label={t("children.name")}
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      placeholder="Name des Kindes"
+                      placeholder={t("children.name_placeholder")}
                       required
                       maxLength={100}
                     />
                     <Input
-                      label="Geburtsdatum"
+                      label={t("children.birth_date")}
                       type="date"
                       value={editBirthDate}
                       onChange={(e) => setEditBirthDate(e.target.value)}
@@ -222,7 +225,7 @@ export default function ChildrenPage() {
                     />
 
                     <Input
-                      label="Errechneter Termin (ET)"
+                      label={t("children.estimated_birth_date")}
                       type="date"
                       value={editEstimatedBirthDate}
                       onChange={(e) =>
@@ -230,21 +233,21 @@ export default function ChildrenPage() {
                       }
                     />
                     <p className="font-body text-xs text-subtext0 -mt-2">
-                      Wichtig fuer die Berechnung der Entwicklungsspruenge.
+                      {t("children.estimated_birth_date_hint")}
                     </p>
 
                     <div className="flex gap-2">
                       <Button type="submit" disabled={updateChild.isPending}>
                         {updateChild.isPending
-                          ? "Aktualisieren..."
-                          : "Aktualisieren"}
+                          ? tc("updating")
+                          : tc("update")}
                       </Button>
                       <Button
                         type="button"
                         variant="secondary"
                         onClick={cancelEdit}
                       >
-                        Abbrechen
+                        {tc("cancel")}
                       </Button>
                     </div>
                   </form>

@@ -13,5 +13,15 @@
   "no_session": "No session yet",
   "session_count": "{{count}} session",
   "session_count_other": "{{count}} sessions",
-  "total_today": "Total today"
+  "total_today": "Total today",
+  "session_today": "1 session today",
+  "sessions_today": "{{count}} sessions today",
+  "timer_running_label": "Tummy time running",
+  "or_add_manually": "or add manually",
+  "tummy_time_label": "Tummy time",
+  "label_duration": "Duration",
+  "summary": {
+    "total": "Total",
+    "sessions": "Sessions"
+  }
 }

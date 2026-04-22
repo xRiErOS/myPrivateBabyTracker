@@ -10,10 +10,12 @@
   "type_filter": {
     "all": "Alle Typen"
   },
-  "label_type": "Art",
+  "label_type": "Typ",
   "label_time": "Zeitpunkt",
   "label_amount": "Menge (ml)",
   "label_amount_solid": "Menge (g)",
+  "label_food_type": "Beikost-Art",
+  "food_type_placeholder": "z.B. Brei, Obstpueree...",
   "amount_ml": "{{amount}} ml",
   "amount_g": "{{amount}} g",
   "empty": "Noch keine Mahlzeit-Eintraege",
@@ -26,5 +28,13 @@
   "entries_count_other": "{{count}} Eintraege",
   "summary_feeding": "Mahlzeit",
   "summary_total": "Gesamt",
-  "hybrid_mode": "Hybridmodus"
+  "hybrid_mode": "Hybridmodus",
+  "side_left": "Links",
+  "side_right": "Rechts",
+  "next_side": "Naechste: {{side}}",
+  "today_nursed": "Heute gestillt",
+  "not_nursed_yet": "Noch nicht gestillt",
+  "last_bottle_sub": "Letzte Flasche: {{amount}} ml",
+  "yesterday_total": "Gestern: {{amount}} ml",
+  "last_entry": "Zuletzt: {{time}}"
 }

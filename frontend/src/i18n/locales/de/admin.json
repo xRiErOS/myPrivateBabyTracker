@@ -1,28 +1,58 @@
 {
   "title": "Verwaltung",
+  "tiles": {
+    "children": "Kinder",
+    "children_desc": "Kinder verwalten, Geburtsdaten, aktives Kind",
+    "medication_masters": "Medikamentenliste",
+    "medication_masters_desc": "Stammdaten fuer Medikamenten-Dropdown",
+    "alerts": "Warnhinweise",
+    "alerts_desc": "Alarme und Schwellwerte konfigurieren",
+    "plugins": "Plugins",
+    "plugins_desc": "Module aktivieren/deaktivieren",
+    "api_keys": "API-Keys",
+    "api_keys_desc": "Schluessel fuer externe Systeme verwalten",
+    "auth": "Authentifizierung",
+    "auth_desc": "Auth-Modus, Benutzer, Sicherheit",
+    "users": "Benutzer",
+    "users_desc": "Benutzer anlegen, bearbeiten, deaktivieren"
+  },
   "children": {
-    "title": "Kinder verwalten",
-    "add": "Kind hinzufuegen",
+    "title": "Kinder",
+    "add": "Hinzufuegen",
     "birth_date": "Geburtsdatum",
     "active": "Aktives Kind",
     "set_active": "Als aktiv setzen",
-    "no_children": "Lege dein erstes Kind an...",
+    "no_children": "Keine Kinder angelegt",
+    "no_children_hint": "Lege dein erstes Kind an, um mit dem Tracking zu beginnen.",
     "preterm": "Fruehgeboren",
-    "estimated_birth_date": "Errechneter Termin"
+    "estimated_birth_date": "Errechneter Termin (ET)",
+    "estimated_birth_date_hint": "Wichtig fuer die Berechnung der Entwicklungsspruenge.",
+    "name": "Name",
+    "name_placeholder": "Name des Kindes",
+    "confirm_delete": "\"{{name}}\" wirklich loeschen?"
   },
   "medication_masters": {
-    "title": "Medikamentenliste",
+    "title": "Medikamenten-Stammdaten",
     "add": "Medikament hinzufuegen",
     "name": "Name",
     "active_ingredient": "Wirkstoff",
-    "default_unit": "Standardeinheit"
+    "default_unit": "Masseinheit",
+    "no_entries": "Noch keine Medikamente angelegt",
+    "no_entries_hint": "Lege Medikamente an, um sie in Formularen per Dropdown auszuwaehlen.",
+    "notes": "Notizen",
+    "confirm_delete": "\"{{name}}\" loeschen?"
   },
   "tags": {
     "title": "Tags",
     "add": "Tag erstellen",
     "name": "Name",
     "color": "Farbe",
-    "no_child": "Kein Kind ausgewaehlt"
+    "no_child": "Kein Kind ausgewaehlt",
+    "no_child_hint": "Waehle zuerst ein Kind aus.",
+    "no_tags": "Noch keine Tags angelegt",
+    "no_tags_hint": "Tags helfen, Eintraege fuer Kinderarzt oder Hebamme zu markieren.",
+    "confirm_delete": "Tag \"{{name}}\" loeschen?",
+    "name_placeholder": "z.B. Kinderarzt"
   },
   "alerts": {
     "title": "Warnhinweise",
@@ -54,27 +84,47 @@
     "copied": "Kopiert!"
   },
   "users": {
-    "title": "Benutzer",
-    "add": "Benutzer erstellen",
+    "title": "Benutzerverwaltung",
+    "add": "Neu",
     "username": "Benutzername",
     "display_name": "Anzeigename",
     "role": "Rolle",
     "role_admin": "Admin",
-    "role_caregiver": "Betreuer",
+    "role_caregiver": "Caregiver",
     "active": "Aktiv",
     "inactive": "Inaktiv",
     "set_password": "Passwort setzen",
-    "delete_confirm": "Benutzer wirklich loeschen?",
+    "delete_confirm": "Benutzer \"{{name}}\" wirklich loeschen?",
     "create_failed": "Erstellen fehlgeschlagen",
-    "update_success": "Benutzer aktualisiert"
+    "update_success": "Benutzer aktualisiert",
+    "update_failed": "Aktualisieren fehlgeschlagen",
+    "password_set_success": "Passwort fuer \"{{name}}\" gesetzt",
+    "password_set_failed": "Passwort setzen fehlgeschlagen",
+    "status_change_failed": "Status-Aenderung fehlgeschlagen",
+    "delete_failed": "Loeschen fehlgeschlagen",
+    "deleted": "Benutzer \"{{name}}\" geloescht",
+    "created": "Benutzer \"{{name}}\" erstellt",
+    "load_failed": "Benutzer konnten nicht geladen werden",
+    "no_users": "Keine Benutzer vorhanden",
+    "new_user": "Neuer Benutzer",
+    "edit_user": "{{name}} bearbeiten",
+    "password_title": "Passwort: {{name}}",
+    "password_label": "Passwort",
+    "password_new_label": "Neues Passwort * (min. 8)",
+    "password_min": "Passwort * (min. 8)",
+    "device_name": "Geraetename"
   },
   "quick_actions": {
-    "title": "Schnellaktionen",
-    "configure": "Konfigurieren"
+    "title": "Quick Actions",
+    "description": "Konfiguriere die 3 Schnellzugriff-Buttons auf dem Dashboard.",
+    "favorite": "Favorit {{number}}"
   },
   "breastfeeding": {
     "title": "Stillmodus",
+    "description": "Zeigt die zuletzt gestillte Seite auf dem Dashboard. Deaktiviere dies, wenn du nicht stillst.",
     "enabled": "Stillen aktiv",
-    "disabled": "Stillen deaktiviert"
+    "disabled": "Stillen deaktiviert",
+    "hybrid": "Hybridmodus",
+    "hybrid_desc": "Zeigt Brust- und Flaschenkacheln gleichzeitig auf dem Dashboard."
   }
 }

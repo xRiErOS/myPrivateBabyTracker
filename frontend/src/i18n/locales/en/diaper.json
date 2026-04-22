@@ -28,5 +28,9 @@
   "summary_dirty": "dirty",
   "summary_dry": "dry",
   "summary_none": "none",
-  "change_rash": "Diaper rash"
+  "has_rash": "Rash present",
+  "change_rash": "Diaper rash",
+  "summary_total_short": "Tot.",
+  "summary_both_short": "Both",
+  "summary_wet_short": "Wet"
 }

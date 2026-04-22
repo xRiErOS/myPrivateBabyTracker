@@ -1,5 +1,7 @@
 /** Date range filter buttons — Heute / 7 Tage / Alle. */
 
+import { useTranslation } from "react-i18next";
+
 export type DateRange = "today" | "week" | "all";
 
 interface DateRangeFilterProps {
@@ -7,16 +9,17 @@ interface DateRangeFilterProps {
   onChange: (range: DateRange) => void;
 }
 
-const OPTIONS: { key: DateRange; label: string }[] = [
-  { key: "today", label: "Heute" },
-  { key: "week", label: "7 Tage" },
-  { key: "all", label: "Alle" },
+const OPTIONS: { key: DateRange; labelKey: string }[] = [
+  { key: "today", labelKey: "date_range.today" },
+  { key: "week", labelKey: "date_range.days_7" },
+  { key: "all", labelKey: "date_range.all" },
 ];
 
 export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
+  const { t: tc } = useTranslation("common");
   return (
     <div className="flex gap-1 bg-surface0 rounded-card p-1">
-      {OPTIONS.map(({ key, label }) => (
+      {OPTIONS.map(({ key, labelKey }) => (
         <button
           key={key}
           type="button"
@@ -27,7 +30,7 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
               : "text-subtext0 hover:text-text"
           }`}
         >
-          {label}
+          {tc(labelKey)}
         </button>
       ))}
     </div>

@@ -1,6 +1,7 @@
 /** Temperature entry list with inline edit. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Pencil, Thermometer, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -25,14 +26,16 @@ function tempColor(celsius: number): string {
   return "text-green";
 }
 
-function tempLabel(celsius: number): string {
-  if (celsius >= 38.5) return "Fieber";
-  if (celsius >= 37.5) return "Erhoehte Temp.";
-  if (celsius < 36.5) return "Unterkuehlung";
-  return "Normal";
+function tempLabelKey(celsius: number): string {
+  if (celsius >= 38.5) return "status.fever";
+  if (celsius >= 37.5) return "status.elevated";
+  if (celsius < 36.5) return "status.hypothermia";
+  return "status.normal";
 }
 
 export function TemperatureList() {
+  const { t } = useTranslation("temperature");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams] = useSearchParams();
   const [dateRange, setDateRange] = useState<DateRange>((searchParams.get("range") as DateRange) ?? "week");
@@ -45,14 +48,14 @@ export function TemperatureList() {
   });
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Thermometer className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Temperatur-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -70,16 +73,16 @@ export function TemperatureList() {
           <ListSummaryBar>
             <div className="flex gap-1.5">
               <MetricPill
-                label={tempLabel(latest.temperature_celsius)}
+                label={t(tempLabelKey(latest.temperature_celsius))}
                 value={<span className={tempColor(latest.temperature_celsius)}>{latest.temperature_celsius.toFixed(1)} °C</span>}
               />
-              <MetricPill label="Messungen" value={entries.length} />
+              <MetricPill label={t("summary.measurements")} value={entries.length} />
               {entries.length > 1 && (
-                <MetricPill label="Bereich" value={`${min.toFixed(1)} — ${max.toFixed(1)}`} />
+                <MetricPill label={t("summary.range")} value={`${min.toFixed(1)} — ${max.toFixed(1)}`} />
               )}
             </div>
             <p className="font-body text-xs text-subtext0">
-              Letzte Messung: {formatTimeSince(latest.measured_at)}
+              {t("summary.last_measurement")}: {formatTimeSince(latest.measured_at)}
             </p>
           </ListSummaryBar>
         );
@@ -101,7 +104,7 @@ export function TemperatureList() {
               </button>
               <button
                 onClick={() => {
-                  if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
+                  if (confirm(t("confirm_delete"))) deleteMut.mutate(entry.id);
                 }}
                 className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
                 style={{ minWidth: 44, minHeight: 44 }}

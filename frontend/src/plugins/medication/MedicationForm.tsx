@@ -1,6 +1,7 @@
 /** Medication entry form — dropdown from master data + free-text fallback. */
 
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
@@ -20,6 +21,8 @@ interface MedicationFormProps {
 }
 
 export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps) {
+  const { t } = useTranslation("medication");
+  const { t: tc } = useTranslation("common");
   const navigate = useNavigate();
   const { activeChild } = useActiveChild();
   const createMut = useCreateMedication();
@@ -68,7 +71,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
     setError(null);
 
     if (!medicationName.trim()) {
-      setError("Medikamentenname ist erforderlich");
+      setError(t("name_required"));
       return;
     }
 
@@ -116,27 +119,27 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
         {masters.length > 0 && !useFreeTex ? (
           <div className="flex flex-col gap-1">
             <label className="font-label text-sm font-medium text-subtext0">
-              Medikament <span className="text-red">*</span>
+              {t("label_name")} <span className="text-red">*</span>
             </label>
             <select
               value={selectedMasterId ?? ""}
               onChange={handleMasterChange}
               className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve transition-all"
             >
-              <option value="">-- Medikament waehlen --</option>
+              <option value="">{t("select_medication")}</option>
               {masters.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
                   {m.active_ingredient ? ` (${m.active_ingredient})` : ""}
                 </option>
               ))}
-              <option value="__free__">Anderes (Freitext)</option>
+              <option value="__free__">{t("other_freetext")}</option>
             </select>
           </div>
         ) : (
           <div className="flex flex-col gap-1">
             <label className="font-label text-sm font-medium text-subtext0">
-              Medikament <span className="text-red">*</span>
+              {t("label_name")} <span className="text-red">*</span>
             </label>
             <Input
               value={medicationName}
@@ -150,7 +153,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
                 onClick={() => setUseFreeText(false)}
                 className="font-label text-xs text-mauve hover:underline text-left"
               >
-                Aus Liste waehlen
+                {t("from_list")}
               </button>
             ) : (
               <button
@@ -158,29 +161,29 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
                 onClick={() => navigate("/admin/medication-masters")}
                 className="font-label text-xs text-mauve hover:underline text-left"
               >
-                Medikamentenliste anlegen
+                {t("create_list")}
               </button>
             )}
           </div>
         )}
         <Input
-          label="Dosis"
+          label={t("label_dose")}
           value={dose}
           onChange={(e) => setDose(e.target.value)}
           placeholder="z.B. 2.5 ml, 1 Tablette..."
           maxLength={100}
         />
         <Input
-          label="Zeitpunkt"
+          label={t("label_time")}
           type="datetime-local"
           value={givenAt}
           onChange={(e) => setGivenAt(e.target.value)}
         />
         <Input
-          label="Notizen"
+          label={tc("notes")}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optionale Notizen..."
+          placeholder={tc("notes_placeholder")}
           maxLength={2000}
         />
         <div className="pt-3 border-t border-surface1">
@@ -191,9 +194,9 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
           )}
         </div>
         <div className="flex justify-end gap-2">
-          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>Abbrechen</Button>}
+          {onCancel && <Button type="button" variant="secondary" onClick={onCancel}>{tc("cancel")}</Button>}
           <Button type="submit" disabled={isPending || !medicationName.trim()}>
-            {isPending ? "Speichern..." : isEditing ? "Aktualisieren" : "Eintragen"}
+            {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
           </Button>
         </div>
       </form>

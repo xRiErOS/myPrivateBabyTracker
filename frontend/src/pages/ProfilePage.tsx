@@ -1,6 +1,7 @@
 /** Profile page — user preferences: timezone, breastfeeding, quick actions. */
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Clock, Baby, Zap } from "lucide-react";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
@@ -31,9 +32,9 @@ const TIMEZONES = [
   "UTC",
 ];
 
-const FAVORITE_LABELS = ["Favorit 1", "Favorit 2", "Favorit 3"];
-
 export default function ProfilePage() {
+  const { t } = useTranslation("auth");
+  const { t: tc } = useTranslation("common");
   const { user } = useAuth();
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,7 @@ export default function ProfilePage() {
   useEffect(() => {
     getPreferences()
       .then(setPrefs)
-      .catch(() => setMsg({ ok: false, text: "Einstellungen konnten nicht geladen werden" }))
+      .catch(() => setMsg({ ok: false, text: t("profile.load_failed") }))
       .finally(() => setLoading(false));
   }, []);
 
@@ -53,23 +54,23 @@ export default function ProfilePage() {
     try {
       const updated = await updatePreferences(patch);
       setPrefs(updated);
-      setMsg({ ok: true, text: "Gespeichert" });
+      setMsg({ ok: true, text: t("profile.saved") });
       setTimeout(() => setMsg(null), 2000);
     } catch {
-      setMsg({ ok: false, text: "Speichern fehlgeschlagen" });
+      setMsg({ ok: false, text: t("profile.save_failed") });
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="text-center text-subtext0 py-8">Laden...</div>;
+  if (loading) return <div className="text-center text-subtext0 py-8">{tc("loading")}</div>;
   if (!prefs) return null;
 
   const quickActions = prefs.quick_actions || ["sleep", "feeding", "diaper"];
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Mein Profil" />
+      <PageHeader title={t("profile.title")} />
 
       {msg && (
         <p className={`text-sm ${msg.ok ? "text-green" : "text-red"}`}>{msg.text}</p>
@@ -78,7 +79,7 @@ export default function ProfilePage() {
       {/* User Info (read-only) */}
       {user && (
         <Card className="p-4 space-y-1">
-          <p className="text-sm text-subtext0">Angemeldet als</p>
+          <p className="text-sm text-subtext0">{t("profile.logged_in_as")}</p>
           <p className="font-semibold text-text">{user.display_name || user.username}</p>
           <p className="text-xs text-subtext0">@{user.username} — {user.role} — {user.auth_type === "forward_auth" ? "SSO" : "Lokal"}</p>
         </Card>
@@ -88,10 +89,10 @@ export default function ProfilePage() {
       <Card className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-sapphire" />
-          <h3 className="font-headline text-base font-semibold text-text">Zeitzone</h3>
+          <h3 className="font-headline text-base font-semibold text-text">{t("profile.timezone")}</h3>
         </div>
         <p className="text-xs text-subtext0">
-          Wird fuer Schlafanalyse, Warnhinweise und Tagesgrenzen verwendet.
+          {t("profile.timezone_hint")}
         </p>
         <select
           value={prefs.timezone}
@@ -110,7 +111,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Baby className="h-4 w-4 text-pink" />
-            <h3 className="font-headline text-base font-semibold text-text">Stillmodus</h3>
+            <h3 className="font-headline text-base font-semibold text-text">{t("profile.breastfeeding")}</h3>
           </div>
           <button
             type="button"
@@ -126,14 +127,14 @@ export default function ProfilePage() {
           </button>
         </div>
         <p className="text-xs text-subtext0">
-          Zeigt die zuletzt gestillte Seite auf dem Dashboard. Deaktiviere dies, wenn du nicht stillst.
+          {t("profile.breastfeeding_hint")}
         </p>
 
         {prefs.breastfeeding_enabled && (
           <div className="flex items-center justify-between pt-2 border-t border-surface1">
             <div>
-              <p className="font-label text-sm text-text">Hybridmodus</p>
-              <p className="text-xs text-subtext0">Zeigt Brust- und Flaschenkacheln gleichzeitig an.</p>
+              <p className="font-label text-sm text-text">{t("profile.hybrid")}</p>
+              <p className="text-xs text-subtext0">{t("profile.hybrid_hint")}</p>
             </div>
             <button
               type="button"
@@ -155,16 +156,16 @@ export default function ProfilePage() {
       <Card className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-peach" />
-          <h3 className="font-headline text-base font-semibold text-text">Quick Actions</h3>
+          <h3 className="font-headline text-base font-semibold text-text">{t("profile.quick_actions")}</h3>
         </div>
         <p className="text-xs text-subtext0">
-          Konfiguriere die 3 Schnellzugriff-Buttons auf dem Dashboard.
+          {t("profile.quick_actions_hint")}
         </p>
         <div className="space-y-2">
-          {FAVORITE_LABELS.map((label, idx) => (
+          {[1, 2, 3].map((num, idx) => (
             <div key={idx} className="flex items-center gap-3">
               <label className="font-label text-sm text-subtext0 w-20 shrink-0">
-                {label}
+                {t("profile.favorite", { number: num })}
               </label>
               <select
                 value={quickActions[idx] || "sleep"}

@@ -1,6 +1,7 @@
 /** Sleep entry list with inline edit (running entries excluded). */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Moon, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
@@ -13,12 +14,6 @@ import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
 import { formatDateTime, formatDuration, formatTimeSince, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
 import { SleepForm } from "./SleepForm";
 
-const TYPE_OPTIONS = [
-  { value: "", label: "Alle Typen" },
-  { value: "nap", label: "Nickerchen" },
-  { value: "night", label: "Nachtschlaf" },
-];
-
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
@@ -26,7 +21,15 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
 };
 
 export function SleepList() {
+  const { t } = useTranslation("sleep");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+
+  const TYPE_OPTIONS = [
+    { value: "", label: t("type_filter.all") },
+    { value: "nap", label: t("type.nap") },
+    { value: "night", label: t("type.night") },
+  ];
   const [typeFilter, setTypeFilter] = useState("");
   const [searchParams] = useSearchParams();
   const specificDate = searchParams.get("date");
@@ -50,14 +53,14 @@ export function SleepList() {
   const entries = allEntries.filter((e) => e.end_time != null);
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Moon className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Schlaf-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -80,14 +83,14 @@ export function SleepList() {
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label="Gesamt" value={formatDuration(totalMinutes)} />
-              <MetricPill label="Sessions" value={entries.length} />
-              {napCount > 0 && <MetricPill label="Nickerchen" value={napCount} />}
-              {nightCount > 0 && <MetricPill label="Nacht" value={nightCount} />}
+              <MetricPill label={t("summary.total")} value={formatDuration(totalMinutes)} />
+              <MetricPill label={t("summary.sessions")} value={entries.length} />
+              {napCount > 0 && <MetricPill label={t("type.nap")} value={napCount} />}
+              {nightCount > 0 && <MetricPill label={t("summary.night")} value={nightCount} />}
             </div>
             {entries[0] && (
               <p className="font-body text-xs text-subtext0">
-                Letzter Schlaf: {formatTimeSince(entries[0].end_time ?? entries[0].start_time)}
+                {t("summary.last_sleep")}: {formatTimeSince(entries[0].end_time ?? entries[0].start_time)}
               </p>
             )}
           </ListSummaryBar>
@@ -100,7 +103,7 @@ export function SleepList() {
             <div className="flex items-center gap-2">
               <Moon className="h-4 w-4 text-mauve" />
               <span className="font-label text-sm font-medium">
-                {entry.sleep_type === "nap" ? "Nickerchen" : "Nachtschlaf"}
+                {entry.sleep_type === "nap" ? t("type.nap") : t("type.night")}
               </span>
             </div>
             <div className="flex gap-1">
@@ -123,7 +126,7 @@ export function SleepList() {
             {entry.end_time ? ` - ${formatDateTime(entry.end_time)}` : ""}
           </p>
           <p className="font-body text-sm text-overlay0">
-            Dauer: {formatDuration(entry.duration_minutes)}
+            {t("duration")}: {formatDuration(entry.duration_minutes)}
           </p>
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>

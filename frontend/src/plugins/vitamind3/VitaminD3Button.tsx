@@ -1,6 +1,7 @@
 /** Vitamin D3 toggle button — shows "Gegeben" or green checkmark. */
 
 import { CheckCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useCreateVitaminD3 } from "../../hooks/useVitaminD3";
 import { todayBerlin } from "../../lib/timelineUtils";
 
@@ -10,6 +11,7 @@ interface VitaminD3ButtonProps {
 }
 
 export function VitaminD3Button({ childId, givenToday }: VitaminD3ButtonProps) {
+  const { t } = useTranslation("vitamind3");
   const createMut = useCreateVitaminD3();
 
   function handleClick() {
@@ -27,7 +29,7 @@ export function VitaminD3Button({ childId, givenToday }: VitaminD3ButtonProps) {
           <div className="flex items-center gap-1.5 px-3 py-2">
             <CheckCircle size={18} className="text-green flex-shrink-0" />
             <span className="text-sm font-label font-semibold text-green whitespace-nowrap">
-              Gegeben
+              {t("given")}
             </span>
           </div>
         ) : (
@@ -37,7 +39,7 @@ export function VitaminD3Button({ childId, givenToday }: VitaminD3ButtonProps) {
             disabled={createMut.isPending}
             className="px-3 py-2 text-sm font-label font-semibold bg-green text-ground rounded-card hover:opacity-90 disabled:opacity-40 transition-all min-h-[44px] whitespace-nowrap"
           >
-            {createMut.isPending ? "..." : "Geben"}
+            {createMut.isPending ? "..." : t("give")}
           </button>
         )}
       </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertTriangle, Baby, ClipboardList, KeyRound, Puzzle, Shield, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { PLUGINS } from "../lib/pluginRegistry";
@@ -12,59 +13,23 @@ import { isBreastfeedingEnabled, setBreastfeedingEnabled, isFeedingHybrid, setFe
 interface AdminTile {
   to: string;
   icon: React.ElementType;
-  label: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
 }
 
 const TILES: AdminTile[] = [
-  {
-    to: "/admin/children",
-    icon: Baby,
-    label: "Kinder",
-    description: "Kinder verwalten, Geburtsdaten, aktives Kind",
-  },
-  {
-    to: "/admin/medication-masters",
-    icon: ClipboardList,
-    label: "Medikamentenliste",
-    description: "Stammdaten fuer Medikamenten-Dropdown",
-  },
-  {
-    to: "/admin/alerts",
-    icon: AlertTriangle,
-    label: "Warnhinweise",
-    description: "Alarme und Schwellwerte konfigurieren",
-  },
-  {
-    to: "/admin/plugins",
-    icon: Puzzle,
-    label: "Plugins",
-    description: "Module aktivieren/deaktivieren",
-  },
-  {
-    to: "/admin/api-keys",
-    icon: KeyRound,
-    label: "API-Keys",
-    description: "Schluessel fuer externe Systeme verwalten",
-  },
-  {
-    to: "/admin/auth",
-    icon: Shield,
-    label: "Authentifizierung",
-    description: "Auth-Modus, Benutzer, Sicherheit",
-  },
-  {
-    to: "/admin/users",
-    icon: Users,
-    label: "Benutzer",
-    description: "Benutzer anlegen, bearbeiten, deaktivieren",
-  },
+  { to: "/admin/children", icon: Baby, labelKey: "tiles.children", descKey: "tiles.children_desc" },
+  { to: "/admin/medication-masters", icon: ClipboardList, labelKey: "tiles.medication_masters", descKey: "tiles.medication_masters_desc" },
+  { to: "/admin/alerts", icon: AlertTriangle, labelKey: "tiles.alerts", descKey: "tiles.alerts_desc" },
+  { to: "/admin/plugins", icon: Puzzle, labelKey: "tiles.plugins", descKey: "tiles.plugins_desc" },
+  { to: "/admin/api-keys", icon: KeyRound, labelKey: "tiles.api_keys", descKey: "tiles.api_keys_desc" },
+  { to: "/admin/auth", icon: Shield, labelKey: "tiles.auth", descKey: "tiles.auth_desc" },
+  { to: "/admin/users", icon: Users, labelKey: "tiles.users", descKey: "tiles.users_desc" },
 ];
-
-const FAVORITE_LABELS = ["Favorit 1", "Favorit 2", "Favorit 3"];
 
 export default function AdminPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation("admin");
   const [quickActions, setQuickActionsState] = useState(getQuickActions);
   const [breastfeedingEnabled, setBreastfeedingEnabledState] = useState(isBreastfeedingEnabled);
   const [hybridEnabled, setHybridEnabledState] = useState(isFeedingHybrid);
@@ -84,10 +49,10 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Verwaltung" />
+      <PageHeader title={t("title")} />
 
       <div className="grid grid-cols-2 gap-3">
-        {TILES.map(({ to, icon: Icon, label, description }) => (
+        {TILES.map(({ to, icon: Icon, labelKey, descKey }) => (
           <Card
             key={to}
             className="flex flex-col items-center gap-2 p-4 cursor-pointer active:bg-surface1 transition-colors"
@@ -95,10 +60,10 @@ export default function AdminPage() {
           >
             <Icon className="h-8 w-8 text-mauve" />
             <span className="font-label text-sm font-medium text-text text-center">
-              {label}
+              {t(labelKey)}
             </span>
             <span className="font-body text-xs text-subtext0 text-center">
-              {description}
+              {t(descKey)}
             </span>
           </Card>
         ))}
@@ -108,16 +73,16 @@ export default function AdminPage() {
       <Card className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-peach" />
-          <h3 className="font-headline text-base font-semibold text-text">Quick Actions</h3>
+          <h3 className="font-headline text-base font-semibold text-text">{t("quick_actions.title")}</h3>
         </div>
         <p className="font-body text-xs text-subtext0">
-          Konfiguriere die 3 Schnellzugriff-Buttons auf dem Dashboard.
+          {t("quick_actions.description")}
         </p>
         <div className="space-y-2">
-          {FAVORITE_LABELS.map((label, idx) => (
+          {[1, 2, 3].map((num, idx) => (
             <div key={idx} className="flex items-center gap-3">
               <label className="font-label text-sm text-subtext0 w-20 shrink-0">
-                {label}
+                {t("quick_actions.favorite", { number: num })}
               </label>
               <select
                 value={quickActions[idx]}
@@ -137,9 +102,9 @@ export default function AdminPage() {
       <Card className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-headline text-base font-semibold text-text">Stillmodus</h3>
+            <h3 className="font-headline text-base font-semibold text-text">{t("breastfeeding.title")}</h3>
             <p className="font-body text-xs text-subtext0 mt-1">
-              Zeigt die zuletzt gestillte Seite auf dem Dashboard. Deaktiviere dies, wenn du nicht stillst.
+              {t("breastfeeding.description")}
             </p>
           </div>
           <button
@@ -159,9 +124,9 @@ export default function AdminPage() {
         {breastfeedingEnabled && (
           <div className="flex items-center justify-between pt-3 border-t border-surface1">
             <div>
-              <p className="font-label text-sm font-medium text-text">Hybridmodus</p>
+              <p className="font-label text-sm font-medium text-text">{t("breastfeeding.hybrid")}</p>
               <p className="font-body text-xs text-subtext0 mt-1">
-                Zeigt Brust- und Flaschenkacheln gleichzeitig auf dem Dashboard.
+                {t("breastfeeding.hybrid_desc")}
               </p>
             </div>
             <button

@@ -15,5 +15,17 @@
   "track_bottle": "Bottle",
   "track_diaper": "Diapers",
   "quick_actions": "Quick actions",
-  "add_menu_title": "New entry"
+  "add_menu_title": "New entry",
+  "14_day_pattern": "14-day pattern",
+  "today_label": "Today",
+  "leap_popup": {
+    "title": "Leap {{number}} — {{name}}",
+    "storm": "Stormy phase",
+    "sun": "Sunny phase",
+    "upcoming": "Upcoming",
+    "days_until": "in {{count}} days (from {{date}})",
+    "new_skills": "New skills",
+    "storm_signs": "Storm signs",
+    "show_all_leaps": "Show all leaps"
+  }
 }

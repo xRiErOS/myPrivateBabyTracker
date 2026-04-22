@@ -1,6 +1,7 @@
 /** Weight entry list with inline edit. */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pencil, Scale, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
@@ -22,6 +23,8 @@ function formatWeight(grams: number): string {
 }
 
 export function WeightList() {
+  const { t } = useTranslation("weight");
+  const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -33,14 +36,14 @@ export function WeightList() {
   });
 
   if (isLoading) {
-    return <p className="font-body text-sm text-overlay0">Laden...</p>;
+    return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
         <Scale className="h-8 w-8" />
-        <p className="font-body text-sm">Noch keine Gewichts-Eintraege</p>
+        <p className="font-body text-sm">{t("empty")}</p>
       </div>
     );
   }
@@ -56,17 +59,17 @@ export function WeightList() {
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label="Aktuell" value={formatWeight(latest.weight_grams)} />
+              <MetricPill label={t("summary.current")} value={formatWeight(latest.weight_grams)} />
               {diff !== null && (
                 <MetricPill
-                  label="Trend"
+                  label={t("summary.trend")}
                   value={<span className={diff >= 0 ? "text-green" : "text-peach"}>{diff >= 0 ? "+" : ""}{(diff / 1000).toFixed(2)} kg</span>}
                 />
               )}
-              <MetricPill label="Messungen" value={entries.length} />
+              <MetricPill label={t("summary.measurements")} value={entries.length} />
             </div>
             <p className="font-body text-xs text-subtext0">
-              Letzte Messung: {formatTimeSince(latest.measured_at)}
+              {t("summary.last_measurement")}: {formatTimeSince(latest.measured_at)}
             </p>
           </ListSummaryBar>
         );
@@ -99,7 +102,7 @@ export function WeightList() {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm("Eintrag loeschen?")) deleteMut.mutate(entry.id);
+                    if (confirm(t("confirm_delete"))) deleteMut.mutate(entry.id);
                   }}
                   className="rounded p-1.5 text-overlay0 hover:bg-red/10 hover:text-red active:bg-red/20"
                   style={{ minWidth: 44, minHeight: 44 }}

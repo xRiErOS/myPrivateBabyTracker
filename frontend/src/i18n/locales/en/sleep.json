@@ -24,5 +24,7 @@
   "last_sleep": "Last sleep",
   "sleep_timer": "Sleep timer",
   "summary_sleep": "Sleep",
-  "summary_total": "Total today"
+  "summary_total": "Total today",
+  "since": "since {{time}}",
+  "last_entry_sub": "Last: {{time}}"
 }
