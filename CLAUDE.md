@@ -115,9 +115,9 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 12 abgeschlossen, v0.6.0)
+## Aktueller Stand (Sprint 13 abgeschlossen, v0.6.1)
 
-- **v0.6.0**: 26 Auth-Tests + 387 Backend-Tests + 83 Frontend-Tests, Sprint 12: 6 Commits, 2 Migrationen
+- **v0.6.1**: 35 Auth-Tests + 387 Backend-Tests + 83 Frontend-Tests, Sprint 13: 4 Commits, 2 Migrationen (timezone, user_preferences)
 - **Container**: mybaby (UID 999), Port 8080, Volume /volume2/docker/mybaby/data
 - **Auth**: Vollstaendiges Auth-System mit 4 Modi (disabled/local/forward/both), JWT httpOnly Cookie, 2FA TOTP, Passkeys WebAuthn, API-Key-Auth fuer M2M
 - **11 Plugins**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones
@@ -184,7 +184,11 @@ Details: `DESIGN.md`
 - **LoginPage**: 2-Step (Passwort → TOTP wenn aktiviert), Passkey-Button als Alternative
 - **AuthSettingsPage**: /admin/auth — Auth-Modus Info, User-Info, Passwort aendern, 2FA Setup/Disable, Passkey verwalten, Logout
 - **Migrations-Kette**: ...g8h9i0j1k2l3 → h9i0j1k2l3m4 (totp_secrets + users.totp_enabled) → i0j1k2l3m4n5 (webauthn_credentials)
-- **SSTD**: `(SSTD) MyBaby Sprint 6 — Milestones Backend + Fruehgeborenen + Recurring Tasks.md` (wird erstellt)
+- **Nutzerverwaltung (Sprint 13)**: User CRUD API (admin-only: list/create/update/delete/set-password), UserManagementPage mit Modals, Admin-Kachel "Benutzer"
+- **Nutzer-Zeitzone**: users.timezone (default Europe/Berlin), Alembic Migration j1k2l3m4n5o6, in UserResponse + ProfilePage
+- **UserPreferences**: Serverseitig statt localStorage — breastfeeding_enabled, quick_actions (JSON), widget_order (JSON), track_visibility (JSON). GET/PATCH /preferences API, auto-create bei erstem Zugriff
+- **ProfilePage**: /profile — Zeitzone-Auswahl, Stillmodus-Toggle, Quick Actions Dropdown, User-Info. Link im MobileMenu
+- **Migrations-Kette**: ...i0j1k2l3m4n5 → j1k2l3m4n5o6 (users.timezone) → k2l3m4n5o6p7 (user_preferences)
 
 ## Bekannte UI-Entscheidungen
 
