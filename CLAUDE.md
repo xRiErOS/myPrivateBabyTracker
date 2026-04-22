@@ -173,7 +173,7 @@ Details: `DESIGN.md`
 - **Widget-Grid Reihenfolge**: getWidgetOrder/moveWidget in pluginConfig.ts (localStorage), Dashboard rendert Widgets dynamisch, Up/Down-Buttons in /admin/plugins
 - **entry_summary Batch**: N+1 auf max 8 Queries reduziert — eine IN-Clause pro Plugin-Typ statt einzelne Abfragen
 - **test_alerts.py Fix**: Hardcoded Timestamps durch relative ersetzt (_recent Helper), alle 16 Tests zeitunabhaengig
-- **Migrations-Kette**: ...f7a8b9c0d1e2 → a1b2c3d4e5f6 (alert_configs.leap_storm_enabled)
+- **Migrations-Kette**: ...f7a8b9c0d1e2 → g8h9i0j1k2l3 (alert_configs.leap_storm_enabled)
 - **SSTD**: `(SSTD) MyBaby Sprint 10 — Admin UX + Recurring Tasks + Alerts.md`
 
 ## Bekannte UI-Entscheidungen
