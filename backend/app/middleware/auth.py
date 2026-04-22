@@ -1,15 +1,17 @@
 """Authentication middleware and dependencies.
 
-Supports three AUTH_MODE values:
+Supports four AUTH_MODE values:
+- disabled: No auth required (home lab behind Authelia)
 - forward: Reads Remote-User header (set by Authelia after header stripping)
-- local: Argon2 password verification with session cookies
-- both: Forward-auth first, local as fallback
+- local: JWT session cookie (set by /auth/login endpoint)
+- both: Forward-auth first, local JWT as fallback
 
 Provides get_current_user() and require_role() FastAPI dependencies.
 """
 
-from typing import Literal
+from datetime import datetime, timezone
 
+import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from fastapi import Depends, HTTPException, Request, status
@@ -24,6 +26,8 @@ from app.models.user import User
 logger = get_logger("auth")
 
 _ph = PasswordHasher()
+JWT_ALGORITHM = "HS256"
+SESSION_COOKIE = "mybaby_session"
 
 
 def hash_password(password: str) -> str:
@@ -92,15 +96,21 @@ async def get_current_user(
                 db, username, display_name, role
             )
 
-    # Local auth mode: check session/token
+    # Local auth mode: check JWT session cookie
     if settings.auth_mode in ("local", "both"):
-        # Session-based: user_id stored in request state by login endpoint
-        user_id = getattr(request.state, "user_id", None)
-        if user_id:
-            result = await db.execute(select(User).where(User.id == user_id))
-            user = result.scalar_one_or_none()
-            if user and user.is_active:
-                return user
+        token = request.cookies.get(SESSION_COOKIE)
+        if token:
+            try:
+                payload = jwt.decode(
+                    token, settings.secret_key, algorithms=[JWT_ALGORITHM]
+                )
+                user_id = int(payload["sub"])
+                result = await db.execute(select(User).where(User.id == user_id))
+                user = result.scalar_one_or_none()
+                if user and user.is_active:
+                    return user
+            except (jwt.InvalidTokenError, KeyError, ValueError):
+                logger.debug("jwt_invalid", reason="decode_failed")
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

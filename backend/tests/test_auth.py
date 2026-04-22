@@ -1,18 +1,23 @@
-"""Tests for authentication middleware and dependencies."""
+"""Tests for authentication middleware, dependencies, and auth router."""
 
 import os
 
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 os.environ.setdefault("SECRET_KEY", "a" * 32)
 os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")
 os.environ.setdefault("ENVIRONMENT", "dev")
 os.environ.setdefault("CSRF_ENABLED", "false")
 
-from app.middleware.auth import get_current_user, hash_password, require_role, verify_password
-from app.middleware.security import HeaderStrippingMiddleware
+from app.database import get_session  # noqa: E402
+from app.middleware.auth import get_current_user, hash_password, require_role, verify_password  # noqa: E402
+from app.middleware.security import HeaderStrippingMiddleware  # noqa: E402
+from app.models.base import Base  # noqa: E402
+from app.models.user import User  # noqa: E402
 
 
 def _create_auth_test_app(auth_mode: str = "forward"):
@@ -182,3 +187,233 @@ class TestRequireRole:
             headers={"Remote-User": "nurse", "Remote-Groups": "users"},
         )
         assert resp.status_code == 403
+
+
+# --- Auth Router Tests (JWT login/logout/me/status) ---
+
+
+@pytest.fixture
+async def auth_engine():
+    eng = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+    async with eng.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield eng
+    await eng.dispose()
+
+
+@pytest.fixture
+async def auth_session(auth_engine) -> AsyncSession:
+    factory = async_sessionmaker(auth_engine, expire_on_commit=False)
+    async with factory() as s:
+        yield s
+
+
+async def _seed_local_user(
+    session: AsyncSession,
+    username="erik",
+    password="Test1234!",
+    role="admin",
+    auth_type="local",
+    is_active=True,
+):
+    user = User(
+        username=username,
+        password_hash=hash_password(password),
+        display_name=username.title(),
+        auth_type=auth_type,
+        role=role,
+        is_active=is_active,
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user
+
+
+async def _auth_client(auth_engine, auth_mode="local"):
+    os.environ["AUTH_MODE"] = auth_mode
+    from app.config import get_settings
+    get_settings.cache_clear()
+
+    from app.main import create_app
+    app = create_app(testing=True)
+
+    # Add trust_all to HeaderStrippingMiddleware for test (127.0.0.1)
+    for mw in app.user_middleware:
+        if hasattr(mw, 'kwargs') and 'trusted_proxies' in mw.kwargs:
+            mw.kwargs['trust_all'] = True
+
+    factory = async_sessionmaker(auth_engine, expire_on_commit=False)
+
+    async def _override():
+        async with factory() as s:
+            yield s
+
+    app.dependency_overrides[get_session] = _override
+    from app.plugins import discover_plugins
+    for plugin in discover_plugins():
+        plugin.register_routes(app)
+
+    transport = ASGITransport(app=app)
+    return AsyncClient(transport=transport, base_url="http://test")
+
+
+class TestAuthRouterLogin:
+    """Auth router: login endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_login_success(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            resp = await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            assert resp.status_code == 200
+            assert resp.json()["username"] == "erik"
+            assert "mybaby_session" in resp.cookies
+
+    @pytest.mark.asyncio
+    async def test_login_wrong_password(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            resp = await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "wrong"
+            })
+            assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_login_unknown_user(self, auth_engine, auth_session):
+        async with await _auth_client(auth_engine) as c:
+            resp = await c.post("/api/v1/auth/login", json={
+                "username": "nobody", "password": "whatever"
+            })
+            assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_login_disabled_mode(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine, "disabled") as c:
+            resp = await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_login_inactive_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, is_active=False)
+        async with await _auth_client(auth_engine) as c:
+            resp = await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            assert resp.status_code == 403
+
+
+class TestAuthRouterLogout:
+
+    @pytest.mark.asyncio
+    async def test_logout(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            resp = await c.post("/api/v1/auth/logout")
+            assert resp.status_code == 204
+
+
+class TestAuthRouterMe:
+
+    @pytest.mark.asyncio
+    async def test_me_authenticated(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            resp = await c.get("/api/v1/auth/me")
+            assert resp.status_code == 200
+            assert resp.json()["username"] == "erik"
+
+    @pytest.mark.asyncio
+    async def test_me_unauthenticated(self, auth_engine, auth_session):
+        async with await _auth_client(auth_engine) as c:
+            resp = await c.get("/api/v1/auth/me")
+            assert resp.status_code == 401
+
+
+class TestAuthRouterStatus:
+
+    @pytest.mark.asyncio
+    async def test_status_disabled(self, auth_engine, auth_session):
+        async with await _auth_client(auth_engine, "disabled") as c:
+            resp = await c.get("/api/v1/auth/status")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["auth_mode"] == "disabled"
+            assert data["authenticated"] is False
+
+    @pytest.mark.asyncio
+    async def test_status_local_authenticated(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            resp = await c.get("/api/v1/auth/status")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["authenticated"] is True
+            assert data["user"]["username"] == "erik"
+
+    @pytest.mark.asyncio
+    async def test_status_forward_auth(self, auth_engine, auth_session):
+        async with await _auth_client(auth_engine, "forward") as c:
+            resp = await c.get("/api/v1/auth/status", headers={
+                "Remote-User": "julia"
+            })
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["authenticated"] is True
+            assert data["user"]["username"] == "julia"
+
+
+class TestChangePassword:
+
+    @pytest.mark.asyncio
+    async def test_change_password_success(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            resp = await c.post("/api/v1/auth/change-password", json={
+                "current_password": "Test1234!",
+                "new_password": "NewPass99!",
+            })
+            assert resp.status_code == 204
+
+    @pytest.mark.asyncio
+    async def test_change_password_wrong_current(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session)
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            resp = await c.post("/api/v1/auth/change-password", json={
+                "current_password": "wrong",
+                "new_password": "NewPass99!",
+            })
+            assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_change_password_forward_auth_user(self, auth_engine, auth_session):
+        await _seed_local_user(auth_session, auth_type="forward_auth")
+        async with await _auth_client(auth_engine) as c:
+            await c.post("/api/v1/auth/login", json={
+                "username": "erik", "password": "Test1234!"
+            })
+            resp = await c.post("/api/v1/auth/change-password", json={
+                "current_password": "Test1234!",
+                "new_password": "NewPass99!",
+            })
+            assert resp.status_code == 400

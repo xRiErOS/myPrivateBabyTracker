@@ -179,6 +179,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # API Keys: machine-to-machine authentication
     from app.api.api_keys import router as api_keys_router
     app.include_router(api_keys_router, prefix="/api/v1")
+    # Auth: login, logout, session management
+    from app.api.auth import router as auth_router
+    app.include_router(auth_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()
