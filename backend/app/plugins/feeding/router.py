@@ -16,6 +16,7 @@ from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.feeding.models import FeedingEntry
+from app.models.tag import delete_entry_tags
 from app.plugins.feeding.schemas import FeedingCreate, FeedingResponse, FeedingUpdate
 
 logger = get_logger("feeding")
@@ -127,6 +128,7 @@ async def delete_feeding(
     if entry is None:
         raise NotFoundError(f"Feeding entry with id {entry_id} not found")
 
+    await delete_entry_tags(db, "feeding", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("feeding_deleted", entry_id=entry_id)

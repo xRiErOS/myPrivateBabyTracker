@@ -6,7 +6,8 @@ table using (entry_type, entry_id) to link tags to any plugin entry type.
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint, delete, func
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -57,4 +58,14 @@ class EntryTag(Base):
         UniqueConstraint("tag_id", "entry_type", "entry_id", name="uq_entry_tag"),
         Index("ix_entry_tags_entry", "entry_type", "entry_id"),
         Index("ix_entry_tags_tag_id", "tag_id"),
+    )
+
+
+async def delete_entry_tags(db: AsyncSession, entry_type: str, entry_id: int) -> None:
+    """Delete all entry_tags for a polymorphic entry before it is deleted."""
+    await db.execute(
+        delete(EntryTag).where(
+            EntryTag.entry_type == entry_type,
+            EntryTag.entry_id == entry_id,
+        )
     )

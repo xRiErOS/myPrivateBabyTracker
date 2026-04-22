@@ -4,6 +4,7 @@ import { apiFetch } from "./client";
 
 export interface UserPreferences {
   breastfeeding_enabled: boolean;
+  feeding_hybrid: boolean;
   quick_actions: string[] | null;
   widget_order: string[] | null;
   track_visibility: Record<string, boolean> | null;

@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Moon, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
 import { TagBadges } from "../../components/TagBadges";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDateTime, formatDuration, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
+import { formatDateTime, formatDuration, formatTimeSince, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
 import { SleepForm } from "./SleepForm";
 
 const TYPE_OPTIONS = [
@@ -71,6 +72,27 @@ export function SleepList() {
         value={typeFilter}
         onChange={(e) => setTypeFilter(e.target.value)}
       />
+
+      {entries.length > 0 && (() => {
+        const totalMinutes = entries.reduce((sum, e) => sum + (e.duration_minutes ?? 0), 0);
+        const napCount = entries.filter((e) => e.sleep_type === "nap").length;
+        const nightCount = entries.filter((e) => e.sleep_type === "night").length;
+        return (
+          <ListSummaryBar>
+            <div className="flex gap-1.5">
+              <MetricPill label="Gesamt" value={formatDuration(totalMinutes)} />
+              <MetricPill label="Sessions" value={entries.length} />
+              {napCount > 0 && <MetricPill label="Nickerchen" value={napCount} />}
+              {nightCount > 0 && <MetricPill label="Nacht" value={nightCount} />}
+            </div>
+            {entries[0] && (
+              <p className="font-body text-xs text-subtext0">
+                Letzter Schlaf: {formatTimeSince(entries[0].end_time ?? entries[0].start_time)}
+              </p>
+            )}
+          </ListSummaryBar>
+        );
+      })()}
 
       {entries.map((entry) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>

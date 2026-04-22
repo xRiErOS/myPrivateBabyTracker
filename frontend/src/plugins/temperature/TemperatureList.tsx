@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pencil, Thermometer, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
 import { TagBadges } from "../../components/TagBadges";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteTemperature, useTemperatureEntries } from "../../hooks/useTemperature";
-import { formatDateTime } from "../../lib/dateUtils";
+import { formatDateTime, formatTimeSince } from "../../lib/dateUtils";
 import { TemperatureForm } from "./TemperatureForm";
 
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
@@ -22,6 +23,13 @@ function tempColor(celsius: number): string {
   if (celsius >= 37.5) return "text-peach";
   if (celsius < 36.5) return "text-blue";
   return "text-green";
+}
+
+function tempLabel(celsius: number): string {
+  if (celsius >= 38.5) return "Fieber";
+  if (celsius >= 37.5) return "Erhoehte Temp.";
+  if (celsius < 36.5) return "Unterkuehlung";
+  return "Normal";
 }
 
 export function TemperatureList() {
@@ -52,6 +60,30 @@ export function TemperatureList() {
   return (
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
+      {entries.length > 0 && (() => {
+        const latest = entries[0];
+        const temps = entries.map((e) => e.temperature_celsius);
+        const min = Math.min(...temps);
+        const max = Math.max(...temps);
+        return (
+          <ListSummaryBar>
+            <div className="flex gap-1.5">
+              <MetricPill
+                label={tempLabel(latest.temperature_celsius)}
+                value={<span className={tempColor(latest.temperature_celsius)}>{latest.temperature_celsius.toFixed(1)} °C</span>}
+              />
+              <MetricPill label="Messungen" value={entries.length} />
+              {entries.length > 1 && (
+                <MetricPill label="Bereich" value={`${min.toFixed(1)} — ${max.toFixed(1)}`} />
+              )}
+            </div>
+            <p className="font-body text-xs text-subtext0">
+              Letzte Messung: {formatTimeSince(latest.measured_at)}
+            </p>
+          </ListSummaryBar>
+        );
+      })()}
 
       {entries.map((entry) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>

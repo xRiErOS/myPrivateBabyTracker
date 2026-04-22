@@ -22,6 +22,7 @@ from app.plugins.milestones.models import (
     MilestonePhoto,
     MilestoneTemplate,
 )
+from app.models.tag import delete_entry_tags
 from app.plugins.milestones.schemas import (
     CategoryCreate,
     CategoryResponse,
@@ -356,6 +357,7 @@ async def delete_milestone(
     for photo in entry.photos:
         _delete_photo_file(photo.file_path)
 
+    await delete_entry_tags(db, "milestones", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("milestone_deleted", entry_id=entry_id)

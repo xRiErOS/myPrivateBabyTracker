@@ -10,6 +10,7 @@ from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.vitamind3.models import VitaminD3Entry
+from app.models.tag import delete_entry_tags
 from app.plugins.vitamind3.schemas import VitaminD3Create, VitaminD3Response
 
 logger = get_logger("vitamind3")
@@ -84,6 +85,7 @@ async def delete_vitamind3(
     if entry is None:
         raise NotFoundError(f"VitaminD3 entry with id {entry_id} not found")
 
+    await delete_entry_tags(db, "vitamind3", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("vitamind3_deleted", entry_id=entry_id)

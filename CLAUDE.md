@@ -108,6 +108,12 @@ Details: `DESIGN.md`
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `security:`
 - Ein Commit pro Task-Abschluss
 
+### Lokales Test-Setup (PFLICHT vor Commit/Push)
+- `frontend/vite.config.ts` darf **niemals** mit NAS-Proxy-Target (`100.71.39.53`) committet werden
+- Vor jedem `git commit` oder `git push`: Proxy auf `http://localhost:8080` zuruecksetzen
+- Wird der NAS-Proxy committet, bricht der Container-Build auf der NAS (Tailscale-IP im Container nicht erreichbar)
+- Dokumentation: `500 CONTEXTS/Home Lab Wiki/20 - Projekte/MyBabyTracker/MyBaby Lokales Test-Setup (Mac zu NAS API Proxy).md`
+
 ## Security-Checkliste (K1-K4) — IMPLEMENTIERT
 
 - [x] K1: Header-Stripping-Middleware als erste Middleware

@@ -12,6 +12,7 @@ from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.temperature.models import TemperatureEntry
+from app.models.tag import delete_entry_tags
 from app.plugins.temperature.schemas import (
     TemperatureCreate,
     TemperatureResponse,
@@ -125,6 +126,7 @@ async def delete_temperature(
     if entry is None:
         raise NotFoundError(f"Temperature entry with id {entry_id} not found")
 
+    await delete_entry_tags(db, "temperature", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("temperature_deleted", entry_id=entry_id)

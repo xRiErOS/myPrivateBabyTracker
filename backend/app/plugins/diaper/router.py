@@ -12,6 +12,7 @@ from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.diaper.models import DiaperEntry
+from app.models.tag import delete_entry_tags
 from app.plugins.diaper.schemas import DiaperCreate, DiaperResponse, DiaperUpdate
 
 logger = get_logger("diaper")
@@ -129,6 +130,7 @@ async def delete_diaper_entry(
     if entry is None:
         raise NotFoundError(f"Diaper entry with id {entry_id} not found")
 
+    await delete_entry_tags(db, "diaper", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("diaper_entry_deleted", entry_id=entry_id)

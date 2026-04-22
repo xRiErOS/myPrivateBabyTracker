@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Timer, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
 import { TagBadges } from "../../components/TagBadges";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
@@ -55,6 +56,21 @@ export function TummyTimeList() {
   return (
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
+      {entries.length > 0 && (() => {
+        const totalMinutes = entries.reduce((sum, e) => sum + (e.duration_minutes ?? 0), 0);
+        return (
+          <ListSummaryBar>
+            <div className="flex gap-1.5">
+              <MetricPill label="Gesamt" value={formatDuration(totalMinutes)} />
+              <MetricPill
+                label="Sessions"
+                value={entries.length === 1 ? "1 Session" : `${entries.length} Sessions`}
+              />
+            </div>
+          </ListSummaryBar>
+        );
+      })()}
 
       {entries.map((entry) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>

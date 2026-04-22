@@ -16,6 +16,7 @@ class UserPreferences(TimestampMixin, Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
     )
     breastfeeding_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    feeding_hybrid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     quick_actions: Mapped[str | None] = mapped_column(Text)  # JSON array of plugin keys
     widget_order: Mapped[str | None] = mapped_column(Text)  # JSON array of widget keys
     track_visibility: Mapped[str | None] = mapped_column(Text)  # JSON object {sleep: true, ...}

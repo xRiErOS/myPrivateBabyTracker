@@ -12,7 +12,7 @@ import {
   groupByDay,
   splitSleepByDay,
 } from "../../lib/timelineUtils";
-import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
+import { isBreastfeedingEnabled, isFeedingHybrid } from "../../lib/breastfeedingMode";
 import {
   useVitaminD3Entries,
   useCreateVitaminD3,
@@ -252,6 +252,13 @@ export function BabySummary({
   // Last bottle across ALL feedings (for non-breastfeeding mode)
   const lastBottleAll = allSortedFeedings.find((f) => f.feeding_type === "bottle");
   const breastfeedingEnabled = isBreastfeedingEnabled();
+  const hybridMode = breastfeedingEnabled && isFeedingHybrid();
+
+  // Breast stats for today (used in breast & hybrid mode)
+  const todayBreast = todayFeedings.filter(
+    (f) => f.feeding_type === "breast_left" || f.feeding_type === "breast_right",
+  );
+  const lastTodayBreast = todayBreast[0];
 
   // Last diaper across ALL fetched diapers (not just today)
   const allSortedDiapers = [...diapers].sort(
@@ -261,7 +268,8 @@ export function BabySummary({
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {breastfeedingEnabled ? (
+      {/* --- Feeding tiles: breast / bottle / hybrid --- */}
+      {(breastfeedingEnabled || hybridMode) && (
         <Tile label="Stillseite" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
           <TileValue
             value={lastBreastSide ?? "\u2014"}
@@ -269,7 +277,18 @@ export function BabySummary({
             sub2={nextBreastSide ? `N\u00e4chste: ${nextBreastSide}` : null}
           />
         </Tile>
-      ) : (
+      )}
+
+      {(breastfeedingEnabled || hybridMode) && (
+        <Tile label="Heute gestillt" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
+          <TileValue
+            value={`${todayBreast.length}x`}
+            sub={lastTodayBreast ? `Zuletzt: ${hoursAgo(lastTodayBreast.start_time)}` : "Noch nicht gestillt"}
+          />
+        </Tile>
+      )}
+
+      {(!breastfeedingEnabled || hybridMode) && (
         <Tile label="Letzte Flasche" icon={<Utensils className="h-3 w-3 text-peach" />} onClick={() => onTileClick?.("feeding")}>
           <TileValue
             value={lastBottleAll?.amount_ml ? `${lastBottleAll.amount_ml} ml` : "\u2014"}
@@ -278,17 +297,19 @@ export function BabySummary({
         </Tile>
       )}
 
-      <Tile label="Heute gesamt" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
-        <TileValue
-          value={
-            <>
-              {todayTotal} ml{" "}
-              <span className={`text-[12px] ${trendColor}`}>{trend}</span>
-            </>
-          }
-          sub={lastBottle ? `Letzte Flasche: ${lastBottle.amount_ml ?? 0} ml` : `Gestern: ${yesterdayTotal} ml`}
-        />
-      </Tile>
+      {(!breastfeedingEnabled || hybridMode) && (
+        <Tile label="Heute gesamt" icon={<Utensils className="h-3 w-3 text-subtext0" />} onClick={() => onTileClick?.("feeding")}>
+          <TileValue
+            value={
+              <>
+                {todayTotal} ml{" "}
+                <span className={`text-[12px] ${trendColor}`}>{trend}</span>
+              </>
+            }
+            sub={lastBottle ? `Letzte Flasche: ${lastBottle.amount_ml ?? 0} ml` : `Gestern: ${yesterdayTotal} ml`}
+          />
+        </Tile>
+      )}
 
       <Tile label="Letzte Windel" icon={<Droplets className="h-3 w-3 text-sapphire" />} onClick={() => onTileClick?.("diaper")}>
         <TileValue

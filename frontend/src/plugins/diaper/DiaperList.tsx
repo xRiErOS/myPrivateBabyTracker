@@ -4,14 +4,16 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AlertTriangle, Droplets, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
 import { TagBadges } from "../../components/TagBadges";
 import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteDiaper, useDiaperEntries } from "../../hooks/useDiaper";
-import { formatDateTime, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
+import { formatDateTime, formatTimeSince, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
+import { isWet } from "../../lib/timelineUtils";
 import { DiaperForm } from "./DiaperForm";
-import type { DiaperType } from "../../api/types";
+import type { DiaperEntry, DiaperType } from "../../api/types";
 
 const TYPE_OPTIONS = [
   { value: "", label: "Alle Typen" },
@@ -33,6 +35,43 @@ const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   week: daysAgoISO(7),
   all: undefined,
 };
+
+const CHANGE_LABELS: Record<DiaperType, string> = {
+  wet: "Nass",
+  dirty: "Stuhl",
+  mixed: "Beides",
+  dry: "Trocken",
+};
+
+function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
+  const total = diapers.length;
+  if (total === 0) return null;
+
+  const wet = diapers.filter(isWet).length;
+  const dirty = diapers.filter((d) => d.diaper_type === "dirty").length;
+  const mixed = diapers.filter((d) => d.diaper_type === "mixed").length;
+  const dry = total - wet - dirty - mixed;
+
+  const segments = [
+    { count: wet, color: "bg-sapphire", label: "Nass" },
+    { count: dirty, color: "bg-peach", label: "Stuhl" },
+    { count: mixed, color: "bg-mauve", label: "Beides" },
+    { count: dry, color: "bg-overlay0", label: "Trocken" },
+  ].filter((s) => s.count > 0);
+
+  return (
+    <div className="flex h-2 w-full rounded-full overflow-hidden">
+      {segments.map((s) => (
+        <div
+          key={s.label}
+          className={`${s.color} h-full`}
+          style={{ width: `${(s.count / total) * 100}%` }}
+          title={`${s.label}: ${s.count}`}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function DiaperList() {
   const { activeChild } = useActiveChild();
@@ -78,6 +117,34 @@ export function DiaperList() {
         value={typeFilter}
         onChange={(e) => setTypeFilter(e.target.value)}
       />
+
+      {entries.length > 0 && (
+        <ListSummaryBar>
+          <div className="flex gap-1.5">
+            <MetricPill label="Ges." value={entries.length} />
+            <MetricPill label="Nass" value={entries.filter(isWet).length} />
+            <MetricPill label="Stuhl" value={entries.filter((e) => e.diaper_type === "dirty").length} />
+            <MetricPill label="Beides" value={entries.filter((e) => e.diaper_type === "mixed").length} />
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="font-body text-xs text-subtext0">
+              Trocken: {entries.filter((e) => e.diaper_type === "dry").length}
+            </p>
+            {entries[0] && (
+              <p className="font-body text-xs text-subtext0">
+                Letzte: {CHANGE_LABELS[entries[0].diaper_type] ?? entries[0].diaper_type} — {formatTimeSince(entries[0].time)}
+              </p>
+            )}
+          </div>
+          <DiaperBar diapers={entries} />
+          {entries.some((e) => e.has_rash) && (
+            <div className="flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-red" />
+              <span className="font-body text-xs text-red font-medium">Ausschlag beobachtet</span>
+            </div>
+          )}
+        </ListSummaryBar>
+      )}
 
       {entries.map((entry) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>

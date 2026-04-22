@@ -12,6 +12,7 @@ from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.tummytime.models import TummyTimeEntry
+from app.models.tag import delete_entry_tags
 from app.plugins.tummytime.schemas import TummyTimeCreate, TummyTimeResponse, TummyTimeUpdate
 
 logger = get_logger("tummytime")
@@ -128,6 +129,7 @@ async def delete_tummy_time(
     if entry is None:
         raise NotFoundError(f"Tummy time entry with id {entry_id} not found")
 
+    await delete_entry_tags(db, "tummytime", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("tummy_time_deleted", entry_id=entry_id)

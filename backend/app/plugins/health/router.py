@@ -12,6 +12,7 @@ from app.logging import get_logger
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.health.models import HealthEntry
+from app.models.tag import delete_entry_tags
 from app.plugins.health.schemas import (
     HealthCreate,
     HealthEntryType,
@@ -124,6 +125,7 @@ async def delete_health(
     if entry is None:
         raise NotFoundError(f"Health entry with id {entry_id} not found")
 
+    await delete_entry_tags(db, "health", entry.id)
     await db.delete(entry)
     await db.commit()
     logger.info("health_deleted", entry_id=entry_id)

@@ -7,7 +7,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateHealth, useUpdateHealth } from "../../hooks/useHealth";
 import { useFeedingEntries } from "../../hooks/useFeeding";
-import { formatDateTime, isoToLocalInput, localInputToISO, nowISO, daysAgoISO } from "../../lib/dateUtils";
+import { formatTime, isoToLocalInput, localInputToISO, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 import { ApiError } from "../../api/client";
 import { attachTag } from "../../api/tags";
 import type { HealthEntry, HealthEntryType, HealthSeverity, HealthDuration } from "../../api/types";
@@ -60,14 +60,13 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
   const [error, setError] = useState<string | null>(null);
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
-  // Fetch last 4 feedings for linking
-  const { data: recentFeedings = [] } = useFeedingEntries({
+  // Fetch today's feedings for linking
+  const { data: todayFeedings = [] } = useFeedingEntries({
     child_id: activeChild?.id,
-    date_from: daysAgoISO(2),
+    date_from: startOfTodayISO(),
   });
-  const last4Feedings = [...recentFeedings]
-    .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
-    .slice(0, 4);
+  const sortedTodayFeedings = [...todayFeedings]
+    .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
 
   const isEditing = entry != null;
   const isPending = createMut.isPending || updateMut.isPending;
@@ -213,14 +212,14 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
         required
       />
 
-      {/* Feeding link — last 4 feedings */}
-      {last4Feedings.length > 0 && (
+      {/* Feeding link — today's feedings as buttons */}
+      {sortedTodayFeedings.length > 0 && (
         <div>
           <label className="font-label text-sm font-medium text-text block mb-1">
             Mahlzeit zuordnen
           </label>
           <div className="flex flex-col gap-1.5">
-            {last4Feedings.map((f) => (
+            {sortedTodayFeedings.map((f) => (
               <button
                 key={f.id}
                 type="button"
@@ -231,9 +230,11 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
                     : "bg-surface1 text-text hover:bg-surface2"
                 }`}
               >
-                <span className="font-medium">{FEEDING_TYPE_LABELS[f.feeding_type] ?? f.feeding_type}</span>
+                <span className="font-medium">
+                  {FEEDING_TYPE_LABELS[f.feeding_type] ?? f.feeding_type}
+                </span>
                 {f.amount_ml ? ` ${f.amount_ml} ml` : ""}
-                <span className="text-xs opacity-70 ml-2">{formatDateTime(f.start_time)}</span>
+                <span className="text-xs opacity-70 ml-2">{formatTime(f.start_time)}</span>
               </button>
             ))}
           </div>

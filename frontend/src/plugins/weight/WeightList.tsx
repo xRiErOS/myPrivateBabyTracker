@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { Pencil, Scale, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
 import { TagBadges } from "../../components/TagBadges";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteWeight, useWeightEntries } from "../../hooks/useWeight";
-import { formatDateTime } from "../../lib/dateUtils";
+import { formatDateTime, formatTimeSince } from "../../lib/dateUtils";
 import { WeightForm } from "./WeightForm";
 
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
@@ -47,6 +48,29 @@ export function WeightList() {
   return (
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
+      {entries.length > 0 && (() => {
+        const latest = entries[0];
+        const prev = entries[1];
+        const diff = prev ? latest.weight_grams - prev.weight_grams : null;
+        return (
+          <ListSummaryBar>
+            <div className="flex gap-1.5">
+              <MetricPill label="Aktuell" value={formatWeight(latest.weight_grams)} />
+              {diff !== null && (
+                <MetricPill
+                  label="Trend"
+                  value={<span className={diff >= 0 ? "text-green" : "text-peach"}>{diff >= 0 ? "+" : ""}{(diff / 1000).toFixed(2)} kg</span>}
+                />
+              )}
+              <MetricPill label="Messungen" value={entries.length} />
+            </div>
+            <p className="font-body text-xs text-subtext0">
+              Letzte Messung: {formatTimeSince(latest.measured_at)}
+            </p>
+          </ListSummaryBar>
+        );
+      })()}
 
       {entries.map((entry, i) => {
         const prev = entries[i + 1];

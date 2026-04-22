@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pencil, Pill, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { ListSummaryBar, MetricPill } from "../../components/ListSummaryBar";
 import { TagBadges } from "../../components/TagBadges";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteMedication, useMedicationEntries } from "../../hooks/useMedication";
-import { formatDateTime } from "../../lib/dateUtils";
+import { formatDateTime, formatTimeSince } from "../../lib/dateUtils";
 import { MedicationForm } from "./MedicationForm";
 
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
@@ -45,6 +46,23 @@ export function MedicationList() {
   return (
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
+      {entries.length > 0 && (() => {
+        const uniqueMeds = new Set(entries.map((e) => e.medication_name));
+        return (
+          <ListSummaryBar>
+            <div className="flex gap-1.5">
+              <MetricPill label="Gaben" value={entries.length} />
+              <MetricPill label="Medikamente" value={uniqueMeds.size} />
+            </div>
+            {entries[0] && (
+              <p className="font-body text-xs text-subtext0">
+                Letzte Gabe: {entries[0].medication_name} — {formatTimeSince(entries[0].given_at)}
+              </p>
+            )}
+          </ListSummaryBar>
+        );
+      })()}
 
       {entries.map((entry) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>
