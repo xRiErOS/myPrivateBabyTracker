@@ -1,9 +1,10 @@
 /** Admin hub page — navigation tiles for management pages + Quick Actions config. */
 
 import { useState } from "react";
-import { AlertTriangle, Baby, ClipboardList, KeyRound, Puzzle, Settings, Shield, Zap } from "lucide-react";
+import { AlertTriangle, Baby, ClipboardList, KeyRound, Puzzle, Shield, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
+import { PageHeader } from "../components/PageHeader";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { getQuickActions, setQuickActions } from "../lib/quickActions";
 import { isBreastfeedingEnabled, setBreastfeedingEnabled } from "../lib/breastfeedingMode";
@@ -52,6 +53,12 @@ const TILES: AdminTile[] = [
     label: "Authentifizierung",
     description: "Auth-Modus, Benutzer, Sicherheit",
   },
+  {
+    to: "/admin/users",
+    icon: Users,
+    label: "Benutzer",
+    description: "Benutzer anlegen, bearbeiten, deaktivieren",
+  },
 ];
 
 const FAVORITE_LABELS = ["Favorit 1", "Favorit 2", "Favorit 3"];
@@ -76,10 +83,7 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Settings className="h-5 w-5 text-mauve" />
-        <h2 className="font-headline text-lg font-semibold">Verwaltung</h2>
-      </div>
+      <PageHeader title="Verwaltung" />
 
       <div className="grid grid-cols-2 gap-3">
         {TILES.map(({ to, icon: Icon, label, description }) => (
