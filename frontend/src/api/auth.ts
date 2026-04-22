@@ -9,6 +9,7 @@ export interface AuthUser {
   role: string;
   auth_type: string;
   locale: string;
+  timezone: string;
   totp_enabled: boolean;
   created_at: string;
 }

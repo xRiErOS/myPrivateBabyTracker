@@ -9,6 +9,7 @@ export interface AdminUser {
   role: string;
   auth_type: string;
   locale: string;
+  timezone: string;
   is_active: boolean;
   totp_enabled: boolean;
   created_at: string;

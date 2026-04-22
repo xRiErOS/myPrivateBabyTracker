@@ -13,6 +13,7 @@ class UserCreate(BaseModel):
     display_name: str | None = Field(default=None, max_length=200)
     role: str = Field(default="caregiver", pattern="^(admin|caregiver)$")
     locale: str = Field(default="de", max_length=10)
+    timezone: str = Field(default="Europe/Berlin", max_length=50)
 
 
 class UserUpdate(BaseModel):
@@ -21,6 +22,7 @@ class UserUpdate(BaseModel):
     display_name: str | None = Field(default=None, max_length=200)
     role: str | None = Field(default=None, pattern="^(admin|caregiver)$")
     locale: str | None = Field(default=None, max_length=10)
+    timezone: str | None = Field(default=None, max_length=50)
     is_active: bool | None = None
 
 
@@ -33,6 +35,7 @@ class UserAdminResponse(BaseModel):
     role: str
     auth_type: str
     locale: str
+    timezone: str
     is_active: bool
     totp_enabled: bool
     created_at: UTCDatetime

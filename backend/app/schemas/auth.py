@@ -29,6 +29,7 @@ class UserResponse(BaseModel):
     role: str
     auth_type: str
     locale: str
+    timezone: str = "Europe/Berlin"
     totp_enabled: bool = False
     created_at: UTCDatetime
 
