@@ -1,10 +1,11 @@
-/** App root — routing with lazy-loaded pages. */
+/** App root — routing with lazy-loaded pages + auth guard. */
 
 import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Layout } from "./components/Layout";
 import { LoadingSpinner } from "./components/LoadingSpinner";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const SleepPage = lazy(() => import("./pages/SleepPage"));
@@ -25,36 +26,61 @@ const PluginConfigPage = lazy(() => import("./pages/PluginConfigPage"));
 const ApiKeyPage = lazy(() => import("./pages/ApiKeyPage"));
 const TummyTimePage = lazy(() => import("./pages/TummyTimePage"));
 const MilestonesPage = lazy(() => import("./pages/MilestonesPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { user, authMode, loading } = useAuth();
+
+  if (loading) return <LoadingSpinner />;
+
+  // disabled + forward modes: no login needed
+  if (authMode === "disabled" || authMode === "forward") return <>{children}</>;
+
+  // local/both: require login
+  if (!user) return <LoginPage />;
+
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <AuthGuard>
+      <Layout>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/sleep" element={<SleepPage />} />
+              <Route path="/feeding" element={<FeedingPage />} />
+              <Route path="/diaper" element={<DiaperPage />} />
+              <Route path="/temperature" element={<TemperaturePage />} />
+              <Route path="/weight" element={<WeightPage />} />
+              <Route path="/medication" element={<MedicationPage />} />
+              <Route path="/health" element={<HealthPage />} />
+              <Route path="/todo" element={<TodoPage />} />
+              <Route path="/tummy-time" element={<TummyTimePage />} />
+              <Route path="/milestones" element={<MilestonesPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/children" element={<ChildrenPage />} />
+              <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
+              <Route path="/tags" element={<TagsPage />} />
+              <Route path="/tags/:tagId" element={<TagDetailPage />} />
+              <Route path="/admin/alerts" element={<AlertConfigPage />} />
+              <Route path="/admin/plugins" element={<PluginConfigPage />} />
+              <Route path="/admin/api-keys" element={<ApiKeyPage />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
+      </Layout>
+    </AuthGuard>
+  );
+}
 
 function App() {
   return (
-    <Layout>
-      <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/sleep" element={<SleepPage />} />
-          <Route path="/feeding" element={<FeedingPage />} />
-          <Route path="/diaper" element={<DiaperPage />} />
-          <Route path="/temperature" element={<TemperaturePage />} />
-          <Route path="/weight" element={<WeightPage />} />
-          <Route path="/medication" element={<MedicationPage />} />
-          <Route path="/health" element={<HealthPage />} />
-          <Route path="/todo" element={<TodoPage />} />
-          <Route path="/tummy-time" element={<TummyTimePage />} />
-          <Route path="/milestones" element={<MilestonesPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/children" element={<ChildrenPage />} />
-          <Route path="/admin/medication-masters" element={<MedicationMastersPage />} />
-          <Route path="/tags" element={<TagsPage />} />
-          <Route path="/tags/:tagId" element={<TagDetailPage />} />
-          <Route path="/admin/alerts" element={<AlertConfigPage />} />
-          <Route path="/admin/plugins" element={<PluginConfigPage />} />
-          <Route path="/admin/api-keys" element={<ApiKeyPage />} />
-        </Routes>
-      </Suspense>
-      </ErrorBoundary>
-    </Layout>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 
