@@ -28,6 +28,25 @@
   "entries_count_other": "{{count}} Eintraege",
   "summary_feeding": "Mahlzeit",
   "summary_total": "Gesamt",
+  "summary": {
+    "meals": "Mahlzeiten",
+    "total": "Gesamt",
+    "breast": "Stillen",
+    "last": "Zuletzt",
+    "avg_meals": "\u00d8 Mahlzeiten/Tag",
+    "avg_ml": "\u00d8 ml/Tag",
+    "avg_interval": "\u00d8 Abstand"
+  },
+  "health": {
+    "spit_up": "Spucken",
+    "tummy_ache": "Bauchschmerzen",
+    "record": "erfassen"
+  },
+  "spit": {
+    "mild": "Wenig",
+    "moderate": "Mittel",
+    "severe": "Stark"
+  },
   "hybrid_mode": "Hybridmodus",
   "side_left": "Links",
   "side_right": "Rechts",
@@ -36,5 +55,8 @@
   "not_nursed_yet": "Noch nicht gestillt",
   "last_bottle_sub": "Letzte Flasche: {{amount}} ml",
   "yesterday_total": "Gestern: {{amount}} ml",
+  "avg_7days": "\u00d8 6 Tage: {{amount}} ml",
+  "yesterday_short": "Gestern: {{amount}} ml",
+  "avg_7days_short": "\u00d8 6T: {{amount}} ml",
   "last_entry": "Zuletzt: {{time}}"
 }

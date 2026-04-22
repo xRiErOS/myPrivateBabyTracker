@@ -17,6 +17,7 @@ import { SleepForm } from "./SleepForm";
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
+  twoWeeks: daysAgoISO(14),
   all: undefined,
 };
 
@@ -76,17 +77,63 @@ export function SleepList() {
         onChange={(e) => setTypeFilter(e.target.value)}
       />
 
-      {entries.length > 0 && (() => {
-        const totalMinutes = entries.reduce((sum, e) => sum + (e.duration_minutes ?? 0), 0);
-        const napCount = entries.filter((e) => e.sleep_type === "nap").length;
-        const nightCount = entries.filter((e) => e.sleep_type === "night").length;
+      {entries.length > 0 && dateRange !== "all" && (() => {
+        const maxDays = dateRange === "twoWeeks" ? 13 : 6;
+
+        // Group entries by day (Berlin timezone)
+        const byDay = new Map<string, typeof entries>();
+        for (const e of entries) {
+          const day = new Date(e.start_time).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+          const arr = byDay.get(day) ?? [];
+          arr.push(e);
+          byDay.set(day, arr);
+        }
+
+        const todayStr = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+        const fullDays = [...byDay.entries()]
+          .filter(([day]) => day !== todayStr)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .slice(0, maxDays);
+
+        const n = fullDays.length;
+        const fmtMinutes = (mins: number) => {
+          const h = Math.floor(mins / 60);
+          const m = Math.round(mins % 60);
+          return `${h}:${String(m).padStart(2, "0")} h`;
+        };
+        const avgTotalMin = n > 0
+          ? fullDays.reduce((s, [, v]) => s + v.reduce((a, e) => a + (e.duration_minutes ?? 0), 0), 0) / n
+          : null;
+        const avgNightMin = n > 0
+          ? fullDays.reduce((s, [, v]) => s + v.filter((e) => e.sleep_type === "night").reduce((a, e) => a + (e.duration_minutes ?? 0), 0), 0) / n
+          : null;
+        const avgNapMin = n > 0
+          ? fullDays.reduce((s, [, v]) => s + v.filter((e) => e.sleep_type === "nap").reduce((a, e) => a + (e.duration_minutes ?? 0), 0), 0) / n
+          : null;
+
+        // Average interval between consecutive sleep entries
+        const sorted = [...entries].sort(
+          (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+        );
+        let avgInterval: string | null = null;
+        if (sorted.length > 1) {
+          let totalMs = 0;
+          for (let i = 1; i < sorted.length; i++) {
+            totalMs += new Date(sorted[i].start_time).getTime() - new Date(sorted[i - 1].start_time).getTime();
+          }
+          const avgMs = totalMs / (sorted.length - 1);
+          const h = Math.floor(avgMs / 3600000);
+          const m = Math.round((avgMs % 3600000) / 60000);
+          avgInterval = `${h}:${String(m).padStart(2, "0")} h`;
+        }
+
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label={t("summary.total")} value={formatDuration(totalMinutes)} />
-              <MetricPill label={t("summary.sessions")} value={entries.length} />
-              {napCount > 0 && <MetricPill label={t("type.nap")} value={napCount} />}
-              {nightCount > 0 && <MetricPill label={t("summary.night")} value={nightCount} />}
+              {avgTotalMin != null && <MetricPill label={t("avg.hours")} value={fmtMinutes(avgTotalMin)} />}
+              {avgNightMin != null && <MetricPill label={t("avg.night")} value={fmtMinutes(avgNightMin)} />}
+              {avgNapMin != null && <MetricPill label={t("avg.naps")} value={fmtMinutes(avgNapMin)} />}
+              {avgInterval != null && <MetricPill label={t("avg.interval")} value={avgInterval} />}
             </div>
             {entries[0] && (
               <p className="font-body text-xs text-subtext0">
@@ -126,7 +173,7 @@ export function SleepList() {
             {entry.end_time ? ` - ${formatDateTime(entry.end_time)}` : ""}
           </p>
           <p className="font-body text-sm text-overlay0">
-            {t("duration")}: {formatDuration(entry.duration_minutes)}
+            {t("duration", { duration: formatDuration(entry.duration_minutes) })}
           </p>
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>

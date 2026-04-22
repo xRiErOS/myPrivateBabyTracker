@@ -14,11 +14,13 @@ import { useDeleteFeeding, useFeedingEntries } from "../../hooks/useFeeding";
 import { useCreateHealth, useHealthEntries } from "../../hooks/useHealth";
 import { formatDateTime, formatTimeSince, nowISO, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
 import { FeedingForm } from "./FeedingForm";
+import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 import type { FeedingType, HealthSeverity } from "../../api/types";
 
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
+  twoWeeks: daysAgoISO(14),
   all: undefined,
 };
 
@@ -104,25 +106,64 @@ export function FeedingList() {
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
-      <Select
-        label="Filter"
-        options={TYPE_OPTIONS}
-        value={typeFilter}
-        onChange={(e) => setTypeFilter(e.target.value)}
-      />
+      {isBreastfeedingEnabled() && (
+        <Select
+          label="Filter"
+          options={TYPE_OPTIONS}
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+        />
+      )}
 
-      {entries.length > 0 && (() => {
-        const totalMl = entries.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
+      {entries.length > 0 && dateRange !== "all" && (() => {
         const lastEntry = entries[0];
-        const bottleCount = entries.filter((f) => f.feeding_type === "bottle").length;
-        const breastCount = entries.filter((f) => f.feeding_type === "breast_left" || f.feeding_type === "breast_right").length;
+        const maxDays = dateRange === "twoWeeks" ? 13 : 6;
+
+        // Group entries by day (Berlin timezone)
+        const byDay = new Map<string, typeof entries>();
+        for (const e of entries) {
+          const day = new Date(e.start_time).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+          const arr = byDay.get(day) ?? [];
+          arr.push(e);
+          byDay.set(day, arr);
+        }
+
+        // Last N full days (excluding today)
+        const todayStr = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+        const fullDays = [...byDay.entries()]
+          .filter(([day]) => day !== todayStr)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .slice(0, maxDays);
+
+        const avgMeals = fullDays.length > 0
+          ? Math.round(fullDays.reduce((s, [, v]) => s + v.length, 0) / fullDays.length * 10) / 10
+          : null;
+        const avgMl = fullDays.length > 0
+          ? Math.round(fullDays.reduce((s, [, v]) => s + v.reduce((a, f) => a + (f.amount_ml ?? 0), 0), 0) / fullDays.length)
+          : null;
+
+        // Average interval between consecutive meals (all entries)
+        const sorted = [...entries].sort(
+          (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+        );
+        let avgInterval: string | null = null;
+        if (sorted.length > 1) {
+          let totalMs = 0;
+          for (let i = 1; i < sorted.length; i++) {
+            totalMs += new Date(sorted[i].start_time).getTime() - new Date(sorted[i - 1].start_time).getTime();
+          }
+          const avgMs = totalMs / (sorted.length - 1);
+          const h = Math.floor(avgMs / 3600000);
+          const m = Math.round((avgMs % 3600000) / 60000);
+          avgInterval = `${h}:${String(m).padStart(2, "0")}`;
+        }
+
         return (
           <ListSummaryBar>
             <div className="flex gap-1.5">
-              <MetricPill label={t("summary.meals")} value={entries.length} />
-              <MetricPill label={t("summary.total")} value={`${totalMl} ml`} />
-              {bottleCount > 0 && <MetricPill label={t("type.bottle")} value={bottleCount} />}
-              {breastCount > 0 && <MetricPill label={t("summary.breast")} value={breastCount} />}
+              {avgMeals != null && <MetricPill label={t("summary.avg_meals")} value={avgMeals} />}
+              {avgMl != null && <MetricPill label={t("summary.avg_ml")} value={`${avgMl} ml`} />}
+              {avgInterval != null && <MetricPill label={t("summary.avg_interval")} value={avgInterval} />}
             </div>
             {lastEntry && (
               <p className="font-body text-xs text-subtext0">

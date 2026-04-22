@@ -16,6 +16,7 @@ import { TemperatureForm } from "./TemperatureForm";
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
   week: new Date(Date.now() - 7 * 86400000).toISOString(),
+  twoWeeks: new Date(Date.now() - 14 * 86400000).toISOString(),
   all: undefined,
 };
 

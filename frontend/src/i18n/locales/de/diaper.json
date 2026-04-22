@@ -4,7 +4,7 @@
   "type": {
     "wet": "Nass",
     "dirty": "Stuhl",
-    "mixed": "Gemischt",
+    "mixed": "Dreckig",
     "dry": "Trocken"
   },
   "type_short": {
@@ -30,6 +30,22 @@
   "summary_none": "keine",
   "has_rash": "Ausschlag vorhanden",
   "change_rash": "Windelausschlag",
+  "rash": "Ausschlag",
+  "rash_observed": "Ausschlag beobachtet",
+  "color": "Farbe",
+  "summary": {
+    "total": "Gesamt",
+    "last": "Zuletzt"
+  },
+  "change": {
+    "mixed": "Dreckig"
+  },
+  "avg": {
+    "total": "\u00d8 Windeln/Tag",
+    "wet": "\u00d8 Nass",
+    "mixed": "\u00d8 Dreckig",
+    "dirty": "\u00d8 Stuhl"
+  },
   "summary_total_short": "Ges.",
   "summary_both_short": "Beid.",
   "summary_wet_short": "Nass"

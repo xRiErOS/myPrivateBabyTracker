@@ -50,7 +50,7 @@ function Tile({
   );
 }
 
-function TileValue({ value, sub, sub2 }: { value: React.ReactNode; sub?: string | null; sub2?: string | null }) {
+function TileValue({ value, sub, sub2 }: { value: React.ReactNode; sub?: React.ReactNode; sub2?: string | null }) {
   return (
     <>
       <div className="font-headline text-lg font-semibold text-text">{value}</div>
@@ -233,6 +233,19 @@ export function BabySummary({
 
   const todayTotal = todayFeedings.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
   const yesterdayTotal = yesterdayFeedings.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
+
+  // 7-day average (excluding today)
+  const avg7days = (() => {
+    const past7 = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(Date.now() - (i + 1) * 86400000);
+      return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+    });
+    const totals = past7
+      .map((day) => (feedByDay[day] ?? []).reduce((s, f) => s + (f.amount_ml ?? 0), 0))
+      .filter((t) => t > 0);
+    return totals.length > 0 ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length) : null;
+  })();
+
   const trend =
     todayTotal > yesterdayTotal ? "\u2191" : todayTotal < yesterdayTotal ? "\u2193" : "\u2194";
   const trendColor = todayTotal >= yesterdayTotal ? "text-green" : "text-red";
@@ -311,7 +324,12 @@ export function BabySummary({
                 <span className={`text-[12px] ${trendColor}`}>{trend}</span>
               </>
             }
-            sub={lastBottle ? tFeeding("last_bottle_sub", { amount: lastBottle.amount_ml ?? 0 }) : tFeeding("yesterday_total", { amount: yesterdayTotal })}
+            sub={
+              <div className="flex gap-2">
+                <span>{tFeeding("yesterday_short", { amount: yesterdayTotal })}</span>
+                {avg7days != null && <span className="text-mauve">{tFeeding("avg_7days_short", { amount: avg7days })}</span>}
+              </div>
+            }
           />
         </Tile>
       )}

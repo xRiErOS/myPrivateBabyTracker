@@ -53,7 +53,7 @@ describe("DiaperForm", () => {
     renderForm();
     expect(screen.getByText("Nass")).toBeInTheDocument();
     expect(screen.getByText("Stuhl")).toBeInTheDocument();
-    expect(screen.getByText("Gemischt")).toBeInTheDocument();
+    expect(screen.getByText("Dreckig")).toBeInTheDocument();
     expect(screen.getByText("Trocken")).toBeInTheDocument();
   });
 

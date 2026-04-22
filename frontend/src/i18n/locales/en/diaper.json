@@ -30,6 +30,22 @@
   "summary_none": "none",
   "has_rash": "Rash present",
   "change_rash": "Diaper rash",
+  "rash": "Rash",
+  "rash_observed": "Rash observed",
+  "color": "Color",
+  "summary": {
+    "total": "Total",
+    "last": "Last"
+  },
+  "change": {
+    "mixed": "Dirty"
+  },
+  "avg": {
+    "total": "\u00d8 diapers/day",
+    "wet": "\u00d8 wet",
+    "mixed": "\u00d8 dirty",
+    "dirty": "\u00d8 stool"
+  },
   "summary_total_short": "Tot.",
   "summary_both_short": "Both",
   "summary_wet_short": "Wet"

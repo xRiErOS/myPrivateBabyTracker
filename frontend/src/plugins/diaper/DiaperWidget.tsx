@@ -10,7 +10,7 @@ import type { DiaperType } from "../../api/types";
 const TYPE_LABELS: Record<DiaperType, string> = {
   wet: "Nass",
   dirty: "Stuhl",
-  mixed: "Gemischt",
+  mixed: "Dreckig",
   dry: "Trocken",
 };
 

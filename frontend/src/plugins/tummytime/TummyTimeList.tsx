@@ -16,6 +16,7 @@ import { TummyTimeForm } from "./TummyTimeForm";
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
+  twoWeeks: daysAgoISO(14),
   all: undefined,
 };
 

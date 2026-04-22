@@ -25,6 +25,18 @@
   "sleep_timer": "Schlaf-Timer",
   "summary_sleep": "Schlaf",
   "summary_total": "Gesamt heute",
+  "summary": {
+    "total": "Gesamt",
+    "sessions": "Eintraege",
+    "night": "Nachtschlaf",
+    "last_sleep": "Zuletzt"
+  },
+  "avg": {
+    "hours": "\u00d8 Schlaf/Tag",
+    "night": "\u00d8 Nachtschlaf",
+    "naps": "\u00d8 Naps",
+    "interval": "\u00d8 Abstand"
+  },
   "since": "seit {{time}}",
   "last_entry_sub": "Letzter: {{time}}"
 }

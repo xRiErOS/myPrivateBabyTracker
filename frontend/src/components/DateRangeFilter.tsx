@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 
-export type DateRange = "today" | "week" | "all";
+export type DateRange = "today" | "week" | "twoWeeks" | "all";
 
 interface DateRangeFilterProps {
   value: DateRange;
@@ -12,6 +12,7 @@ interface DateRangeFilterProps {
 const OPTIONS: { key: DateRange; labelKey: string }[] = [
   { key: "today", labelKey: "date_range.today" },
   { key: "week", labelKey: "date_range.days_7" },
+  { key: "twoWeeks", labelKey: "date_range.days_14" },
   { key: "all", labelKey: "date_range.all" },
 ];
 

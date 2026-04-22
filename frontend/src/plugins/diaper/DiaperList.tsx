@@ -19,6 +19,7 @@ import type { DiaperEntry, DiaperType } from "../../api/types";
 const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
   today: startOfTodayISO(),
   week: daysAgoISO(7),
+  twoWeeks: daysAgoISO(14),
   all: undefined,
 };
 
@@ -122,33 +123,58 @@ export function DiaperList() {
         onChange={(e) => setTypeFilter(e.target.value)}
       />
 
-      {entries.length > 0 && (
-        <ListSummaryBar>
-          <div className="flex gap-1.5">
-            <MetricPill label={t("summary.total")} value={entries.length} />
-            <MetricPill label={t("type.wet")} value={entries.filter(isWet).length} />
-            <MetricPill label={t("type.dirty")} value={entries.filter((e) => e.diaper_type === "dirty").length} />
-            <MetricPill label={t("change.mixed")} value={entries.filter((e) => e.diaper_type === "mixed").length} />
-          </div>
-          <div className="flex items-center justify-between">
-            <p className="font-body text-xs text-subtext0">
-              {t("type.dry")}: {entries.filter((e) => e.diaper_type === "dry").length}
-            </p>
-            {entries[0] && (
-              <p className="font-body text-xs text-subtext0">
-                {t("summary.last")}: {CHANGE_LABELS[entries[0].diaper_type] ?? entries[0].diaper_type} — {formatTimeSince(entries[0].time)}
-              </p>
-            )}
-          </div>
-          <DiaperBar diapers={entries} />
-          {entries.some((e) => e.has_rash) && (
-            <div className="flex items-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5 text-red" />
-              <span className="font-body text-xs text-red font-medium">{t("rash_observed")}</span>
+      {entries.length > 0 && dateRange !== "all" && (() => {
+        const maxDays = dateRange === "twoWeeks" ? 13 : 6;
+
+        // Group by day (Berlin timezone)
+        const byDay = new Map<string, typeof entries>();
+        for (const e of entries) {
+          const day = new Date(e.time).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+          const arr = byDay.get(day) ?? [];
+          arr.push(e);
+          byDay.set(day, arr);
+        }
+
+        const todayStr = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+        const fullDays = [...byDay.entries()]
+          .filter(([day]) => day !== todayStr)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .slice(0, maxDays);
+
+        const n = fullDays.length;
+        const avgTotal = n > 0 ? Math.round(fullDays.reduce((s, [, v]) => s + v.length, 0) / n) : null;
+        const avgWet = n > 0 ? Math.round(fullDays.reduce((s, [, v]) => s + v.filter(isWet).length, 0) / n) : null;
+        const avgMixed = n > 0 ? Math.round(fullDays.reduce((s, [, v]) => s + v.filter((d) => d.diaper_type === "mixed").length, 0) / n) : null;
+        const avgDirty = n > 0 ? Math.round(fullDays.reduce((s, [, v]) => s + v.filter((d) => d.diaper_type === "dirty").length, 0) / n) : null;
+
+        return (
+          <ListSummaryBar>
+            <div className="flex gap-1.5">
+              {avgTotal != null && <MetricPill label={t("avg.total")} value={avgTotal} />}
+              {avgWet != null && <MetricPill label={t("avg.wet")} value={avgWet} />}
+              {avgMixed != null && <MetricPill label={t("avg.mixed")} value={avgMixed} />}
+              {avgDirty != null && <MetricPill label={t("avg.dirty")} value={avgDirty} />}
             </div>
-          )}
-        </ListSummaryBar>
-      )}
+            <div className="flex items-center justify-between">
+              <p className="font-body text-xs text-subtext0">
+                {t("type.dry")}: {entries.filter((e) => e.diaper_type === "dry").length}
+              </p>
+              {entries[0] && (
+                <p className="font-body text-xs text-subtext0">
+                  {t("summary.last")}: {CHANGE_LABELS[entries[0].diaper_type] ?? entries[0].diaper_type} — {formatTimeSince(entries[0].time)}
+                </p>
+              )}
+            </div>
+            <DiaperBar diapers={entries} />
+            {entries.some((e) => e.has_rash) && (
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-red" />
+                <span className="font-body text-xs text-red font-medium">{t("rash_observed")}</span>
+              </div>
+            )}
+          </ListSummaryBar>
+        );
+      })()}
 
       {entries.map((entry) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>
