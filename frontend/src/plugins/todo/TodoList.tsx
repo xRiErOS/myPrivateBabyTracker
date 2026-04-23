@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { CalendarClock, CheckSquare, Pencil, Search, Square, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { TagBadges } from "../../components/TagBadges";
-import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteTodo, useTodos, useUpdateTodo } from "../../hooks/useTodos";
 import { formatDateTime } from "../../lib/dateUtils";
@@ -141,7 +140,7 @@ export function TodoList() {
                 <span className={`font-heading text-base text-text break-words ${entry.is_done ? "line-through" : ""}`}>
                   {entry.title}
                 </span>
-                {entry.details && (
+                {entry.details && editingId !== entry.id && (
                   <p className="font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5">
                     {entry.details}
                   </p>
@@ -222,9 +221,6 @@ export function TodoList() {
           {editingId === entry.id && (
             <div className="border-t border-surface1 bg-surface0/50 -mx-3 -mb-3 px-3 py-3 mt-3">
               <TodoForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
-              <div className="mt-3 pt-3 border-t border-surface1">
-                <TagSelector entryType="todo" entryId={entry.id} />
-              </div>
             </div>
           )}
         </Card>
