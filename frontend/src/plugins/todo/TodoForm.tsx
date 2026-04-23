@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "../../components/Button";
-import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTodo, useUpdateTodo } from "../../hooks/useTodos";
@@ -31,23 +30,27 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
   );
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
+  const titleRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea
-  const autoResize = useCallback(() => {
-    const el = textareaRef.current;
+  // Auto-resize textarea helper
+  const autoResizeEl = useCallback((el: HTMLTextAreaElement | null) => {
     if (el) {
       el.style.height = "0";
       el.style.height = `${el.scrollHeight}px`;
     }
   }, []);
 
-  useEffect(() => { autoResize(); }, [details, autoResize]);
+  useEffect(() => { autoResizeEl(textareaRef.current); }, [details, autoResizeEl]);
+  useEffect(() => { autoResizeEl(titleRef.current); }, [title, autoResizeEl]);
 
   // Also resize on mount (for pre-filled content)
   useEffect(() => {
-    requestAnimationFrame(autoResize);
-  }, [autoResize]);
+    requestAnimationFrame(() => {
+      autoResizeEl(titleRef.current);
+      autoResizeEl(textareaRef.current);
+    });
+  }, [autoResizeEl]);
 
   const isPending = createMut.isPending || updateMut.isPending;
 
@@ -89,14 +92,22 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <Input
-        label="Titel"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="z.B. Impfung U4 besprechen"
-        maxLength={200}
-        required
-      />
+      <div className="flex flex-col gap-1">
+        <label htmlFor="todo-title" className="font-label text-sm font-medium text-subtext0">
+          Titel<span className="text-red ml-0.5">*</span>
+        </label>
+        <textarea
+          id="todo-title"
+          ref={titleRef}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="z.B. Impfung U4 besprechen"
+          maxLength={200}
+          required
+          rows={1}
+          className="w-full min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text placeholder:text-overlay0 border-none outline-none focus:ring-2 focus:ring-mauve transition-all resize-none overflow-hidden"
+        />
+      </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="todo-details" className="font-label text-sm font-medium text-subtext0">
           Details
@@ -109,7 +120,7 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
           placeholder="Optionale Details..."
           maxLength={2000}
           rows={2}
-          className="w-full rounded-lg border border-surface2 bg-ground px-3 py-2 font-body text-base text-text placeholder:text-overlay0 focus:border-mauve focus:outline-none resize-none overflow-hidden"
+          className="w-full min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text placeholder:text-overlay0 border-none outline-none focus:ring-2 focus:ring-mauve transition-all resize-none overflow-hidden"
         />
       </div>
       <div className="flex gap-3">

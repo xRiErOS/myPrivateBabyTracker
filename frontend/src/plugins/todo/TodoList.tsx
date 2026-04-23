@@ -130,116 +130,130 @@ export function TodoList() {
       )}
 
       {filtered.map((entry) => (
-        <Card key={entry.id} className={`flex flex-col gap-1 p-3${entry.is_done ? " opacity-60" : ""}${editingId === entry.id ? " overflow-hidden" : ""}`}>
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-2 flex-1 min-w-0">
-              {/* Checkbox */}
-              <button
-                type="button"
-                onClick={() => toggleDone(entry.id, entry.is_done)}
-                className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
-              >
-                {entry.is_done ? (
-                  <CheckSquare className="h-6 w-6 text-green" />
-                ) : (
-                  <Square className="h-6 w-6" />
-                )}
-              </button>
-              <div className="flex flex-col min-w-0 break-words w-full">
-                <span className={`font-heading text-base text-text break-words ${entry.is_done ? "line-through" : ""}`}>
-                  {entry.title}
-                </span>
-                {entry.details && editingId !== entry.id && (
-                  <div>
-                    <p className={`font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5 ${expandedIds.has(entry.id) ? "" : "line-clamp-2"}`}>
-                      {entry.details}
+        <Card key={entry.id} className={`flex flex-col gap-1 p-3${entry.is_done ? " opacity-60" : ""}`}>
+          {editingId === entry.id ? (
+            /* Edit mode: full form replaces entire card content */
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-label text-sm font-medium text-subtext0">Bearbeiten</span>
+                <button
+                  onClick={() => setEditingId(null)}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-peach hover:text-text transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <TodoForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
+            </div>
+          ) : (
+            /* View mode */
+            <>
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-2 flex-1 min-w-0">
+                  {/* Checkbox */}
+                  <button
+                    type="button"
+                    onClick={() => toggleDone(entry.id, entry.is_done)}
+                    className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-green transition-colors"
+                  >
+                    {entry.is_done ? (
+                      <CheckSquare className="h-6 w-6 text-green" />
+                    ) : (
+                      <Square className="h-6 w-6" />
+                    )}
+                  </button>
+                  <div className="flex flex-col min-w-0 break-words w-full">
+                    <span className={`font-heading text-base text-text break-words ${entry.is_done ? "line-through" : ""}`}>
+                      {entry.title}
+                    </span>
+                    {entry.details && (
+                      <div>
+                        <p className={`font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5 ${expandedIds.has(entry.id) ? "" : "line-clamp-2"}`}>
+                          {entry.details}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(entry.id)}
+                          className="font-label text-xs text-mauve hover:underline mt-0.5"
+                        >
+                          {expandedIds.has(entry.id) ? "Weniger" : "Mehr anzeigen"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => setEditingId(entry.id)}
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text transition-colors"
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm("ToDo loeschen?")) deleteMut.mutate(entry.id);
+                    }}
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              {/* Due date + postpone buttons */}
+              <div className="flex items-center gap-2 ml-11 flex-wrap">
+                {entry.due_date && (() => {
+                  const due = new Date(entry.due_date);
+                  const now = new Date();
+                  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+                  const isOverdue = dueDay < today && !entry.is_done;
+                  const isDueToday = dueDay.getTime() === today.getTime() && !entry.is_done;
+                  const cls = isOverdue
+                    ? "text-sm font-medium text-red"
+                    : isDueToday
+                      ? "text-sm font-medium text-peach"
+                      : "text-sm text-subtext0";
+                  return (
+                    <p className={`font-body ${cls}`}>
+                      Faellig: {formatDateTime(entry.due_date)}
                     </p>
+                  );
+                })()}
+                {!entry.is_done && (
+                  <div className="flex gap-1">
                     <button
                       type="button"
-                      onClick={() => toggleExpand(entry.id)}
-                      className="font-label text-xs text-mauve hover:underline mt-0.5"
+                      onClick={() => postpone(entry.id, nextDay(1))}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
                     >
-                      {expandedIds.has(entry.id) ? "Weniger" : "Mehr anzeigen"}
+                      Morgen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => postpone(entry.id, nextWeekday(6))}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                    >
+                      Sa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => postpone(entry.id, nextDay(7))}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
+                    >
+                      +1W
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-            <div className="flex gap-1 flex-shrink-0">
-              <button
-                onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
-                className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}
-              >
-                {editingId === entry.id ? <X className="h-5 w-5" /> : <Pencil className="h-5 w-5" />}
-              </button>
-              <button
-                onClick={() => {
-                  if (confirm("ToDo loeschen?")) deleteMut.mutate(entry.id);
-                }}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-          {/* Due date + postpone buttons (always visible for open entries) */}
-          <div className="flex items-center gap-2 ml-11 flex-wrap">
-            {entry.due_date && (() => {
-              const due = new Date(entry.due_date);
-              const now = new Date();
-              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-              const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
-              const isOverdue = dueDay < today && !entry.is_done;
-              const isDueToday = dueDay.getTime() === today.getTime() && !entry.is_done;
-              const cls = isOverdue
-                ? "text-sm font-medium text-red"
-                : isDueToday
-                  ? "text-sm font-medium text-peach"
-                  : "text-sm text-subtext0";
-              return (
-                <p className={`font-body ${cls}`}>
-                  Faellig: {formatDateTime(entry.due_date)}
+              {entry.completed_at && (
+                <p className="font-body text-xs text-green ml-11">
+                  Erledigt: {formatDateTime(entry.completed_at)}
                 </p>
-              );
-            })()}
-            {!entry.is_done && (
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => postpone(entry.id, nextDay(1))}
-                  className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
-                >
-                  Morgen
-                </button>
-                <button
-                  type="button"
-                  onClick={() => postpone(entry.id, nextWeekday(6))}
-                  className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
-                >
-                  Sa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => postpone(entry.id, nextDay(7))}
-                  className="px-1.5 py-0.5 rounded text-[10px] font-label bg-surface1 text-subtext0 hover:bg-surface2 transition-colors"
-                >
-                  +1W
-                </button>
+              )}
+              <div className="ml-11">
+                <TagBadges entryType="todo" entryId={entry.id} />
               </div>
-            )}
-          </div>
-          {entry.completed_at && (
-            <p className="font-body text-xs text-green ml-11">
-              Erledigt: {formatDateTime(entry.completed_at)}
-            </p>
-          )}
-          <div className="ml-11">
-            <TagBadges entryType="todo" entryId={entry.id} />
-          </div>
-          {editingId === entry.id && (
-            <div className="border-t border-surface1 bg-surface0/50 -mx-3 -mb-3 px-3 py-3 mt-3">
-              <TodoForm entry={entry} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
-            </div>
+            </>
           )}
         </Card>
       ))}
