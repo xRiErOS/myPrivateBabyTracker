@@ -1,7 +1,7 @@
 /** Todo page — tasks + templates with tab navigation. */
 
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CheckSquare, FileText, Plus } from "lucide-react";
 import { Button } from "../components/Button";
@@ -20,18 +20,28 @@ export default function TodoPage() {
   const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState<TodoTab>("tasks");
+  const cameFromDashboard = useRef(false);
 
   useEffect(() => {
     if (searchParams.get("new") === "1") {
       setShowForm(true);
       setActiveTab("tasks");
+      cameFromDashboard.current = true;
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
   const handleDone = useCallback(() => setShowForm(false), []);
+  const handleCancel = useCallback(() => {
+    setShowForm(false);
+    if (cameFromDashboard.current) {
+      cameFromDashboard.current = false;
+      navigate("/");
+    }
+  }, [navigate]);
 
   if (!activeChild) {
     return (
@@ -49,7 +59,7 @@ export default function TodoPage() {
         {activeTab === "tasks" && (
           <Button
             variant={showForm ? "danger" : "primary"}
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => showForm ? handleCancel() : setShowForm(true)}
             className="flex items-center gap-2"
           >
             {showForm ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}

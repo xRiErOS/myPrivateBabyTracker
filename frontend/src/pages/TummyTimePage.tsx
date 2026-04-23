@@ -1,7 +1,7 @@
 /** Tummy time page -- new entry form + list with inline edit, auto-opens running session. */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Timer, Plus } from "lucide-react";
 import { Button } from "../components/Button";
@@ -18,7 +18,9 @@ export default function TummyTimePage() {
   const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const cameFromDashboard = useRef(false);
 
   const { data: entries } = useTummyTimeEntries({
     child_id: activeChild?.id,
@@ -38,6 +40,7 @@ export default function TummyTimePage() {
   useEffect(() => {
     if (searchParams.get("new") === "1") {
       setShowForm(true);
+      cameFromDashboard.current = true;
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -45,6 +48,13 @@ export default function TummyTimePage() {
   const handleDone = useCallback(() => {
     setShowForm(false);
   }, []);
+  const handleCancel = useCallback(() => {
+    setShowForm(false);
+    if (cameFromDashboard.current) {
+      cameFromDashboard.current = false;
+      navigate("/");
+    }
+  }, [navigate]);
 
   if (!activeChild) {
     return (
@@ -61,7 +71,7 @@ export default function TummyTimePage() {
       <PageHeader title={t("title")}>
         <Button
           variant={showForm && !runningEntry ? "danger" : "primary"}
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => showForm ? handleCancel() : setShowForm(true)}
           className="flex items-center gap-2"
         >
           {showForm && !runningEntry ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}

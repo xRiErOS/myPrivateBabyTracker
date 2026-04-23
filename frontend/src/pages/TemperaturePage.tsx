@@ -1,7 +1,7 @@
 /** Temperature page — new entry form + list with inline edit. */
 
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Plus, Thermometer } from "lucide-react";
 import { Button } from "../components/Button";
@@ -17,16 +17,26 @@ export default function TemperaturePage() {
   const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const cameFromDashboard = useRef(false);
 
   useEffect(() => {
     if (searchParams.get("new") === "1") {
       setShowForm(true);
+      cameFromDashboard.current = true;
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
   const handleDone = useCallback(() => setShowForm(false), []);
+  const handleCancel = useCallback(() => {
+    setShowForm(false);
+    if (cameFromDashboard.current) {
+      cameFromDashboard.current = false;
+      navigate("/");
+    }
+  }, [navigate]);
 
   if (!activeChild) {
     return (
@@ -43,7 +53,7 @@ export default function TemperaturePage() {
       <PageHeader title={t("title")}>
         <Button
           variant={showForm ? "danger" : "primary"}
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => showForm ? handleCancel() : setShowForm(true)}
           className="flex items-center gap-2"
         >
           {showForm ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
