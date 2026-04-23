@@ -37,6 +37,15 @@ export function TodoList() {
   const [showAllDone, setShowAllDone] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  function toggleExpand(id: number) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
   const { data: entries = [], isLoading } = useTodos(activeChild?.id, true);
   const updateMut = useUpdateTodo();
   const deleteMut = useDeleteTodo();
@@ -141,9 +150,18 @@ export function TodoList() {
                   {entry.title}
                 </span>
                 {entry.details && editingId !== entry.id && (
-                  <p className="font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5">
-                    {entry.details}
-                  </p>
+                  <div>
+                    <p className={`font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5 ${expandedIds.has(entry.id) ? "" : "line-clamp-2"}`}>
+                      {entry.details}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(entry.id)}
+                      className="font-label text-xs text-mauve hover:underline mt-0.5"
+                    >
+                      {expandedIds.has(entry.id) ? "Weniger" : "Mehr anzeigen"}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
