@@ -33,7 +33,7 @@ class HealthEntry(TimestampMixin, Base):
     time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     feeding_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("feeding_entries.id", ondelete="SET NULL"), nullable=True
+        Integer, ForeignKey("feeding_entries.id", ondelete="CASCADE"), nullable=True
     )
 
     # Relationships
