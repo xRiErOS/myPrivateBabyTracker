@@ -1,10 +1,10 @@
 /** Sleep dashboard widget — today's total, last sleep, running timer with stop. */
 
 import { useEffect, useState } from "react";
-import { Moon, Play, Square } from "lucide-react";
+import { Moon, Pencil, Play, Square, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDuration, formatTime, formatTimeSince, nowISO, startOfTodayISO } from "../../lib/dateUtils";
+import { formatDuration, formatTime, formatTimeSince, isoToLocalInput, localInputToISO, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 
 function useElapsedSeconds(startIso: string | undefined): number {
   const [seconds, setSeconds] = useState(() =>
@@ -41,6 +41,9 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
 
+  const [showAdjust, setShowAdjust] = useState(false);
+  const [adjustStart, setAdjustStart] = useState("");
+
   const totalMinutes = entries.reduce(
     (sum, e) => sum + (e.duration_minutes ?? 0),
     0,
@@ -64,7 +67,23 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
     });
   }
 
+  function openAdjust(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!running) return;
+    setAdjustStart(isoToLocalInput(running.start_time));
+    setShowAdjust(true);
+  }
+
+  function handleAdjustSave() {
+    if (!running || !adjustStart) return;
+    updateMut.mutate(
+      { id: running.id, data: { start_time: localInputToISO(adjustStart) } },
+      { onSuccess: () => setShowAdjust(false) },
+    );
+  }
+
   return (
+    <>
     <Card className={`h-full ${running ? "ring-2 ring-green/40 bg-green/5" : ""}`}>
       <div className="flex items-center gap-2 mb-3">
         <Moon className={`h-5 w-5 ${running ? "text-green" : "text-mauve"}`} />
@@ -85,6 +104,13 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
                 <span className="font-body text-xs text-green">
                   Schlaeft seit {formatTime(running.start_time)}
                 </span>
+                <button
+                  onClick={openAdjust}
+                  className="text-green/60 hover:text-green transition-colors min-h-[24px] min-w-[24px] flex items-center justify-center"
+                  aria-label="Startzeit anpassen"
+                >
+                  <Pencil size={11} />
+                </button>
               </div>
               <button
                 onClick={handleStop}
@@ -119,5 +145,50 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
         </div>
       )}
     </Card>
+
+    {/* Startzeit-Anpassen Overlay */}
+    {showAdjust && (
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div
+          className="absolute inset-0 bg-ground/80 backdrop-blur-sm"
+          onClick={() => setShowAdjust(false)}
+        />
+        <div className="relative w-full max-w-xs bg-surface0 rounded-2xl p-4 space-y-3 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline text-sm font-semibold text-text">Startzeit anpassen</h3>
+            <button
+              onClick={() => setShowAdjust(false)}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <input
+            type="datetime-local"
+            value={adjustStart}
+            onChange={(e) => setAdjustStart(e.target.value)}
+            className="w-full min-h-[44px] rounded-[8px] bg-surface1 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve transition-all"
+          />
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowAdjust(false)}
+              className="px-4 py-2 rounded-lg font-label text-sm text-subtext0 hover:text-text transition-colors min-h-[44px]"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="button"
+              onClick={handleAdjustSave}
+              disabled={updateMut.isPending || !adjustStart}
+              className="px-4 py-2 rounded-lg bg-green text-ground font-label text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity min-h-[44px]"
+            >
+              {updateMut.isPending ? "Speichern..." : "Speichern"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
