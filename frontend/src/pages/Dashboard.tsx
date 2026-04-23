@@ -74,7 +74,7 @@ export default function Dashboard() {
         (new Date(upcoming.storm_start_date).getTime() - Date.now()) / 86400000,
       );
       if (daysUntil <= 14) {
-        return { icon: CloudSun, color: "text-sapphire", label: `${daysUntil}d` };
+        return { icon: CloudSun, color: "text-sapphire", label: `in ${daysUntil} ${daysUntil === 1 ? "Tag" : "Tagen"}` };
       }
     }
 
@@ -130,7 +130,9 @@ export default function Dashboard() {
           {now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
         </h2>
         <span className="font-label text-sm text-subtext0 flex items-center gap-1.5">
-          {activeChild.name}
+          {isVisibleOnDashboard("milestones") && leapIndicator.label
+            ? leapIndicator.label
+            : activeChild.name}
           {isVisibleOnDashboard("milestones") && (
             <button onClick={() => setShowLeapPopup(true)} className="flex items-center min-h-[44px] min-w-[44px] justify-center" aria-label="Spruenge">
               <leapIndicator.icon className={`h-4 w-4 ${leapIndicator.color}`} />
