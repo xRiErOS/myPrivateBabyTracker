@@ -1,6 +1,7 @@
 /** Todo form — create or edit a todo entry. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
@@ -112,20 +113,46 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
         />
       </div>
       <div className="flex gap-3">
-        <div className="flex-1">
-          <Input
-            label="Faellig am"
+        <div className="flex-1 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <label className="font-label text-sm font-medium text-subtext0">Fällig am</label>
+            {dueDate && (
+              <button
+                type="button"
+                onClick={() => { setDueDate(""); setDueTime(""); }}
+                className="flex items-center gap-0.5 text-xs text-subtext0 hover:text-red transition-colors min-h-[20px]"
+                aria-label="Datum löschen"
+              >
+                <X size={12} /> Löschen
+              </button>
+            )}
+          </div>
+          <input
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
+            className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve transition-all"
           />
         </div>
-        <div className="w-32">
-          <Input
-            label="Uhrzeit"
+        <div className="w-32 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <label className="font-label text-sm font-medium text-subtext0">Uhrzeit</label>
+            {dueTime && (
+              <button
+                type="button"
+                onClick={() => setDueTime("")}
+                className="flex items-center gap-0.5 text-xs text-subtext0 hover:text-red transition-colors min-h-[20px]"
+                aria-label="Uhrzeit löschen"
+              >
+                <X size={12} /> Löschen
+              </button>
+            )}
+          </div>
+          <input
             type="time"
             value={dueTime}
             onChange={(e) => setDueTime(e.target.value)}
+            className="min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve transition-all"
           />
         </div>
       </div>
