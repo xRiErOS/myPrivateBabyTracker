@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Droplets, Moon, Play, Square, Sun, Utensils, X } from "lucide-react";
+import { Droplets, Moon, Pencil, Play, Square, Sun, Utensils, X } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
 import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDuration, formatTime, nowISO, daysAgoISO } from "../../lib/dateUtils";
+import { formatDuration, formatTime, isoToLocalInput, localInputToISO, nowISO, daysAgoISO } from "../../lib/dateUtils";
 import {
   hoursAgo,
   isWet,
@@ -104,7 +104,7 @@ function changeTypeLabel(d: DiaperEntry | undefined, tDiaper: (key: string) => s
 }
 
 
-/** Compact sleep tile with timer start/stop. */
+/** Compact sleep tile with timer start/stop + start-time adjust overlay. */
 function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void }) {
   const { t: tSleep } = useTranslation("sleep");
   // Fetch from yesterday to catch overnight sleep that extends into today
@@ -114,6 +114,9 @@ function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void
   });
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
+
+  const [showAdjust, setShowAdjust] = useState(false);
+  const [adjustStart, setAdjustStart] = useState("");
 
   // Use splitSleepByDay to correctly count only today's portion of overnight sleep
   const today = todayBerlin();
@@ -154,32 +157,100 @@ function SleepTile({ childId, onClick }: { childId: number; onClick?: () => void
     if (running) updateMut.mutate({ id: running.id, data: { end_time: nowISO() } });
   }
 
+  function openAdjust(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!running) return;
+    setAdjustStart(isoToLocalInput(running.start_time));
+    setShowAdjust(true);
+  }
+
+  function handleAdjustSave() {
+    if (!running || !adjustStart) return;
+    updateMut.mutate(
+      { id: running.id, data: { start_time: localInputToISO(adjustStart) } },
+      { onSuccess: () => setShowAdjust(false) },
+    );
+  }
+
   if (running) {
     return (
-      <Tile
-        label={tSleep("summary_sleep")}
-        icon={<Moon className="h-3 w-3 text-green" />}
-        className="ring-1 ring-green/30 bg-green/5"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-headline text-lg font-semibold text-green">
-              {formatElapsed(elapsed)}
+      <>
+        <Tile
+          label={tSleep("summary_sleep")}
+          icon={<Moon className="h-3 w-3 text-green" />}
+          className="ring-1 ring-green/30 bg-green/5"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-headline text-lg font-semibold text-green">
+                {formatElapsed(elapsed)}
+              </div>
+              <div className="font-body text-xs text-green flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
+                {tSleep("since", { time: formatTime(running.start_time) })}
+                <button
+                  onClick={openAdjust}
+                  className="text-green/60 hover:text-green transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -my-3"
+                  aria-label="Startzeit anpassen"
+                >
+                  <Pencil size={11} />
+                </button>
+              </div>
             </div>
-            <div className="font-body text-xs text-green flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
-              {tSleep("since", { time: formatTime(running.start_time) })}
+            <button
+              onClick={handleStop}
+              disabled={updateMut.isPending}
+              className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-green text-ground hover:opacity-90 transition-opacity"
+            >
+              <Square className="h-4 w-4" />
+            </button>
+          </div>
+        </Tile>
+
+        {/* Startzeit-Anpassen Overlay */}
+        {showAdjust && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-ground/80 backdrop-blur-sm"
+              onClick={() => setShowAdjust(false)}
+            />
+            <div className="relative w-full max-w-xs bg-surface0 rounded-2xl p-4 space-y-3 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <h3 className="font-headline text-sm font-semibold text-text">Startzeit anpassen</h3>
+                <button
+                  onClick={() => setShowAdjust(false)}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-text"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <input
+                type="datetime-local"
+                value={adjustStart}
+                onChange={(e) => setAdjustStart(e.target.value)}
+                className="w-full min-h-[44px] rounded-[8px] bg-surface1 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve transition-all"
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowAdjust(false)}
+                  className="px-4 py-2 rounded-lg font-label text-sm text-subtext0 hover:text-text transition-colors min-h-[44px]"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAdjustSave}
+                  disabled={updateMut.isPending || !adjustStart}
+                  className="px-4 py-2 rounded-lg bg-green text-ground font-label text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity min-h-[44px]"
+                >
+                  {updateMut.isPending ? "Speichern..." : "Speichern"}
+                </button>
+              </div>
             </div>
           </div>
-          <button
-            onClick={handleStop}
-            disabled={updateMut.isPending}
-            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-green text-ground hover:opacity-90 transition-opacity"
-          >
-            <Square className="h-4 w-4" />
-          </button>
-        </div>
-      </Tile>
+        )}
+      </>
     );
   }
 
