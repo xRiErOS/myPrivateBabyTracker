@@ -146,8 +146,10 @@ export default function Dashboard() {
       {/* Alert Banner */}
       <AlertBanner />
 
-      {/* Quick Actions + Add Menu */}
-      <QuickActionsBar navigate={navigate} />
+      {/* Quick Actions + Add Menu — Desktop only (FAB replaces on mobile) */}
+      <div className="hidden md:block">
+        <QuickActionsBar navigate={navigate} />
+      </div>
 
       {/* View Tabs */}
       <ViewTabs active={view} onChange={setView} />
