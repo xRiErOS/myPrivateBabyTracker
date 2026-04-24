@@ -16,6 +16,7 @@ from app.plugins.milestones.models import (
 from app.plugins.milestones.router import (
     category_router,
     leap_router,
+    media_router,
     milestone_router,
     template_router,
 )
@@ -33,6 +34,7 @@ class MilestonesPlugin(PluginBase):
         app.include_router(category_router, prefix="/api/v1")
         app.include_router(template_router, prefix="/api/v1")
         app.include_router(milestone_router, prefix="/api/v1")
+        app.include_router(media_router, prefix="/api/v1")
         app.include_router(leap_router, prefix="/api/v1")
 
     def register_models(self) -> list[type]:
