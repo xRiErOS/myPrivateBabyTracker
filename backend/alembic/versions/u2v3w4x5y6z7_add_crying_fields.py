@@ -1,7 +1,7 @@
 """Add duration_minutes and soothing_method to health_entries for crying tracking.
 
-Revision ID: r9s0t1u2v3w4
-Revises: q8r9s0t1u2v3
+Revision ID: u2v3w4x5y6z7
+Revises: t1u2v3w4x5y6
 Create Date: 2026-04-24
 """
 
@@ -9,8 +9,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "r9s0t1u2v3w4"
-down_revision = "q8r9s0t1u2v3"
+revision = "u2v3w4x5y6z7"
+down_revision = "t1u2v3w4x5y6"
 branch_labels = None
 depends_on = None
 

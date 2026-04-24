@@ -1,7 +1,7 @@
 """Add shared_notes table for parent communication.
 
-Revision ID: s0t1u2v3w4x5
-Revises: r9s0t1u2v3w4
+Revision ID: v3w4x5y6z7a8
+Revises: u2v3w4x5y6z7
 Create Date: 2026-04-24
 """
 
@@ -9,8 +9,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "s0t1u2v3w4x5"
-down_revision = "r9s0t1u2v3w4"
+revision = "v3w4x5y6z7a8"
+down_revision = "u2v3w4x5y6z7"
 branch_labels = None
 depends_on = None
 

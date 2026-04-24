@@ -1,7 +1,7 @@
 """Add checkup_types and checkup_entries tables + seed U1-U9.
 
-Revision ID: q8r9s0t1u2v3
-Revises: p7q8r9s0t1u2
+Revision ID: t1u2v3w4x5y6
+Revises: r9s0t1u2v3w4
 Create Date: 2026-04-24
 """
 
@@ -9,8 +9,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "q8r9s0t1u2v3"
-down_revision = "p7q8r9s0t1u2"
+revision = "t1u2v3w4x5y6"
+down_revision = "r9s0t1u2v3w4"
 branch_labels = None
 depends_on = None
 
