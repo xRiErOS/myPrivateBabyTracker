@@ -1,15 +1,24 @@
 /** Alert configuration page — toggle and configure all 5 alert rules. */
 
+import { useState } from "react";
+import { Info, X, Check } from "lucide-react";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useActiveChild } from "../context/ChildContext";
 import { useAlertConfig, useUpdateAlertConfig } from "../hooks/useAlertConfig";
 import type { AlertConfig } from "../api/types";
+import {
+  REFERENCE_VALUES,
+  getChildAgeDays,
+  type RuleKey,
+  type ReferenceRange,
+} from "../lib/referenceValues";
 
 interface AlertRule {
   enabledKey: keyof AlertConfig;
   thresholdKey: keyof AlertConfig;
+  referenceKey: RuleKey;
   title: string;
   description: string;
   thresholdLabel: string;
@@ -22,6 +31,7 @@ const RULES: AlertRule[] = [
   {
     enabledKey: "wet_diaper_enabled",
     thresholdKey: "wet_diaper_min",
+    referenceKey: "wet_diaper_min",
     title: "Nasse Windeln",
     description: "Warnung wenn weniger als X nasse Windeln pro Tag",
     thresholdLabel: "Minimum pro Tag",
@@ -32,6 +42,7 @@ const RULES: AlertRule[] = [
   {
     enabledKey: "no_stool_enabled",
     thresholdKey: "no_stool_hours",
+    referenceKey: "no_stool_hours",
     title: "Kein Stuhlgang",
     description: "Warnung wenn laenger als X Stunden kein Stuhlgang",
     thresholdLabel: "Stunden",
@@ -42,6 +53,7 @@ const RULES: AlertRule[] = [
   {
     enabledKey: "low_feeding_enabled",
     thresholdKey: "low_feeding_ml",
+    referenceKey: "low_feeding_ml",
     title: "Trinkmenge",
     description: "Warnung wenn weniger als X ml pro Tag getrunken",
     thresholdLabel: "Minimum ml/Tag",
@@ -52,6 +64,7 @@ const RULES: AlertRule[] = [
   {
     enabledKey: "fever_enabled",
     thresholdKey: "fever_threshold",
+    referenceKey: "fever_threshold",
     title: "Fieber",
     description: "Warnung wenn Temperatur den Schwellwert erreicht",
     thresholdLabel: "Schwellwert",
@@ -62,6 +75,7 @@ const RULES: AlertRule[] = [
   {
     enabledKey: "feeding_interval_enabled",
     thresholdKey: "feeding_interval_hours",
+    referenceKey: "feeding_interval_hours",
     title: "Fuetterungsintervall",
     description: "Warnung wenn laenger als X Stunden seit letzter Mahlzeit",
     thresholdLabel: "Stunden",
@@ -92,10 +106,97 @@ function ToggleButton({
   );
 }
 
+function ReferenceModal({
+  rule,
+  ageDays,
+  onApply,
+  onClose,
+}: {
+  rule: AlertRule;
+  ageDays: number;
+  onApply: (value: number) => void;
+  onClose: () => void;
+}) {
+  const ranges = REFERENCE_VALUES[rule.referenceKey];
+  if (!ranges) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="bg-ground rounded-card w-full max-w-md max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-surface1">
+          <h3 className="font-headline font-semibold text-text text-base">
+            Referenzwerte: {rule.title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="min-h-[32px] min-w-[32px] flex items-center justify-center rounded-lg hover:bg-surface1 transition-colors"
+            aria-label="Schliessen"
+          >
+            <X className="h-4 w-4 text-subtext0" />
+          </button>
+        </div>
+
+        <div className="p-4">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left">
+                <th className="font-label text-subtext0 pb-2">Alter</th>
+                <th className="font-label text-subtext0 pb-2">Empfehlung</th>
+                <th className="font-label text-subtext0 pb-2 text-right" />
+              </tr>
+            </thead>
+            <tbody>
+              {ranges.map((range, i) => {
+                const isActive = ageDays <= range.maxAgeDays &&
+                  (i === 0 || ageDays > ranges[i - 1].maxAgeDays);
+
+                return (
+                  <tr
+                    key={i}
+                    className={`border-t border-surface1 ${isActive ? "bg-green/10" : ""}`}
+                  >
+                    <td className={`py-2.5 font-body ${isActive ? "text-text font-medium" : "text-subtext0"}`}>
+                      {range.label}
+                      {isActive && (
+                        <span className="ml-1.5 text-green text-xs font-label">aktuell</span>
+                      )}
+                    </td>
+                    <td className={`py-2.5 font-body ${isActive ? "text-text font-medium" : "text-subtext0"}`}>
+                      {range.display}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <button
+                        onClick={() => {
+                          onApply(range.recommended);
+                          onClose();
+                        }}
+                        className="min-h-[36px] px-3 rounded-[8px] bg-peach text-ground text-xs font-label font-semibold hover:opacity-90 transition-all inline-flex items-center gap-1"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                        Uebernehmen
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AlertConfigPage() {
   const { activeChild } = useActiveChild();
   const { data: config, isLoading } = useAlertConfig(activeChild?.id);
   const updateMut = useUpdateAlertConfig(activeChild?.id ?? 0);
+  const [openRef, setOpenRef] = useState<RuleKey | null>(null);
+
+  const ageDays = activeChild ? getChildAgeDays(activeChild.birth_date) : 0;
 
   if (isLoading) return <LoadingSpinner />;
 
@@ -129,9 +230,18 @@ export default function AlertConfigPage() {
           <Card key={rule.enabledKey} className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex-1 mr-3">
-                <h4 className="font-label text-sm font-medium text-text">
-                  {rule.title}
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-label text-sm font-medium text-text">
+                    {rule.title}
+                  </h4>
+                  <button
+                    onClick={() => setOpenRef(rule.referenceKey)}
+                    className="min-h-[28px] min-w-[28px] flex items-center justify-center rounded-lg hover:bg-surface1 transition-colors"
+                    aria-label={`Referenzwerte fuer ${rule.title}`}
+                  >
+                    <Info className="h-4 w-4 text-sapphire" />
+                  </button>
+                </div>
                 <p className="font-body text-xs text-subtext0">
                   {rule.description}
                 </p>
@@ -160,6 +270,15 @@ export default function AlertConfigPage() {
                   <span className="font-body text-sm text-subtext0">{rule.unit}</span>
                 )}
               </div>
+            )}
+
+            {openRef === rule.referenceKey && (
+              <ReferenceModal
+                rule={rule}
+                ageDays={ageDays}
+                onApply={(value) => handleThreshold(rule.thresholdKey, value)}
+                onClose={() => setOpenRef(null)}
+              />
             )}
           </Card>
         );

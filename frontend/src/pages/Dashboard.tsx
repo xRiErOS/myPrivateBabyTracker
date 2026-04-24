@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CloudLightning, CloudSun, LayoutDashboard, Plus, Sun, X } from "lucide-react";
-import { AlertBanner } from "../components/AlertBanner";
+import { AlertBanner, ReferenceDeviationBanner } from "../components/AlertBanner";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useActiveChild } from "../context/ChildContext";
@@ -146,6 +146,7 @@ export default function Dashboard() {
 
       {/* Alert Banner */}
       <AlertBanner />
+      <ReferenceDeviationBanner />
 
       {/* Quick Actions + Add Menu — Desktop only (FAB replaces on mobile) */}
       <div className="hidden md:block">
