@@ -16,10 +16,13 @@ depends_on = None
 
 
 def upgrade() -> None:
-    with op.batch_alter_table("sleep_entries") as batch_op:
-        batch_op.add_column(
-            sa.Column("location", sa.String(50), nullable=True)
-        )
+    conn = op.get_bind()
+    columns = [col["name"] for col in sa.inspect(conn).get_columns("sleep_entries")]
+    if "location" not in columns:
+        with op.batch_alter_table("sleep_entries") as batch_op:
+            batch_op.add_column(
+                sa.Column("location", sa.String(50), nullable=True)
+            )
 
 
 def downgrade() -> None:
