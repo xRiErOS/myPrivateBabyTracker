@@ -713,6 +713,43 @@ async def get_storage_info(
     )
 
 
+@media_router.get("/download-zip")
+async def download_zip(
+    child_id: int = Query(..., gt=0),
+    user: User | None = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Download all photos for a child as a ZIP archive."""
+    stmt = (
+        select(MilestonePhoto)
+        .join(MilestoneEntry, MilestonePhoto.milestone_entry_id == MilestoneEntry.id)
+        .where(MilestoneEntry.child_id == child_id)
+        .order_by(MilestonePhoto.created_at)
+    )
+    result = await db.execute(stmt)
+    photos = result.scalars().all()
+
+    if not photos:
+        raise HTTPException(status_code=404, detail="No photos found for this child")
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for photo in photos:
+            full_path = os.path.join(os.getcwd(), "data", "uploads", photo.file_path)
+            if os.path.exists(full_path):
+                entry_title = photo.entry.title if photo.entry else "unknown"
+                safe_title = "".join(c for c in entry_title if c.isalnum() or c in " _-")[:50]
+                arc_name = f"{safe_title}/{photo.id}_{photo.file_name}"
+                zf.write(full_path, arc_name)
+
+    buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="milestones_photos_{child_id}.zip"'},
+    )
+
+
 @media_router.get("/{photo_id}", response_model=MediaPhotoResponse)
 async def get_media_photo(
     photo_id: int,
@@ -762,44 +799,6 @@ async def delete_media_photo(
     await db.delete(photo)
     await db.commit()
     logger.info("media_photo_deleted", photo_id=photo_id)
-
-
-@media_router.get("/download-zip")
-async def download_zip(
-    child_id: int = Query(..., gt=0),
-    user: User | None = Depends(get_current_user),
-    db: AsyncSession = Depends(get_session),
-):
-    """Download all photos for a child as a ZIP archive."""
-    stmt = (
-        select(MilestonePhoto)
-        .join(MilestoneEntry, MilestonePhoto.milestone_entry_id == MilestoneEntry.id)
-        .where(MilestoneEntry.child_id == child_id)
-        .order_by(MilestonePhoto.created_at)
-    )
-    result = await db.execute(stmt)
-    photos = result.scalars().all()
-
-    if not photos:
-        raise HTTPException(status_code=404, detail="No photos found for this child")
-
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for photo in photos:
-            full_path = os.path.join(os.getcwd(), "data", "uploads", photo.file_path)
-            if os.path.exists(full_path):
-                # Use milestone title + original filename in archive
-                entry_title = photo.entry.title if photo.entry else "unknown"
-                safe_title = "".join(c for c in entry_title if c.isalnum() or c in " _-")[:50]
-                arc_name = f"{safe_title}/{photo.file_name}"
-                zf.write(full_path, arc_name)
-
-    buf.seek(0)
-    return StreamingResponse(
-        buf,
-        media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="milestones_photos_{child_id}.zip"'},
-    )
 
 
 def _thumb_path(relative_path: str) -> str:
