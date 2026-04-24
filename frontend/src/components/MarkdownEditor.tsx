@@ -1,13 +1,12 @@
 /** Markdown Editor with Preview Toggle and Format Toolbar.
 
-Simple tab-bar: Bearbeiten | Vorschau
-Edit mode: textarea with format toolbar (Bold, Italic, List, Ordered List, Checkbox)
-Preview mode: rendered HTML via minimal markdown parser
+Mobile: Tab-bar toggle Bearbeiten | Vorschau
+Desktop (md+): Split-view editor left, live preview right
 No WYSIWYG dependency.
 */
 
-import { useCallback, useRef } from "react";
-import { Bold, CheckSquare, Italic, List, ListOrdered } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Bold, CheckSquare, Eye, EyeOff, Italic, List, ListOrdered } from "lucide-react";
 import { renderMarkdown, toggleCheckbox } from "../lib/markdown";
 
 interface MarkdownEditorProps {
@@ -71,6 +70,8 @@ export function MarkdownEditor({
   disabled = false,
 }: MarkdownEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Mobile-only toggle: "edit" | "preview"
+  const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
 
   function handleToolbar(action: "bold" | "italic" | "ul" | "ol" | "checkbox") {
     const ta = textareaRef.current;
@@ -96,55 +97,83 @@ export function MarkdownEditor({
 
   return (
     <div className="rounded-xl border border-surface2 overflow-hidden">
-      {/* Format toolbar */}
-      <div className="flex gap-0.5 px-2 py-1 bg-surface1 border-b border-surface2">
-        {(
-          [
-            { action: "bold", icon: <Bold className="h-3.5 w-3.5" />, title: "Fett" },
-            { action: "italic", icon: <Italic className="h-3.5 w-3.5" />, title: "Kursiv" },
-            { action: "ul", icon: <List className="h-3.5 w-3.5" />, title: "Liste" },
-            { action: "ol", icon: <ListOrdered className="h-3.5 w-3.5" />, title: "Nummerierte Liste" },
-            { action: "checkbox", icon: <CheckSquare className="h-3.5 w-3.5" />, title: "Aufgabe" },
-          ] as const
-        ).map(({ action, icon, title }) => (
-          <button
-            key={action}
-            type="button"
-            title={title}
-            disabled={disabled}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              handleToolbar(action);
-            }}
-            className="flex items-center justify-center rounded px-2 text-subtext0 hover:text-text hover:bg-surface2 transition-colors disabled:opacity-40"
-            style={{ minHeight: 36 }}
-          >
-            {icon}
-          </button>
-        ))}
+      {/* Toolbar row: format buttons + mobile preview toggle */}
+      <div className="flex items-center gap-0.5 px-2 py-1 bg-surface1 border-b border-surface2">
+        {/* Format buttons — hidden in mobile preview mode */}
+        <div className={`flex gap-0.5 flex-1 ${mobileTab === "preview" ? "md:flex hidden" : "flex"}`}>
+          {(
+            [
+              { action: "bold", icon: <Bold className="h-3.5 w-3.5" />, title: "Fett" },
+              { action: "italic", icon: <Italic className="h-3.5 w-3.5" />, title: "Kursiv" },
+              { action: "ul", icon: <List className="h-3.5 w-3.5" />, title: "Liste" },
+              { action: "ol", icon: <ListOrdered className="h-3.5 w-3.5" />, title: "Nummerierte Liste" },
+              { action: "checkbox", icon: <CheckSquare className="h-3.5 w-3.5" />, title: "Aufgabe" },
+            ] as const
+          ).map(({ action, icon, title }) => (
+            <button
+              key={action}
+              type="button"
+              title={title}
+              disabled={disabled}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleToolbar(action);
+              }}
+              className="flex items-center justify-center rounded px-2 text-subtext0 hover:text-text hover:bg-surface2 transition-colors disabled:opacity-40"
+              style={{ minHeight: 36 }}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile-only: toggle edit/preview */}
+        <button
+          type="button"
+          title={mobileTab === "edit" ? "Vorschau" : "Bearbeiten"}
+          onClick={() => setMobileTab((t) => t === "edit" ? "preview" : "edit")}
+          className="md:hidden flex items-center gap-1 rounded px-2 py-1 text-xs text-subtext0 hover:text-text hover:bg-surface2 transition-colors ml-auto"
+          style={{ minHeight: 36 }}
+        >
+          {mobileTab === "edit"
+            ? <><Eye className="h-3.5 w-3.5" /> Vorschau</>
+            : <><EyeOff className="h-3.5 w-3.5" /> Bearbeiten</>
+          }
+        </button>
       </div>
 
-      {/* Textarea */}
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        disabled={disabled}
-        maxLength={2000}
-        className="w-full bg-surface1 px-3 py-2.5 text-sm text-text font-mono focus:outline-none resize-none disabled:opacity-50"
-        style={{ fontSize: "16px" }}
-      />
+      {/* Desktop: split view (md+). Mobile: single pane toggled via mobileTab */}
+      <div className="md:flex">
+        {/* Editor pane */}
+        <div className={`md:flex-1 md:border-r md:border-surface2 ${mobileTab === "preview" ? "hidden md:block" : "block"}`}>
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={rows}
+            disabled={disabled}
+            maxLength={2000}
+            className="w-full bg-surface1 px-3 py-2.5 text-sm text-text font-mono focus:outline-none resize-none disabled:opacity-50"
+            style={{ fontSize: "16px" }}
+          />
+        </div>
 
-      {/* Live preview */}
-      {value.trim() && (
+        {/* Preview pane — always visible on desktop, toggled on mobile */}
         <div
-          className="px-3 py-2 bg-surface0 border-t border-surface2"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
-        />
-      )}
+          className={`md:flex-1 px-3 py-2.5 bg-surface0 min-h-[3rem] ${mobileTab === "edit" ? "hidden md:block" : "block"}`}
+        >
+          {value.trim() ? (
+            <div
+              className="prose-like text-sm"
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
+            />
+          ) : (
+            <p className="text-xs text-overlay0 italic">Vorschau</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
