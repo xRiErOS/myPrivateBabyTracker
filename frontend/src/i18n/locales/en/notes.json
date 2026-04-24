@@ -9,5 +9,7 @@
   "unpin": "Unpin",
   "pin": "Pin",
   "title_placeholder": "Note title",
-  "content_placeholder": "Note content..."
+  "content_placeholder": "Note content...",
+  "search_placeholder": "Search notes...",
+  "search_empty": "No notes found"
 }

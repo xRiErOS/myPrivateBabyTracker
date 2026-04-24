@@ -6,10 +6,10 @@ import { useToast } from "../context/ToastContext";
 
 const NOTES_KEY = ["notes"] as const;
 
-export function useNotes(childId: number | undefined) {
+export function useNotes(childId: number | undefined, search?: string) {
   return useQuery({
-    queryKey: [...NOTES_KEY, childId],
-    queryFn: () => listNotes(childId),
+    queryKey: [...NOTES_KEY, childId, search ?? ""],
+    queryFn: () => listNotes(childId, search),
     enabled: !!childId,
   });
 }

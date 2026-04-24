@@ -9,5 +9,7 @@
   "unpin": "Lospinnen",
   "pin": "Anpinnen",
   "title_placeholder": "Titel der Notiz",
-  "content_placeholder": "Notiz-Inhalt..."
+  "content_placeholder": "Notiz-Inhalt...",
+  "search_placeholder": "Notizen durchsuchen...",
+  "search_empty": "Keine Notizen gefunden"
 }

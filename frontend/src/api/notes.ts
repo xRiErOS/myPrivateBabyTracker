@@ -28,8 +28,11 @@ export interface NoteUpdate {
 
 const BASE = "/v1/notes/";
 
-export async function listNotes(childId?: number): Promise<SharedNote[]> {
-  const qs = childId ? `?child_id=${childId}` : "";
+export async function listNotes(childId?: number, search?: string): Promise<SharedNote[]> {
+  const sp = new URLSearchParams();
+  if (childId) sp.set("child_id", String(childId));
+  if (search && search.trim()) sp.set("search", search.trim());
+  const qs = sp.toString() ? `?${sp.toString()}` : "";
   return apiFetch<SharedNote[]>(`${BASE}${qs}`);
 }
 

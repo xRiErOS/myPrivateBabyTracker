@@ -1,7 +1,7 @@
 """Notes plugin CRUD router — shared notes for parent communication."""
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.errors import NotFoundError
@@ -34,15 +34,27 @@ def _to_response(note: SharedNote) -> NoteResponse:
 @router.get("/", response_model=list[NoteResponse])
 async def list_notes(
     child_id: int | None = Query(default=None, gt=0),
+    search: str | None = Query(default=None, max_length=200),
     user: User | None = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """List all shared notes, optionally filtered by child. Pinned first."""
+    """List all shared notes, optionally filtered by child. Pinned first.
+
+    Supports full-text search via ?search= (ILIKE on title + content).
+    """
     stmt = select(SharedNote).order_by(
         SharedNote.pinned.desc(), SharedNote.updated_at.desc()
     )
     if child_id:
         stmt = stmt.where(SharedNote.child_id == child_id)
+    if search and search.strip():
+        pattern = f"%{search.strip()}%"
+        stmt = stmt.where(
+            or_(
+                SharedNote.title.ilike(pattern),
+                SharedNote.content.ilike(pattern),
+            )
+        )
     result = await db.execute(stmt)
     return [_to_response(n) for n in result.scalars().all()]
 
