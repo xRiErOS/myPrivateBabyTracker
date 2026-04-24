@@ -6,7 +6,7 @@ Ctrl+B = Bold, Ctrl+I = Italic.
 Theme: Catppuccin Latte (light) / Macchiato (dark) via CSS variable awareness.
 */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { EditorView, keymap, placeholder as cmPlaceholder } from "@codemirror/view";
 import { EditorState, EditorSelection, Compartment } from "@codemirror/state";
 import { markdown } from "@codemirror/lang-markdown";
@@ -97,9 +97,7 @@ function wrapSelection(view: EditorView, marker: string): boolean {
 }
 
 function insertPrefix(view: EditorView, prefix: string): boolean {
-  const { state } = view;
-  const line = state.doc.lineAt(state.selection.main.head);
-  const insert = line.text.startsWith(prefix) ? "" : prefix;
+  const line = view.state.doc.lineAt(view.state.selection.main.head);
   if (line.text.startsWith(prefix)) {
     // Remove prefix
     view.dispatch({
