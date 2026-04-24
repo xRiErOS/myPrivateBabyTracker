@@ -2,6 +2,7 @@
 
 from sqlalchemy import Boolean, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import Optional
 
 from app.models.base import Base, TimestampMixin
 
@@ -42,6 +43,11 @@ class AlertConfig(TimestampMixin, Base):
 
     # Leap storm: alert when child is in a developmental leap storm phase
     leap_storm_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+
+    # Age filter: only evaluate alerts within this age range (weeks)
+    # NULL = no lower/upper bound
+    min_age_weeks: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
+    max_age_weeks: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
 
     child = relationship("Child", backref="alert_config", lazy="selectin")
 

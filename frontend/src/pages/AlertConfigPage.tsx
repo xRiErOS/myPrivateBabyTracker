@@ -182,6 +182,58 @@ export default function AlertConfigPage() {
           />
         </div>
       </Card>
+
+      {/* Age filter — optional min/max age in weeks */}
+      <Card className="p-4 space-y-3">
+        <div>
+          <h4 className="font-label text-sm font-medium text-text">Altersbereich</h4>
+          <p className="font-body text-xs text-subtext0 mt-0.5">
+            Warnhinweise nur in diesem Altersbereich anzeigen (in Wochen, optional)
+          </p>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <label className="font-label text-sm text-subtext0 whitespace-nowrap">Ab Woche</label>
+            <input
+              type="number"
+              value={config.min_age_weeks ?? ""}
+              onChange={(e) => {
+                const val = e.target.value === "" ? null : parseInt(e.target.value);
+                updateMut.mutate({ min_age_weeks: val });
+              }}
+              placeholder="–"
+              min={0}
+              max={520}
+              className="min-h-[44px] w-20 px-3 rounded-[8px] bg-surface0 text-text font-body text-base border border-surface2 focus:outline-none focus:ring-2 focus:ring-peach"
+              style={{ fontSize: "16px" }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="font-label text-sm text-subtext0 whitespace-nowrap">Bis Woche</label>
+            <input
+              type="number"
+              value={config.max_age_weeks ?? ""}
+              onChange={(e) => {
+                const val = e.target.value === "" ? null : parseInt(e.target.value);
+                updateMut.mutate({ max_age_weeks: val });
+              }}
+              placeholder="–"
+              min={0}
+              max={520}
+              className="min-h-[44px] w-20 px-3 rounded-[8px] bg-surface0 text-text font-body text-base border border-surface2 focus:outline-none focus:ring-2 focus:ring-peach"
+              style={{ fontSize: "16px" }}
+            />
+          </div>
+          {(config.min_age_weeks !== null || config.max_age_weeks !== null) && (
+            <button
+              onClick={() => updateMut.mutate({ min_age_weeks: null, max_age_weeks: null })}
+              className="text-xs text-subtext0 underline"
+            >
+              Zuruecksetzen
+            </button>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

@@ -252,6 +252,8 @@ export interface AlertConfig {
   feeding_interval_enabled: boolean;
   feeding_interval_hours: number;
   leap_storm_enabled: boolean;
+  min_age_weeks: number | null;
+  max_age_weeks: number | null;
 }
 
 export interface Alert {

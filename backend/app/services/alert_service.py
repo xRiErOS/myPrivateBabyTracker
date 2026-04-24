@@ -28,12 +28,36 @@ async def get_or_create_config(db: AsyncSession, child_id: int) -> AlertConfig:
     return config
 
 
+async def _get_child_age_weeks(db: AsyncSession, child_id: int) -> float | None:
+    """Return child age in weeks, or None if child not found."""
+    result = await db.execute(select(Child).where(Child.id == child_id))
+    child = result.scalar_one_or_none()
+    if child is None:
+        return None
+    ref_date = child.estimated_birth_date if child.estimated_birth_date else child.birth_date
+    return (date.today() - ref_date).days / 7
+
+
 async def evaluate_alerts(db: AsyncSession, child_id: int) -> list[Alert]:
-    """Evaluate all enabled alert rules and return active warnings."""
+    """Evaluate all enabled alert rules and return active warnings.
+
+    Rules with min_age_weeks / max_age_weeks are only evaluated when the
+    child's corrected age falls within the specified range.
+    """
     config = await get_or_create_config(db, child_id)
     alerts: list[Alert] = []
     now = datetime.now(timezone.utc)
     day_ago = now - timedelta(hours=24)
+
+    # Pre-compute child age for age-based filtering
+    child_age_weeks: float | None = None
+    if config.min_age_weeks is not None or config.max_age_weeks is not None:
+        child_age_weeks = await _get_child_age_weeks(db, child_id)
+        if child_age_weeks is not None:
+            if config.min_age_weeks is not None and child_age_weeks < config.min_age_weeks:
+                return []  # Child too young — skip all alerts
+            if config.max_age_weeks is not None and child_age_weeks > config.max_age_weeks:
+                return []  # Child too old — skip all alerts
 
     # 1. Wet diaper check
     if config.wet_diaper_enabled:

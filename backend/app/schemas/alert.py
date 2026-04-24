@@ -22,6 +22,8 @@ class AlertConfigUpdate(BaseModel):
     feeding_interval_hours: int | None = Field(default=None, ge=1, le=24)
 
     leap_storm_enabled: bool | None = None
+    min_age_weeks: int | None = Field(default=None, ge=0, le=520)
+    max_age_weeks: int | None = Field(default=None, ge=0, le=520)
 
 
 class AlertConfigResponse(BaseModel):
@@ -40,6 +42,8 @@ class AlertConfigResponse(BaseModel):
     feeding_interval_enabled: bool
     feeding_interval_hours: int
     leap_storm_enabled: bool
+    min_age_weeks: int | None = None
+    max_age_weeks: int | None = None
 
     model_config = {"from_attributes": True}
 
