@@ -6,9 +6,9 @@ Preview mode: rendered HTML via minimal markdown parser
 No WYSIWYG dependency.
 */
 
-import { useRef, useState } from "react";
-import { Bold, CheckSquare, Eye, Italic, List, ListOrdered, Pencil } from "lucide-react";
-import { renderMarkdown } from "../lib/markdown";
+import { useCallback, useRef } from "react";
+import { Bold, CheckSquare, Italic, List, ListOrdered } from "lucide-react";
+import { renderMarkdown, toggleCheckbox } from "../lib/markdown";
 
 interface MarkdownEditorProps {
   value: string;
@@ -70,7 +70,6 @@ export function MarkdownEditor({
   rows = 6,
   disabled = false,
 }: MarkdownEditorProps) {
-  const [mode, setMode] = useState<"edit" | "preview">("edit");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function handleToolbar(action: "bold" | "italic" | "ul" | "ol" | "checkbox") {
@@ -97,100 +96,89 @@ export function MarkdownEditor({
 
   return (
     <div className="rounded-xl border border-surface2 overflow-hidden">
-      {/* Tab bar */}
-      <div className="flex border-b border-surface2 bg-surface0">
-        <button
-          type="button"
-          onClick={() => setMode("edit")}
-          disabled={disabled}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-label font-medium transition-colors ${
-            mode === "edit"
-              ? "text-peach border-b-2 border-peach bg-surface0"
-              : "text-subtext0 hover:text-text"
-          }`}
-        >
-          <Pencil className="h-3 w-3" />
-          Bearbeiten
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("preview")}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-label font-medium transition-colors ${
-            mode === "preview"
-              ? "text-peach border-b-2 border-peach bg-surface0"
-              : "text-subtext0 hover:text-text"
-          }`}
-        >
-          <Eye className="h-3 w-3" />
-          Vorschau
-        </button>
+      {/* Format toolbar */}
+      <div className="flex gap-0.5 px-2 py-1 bg-surface1 border-b border-surface2">
+        {(
+          [
+            { action: "bold", icon: <Bold className="h-3.5 w-3.5" />, title: "Fett" },
+            { action: "italic", icon: <Italic className="h-3.5 w-3.5" />, title: "Kursiv" },
+            { action: "ul", icon: <List className="h-3.5 w-3.5" />, title: "Liste" },
+            { action: "ol", icon: <ListOrdered className="h-3.5 w-3.5" />, title: "Nummerierte Liste" },
+            { action: "checkbox", icon: <CheckSquare className="h-3.5 w-3.5" />, title: "Aufgabe" },
+          ] as const
+        ).map(({ action, icon, title }) => (
+          <button
+            key={action}
+            type="button"
+            title={title}
+            disabled={disabled}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              handleToolbar(action);
+            }}
+            className="flex items-center justify-center rounded px-2 text-subtext0 hover:text-text hover:bg-surface2 transition-colors disabled:opacity-40"
+            style={{ minHeight: 36 }}
+          >
+            {icon}
+          </button>
+        ))}
       </div>
 
-      {/* Format toolbar — only in edit mode */}
-      {mode === "edit" && (
-        <div className="flex gap-0.5 px-2 py-1 bg-surface1 border-b border-surface2">
-          {(
-            [
-              { action: "bold", icon: <Bold className="h-3.5 w-3.5" />, title: "Fett" },
-              { action: "italic", icon: <Italic className="h-3.5 w-3.5" />, title: "Kursiv" },
-              { action: "ul", icon: <List className="h-3.5 w-3.5" />, title: "Liste" },
-              { action: "ol", icon: <ListOrdered className="h-3.5 w-3.5" />, title: "Nummerierte Liste" },
-              { action: "checkbox", icon: <CheckSquare className="h-3.5 w-3.5" />, title: "Aufgabe" },
-            ] as const
-          ).map(({ action, icon, title }) => (
-            <button
-              key={action}
-              type="button"
-              title={title}
-              disabled={disabled}
-              onMouseDown={(e) => {
-                // Prevent textarea blur before handler runs
-                e.preventDefault();
-                handleToolbar(action);
-              }}
-              className="flex items-center justify-center rounded px-2 text-subtext0 hover:text-text hover:bg-surface2 transition-colors disabled:opacity-40"
-              style={{ minHeight: 36 }}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Textarea */}
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        disabled={disabled}
+        maxLength={2000}
+        className="w-full bg-surface1 px-3 py-2.5 text-sm text-text font-mono focus:outline-none resize-none disabled:opacity-50"
+        style={{ fontSize: "16px" }}
+      />
 
-      {/* Content */}
-      {mode === "edit" ? (
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={rows}
-          disabled={disabled}
-          maxLength={2000}
-          className="w-full bg-surface1 px-3 py-2.5 text-sm text-text font-mono focus:outline-none resize-none disabled:opacity-50"
-          style={{ fontSize: "16px" }}
-        />
-      ) : (
+      {/* Live preview */}
+      {value.trim() && (
         <div
-          className="min-h-[120px] px-3 py-2.5 bg-surface0 overflow-auto"
+          className="px-3 py-2 bg-surface0 border-t border-surface2"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: value.trim()
-              ? renderMarkdown(value)
-              : `<p class="text-sm text-overlay0 italic">Noch kein Inhalt.</p>`,
-          }}
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
         />
       )}
     </div>
   );
 }
 
-/** Read-only Markdown renderer for display in lists/detail views. */
-export function MarkdownDisplay({ content }: { content: string | null }) {
+/** Markdown renderer for display in lists/detail views.
+ *  When `onContentChange` is provided, checkboxes are interactive (click to toggle).
+ */
+export function MarkdownDisplay({
+  content,
+  onContentChange,
+}: {
+  content: string | null;
+  onContentChange?: (updated: string) => void;
+}) {
   if (!content) return null;
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" && target.getAttribute("type") === "checkbox") {
+        e.preventDefault();
+        const lineIndex = parseInt(target.getAttribute("data-line") ?? "-1", 10);
+        if (lineIndex >= 0 && content && onContentChange) {
+          onContentChange(toggleCheckbox(content, lineIndex));
+        }
+      }
+    },
+    [content, onContentChange],
+  );
+
   return (
     <div
       className="prose-like"
+      onClick={onContentChange ? handleClick : undefined}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
     />

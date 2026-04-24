@@ -31,6 +31,19 @@ function renderInline(text: string): string {
   return result;
 }
 
+/** Toggle a checkbox line: `- [ ] text` ↔ `- [x] text`. Returns updated markdown. */
+export function toggleCheckbox(md: string, lineIndex: number): string {
+  const lines = md.split("\n");
+  if (lineIndex < 0 || lineIndex >= lines.length) return md;
+  const line = lines[lineIndex];
+  if (line.match(/^[\s]*[-*]\s*\[[ ]?\]/)) {
+    lines[lineIndex] = line.replace(/\[[ ]?\]/, "[x]");
+  } else if (line.match(/^[\s]*[-*]\s*\[[xX]\]/)) {
+    lines[lineIndex] = line.replace(/\[[xX]\]/, "[ ]");
+  }
+  return lines.join("\n");
+}
+
 export function renderMarkdown(md: string): string {
   if (!md) return "";
 
@@ -86,14 +99,14 @@ export function renderMarkdown(md: string): string {
       continue;
     }
 
-    // Task list item [ ] / [x]
-    const taskItem = line.match(/^[\s]*[-*]\s+\[( |x|X)\]\s+(.+)/);
+    // Task list item [ ] / [x] — tolerant: "- [ ]", "-[ ]", "- []" all work
+    const taskItem = line.match(/^[\s]*[-*]\s*\[( |x|X)?\]\s*(.+)/);
     if (taskItem) {
       if (!inList) { html.push('<ul class="space-y-1 my-1">'); inList = true; }
-      const checked = taskItem[1].toLowerCase() === "x";
+      const checked = (taskItem[1] ?? "").toLowerCase() === "x";
       html.push(
         `<li class="flex items-start gap-2 text-sm">` +
-        `<input type="checkbox" ${checked ? "checked" : ""} disabled class="mt-0.5 shrink-0" />` +
+        `<input type="checkbox" ${checked ? "checked" : ""} data-line="${i}" class="mt-0.5 shrink-0 cursor-pointer accent-green" />` +
         `<span class="${checked ? "line-through text-subtext0" : "text-text"}">${renderInline(taskItem[2])}</span>` +
         `</li>`
       );

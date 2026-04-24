@@ -28,12 +28,10 @@ export function useCreateNote() {
 
 export function useUpdateNote() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: NoteUpdate }) => updateNote(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: NOTES_KEY });
-      showToast("Notiz aktualisiert");
     },
   });
 }

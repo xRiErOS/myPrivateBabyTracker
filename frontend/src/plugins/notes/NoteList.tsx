@@ -50,7 +50,12 @@ export function NoteList() {
                 </h3>
               </div>
               <div className="mt-1">
-                <MarkdownDisplay content={note.content} />
+                <MarkdownDisplay
+                  content={note.content}
+                  onContentChange={(updated) =>
+                    updateMut.mutate({ id: note.id, data: { content: updated } })
+                  }
+                />
               </div>
               <div className="flex items-center gap-2 mt-2 text-xs text-subtext0">
                 {note.author_name && <span>{note.author_name}</span>}

@@ -27,9 +27,10 @@ function weekdayLabel(days: number[] | null): string {
 interface HabitCardProps {
   habit: Habit;
   onEdit: (habit: Habit) => void;
+  onDetailsChange?: (id: number, details: string) => void;
 }
 
-function HabitCard({ habit, onEdit }: HabitCardProps) {
+function HabitCard({ habit, onEdit, onDetailsChange }: HabitCardProps) {
   const completeMut = useCompleteHabit();
   const uncompleteMut = useUncompleteHabit();
   const deleteMut = useDeleteHabit();
@@ -65,7 +66,10 @@ function HabitCard({ habit, onEdit }: HabitCardProps) {
         </p>
         {habit.details && (
           <div className="mt-1 text-xs text-subtext0">
-            <MarkdownDisplay content={habit.details} />
+            <MarkdownDisplay
+              content={habit.details}
+              onContentChange={onDetailsChange ? (updated) => onDetailsChange(habit.id, updated) : undefined}
+            />
           </div>
         )}
       </div>
@@ -182,6 +186,9 @@ export function HabitList() {
                 key={habit.id}
                 habit={habit}
                 onEdit={setEditingHabit}
+                onDetailsChange={(id, details) =>
+                  updateMut.mutate({ id, data: { details } })
+                }
               />
             )
           )}

@@ -170,7 +170,12 @@ export function TodoList() {
                     {entry.details && (
                       <div>
                         <div className={`mt-0.5 ${expandedIds.has(entry.id) ? "" : "line-clamp-3 overflow-hidden"}`}>
-                          <MarkdownDisplay content={entry.details} />
+                          <MarkdownDisplay
+                            content={entry.details}
+                            onContentChange={(updated) =>
+                              updateMut.mutate({ id: entry.id, data: { details: updated } })
+                            }
+                          />
                         </div>
                         <button
                           type="button"
