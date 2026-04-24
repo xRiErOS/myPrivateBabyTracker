@@ -130,7 +130,7 @@ function SuggestionCard({ suggestion, categoryInfo, onComplete, onCompleteAndPho
           type="button"
           onClick={() => onCompleteAndPhoto(suggestion)}
           disabled={isLoading}
-          className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-mauve transition-colors disabled:opacity-50"
+          className="flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-surface1 text-mauve active:bg-mauve active:text-ground hover:bg-mauve hover:text-ground transition-colors disabled:opacity-50"
           title="Erreicht + Foto hinzufügen"
           aria-label={`${suggestion.title} erreicht und Foto hinzufügen`}
         >
