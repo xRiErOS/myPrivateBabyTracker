@@ -1,9 +1,12 @@
-/** Photo section for milestone detail — upload, thumbnails, lightbox, delete. */
+/** Photo section for milestone detail — upload, thumbnails, lightbox, delete, tags. */
 
 import { useRef, useState } from "react";
-import { Camera, Trash2, X, ZoomIn } from "lucide-react";
+import { Camera, Tag, Trash2, X, ZoomIn } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { photoUrl } from "../../api/milestones";
+import { TagBadges } from "../../components/TagBadges";
+import { TagSelector } from "../../components/TagSelector";
+import { isPluginEnabled } from "../../lib/pluginConfig";
 import { useDeletePhoto, useUploadPhoto } from "../../hooks/useMilestones";
 import type { MilestonePhoto } from "../../api/types";
 
@@ -21,8 +24,11 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
   const deleteMut = useDeletePhoto();
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // Track which photo has its TagSelector open
+  const [tagEditPhotoId, setTagEditPhotoId] = useState<number | null>(null);
 
   const canUpload = photos.length < MAX_PHOTOS;
+  const tagsEnabled = isPluginEnabled("tags");
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -53,34 +59,49 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
       {/* Thumbnail grid */}
       <div className="flex gap-2 flex-wrap">
         {photos.map((photo) => (
-          <div
-            key={photo.id}
-            className="relative group w-20 h-20 rounded-[8px] overflow-hidden bg-surface1"
-          >
-            <img
-              src={photoUrl(photo.file_path, true)}
-              alt={photo.file_name}
-              className="w-full h-full object-cover cursor-pointer"
-              loading="lazy"
-              onClick={() => setLightboxUrl(photoUrl(photo.file_path, false))}
-            />
-            {/* Hover overlay with actions */}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-              <button
-                type="button"
+          <div key={photo.id} className="flex flex-col gap-1">
+            <div
+              className="relative group w-20 h-20 rounded-[8px] overflow-hidden bg-surface1"
+            >
+              <img
+                src={photoUrl(photo.file_path, true)}
+                alt={photo.file_name}
+                className="w-full h-full object-cover cursor-pointer"
+                loading="lazy"
                 onClick={() => setLightboxUrl(photoUrl(photo.file_path, false))}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-white/80 text-text"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(photo)}
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-red/80 text-white"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              />
+              {/* Hover overlay with actions */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setLightboxUrl(photoUrl(photo.file_path, false))}
+                  className="h-8 w-8 flex items-center justify-center rounded-full bg-white/80 text-text"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </button>
+                {tagsEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => setTagEditPhotoId(tagEditPhotoId === photo.id ? null : photo.id)}
+                    className="h-8 w-8 flex items-center justify-center rounded-full bg-white/80 text-mauve"
+                    title="Tags verwalten"
+                  >
+                    <Tag className="h-4 w-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDelete(photo)}
+                  className="h-8 w-8 flex items-center justify-center rounded-full bg-red/80 text-white"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
+            {/* Tag badges below thumbnail */}
+            {tagsEnabled && (
+              <TagBadges entryType="photo" entryId={photo.id} />
+            )}
           </div>
         ))}
 
@@ -103,6 +124,23 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
           </button>
         )}
       </div>
+
+      {/* Tag selector panel — shown when a photo's tag icon is clicked */}
+      {tagsEnabled && tagEditPhotoId != null && (
+        <div className="rounded-lg border border-surface2 bg-surface0 p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-label text-xs text-subtext0">Foto-Tags</span>
+            <button
+              type="button"
+              onClick={() => setTagEditPhotoId(null)}
+              className="text-overlay0 hover:text-text"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <TagSelector entryType="photo" entryId={tagEditPhotoId} />
+        </div>
+      )}
 
       {/* Hidden file input */}
       <input
