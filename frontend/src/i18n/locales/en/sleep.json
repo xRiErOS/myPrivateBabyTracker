@@ -38,5 +38,13 @@
     "interval": "\u00d8 interval"
   },
   "since": "since {{time}}",
-  "last_entry_sub": "Last: {{time}}"
+  "last_entry_sub": "Last: {{time}}",
+  "location": {
+    "toggle": "Sleep location",
+    "bed": "Bed",
+    "carrier": "Carrier",
+    "stroller": "Stroller",
+    "car": "Car",
+    "other": "Other"
+  }
 }
