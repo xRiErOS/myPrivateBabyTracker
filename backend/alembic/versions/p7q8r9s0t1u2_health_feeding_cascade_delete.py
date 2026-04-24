@@ -17,9 +17,13 @@ down_revision = "o6p7q8r9s0t1"
 
 def upgrade() -> None:
     with op.batch_alter_table("health_entries") as batch_op:
-        batch_op.drop_constraint(
-            "fk_health_entries_feeding_id", type_="foreignkey"
-        )
+        try:
+            batch_op.drop_constraint(
+                "fk_health_entries_feeding_id", type_="foreignkey"
+            )
+        except Exception:
+            # Constraint may not exist by this name in older DBs (SQLite FK reflection)
+            pass
         batch_op.create_foreign_key(
             "fk_health_entries_feeding_id",
             "feeding_entries",
