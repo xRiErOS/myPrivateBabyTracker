@@ -401,7 +401,7 @@ async def complete_milestone(
 UPLOAD_BASE = os.path.join(os.getcwd(), "data", "uploads", "milestones")
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
-MAX_PHOTOS_PER_ENTRY = 3
+MAX_PHOTOS_PER_ENTRY = 4
 ORIGINAL_MAX_PX = 2048
 THUMB_SIZE_PX = 400
 JPEG_QUALITY = 80

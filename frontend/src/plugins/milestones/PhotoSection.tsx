@@ -10,7 +10,7 @@ import { isPluginEnabled } from "../../lib/pluginConfig";
 import { useDeletePhoto, useUploadPhoto } from "../../hooks/useMilestones";
 import type { MilestonePhoto } from "../../api/types";
 
-const MAX_PHOTOS = 3;
+const MAX_PHOTOS = 4;
 
 interface PhotoSectionProps {
   entryId: number;
@@ -56,12 +56,16 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
         {t("photos", { defaultValue: "Fotos" })} ({photos.length}/{MAX_PHOTOS})
       </h4>
 
-      {/* Thumbnail grid */}
-      <div className="flex gap-2 flex-wrap">
+      {/* Thumbnail grid — adaptive layout based on photo count */}
+      <div className={`grid gap-2 ${
+        photos.length <= 1 ? "grid-cols-1" :
+        photos.length === 2 ? "grid-cols-2" :
+        "grid-cols-2 sm:grid-cols-4"
+      }`} style={{ maxWidth: photos.length <= 2 ? `${photos.length * 88 + (photos.length - 1) * 8 + 88}px` : undefined }}>
         {photos.map((photo) => (
           <div key={photo.id} className="flex flex-col gap-1">
             <div
-              className="relative group w-20 h-20 rounded-[8px] overflow-hidden bg-surface1"
+              className="relative group aspect-square rounded-[8px] overflow-hidden bg-surface1"
             >
               <img
                 src={photoUrl(photo.file_path, true)}
@@ -107,7 +111,7 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
 
         {/* Upload skeleton while uploading */}
         {uploading && (
-          <div className="w-20 h-20 rounded-[8px] bg-surface1 animate-pulse flex items-center justify-center">
+          <div className="aspect-square rounded-[8px] bg-surface1 animate-pulse flex items-center justify-center">
             <div className="w-6 h-6 border-2 border-mauve border-t-transparent rounded-full animate-spin" />
           </div>
         )}
@@ -117,7 +121,7 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-20 h-20 rounded-[8px] border-2 border-dashed border-surface2 flex flex-col items-center justify-center gap-1 text-overlay0 hover:text-mauve hover:border-mauve transition-colors"
+            className="aspect-square rounded-[8px] border-2 border-dashed border-surface2 flex flex-col items-center justify-center gap-1 text-overlay0 hover:text-mauve hover:border-mauve transition-colors min-h-[80px]"
           >
             <Camera className="h-5 w-5" />
             <span className="text-[10px] font-label">{t("photo_upload")}</span>

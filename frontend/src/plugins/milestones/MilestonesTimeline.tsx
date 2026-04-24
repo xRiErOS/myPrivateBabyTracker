@@ -8,7 +8,7 @@ import { useActiveChild } from "../../context/ChildContext";
 import { useCategories, useMilestoneEntries, useUploadPhoto } from "../../hooks/useMilestones";
 import type { MilestoneCategory, MilestoneEntry, MilestonePhoto } from "../../api/types";
 
-const MAX_PHOTOS = 3;
+const MAX_PHOTOS = 4;
 
 /** Calculate age label from birth date to achieved date. */
 function ageLabel(birthDate: string, achievedDate: string): string {

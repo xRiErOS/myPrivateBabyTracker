@@ -121,9 +121,35 @@ Details: `DESIGN.md`
 - [x] K3: Pydantic `Field(max_length=2000, ge=0)` auf allen Plugin-Schemas
 - [x] K4: `SECRET_KEY` min 32 Zeichen, App verweigert Start ohne
 
-## Aktueller Stand (Sprint 14 abgeschlossen, v0.6.2)
+## Aktueller Stand (Sprint 19+20 abgeschlossen, v0.8.0)
 
-- **v0.6.2**: 387 Backend-Tests + 83 Frontend-Tests, Sprint 14: 4 Commits, 1 Migration (leap_weeks_fix)
+- **v0.8.0**: Sprint 19 (Julia-Feedback Bugs + Notes UX, 11 Items) + Sprint 20 (Milestone-Fotos + Medienverwaltung, 4 Items), 12 Commits
+- **Sprint 19 Bug-Fixes**: Sleep-Timer Race Condition (#151), Schlafhistorie waehrend Timer (#152), Datumswechsel nachts Berlin-TZ (#153), Windel "Beides" einheitlich (#154), 401-Handler PWA Login (#155)
+- **Notes UX**: Suchfeld debounced 300ms (#157), Details eingeklappt line-clamp-2 (#158), Titel font-semibold (#159)
+- **Live-Preview Markdown**: Split-View Desktop (md:flex), Toggle Mobile (#145)
+- **U-Untersuchungen Datumsbereich**: Kalender-Zeitfenster aus birth_date + min/max_age_weeks, Fruehgeborenen-Support (#150)
+- **Dashboard-Durchschnitte**: Ø 7T + Ø 14T Fuetterung, Ø 7T Windeln in BabySummary (#156)
+- **Photo-Proxy + Thumbnails**: Pillow-Pipeline (Original max 2048px/80% JPEG, Thumbnail 400px _thumb), Auth-Proxy GET /api/v1/milestones/photos/{path}, Static /uploads/ Mount entfernt (#163)
+- **Foto-Upload UI**: PhotoSection Komponente, Mobile-Kamera-Input, Skeleton-Loader, Lightbox, max 3 Fotos (#160)
+- **Meilenstein-Timeline**: Vertikale Zeitleiste /milestones/timeline, alternierend links/rechts Desktop, linear Mobile, Lazy-Loading (#161)
+- **Admin Medienverwaltung**: /admin/media — Grid-Uebersicht, Filter, Bulk-ZIP, Ersetzen/Loeschen, Speicherplatz-Anzeige (#162)
+- **v0.7.0**: Sprint 16 (Plugin Wohlbefinden, 7 Items) + Sprint 17 (UI/UX Polish, 6 Items), 15 Commits, 6 Migrationen
+- **Wohlbefinden-Rename**: Health-Plugin Display-Name "Gesundheit" → "Wohlbefinden" (en: "Well-being"), interner Key bleibt `health`
+- **Wachstumskurven**: WHO-Perzentilen (P3/P15/P50/P85/P97), Gewicht+Laenge nach Geschlecht, Fruehgeborenen-Kalibrierung (korrigiertes Alter)
+- **U-Untersuchungen**: Neues Plugin `checkup` — U1-U9 Tracking mit Seed-Daten, empfohlene Zeitraeume, Dashboard-Widget
+- **Schreien & Beruhigung**: health_entries erweitert (entry_type: crying), Intensitaet + Dauer + Beruhigungsmethode
+- **Schlaf-Ort**: Optional location (bed/carrier/stroller/car/other) in Sleep-Plugin, Toggle im Form
+- **Medikamenten-Widget**: Kompaktere Darstellung im Dashboard
+- **Geteiltes Notiz-Modul**: Neues Plugin `notes` — SharedNote (title, content, pinned, author), Dashboard-Widget
+- **Tasks & Habits**: Todo-Plugin → "Tasks & Habits", Habit-Model (daily/weekly recurrence, streak), neuer Habits-Tab
+- **FAB**: Floating Action Button auf Mobile (< md), Quick-Actions, Scale-Animation
+- **Warnhinweise visuell**: Grid-Layout (Desktop nebeneinander), staerkere Farben + groessere Icons
+- **Warnhinweise altersspezifisch**: min_age_weeks/max_age_weeks in AlertConfig, Altersfilter in alert_service
+- **Changelog-Overlay**: Version-Check beim App-Start, Modal mit Aenderungen, localStorage fuer letzte Version
+- **Markdown Editor**: Eigener Minimal-Parser (kein externer Dependency), Bearbeiten/Vorschau-Toggle in Todo-Details
+- **Migrations-Kette**: ...p7q8r9s0t1u2 → q8r9s0t1u2v3 (habits) → r9s0t1u2v3w4 (alert_age_filter) → t1u2v3w4x5y6 (checkup) → u2v3w4x5y6z7 (crying) → v3w4x5y6z7a8 (shared_notes) → w4x5y6z7a8b9 (sleep_location)
+- **Neue Plugins**: growth (WHO-Kurven), checkup (U-Untersuchungen), notes (Eltern-Notizen)
+- **14 Plugins gesamt**: sleep, feeding, diaper, vitamind3, temperature, weight, medication, todo, health, tummytime, milestones, growth, checkup, notes
 - **i18n**: react-i18next, 15 Namespaces (common, sleep, feeding, diaper, medication, temperature, weight, vitamind3, health, tummytime, milestones, todo, dashboard, admin, auth), de/en, Inline-Resources
 - **Spracheinstellung**: User.locale in Preferences-API, ProfilePage Dropdown (de/en), i18next-Sync beim Login + Sprachwechsel
 - **Wonder-Weeks-Fix**: Alle 10 Sprungzeitraeume korrigiert (seed_data.py + Alembic UPDATE-Migration n5o6p7q8r9s0)
@@ -246,7 +272,16 @@ Details: `DESIGN.md`
 - Meilenstein-Wording: Soft-Wording durchgehend, kein "verspaetet"-Label, Disclaimer "Jedes Kind entwickelt sich in eigenem Tempo"
 - Fruehgeborenen-Modus: is_preterm + estimated_birth_date im Child-Model, korrigiertes Alter fuer Leaps + Suggestions
 - Todo-Vorlagen: TodoTemplate (title, details, is_active), Clone-to-Today-Button erstellt normalen TodoEntry mit due_date=heute
-- Photo-Speicherung: data/uploads/milestones/{child_id}/{uuid}.ext, Static-Mount /uploads/, Cascade-Delete bei Entry-Loeschung
+- Photo-Speicherung: data/uploads/milestones/{child_id}/{uuid}.ext, Auth-Proxy /api/v1/milestones/photos/{path} (kein Static-Mount), Cascade-Delete bei Entry-Loeschung
+- Photo-Thumbnails: Pillow-Pipeline generiert {uuid}_thumb.jpg (400px) bei Upload, Original max 2048px/80% JPEG
+- Photo-Limit: Max 3 Fotos je Meilenstein, Upload-Button ausgeblendet wenn erreicht
+- Meilenstein-Timeline: /milestones/timeline, vertikale Zeitleiste alternierend, Placeholder mit Kategorie-Icon wenn kein Foto
+- Admin-Medienverwaltung: /admin/media, Grid-Thumbnails, Filter, Bulk-ZIP-Download, Speicherplatz-Anzeige
+- Notes-Suche: Backend ILIKE auf title+content, Frontend debounced 300ms
+- Notes-Details: line-clamp-2 eingeklappt, Titel text-base font-semibold
+- Markdown-Editor: Split-View Desktop (md:flex), Toggle Mobile (Bearbeiten/Vorschau)
+- Session-Cookie: Axios 401-Interceptor → redirect LoginPage via set401Handler Callback
+- Datumswechsel: berlinDayBounds() statt UTC T00:00:00Z fuer Tagesfilter
 
 ## Frontend-Portierung (aus Home-Dashboard) — ABGESCHLOSSEN
 

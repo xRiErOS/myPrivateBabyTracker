@@ -83,12 +83,14 @@ export function NoteList() {
         <Card key={note.id} className="p-3">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
+              {editingId !== note.id && (
               <div className="flex items-center gap-2">
                 {note.pinned && <Pin className="h-3.5 w-3.5 text-peach shrink-0" />}
                 <h3 className="font-headline text-base font-semibold text-text truncate">
                   {note.title}
                 </h3>
               </div>
+              )}
               {editingId !== note.id && (
                 <>
                   {note.content && (

@@ -1,37 +1,58 @@
-/** CodeMirror 6 WYSIWYG Markdown Editor — single pane, live syntax highlighting.
+/** CodeMirror 6 Markdown Editor — syntax highlighting + format toolbar.
 
-No split view. Markdown source stored as-is, formatted on-screen via CodeMirror.
+Markdown source stored as-is, formatted on-screen via CodeMirror syntax highlighting.
+Bold/italic text is visually styled, markdown markers are dimmed.
 Ctrl+B = Bold, Ctrl+I = Italic.
 Theme: Catppuccin Latte (light) / Macchiato (dark) via CSS variable awareness.
 */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EditorView, keymap, placeholder as cmPlaceholder } from "@codemirror/view";
 import { EditorState, EditorSelection, Compartment } from "@codemirror/state";
 import { markdown } from "@codemirror/lang-markdown";
+import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
+import { tags } from "@lezer/highlight";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { Bold, CheckSquare, Italic, List, ListOrdered } from "lucide-react";
 import { renderMarkdown, toggleCheckbox } from "../lib/markdown";
 
 // ---------------------------------------------------------------------------
-// Catppuccin theme for CodeMirror
+// Catppuccin highlight style for markdown tokens
 // ---------------------------------------------------------------------------
 
-/** Build a CodeMirror theme using Catppuccin CSS variables.
- *  Uses literal fallback values matching Catppuccin Latte.
- */
+const catppuccinHighlight = HighlightStyle.define([
+  { tag: tags.strong, fontWeight: "bold", color: "var(--color-text, #4c4f69)" },
+  { tag: tags.emphasis, fontStyle: "italic", color: "var(--color-text, #4c4f69)" },
+  { tag: tags.heading1, fontWeight: "bold", fontSize: "1.4em", color: "var(--color-mauve, #8839ef)" },
+  { tag: tags.heading2, fontWeight: "bold", fontSize: "1.2em", color: "var(--color-mauve, #8839ef)" },
+  { tag: tags.heading3, fontWeight: "bold", fontSize: "1.1em", color: "var(--color-mauve, #8839ef)" },
+  { tag: tags.link, color: "var(--color-blue, #1e66f5)", textDecoration: "underline" },
+  { tag: tags.url, color: "var(--color-sapphire, #209fb5)" },
+  { tag: tags.monospace, fontFamily: "monospace", color: "var(--color-green, #40a02b)" },
+  { tag: tags.quote, fontStyle: "italic", color: "var(--color-subtext0, #6c6f85)" },
+  { tag: tags.list, color: "var(--color-peach, #fe640b)" },
+  // Dim the markdown syntax characters (**, *, #, etc.)
+  { tag: tags.processingInstruction, color: "var(--color-overlay0, #9ca0b0)", fontSize: "0.85em" },
+  { tag: tags.meta, color: "var(--color-overlay0, #9ca0b0)", fontSize: "0.85em" },
+]);
+
+// ---------------------------------------------------------------------------
+// Base editor theme
+// ---------------------------------------------------------------------------
+
 const catppuccinTheme = EditorView.theme(
   {
     "&": {
       color: "var(--color-text, #4c4f69)",
       backgroundColor: "var(--color-surface1, #ccd0da)",
       fontSize: "16px",
-      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
     },
     ".cm-content": {
       caretColor: "var(--color-peach, #fe640b)",
       padding: "10px 12px",
       lineHeight: "1.6",
       minHeight: "80px",
+      fontFamily: "var(--font-body, system-ui, -apple-system, sans-serif)",
     },
     ".cm-focused .cm-selectionBackground, .cm-selectionBackground": {
       backgroundColor: "var(--color-peach, #fe640b)20",
@@ -42,21 +63,6 @@ const catppuccinTheme = EditorView.theme(
     ".cm-line": {
       padding: "0",
     },
-    // Markdown syntax highlighting via Catppuccin
-    ".cm-strong": { fontWeight: "bold", color: "var(--color-text, #4c4f69)" },
-    ".cm-emphasis": { fontStyle: "italic", color: "var(--color-text, #4c4f69)" },
-    ".cm-monospace": { fontFamily: "monospace", color: "var(--color-green, #40a02b)" },
-    ".cm-link": { color: "var(--color-blue, #1e66f5)" },
-    ".cm-url": { color: "var(--color-sapphire, #209fb5)" },
-    ".cm-header-1, .cm-header-2, .cm-header-3": {
-      fontWeight: "bold",
-      color: "var(--color-mauve, #8839ef)",
-    },
-    ".cm-quote": { color: "var(--color-subtext0, #6c6f85)" },
-    ".cm-meta": { color: "var(--color-overlay0, #9ca0b0)" },
-    ".cm-atom": { color: "var(--color-green, #40a02b)" },
-    // Faint styling for markdown markup characters (**, *, #, etc.)
-    ".cm-formatting": { color: "var(--color-overlay0, #9ca0b0)" },
     "&.cm-focused": { outline: "2px solid var(--color-peach, #fe640b)50" },
     ".cm-scroller": { overflow: "auto" },
   },
@@ -88,6 +94,53 @@ function wrapSelection(view: EditorView, marker: string): boolean {
   });
   view.dispatch(changes);
   return true;
+}
+
+function insertPrefix(view: EditorView, prefix: string): boolean {
+  const { state } = view;
+  const line = state.doc.lineAt(state.selection.main.head);
+  const insert = line.text.startsWith(prefix) ? "" : prefix;
+  if (line.text.startsWith(prefix)) {
+    // Remove prefix
+    view.dispatch({
+      changes: { from: line.from, to: line.from + prefix.length },
+    });
+  } else {
+    view.dispatch({
+      changes: { from: line.from, insert: prefix },
+    });
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Toolbar
+// ---------------------------------------------------------------------------
+
+function FormatToolbar({ viewRef }: { viewRef: React.RefObject<EditorView | null> }) {
+  const tools = [
+    { icon: Bold, action: () => viewRef.current && wrapSelection(viewRef.current, "**"), title: "Fett (Ctrl+B)" },
+    { icon: Italic, action: () => viewRef.current && wrapSelection(viewRef.current, "*"), title: "Kursiv (Ctrl+I)" },
+    { icon: List, action: () => viewRef.current && insertPrefix(viewRef.current, "- "), title: "Liste" },
+    { icon: ListOrdered, action: () => viewRef.current && insertPrefix(viewRef.current, "1. "), title: "Nummerierte Liste" },
+    { icon: CheckSquare, action: () => viewRef.current && insertPrefix(viewRef.current, "- [ ] "), title: "Checkbox" },
+  ];
+
+  return (
+    <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-surface2 bg-surface0">
+      {tools.map(({ icon: Icon, action, title }) => (
+        <button
+          key={title}
+          type="button"
+          onClick={(e) => { e.preventDefault(); action(); viewRef.current?.focus(); }}
+          className="p-1.5 rounded text-overlay0 hover:text-text hover:bg-surface1 transition-colors"
+          title={title}
+        >
+          <Icon className="h-4 w-4" />
+        </button>
+      ))}
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -134,6 +187,7 @@ export function MarkdownEditor({
       extensions: [
         history(),
         markdown(),
+        syntaxHighlighting(catppuccinHighlight),
         catppuccinTheme,
         cmPlaceholder(placeholder),
         keymap.of([boldCmd, italicCmd, ...defaultKeymap, ...historyKeymap]),
@@ -190,10 +244,10 @@ export function MarkdownEditor({
   }, [disabled]);
 
   return (
-    <div
-      className="rounded-xl border border-surface2 overflow-hidden bg-surface1"
-      ref={containerRef}
-    />
+    <div className="rounded-xl border border-surface2 overflow-hidden bg-surface1">
+      {!disabled && <FormatToolbar viewRef={viewRef} />}
+      <div ref={containerRef} />
+    </div>
   );
 }
 
