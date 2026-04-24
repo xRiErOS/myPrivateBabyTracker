@@ -8,7 +8,9 @@ import { useEffect, useState } from "react";
 import {
   Activity,
   CheckSquare,
+  ClipboardCheck,
   Droplets,
+  FileText,
   LayoutDashboard,
   Moon,
   Pill,
@@ -47,6 +49,8 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/tummy-time", icon: Timer, labelKey: "nav.tummytime", pluginKey: "tummytime" },
   { to: "/todo", icon: CheckSquare, labelKey: "nav.todo", pluginKey: "todo" },
   { to: "/milestones", icon: Star, labelKey: "nav.milestones", pluginKey: "milestones" },
+  { to: "/checkup", icon: ClipboardCheck, labelKey: "nav.checkup", pluginKey: "checkup" },
+  { to: "/notes", icon: FileText, labelKey: "nav.notes", pluginKey: "notes" },
   { to: "/profile", icon: User, labelKey: "nav.profile" },
   { to: "/admin", icon: Settings, labelKey: "nav.admin" },
 ];

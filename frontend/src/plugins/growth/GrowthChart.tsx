@@ -56,7 +56,7 @@ function PercentileCurves({ curves }: { curves: PercentilePoint[] }) {
       {/* P15-P85 band */}
       <path d={buildArea(p85, p15)} fill="var(--ctp-lavender)" opacity={0.18} />
       {/* P50 line (median) */}
-      <path d={buildPath(p50)} fill="none" stroke="var(--ctp-lavender)" strokeWidth={2} strokeDasharray="6 3" />
+      <path d={buildPath(p50)} fill="none" stroke="var(--ctp-lavender)" strokeWidth={2.5} opacity={0.9} />
       {/* P3 and P97 lines (thin) */}
       <path d={buildPath(p3)} fill="none" stroke="var(--ctp-overlay0)" strokeWidth={0.8} opacity={0.5} />
       <path d={buildPath(p97)} fill="none" stroke="var(--ctp-overlay0)" strokeWidth={0.8} opacity={0.5} />
@@ -131,7 +131,7 @@ function YAxis() {
           </g>
         );
       })}
-      <text x={12} y={PADDING.top + INNER_H / 2} textAnchor="middle" className="fill-subtext0 text-[11px]" transform={`rotate(-90, 12, ${PADDING.top + INNER_H / 2})`}>
+      <text x={10} y={PADDING.top - 6} className="fill-subtext0 text-[11px]">
         kg
       </text>
     </g>
@@ -179,7 +179,7 @@ export function GrowthChart() {
             <span className="font-body text-subtext0">{data.child_name}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 bg-lavender rounded" style={{ borderStyle: "dashed" }} />
+            <div className="w-3 h-0.5 bg-lavender rounded" />
             <span className="font-body text-subtext0">WHO P50</span>
           </div>
           <div className="flex items-center gap-1.5">
