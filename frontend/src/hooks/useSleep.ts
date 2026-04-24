@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createSleep,
   deleteSleep,
+  getSleepChart,
   listSleep,
   updateSleep,
   type SleepListParams,
@@ -55,5 +56,13 @@ export function useDeleteSleep() {
       qc.invalidateQueries({ queryKey: SLEEP_KEY });
       showToast("Schlaf geloescht");
     },
+  });
+}
+
+export function useSleepChart(childId?: number, days = 30) {
+  return useQuery({
+    queryKey: ["sleep-chart", childId, days],
+    queryFn: () => getSleepChart(childId!, days),
+    enabled: !!childId,
   });
 }

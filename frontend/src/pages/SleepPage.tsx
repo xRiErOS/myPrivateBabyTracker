@@ -1,4 +1,6 @@
-/** Sleep page — new entry form + list with inline edit, auto-opens running sleep. */
+/** Sleep page — new entry form + list with inline edit, auto-opens running sleep.
+ *  Tab navigation: "Eintraege" | "Schlafuebersicht" (chart).
+ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -12,6 +14,9 @@ import { useActiveChild } from "../context/ChildContext";
 import { useSleepEntries } from "../hooks/useSleep";
 import { SleepForm } from "../plugins/sleep/SleepForm";
 import { SleepList } from "../plugins/sleep/SleepList";
+import { SleepChart } from "../plugins/sleep/SleepChart";
+
+type SleepTab = "list" | "chart";
 
 export default function SleepPage() {
   const { t } = useTranslation("sleep");
@@ -20,6 +25,7 @@ export default function SleepPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const [tab, setTab] = useState<SleepTab>("list");
   const cameFromDashboard = useRef(false);
 
   const { data: entries } = useSleepEntries({
@@ -41,6 +47,10 @@ export default function SleepPage() {
     if (searchParams.get("new") === "1") {
       setShowForm(true);
       cameFromDashboard.current = true;
+      setSearchParams({}, { replace: true });
+    }
+    if (searchParams.get("tab") === "chart") {
+      setTab("chart");
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -69,22 +79,49 @@ export default function SleepPage() {
   return (
     <div className="space-y-4">
       <PageHeader title={t("title")}>
-        <Button
-          variant={showForm && !runningEntry ? "danger" : "primary"}
-          onClick={() => showForm ? handleCancel() : setShowForm(true)}
-          className="flex items-center gap-2"
-        >
-          {showForm && !runningEntry ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
-        </Button>
+        {tab === "list" && (
+          <Button
+            variant={showForm && !runningEntry ? "danger" : "primary"}
+            onClick={() => showForm ? handleCancel() : setShowForm(true)}
+            className="flex items-center gap-2"
+          >
+            {showForm && !runningEntry ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
+          </Button>
+        )}
       </PageHeader>
 
-      {showForm && (
-        <Card>
-          <SleepForm entry={runningEntry} onDone={handleDone} />
-        </Card>
+      {/* Tab bar */}
+      <div className="flex gap-1 rounded-lg bg-surface0 p-1">
+        <button
+          onClick={() => { setTab("list"); setShowForm(false); }}
+          className={`flex-1 rounded-md px-3 py-2 font-label text-sm transition-colors ${
+            tab === "list" ? "bg-surface1 text-text font-semibold shadow-sm" : "text-subtext0 hover:text-text"
+          }`}
+        >
+          {t("chart.tab_list")}
+        </button>
+        <button
+          onClick={() => { setTab("chart"); setShowForm(false); }}
+          className={`flex-1 rounded-md px-3 py-2 font-label text-sm transition-colors ${
+            tab === "chart" ? "bg-surface1 text-text font-semibold shadow-sm" : "text-subtext0 hover:text-text"
+          }`}
+        >
+          {t("chart.tab_chart")}
+        </button>
+      </div>
+
+      {tab === "list" && (
+        <>
+          {showForm && (
+            <Card>
+              <SleepForm entry={runningEntry} onDone={handleDone} />
+            </Card>
+          )}
+          {!showForm && <SleepList />}
+        </>
       )}
 
-      {!showForm && <SleepList />}
+      {tab === "chart" && <SleepChart />}
     </div>
   );
 }

@@ -46,5 +46,13 @@
     "stroller": "Kinderwagen",
     "car": "Auto",
     "other": "Andere"
+  },
+  "chart": {
+    "title": "Schlafuebersicht",
+    "tab_list": "Eintraege",
+    "tab_chart": "Schlafuebersicht",
+    "target_range": "Ziel: {{min}}-{{max}}h",
+    "outside_range": "Ausserhalb Zielbereich",
+    "corrected_age": "Korrigiertes Alter"
   }
 }

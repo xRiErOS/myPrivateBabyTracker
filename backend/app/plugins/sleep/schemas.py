@@ -64,3 +64,23 @@ class SleepResponse(BaseModel):
     created_at: UTCDatetime
 
     model_config = {"from_attributes": True}
+
+
+class SleepDayPoint(BaseModel):
+    """A single day's aggregated sleep data."""
+
+    date: str  # YYYY-MM-DD
+    total_hours: float
+    nap_hours: float
+    night_hours: float
+
+
+class SleepChartResponse(BaseModel):
+    """Response for sleep chart endpoint."""
+
+    child_name: str
+    is_preterm: bool
+    measurements: list[SleepDayPoint]
+    target_min_hours: float
+    target_max_hours: float
+    age_group: str

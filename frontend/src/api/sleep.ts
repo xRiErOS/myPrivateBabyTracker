@@ -47,3 +47,23 @@ export async function updateSleep(id: number, data: SleepUpdate): Promise<SleepE
 export async function deleteSleep(id: number): Promise<void> {
   return apiFetch<void>(`${BASE}${id}`, { method: "DELETE" });
 }
+
+export interface SleepDayPoint {
+  date: string;
+  total_hours: number;
+  nap_hours: number;
+  night_hours: number;
+}
+
+export interface SleepChartData {
+  child_name: string;
+  is_preterm: boolean;
+  measurements: SleepDayPoint[];
+  target_min_hours: number;
+  target_max_hours: number;
+  age_group: string;
+}
+
+export async function getSleepChart(childId: number, days = 30): Promise<SleepChartData> {
+  return apiFetch<SleepChartData>(`${BASE}chart?child_id=${childId}&days=${days}`);
+}

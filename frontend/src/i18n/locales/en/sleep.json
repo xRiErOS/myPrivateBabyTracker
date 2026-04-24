@@ -46,5 +46,13 @@
     "stroller": "Stroller",
     "car": "Car",
     "other": "Other"
+  },
+  "chart": {
+    "title": "Sleep overview",
+    "tab_list": "Entries",
+    "tab_chart": "Sleep overview",
+    "target_range": "Target: {{min}}-{{max}}h",
+    "outside_range": "Outside target range",
+    "corrected_age": "Corrected age"
   }
 }
