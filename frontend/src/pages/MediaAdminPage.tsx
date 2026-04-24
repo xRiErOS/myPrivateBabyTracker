@@ -227,6 +227,20 @@ export default function MediaAdminPage() {
               Abbrechen
             </Button>
             <Button
+              variant="secondary"
+              className="flex items-center gap-1.5"
+              onClick={() => {
+                // Download each selected photo
+                for (const id of selectedIds) {
+                  const photo = photos.find((p) => p.id === id);
+                  if (photo) handleDownload(photo);
+                }
+              }}
+            >
+              <Download className="h-4 w-4" />
+              Herunterladen
+            </Button>
+            <Button
               variant="danger"
               className="flex items-center gap-1.5"
               onClick={handleBulkDelete}
