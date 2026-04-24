@@ -5,9 +5,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { MarkdownEditor } from "../../components/MarkdownEditor";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateNote, useUpdateNote } from "../../hooks/useNotes";
 import { ApiError } from "../../api/client";
+import { attachTag } from "../../api/tags";
 import type { SharedNote } from "../../api/notes";
 
 interface NoteFormProps {
@@ -25,6 +27,7 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
 
   const [title, setTitle] = useState(entry?.title ?? "");
   const [content, setContent] = useState(entry?.content ?? "");
+  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const isEditing = entry != null;
@@ -41,11 +44,18 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
           data: { title, content },
         });
       } else {
-        await createMut.mutateAsync({
+        const result = await createMut.mutateAsync({
           child_id: activeChild!.id,
           title,
           content,
         });
+        if (pendingTagIds.length > 0) {
+          await Promise.all(
+            pendingTagIds.map((tagId) =>
+              attachTag({ tag_id: tagId, entry_type: "note", entry_id: result.id })
+            )
+          );
+        }
       }
       onDone?.();
     } catch (err) {
@@ -77,6 +87,13 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
             rows={5}
             placeholder={t("content_placeholder")}
           />
+        </div>
+        <div className="pt-3 border-t border-surface1">
+          {isEditing ? (
+            <TagSelector entryType="note" entryId={entry!.id} />
+          ) : (
+            <TagSelector entryType="note" pendingTagIds={pendingTagIds} onPendingChange={setPendingTagIds} />
+          )}
         </div>
         <div className="flex justify-end gap-2">
           {onCancel && (

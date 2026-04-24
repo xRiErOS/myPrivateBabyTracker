@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { FileText, Pencil, Pin, PinOff, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { MarkdownDisplay } from "../../components/MarkdownEditor";
+import { TagBadges } from "../../components/TagBadges";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteNote, useNotes, useUpdateNote } from "../../hooks/useNotes";
 import { NoteForm } from "./NoteForm";
@@ -57,6 +58,7 @@ export function NoteList() {
                   }
                 />
               </div>
+              <TagBadges entryType="note" entryId={note.id} />
               <div className="flex items-center gap-2 mt-2 text-xs text-subtext0">
                 {note.author_name && <span>{note.author_name}</span>}
                 <span>{new Date(note.updated_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>

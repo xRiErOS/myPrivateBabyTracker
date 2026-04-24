@@ -229,10 +229,12 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              role="switch"
+              aria-checked={showLocation}
               onClick={() => { setShowLocation(!showLocation); if (showLocation) setLocation(""); }}
-              className={`relative h-8 w-[52px] rounded-full transition-colors ${showLocation ? "bg-green" : "bg-surface2"}`}
+              className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${showLocation ? "bg-green" : "bg-surface2"}`}
             >
-              <span className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-transform ${showLocation ? "translate-x-[26px]" : "translate-x-1"}`} />
+              <span className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${showLocation ? "translate-x-[26px]" : "translate-x-[2px]"}`} />
             </button>
             <span className="font-label text-sm text-subtext0">{t("location.toggle")}</span>
           </div>

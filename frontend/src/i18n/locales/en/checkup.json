@@ -19,5 +19,6 @@
   "overdue": "Overdue",
   "due_now": "Due now",
   "days_until": "In {{days}} days",
-  "all_done": "All done!"
+  "all_done": "All done!",
+  "mark_done": "Mark as done"
 }

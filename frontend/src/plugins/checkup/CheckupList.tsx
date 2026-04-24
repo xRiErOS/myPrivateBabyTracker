@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CheckCircle, Circle, ClipboardCheck, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
-import { useCheckupEntries, useCheckupTypes, useDeleteCheckup } from "../../hooks/useCheckup";
+import { useCheckupEntries, useCheckupTypes, useCreateCheckup, useDeleteCheckup } from "../../hooks/useCheckup";
 import { CheckupForm } from "./CheckupForm";
 
 function formatWeight(grams: number): string {
@@ -19,6 +19,7 @@ export function CheckupList() {
   const { data: entries = [], isLoading } = useCheckupEntries(activeChild?.id);
   const { data: types = [] } = useCheckupTypes();
   const deleteMut = useDeleteCheckup();
+  const createMut = useCreateCheckup();
   const [editingId, setEditingId] = useState<number | null>(null);
 
   if (isLoading) {
@@ -41,7 +42,23 @@ export function CheckupList() {
                 {isCompleted ? (
                   <CheckCircle className="h-5 w-5 text-green mt-0.5 shrink-0" />
                 ) : (
-                  <Circle className="h-5 w-5 text-overlay0 mt-0.5 shrink-0" />
+                  <button
+                    type="button"
+                    title={t("mark_done")}
+                    disabled={createMut.isPending}
+                    onClick={() => {
+                      createMut.mutate({
+                        child_id: activeChild!.id,
+                        checkup_type_id: ct.id,
+                        date: new Date().toISOString().slice(0, 10),
+                        is_completed: true,
+                      });
+                    }}
+                    className="mt-0.5 shrink-0 rounded text-overlay0 hover:text-green transition-colors"
+                    style={{ minWidth: 20, minHeight: 20 }}
+                  >
+                    <Circle className="h-5 w-5" />
+                  </button>
                 )}
                 <div>
                   <h3 className="font-headline text-sm font-semibold text-text">

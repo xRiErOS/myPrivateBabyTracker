@@ -19,5 +19,6 @@
   "overdue": "Ueberfaellig",
   "due_now": "Jetzt faellig",
   "days_until": "In {{days}} Tagen",
-  "all_done": "Alle erledigt!"
+  "all_done": "Alle erledigt!",
+  "mark_done": "Als erledigt markieren"
 }
