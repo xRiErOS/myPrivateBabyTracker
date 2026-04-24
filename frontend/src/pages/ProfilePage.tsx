@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Baby, Globe, Zap } from "lucide-react";
+import { Clock, Baby, Globe, RefreshCw, Zap } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../hooks/useAuth";
@@ -36,9 +37,11 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
@@ -206,6 +209,51 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
+      </Card>
+
+      {/* Clear Cache */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4 text-teal" />
+          <h3 className="font-headline text-base font-semibold text-text">{t("profile.clear_cache")}</h3>
+        </div>
+        <p className="text-xs text-subtext0">
+          {t("profile.clear_cache_hint")}
+        </p>
+        <button
+          type="button"
+          disabled={clearing}
+          onClick={async () => {
+            setClearing(true);
+            setMsg(null);
+            try {
+              // 1. Clear all Cache Storage entries (SW caches)
+              if ("caches" in window) {
+                const keys = await caches.keys();
+                await Promise.all(keys.map((k) => caches.delete(k)));
+              }
+              // 2. Unregister any service workers
+              if ("serviceWorker" in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map((r) => r.unregister()));
+              }
+              // 3. Clear React Query cache
+              queryClient.clear();
+              // 4. Show success message and reload
+              setMsg({ ok: true, text: t("profile.clear_cache_done") });
+              setTimeout(() => {
+                window.location.reload();
+              }, 800);
+            } catch {
+              setClearing(false);
+              setMsg({ ok: false, text: t("profile.save_failed") });
+            }
+          }}
+          className="w-full py-2.5 rounded-lg bg-surface1 text-text font-label text-sm font-semibold hover:bg-surface2 active:bg-surface2 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${clearing ? "animate-spin" : ""}`} />
+          {t("profile.clear_cache_button")}
+        </button>
       </Card>
     </div>
   );
