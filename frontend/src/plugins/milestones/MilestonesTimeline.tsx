@@ -160,9 +160,9 @@ function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUpload
       </div>
 
       {/* Timeline dot (desktop: center line) */}
-      <div className="hidden md:flex flex-col items-center">
+      <div className="hidden md:flex flex-col items-center relative">
         <div
-          className="w-4 h-4 rounded-full border-2 border-ground flex-shrink-0"
+          className="w-4 h-4 rounded-full border-2 border-ground flex-shrink-0 z-10"
           style={{ backgroundColor: catColor }}
         />
         <div className="w-0.5 flex-1 bg-surface2" />
@@ -224,7 +224,7 @@ export function MilestonesTimeline() {
       {/* Mobile: linear layout. Desktop: alternating left/right with center line */}
       <div className="relative">
         {/* Center line (desktop only) */}
-        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-surface2 -translate-x-1/2" />
+        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-surface2 -translate-x-1/2 z-0" />
 
         <div className="flex flex-col gap-4 md:gap-6">
           {sorted.map((entry, idx) => (
