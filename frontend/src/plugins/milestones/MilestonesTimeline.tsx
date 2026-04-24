@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { Camera, Star, X, ZoomIn } from "lucide-react";
+import { getCategoryIcon } from "./categoryIcons";
 import { useTranslation } from "react-i18next";
 import { photoUrl } from "../../api/milestones";
 import { useActiveChild } from "../../context/ChildContext";
@@ -43,7 +44,7 @@ interface TimelineItemProps {
 function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUploadPhoto, uploading }: TimelineItemProps) {
   const photo = entry.photos[0] as MilestonePhoto | undefined;
   const catColor = category?.color ?? "#8087a2";
-  const catIcon = category?.icon;
+  const CategoryIcon = getCategoryIcon(category?.name);
   const canUpload = entry.photos.length < MAX_PHOTOS;
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -90,11 +91,7 @@ function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUpload
               className="w-full aspect-[4/3] rounded-[8px] flex items-center justify-center mb-2"
               style={{ backgroundColor: catColor + "20" }}
             >
-              {catIcon ? (
-                <span className="text-3xl">{catIcon}</span>
-              ) : (
-                <Star className="h-10 w-10" style={{ color: catColor }} />
-              )}
+              <CategoryIcon className="h-10 w-10" style={{ color: catColor }} />
             </div>
           )}
 
