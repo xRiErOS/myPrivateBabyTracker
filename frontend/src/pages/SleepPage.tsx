@@ -27,6 +27,7 @@ export default function SleepPage() {
   const [showForm, setShowForm] = useState(false);
   const [tab, setTab] = useState<SleepTab>("list");
   const cameFromDashboard = useRef(false);
+  const stoppingTimer = useRef(false);
 
   const { data: entries } = useSleepEntries({
     child_id: activeChild?.id,
@@ -38,9 +39,9 @@ export default function SleepPage() {
     [entries],
   );
 
-  // Auto-open form when a running entry is detected
+  // Auto-open form when a running entry is detected (not while we are stopping it)
   useEffect(() => {
-    if (runningEntry) setShowForm(true);
+    if (runningEntry && !stoppingTimer.current) setShowForm(true);
   }, [runningEntry]);
 
   useEffect(() => {
@@ -56,7 +57,10 @@ export default function SleepPage() {
   }, [searchParams, setSearchParams]);
 
   const handleDone = useCallback(() => {
+    stoppingTimer.current = true;
     setShowForm(false);
+    // Clear the flag after the query cache has had time to update
+    setTimeout(() => { stoppingTimer.current = false; }, 2000);
   }, []);
   const handleCancel = useCallback(() => {
     setShowForm(false);
@@ -117,7 +121,7 @@ export default function SleepPage() {
               <SleepForm entry={runningEntry} onDone={handleDone} />
             </Card>
           )}
-          {!showForm && <SleepList />}
+          <SleepList />
         </>
       )}
 
