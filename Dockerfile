@@ -19,9 +19,9 @@ LABEL maintainer="Erik Riedel"
 LABEL version="0.1.0"
 LABEL description="Self-hosted, plugin-based baby tracker"
 
-# System dependencies (curl for healthcheck)
+# System dependencies (curl for healthcheck, libjpeg/zlib for Pillow)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
+    apt-get install -y --no-install-recommends curl libjpeg62-turbo-dev zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -34,8 +34,8 @@ COPY backend/ ./
 # Copy frontend build from Stage 1
 COPY --from=frontend /app/frontend/dist ./static/
 
-# Create data directory and non-root user
-RUN mkdir -p /app/data && \
+# Create data + uploads directory and non-root user
+RUN mkdir -p /app/data/uploads/milestones && \
     groupadd -r mybaby && \
     useradd -r -g mybaby -d /app -s /sbin/nologin mybaby && \
     chown -R mybaby:mybaby /app

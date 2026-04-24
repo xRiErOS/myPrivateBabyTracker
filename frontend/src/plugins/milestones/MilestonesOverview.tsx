@@ -181,6 +181,9 @@ export default function MilestonesOverview() {
 
   const handleQuickComplete = (s: MilestoneSuggestion) => {
     if (!childId) return;
+    // Prevent duplicate entries for the same template
+    const existing = (recentEntries ?? []).find((e) => e.template_id === s.id && e.completed);
+    if (existing) return;
     createMilestone.mutate({
       child_id: childId,
       template_id: s.id,
@@ -194,18 +197,27 @@ export default function MilestonesOverview() {
 
   const handleCompleteAndPhoto = async (s: MilestoneSuggestion) => {
     if (!childId) return;
-    // First complete the milestone
-    const entry = await createMilestone.mutateAsync({
-      child_id: childId,
-      template_id: s.id,
-      title: s.title,
-      category_id: s.category_id,
-      source_type: s.source_type,
-      completed: true,
-      completed_date: new Date().toISOString().split("T")[0],
-    });
+    // Check if an entry already exists for this template (avoid duplicates)
+    const existing = (recentEntries ?? []).find(
+      (e) => e.template_id === s.id && e.completed,
+    );
+    let entryId: number;
+    if (existing) {
+      entryId = existing.id;
+    } else {
+      const entry = await createMilestone.mutateAsync({
+        child_id: childId,
+        template_id: s.id,
+        title: s.title,
+        category_id: s.category_id,
+        source_type: s.source_type,
+        completed: true,
+        completed_date: new Date().toISOString().split("T")[0],
+      });
+      entryId = entry.id;
+    }
     // Store entry ID and trigger file picker
-    pendingMilestoneId.current = entry.id;
+    pendingMilestoneId.current = entryId;
     fileInputRef.current?.click();
   };
 
