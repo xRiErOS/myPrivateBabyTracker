@@ -12,7 +12,6 @@ import {
   REFERENCE_VALUES,
   getChildAgeDays,
   type RuleKey,
-  type ReferenceRange,
 } from "../lib/referenceValues";
 
 interface AlertRule {
@@ -258,6 +257,7 @@ export default function AlertConfigPage() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   value={threshold}
                   onChange={(e) =>
                     handleThreshold(rule.thresholdKey, parseFloat(e.target.value) || 0)
@@ -265,6 +265,7 @@ export default function AlertConfigPage() {
                   step={rule.step}
                   min={rule.min}
                   className="min-h-[44px] w-24 px-3 rounded-[8px] bg-surface0 text-text font-body text-base border border-surface2 focus:outline-none focus:ring-2 focus:ring-peach"
+                  style={{ fontSize: "16px" }}
                 />
                 {rule.unit && (
                   <span className="font-body text-sm text-subtext0">{rule.unit}</span>

@@ -118,6 +118,21 @@ export function FAB() {
             className="flex flex-col items-end gap-2 origin-bottom-right"
             style={{ animation: "fabMenuIn 150ms ease-out" }}
           >
+            {/* "Weitere" button — top position, opens full plugin modal */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+                setAllPluginsOpen(true);
+              }}
+              className="flex items-center gap-3 rounded-full bg-surface1 shadow-lg border border-surface2 px-4 py-2.5 min-h-[44px] text-sm font-medium text-subtext0 hover:bg-surface2 transition-colors"
+            >
+              <span className="font-label">Weitere</span>
+              <div className="h-9 w-9 rounded-full bg-overlay0/20 flex items-center justify-center">
+                <Grid2X2 className="h-5 w-5 text-overlay0" />
+              </div>
+            </button>
+
             {actions.map((action) => {
               const Icon = action.icon;
               return (
@@ -125,7 +140,7 @@ export function FAB() {
                   key={action.key}
                   onClick={() => handleAction(action.route)}
                   disabled={!activeChild}
-                  className="flex items-center gap-3 rounded-full bg-surface0 shadow-lg px-4 py-2.5 min-h-[44px] text-sm font-medium text-text hover:bg-surface1 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-3 rounded-full bg-surface0 shadow-lg border border-surface1 px-4 py-2.5 min-h-[44px] text-sm font-medium text-text hover:bg-surface1 transition-colors disabled:opacity-50"
                 >
                   <span className="font-label">{action.label}</span>
                   <div className="h-9 w-9 rounded-full bg-peach/15 flex items-center justify-center">
@@ -134,21 +149,6 @@ export function FAB() {
                 </button>
               );
             })}
-
-            {/* "Weitere" button — opens full plugin modal */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen(false);
-                setAllPluginsOpen(true);
-              }}
-              className="flex items-center gap-3 rounded-full bg-surface0 shadow-lg px-4 py-2.5 min-h-[44px] text-sm font-medium text-text hover:bg-surface1 transition-colors"
-            >
-              <span className="font-label">Weitere</span>
-              <div className="h-9 w-9 rounded-full bg-surface1 flex items-center justify-center">
-                <Grid2X2 className="h-5 w-5 text-subtext0" />
-              </div>
-            </button>
           </div>
         )}
 

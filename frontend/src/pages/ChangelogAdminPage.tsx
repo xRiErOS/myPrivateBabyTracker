@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
+import { apiFetch as apiClient } from "../api/client";
 
 type ChangelogVariant = "update" | "info" | "warning";
 
@@ -16,36 +17,20 @@ interface ChangelogEntry {
   variant?: ChangelogVariant;
 }
 
-async function apiFetch(path: string, options?: RequestInit) {
-  const res = await fetch(`/api/v1${path}`, {
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    ...options,
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(body || `HTTP ${res.status}`);
-  }
-  return res;
-}
-
 async function listChangelog(): Promise<ChangelogEntry[]> {
-  const res = await apiFetch("/changelog");
-  return res.json();
+  return apiClient<ChangelogEntry[]>("/v1/changelog");
 }
 
 async function createChangelog(payload: ChangelogEntry): Promise<ChangelogEntry> {
-  const res = await apiFetch("/changelog", { method: "POST", body: JSON.stringify(payload) });
-  return res.json();
+  return apiClient<ChangelogEntry>("/v1/changelog", { method: "POST", body: JSON.stringify(payload) });
 }
 
 async function updateChangelog(version: string, payload: Partial<Omit<ChangelogEntry, "version">>): Promise<ChangelogEntry> {
-  const res = await apiFetch(`/changelog/${encodeURIComponent(version)}`, { method: "PUT", body: JSON.stringify(payload) });
-  return res.json();
+  return apiClient<ChangelogEntry>(`/v1/changelog/${encodeURIComponent(version)}`, { method: "PUT", body: JSON.stringify(payload) });
 }
 
 async function deleteChangelog(version: string): Promise<void> {
-  await apiFetch(`/changelog/${encodeURIComponent(version)}`, { method: "DELETE" });
+  await apiClient<null>(`/v1/changelog/${encodeURIComponent(version)}`, { method: "DELETE" });
 }
 
 interface FormState {

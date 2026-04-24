@@ -50,19 +50,23 @@ export function NoteList() {
                   {note.title}
                 </h3>
               </div>
-              <div className="mt-1">
-                <MarkdownDisplay
-                  content={note.content}
-                  onContentChange={(updated) =>
-                    updateMut.mutate({ id: note.id, data: { content: updated } })
-                  }
-                />
-              </div>
-              <TagBadges entryType="note" entryId={note.id} />
-              <div className="flex items-center gap-2 mt-2 text-xs text-subtext0">
-                {note.author_name && <span>{note.author_name}</span>}
-                <span>{new Date(note.updated_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
-              </div>
+              {editingId !== note.id && (
+                <>
+                  <div className="mt-1">
+                    <MarkdownDisplay
+                      content={note.content}
+                      onContentChange={(updated) =>
+                        updateMut.mutate({ id: note.id, data: { content: updated } })
+                      }
+                    />
+                  </div>
+                  <TagBadges entryType="note" entryId={note.id} />
+                  <div className="flex items-center gap-2 mt-2 text-xs text-subtext0">
+                    {note.author_name && <span>{note.author_name}</span>}
+                    <span>{new Date(note.updated_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex gap-1 ml-2">
               <button
