@@ -19,7 +19,7 @@ class AlertConfigUpdate(BaseModel):
     fever_threshold: float | None = Field(default=None, ge=36.0, le=42.0)
 
     feeding_interval_enabled: bool | None = None
-    feeding_interval_hours: int | None = Field(default=None, ge=1, le=24)
+    feeding_interval_hours: float | None = Field(default=None, ge=0.5, le=24)
 
     leap_storm_enabled: bool | None = None
     min_age_weeks: int | None = Field(default=None, ge=0, le=520)
@@ -40,7 +40,7 @@ class AlertConfigResponse(BaseModel):
     fever_enabled: bool
     fever_threshold: float
     feeding_interval_enabled: bool
-    feeding_interval_hours: int
+    feeding_interval_hours: float
     leap_storm_enabled: bool
     min_age_weeks: int | None = None
     max_age_weeks: int | None = None

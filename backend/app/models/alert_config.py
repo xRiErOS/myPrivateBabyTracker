@@ -1,6 +1,6 @@
 """AlertConfig model — configurable warning thresholds per child (ADR-10)."""
 
-from sqlalchemy import Boolean, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Boolean, Float, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
 
@@ -39,7 +39,7 @@ class AlertConfig(TimestampMixin, Base):
 
     # Feeding interval: no feeding for more than N hours
     feeding_interval_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
-    feeding_interval_hours: Mapped[int] = mapped_column(Integer, default=3)
+    feeding_interval_hours: Mapped[float] = mapped_column(Float, default=3.0)
 
     # Leap storm: alert when child is in a developmental leap storm phase
     leap_storm_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
