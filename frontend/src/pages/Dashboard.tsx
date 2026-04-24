@@ -324,7 +324,7 @@ function TodayView({
           checkup: <CheckupWidget />,
           notes: <NoteWidget />,
         };
-        const ROW_SPAN_WIDGETS = new Set(["medication"]);
+        const ROW_SPAN_WIDGETS = new Set<string>();
         const orderedWidgets = getWidgetOrder().filter((key) => isVisibleOnDashboard(key) && key in WIDGET_MAP);
         if (orderedWidgets.length === 0) return null;
         return (
