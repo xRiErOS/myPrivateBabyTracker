@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Image as ImageIcon, Search, Tags, Trash2 } from "lucide-react";
+import { Image as ImageIcon, Search, Tags, Trash2, X } from "lucide-react";
 import { photoUrl } from "../api/milestones";
 import { PageHeader } from "../components/PageHeader";
 import { Button } from "../components/Button";
@@ -177,6 +177,7 @@ export default function TagDetailPage() {
   const detachMut = useDetachTag();
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [modalEntry, setModalEntry] = useState<{ type: string; id: number } | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const tag = tags.find((t) => t.id === Number(tagId));
 
@@ -323,7 +324,18 @@ export default function TagDetailPage() {
                   et={et}
                   selected={selected.has(et.id)}
                   onToggleSelect={() => toggleSelect(et.id)}
-                  onClick={() => setModalEntry({ type: et.entry_type, id: et.entry_id })}
+                  onClick={() => {
+                    if (et.entry_type === "photo") {
+                      // Open lightbox for photos
+                      const raw = et.entry_summary ?? "";
+                      const pathMatch = raw.match(/photo_path:(.+)$/);
+                      if (pathMatch?.[1]) {
+                        setLightboxUrl(photoUrl(pathMatch[1], false));
+                        return;
+                      }
+                    }
+                    setModalEntry({ type: et.entry_type, id: et.entry_id });
+                  }}
                   onSwipeLeft={() => archiveMut.mutate({ id: et.id, isArchived: !et.is_archived })}
                   onSwipeRight={() => {
                     if (confirm("Tag-Zuordnung entfernen?")) {
@@ -349,6 +361,28 @@ export default function TagDetailPage() {
           entryId={modalEntry.id}
           onClose={() => setModalEntry(null)}
         />
+      )}
+
+      {/* Photo Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxUrl(null)}
+            className="absolute top-4 right-4 h-12 w-12 flex items-center justify-center text-white hover:text-peach transition-colors"
+          >
+            <X className="h-8 w-8" />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Vollbild"
+            className="max-w-full max-h-full object-contain rounded-[8px]"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </div>
   );
