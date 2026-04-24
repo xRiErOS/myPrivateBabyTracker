@@ -1,7 +1,7 @@
 /** Desktop sidebar navigation — hidden on mobile. Dynamically filters by enabled plugins. */
 
 import { useEffect, useState } from "react";
-import { Activity, CheckSquare, ClipboardCheck, Droplets, FileText, LayoutDashboard, Moon, Pill, Scale, Settings, Star, Tags, Thermometer, Timer, Utensils } from "lucide-react";
+import { Activity, CheckSquare, ClipboardCheck, Droplets, FileText, LayoutDashboard, Moon, Pill, Scale, Settings, Star, Tags, Thermometer, Timer, User, Utensils } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { isPluginEnabled } from "../lib/pluginConfig";
@@ -28,6 +28,7 @@ const ALL_NAV_ITEMS: SidebarItem[] = [
   { to: "/tags", icon: Tags, label: "Tags", pluginKey: "tags" },
   { to: "/checkup", icon: ClipboardCheck, label: "U-Untersuchungen", pluginKey: "checkup" },
   { to: "/notes", icon: FileText, label: "Notizen", pluginKey: "notes" },
+  { to: "/profile", icon: User, label: "Profil" },
   { to: "/admin", icon: Settings, label: "Verwaltung" },
 ];
 
