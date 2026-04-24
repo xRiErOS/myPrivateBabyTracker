@@ -2,6 +2,19 @@
 
 const API_BASE = "/api";
 
+/** Callback registered by AuthProvider to handle expired sessions (401). */
+let _on401: (() => void) | null = null;
+
+/** Register a callback that fires when the server responds with 401. */
+export function set401Handler(cb: () => void): void {
+  _on401 = cb;
+}
+
+/** Unregister the 401 handler. */
+export function clear401Handler(): void {
+  _on401 = null;
+}
+
 function getCsrfToken(): string | null {
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : null;
@@ -52,6 +65,9 @@ export async function apiFetch<T>(
   });
 
   if (!resp.ok) {
+    if (resp.status === 401 && _on401) {
+      _on401();
+    }
     const body = await resp.text().catch(() => "");
     throw new ApiError(resp.status, `API ${resp.status}: ${body || path}`);
   }

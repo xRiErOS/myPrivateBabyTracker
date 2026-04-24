@@ -15,6 +15,7 @@ import {
   logout as apiLogout,
   getAuthStatus,
 } from "../api/auth";
+import { set401Handler, clear401Handler } from "../api/client";
 
 interface AuthState {
   user: AuthUser | null;
@@ -49,6 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Register 401 handler: when session expires, refresh auth state → AuthGuard shows LoginPage
+  useEffect(() => {
+    set401Handler(() => {
+      setUser(null);
+    });
+    return () => clear401Handler();
+  }, []);
 
   const login = useCallback(
     async (username: string, password: string, totpCode?: string) => {
