@@ -23,6 +23,7 @@ import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
 import { TodoWidget } from "../plugins/todo/TodoWidget";
 import { TagsWidget } from "../plugins/tags/TagsWidget";
 import { CheckupWidget } from "../plugins/checkup/CheckupWidget";
+import { NoteWidget } from "../plugins/notes/NoteWidget";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { isPluginEnabled, isVisibleOnDashboard, getWidgetOrder } from "../lib/pluginConfig";
 import { getQuickActions } from "../lib/quickActions";
@@ -321,6 +322,7 @@ function TodayView({
           todo: <TodoWidget />,
           tags: <TagsWidget />,
           checkup: <CheckupWidget />,
+          notes: <NoteWidget />,
         };
         const ROW_SPAN_WIDGETS = new Set(["medication"]);
         const orderedWidgets = getWidgetOrder().filter((key) => isVisibleOnDashboard(key) && key in WIDGET_MAP);

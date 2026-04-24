@@ -1,0 +1,13 @@
+{
+  "title": "Notes",
+  "widget_title": "Notes",
+  "label_title": "Title",
+  "label_content": "Content",
+  "empty": "No notes yet",
+  "confirm_delete": "Delete note?",
+  "pinned": "Pinned",
+  "unpin": "Unpin",
+  "pin": "Pin",
+  "title_placeholder": "Note title",
+  "content_placeholder": "Note content..."
+}
