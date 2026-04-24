@@ -412,9 +412,10 @@ def _process_image(content: bytes, ext: str) -> tuple[bytes, bytes]:
 
     Returns (processed_original_bytes, thumbnail_bytes).
     """
-    from PIL import Image
+    from PIL import Image, ImageOps
 
     img = Image.open(io.BytesIO(content))
+    img = ImageOps.exif_transpose(img)  # Fix iPhone portrait rotation
     img = img.convert("RGB")  # Ensure RGB for JPEG output
 
     # Resize original if larger than 2048px on any side
@@ -443,7 +444,7 @@ async def upload_photo(
     user: User | None = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """Upload a photo for a milestone entry (max 3 per entry)."""
+    """Upload a photo for a milestone entry (max 4 per entry)."""
     # Verify entry exists
     result = await db.execute(
         select(MilestoneEntry).where(MilestoneEntry.id == entry_id)
@@ -615,16 +616,16 @@ async def serve_photo(
 ):
     """Serve a photo file with auth check. Use ?thumb=true for thumbnail."""
     # Sanitize: prevent path traversal
-    safe_name = Path(filename).name
-    if safe_name != filename.split("/")[-1]:
-        raise HTTPException(status_code=400, detail="Invalid filename")
-
-    # Reconstruct path from filename — expect format: {child_id}/{uuid}.jpg
     parts = filename.split("/")
     if len(parts) != 2:
         raise HTTPException(status_code=400, detail="Invalid path format")
 
     child_id_str, file_part = parts
+    # Block traversal sequences and validate format
+    if ".." in child_id_str or ".." in file_part or "/" in file_part:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if not child_id_str.isdigit():
+        raise HTTPException(status_code=400, detail="Invalid child ID in path")
     if thumb:
         # Replace .jpg with _thumb.jpg
         base = file_part.rsplit(".", 1)[0]

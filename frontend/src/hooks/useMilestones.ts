@@ -169,6 +169,7 @@ export function useUploadPhoto() {
     mutationFn: ({ milestoneId, file }: { milestoneId: number; file: File }) => uploadPhoto(milestoneId, file),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MILESTONES_KEY });
+      qc.invalidateQueries({ queryKey: MEDIA_KEY });
       showToast("Foto hochgeladen");
     },
   });
@@ -181,6 +182,7 @@ export function useDeletePhoto() {
     mutationFn: ({ milestoneId, photoId }: { milestoneId: number; photoId: number }) => deletePhoto(milestoneId, photoId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MILESTONES_KEY });
+      qc.invalidateQueries({ queryKey: MEDIA_KEY });
       showToast("Foto geloescht");
     },
   });

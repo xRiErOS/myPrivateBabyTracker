@@ -119,14 +119,23 @@ export async function completeMilestone(id: number, data: MilestoneCompleteReque
 
 // --- Photos ---
 
+/** Get CSRF token from cookie for multipart uploads (can't use apiFetch). */
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export async function uploadPhoto(milestoneId: number, file: File): Promise<MilestonePhoto> {
   const form = new FormData();
   form.append("file", file);
-  // Don't set Content-Type — browser sets multipart boundary automatically
+  const headers: Record<string, string> = {};
+  const csrf = getCsrfToken();
+  if (csrf) headers["X-CSRF-Token"] = csrf;
   const resp = await fetch(`/api/v1/milestones/${milestoneId}/photo`, {
     method: "POST",
     body: form,
     credentials: "same-origin",
+    headers,
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => "");
@@ -159,10 +168,14 @@ export async function deleteMediaPhoto(photoId: number): Promise<void> {
 export async function replacePhoto(entryId: number, photoId: number, file: File): Promise<MilestonePhoto> {
   const form = new FormData();
   form.append("file", file);
+  const headers: Record<string, string> = {};
+  const csrf = getCsrfToken();
+  if (csrf) headers["X-CSRF-Token"] = csrf;
   const resp = await fetch(`/api/v1/milestones/${entryId}/photos/${photoId}`, {
     method: "PATCH",
     body: form,
     credentials: "same-origin",
+    headers,
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => "");
