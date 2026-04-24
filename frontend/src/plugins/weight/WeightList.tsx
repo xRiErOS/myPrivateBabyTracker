@@ -27,7 +27,7 @@ export function WeightList() {
   const { t } = useTranslation("weight");
   const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
-  const [dateRange, setDateRange] = useState<DateRange>("all");
+  const [dateRange, setDateRange] = useState<DateRange>("week");
   const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteWeight();
 

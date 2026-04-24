@@ -128,8 +128,18 @@ export function HabitList() {
     });
   }
 
-  const todayDone = habits.filter((h) => h.completed_today).length;
-  const total = habits.length;
+  // Filter: only show weekly habits if today matches their weekday
+  // JS getDay(): 0=Sun..6=Sat → convert to Mon=0..Sun=6 to match our weekday model
+  const jsDay = new Date().getDay();
+  const todayIdx = jsDay === 0 ? 6 : jsDay - 1; // Mon=0, Tue=1, ..., Sun=6
+  const todayHabits = habits.filter((h) => {
+    if (h.recurrence === "weekly" && h.weekdays && h.weekdays.length > 0) {
+      return h.weekdays.includes(todayIdx);
+    }
+    return true; // daily habits always shown
+  });
+  const todayDone = todayHabits.filter((h) => h.completed_today).length;
+  const total = todayHabits.length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -166,11 +176,11 @@ export function HabitList() {
       {/* Habit cards */}
       {isLoading ? (
         <p className="font-body text-sm text-subtext0">Lade Habits...</p>
-      ) : habits.length === 0 ? (
-        <p className="font-body text-sm text-overlay0">Noch keine Habits angelegt.</p>
+      ) : todayHabits.length === 0 ? (
+        <p className="font-body text-sm text-overlay0">Heute keine Habits faellig.</p>
       ) : (
         <Card className="divide-y-0">
-          {habits.map((habit) =>
+          {todayHabits.map((habit) =>
             editingHabit?.id === habit.id ? (
               <div key={habit.id} className="py-3 border-b border-surface1">
                 <HabitForm
