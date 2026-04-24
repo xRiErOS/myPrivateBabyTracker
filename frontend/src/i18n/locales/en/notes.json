@@ -11,5 +11,7 @@
   "title_placeholder": "Note title",
   "content_placeholder": "Note content...",
   "search_placeholder": "Search notes...",
-  "search_empty": "No notes found"
+  "search_empty": "No notes found",
+  "show_more": "Show more",
+  "show_less": "Show less"
 }

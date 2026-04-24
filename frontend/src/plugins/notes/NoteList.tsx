@@ -21,6 +21,15 @@ export function NoteList() {
   const deleteMut = useDeleteNote();
   const updateMut = useUpdateNote();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  function toggleExpand(id: number) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -82,14 +91,26 @@ export function NoteList() {
               </div>
               {editingId !== note.id && (
                 <>
-                  <div className="mt-1 line-clamp-2 overflow-hidden">
-                    <MarkdownDisplay
-                      content={note.content}
-                      onContentChange={(updated) =>
-                        updateMut.mutate({ id: note.id, data: { content: updated } })
-                      }
-                    />
-                  </div>
+                  {note.content && (
+                    <div>
+                      <div
+                        className={`mt-1 ${expandedIds.has(note.id) ? "" : "line-clamp-2 overflow-hidden"}`}
+                        onClick={() => toggleExpand(note.id)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <MarkdownDisplay content={note.content} />
+                      </div>
+                      {note.content.trim() && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(note.id)}
+                          className="font-label text-xs text-mauve hover:underline mt-0.5"
+                        >
+                          {expandedIds.has(note.id) ? t("show_less") : t("show_more")}
+                        </button>
+                      )}
+                    </div>
+                  )}
                   <TagBadges entryType="note" entryId={note.id} />
                   <div className="flex items-center gap-2 mt-2 text-xs text-subtext0">
                     {note.author_name && <span>{note.author_name}</span>}
