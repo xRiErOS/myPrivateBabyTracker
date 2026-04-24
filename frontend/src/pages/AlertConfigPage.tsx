@@ -258,10 +258,14 @@ export default function AlertConfigPage() {
                 <input
                   type="number"
                   inputMode="decimal"
-                  value={threshold}
-                  onChange={(e) =>
-                    handleThreshold(rule.thresholdKey, parseFloat(e.target.value) || 0)
-                  }
+                  defaultValue={threshold}
+                  key={`${rule.thresholdKey}-${threshold}`}
+                  onBlur={(e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val !== threshold) {
+                      handleThreshold(rule.thresholdKey, val);
+                    }
+                  }}
                   step={rule.step}
                   min={rule.min}
                   className="min-h-[44px] w-24 px-3 rounded-[8px] bg-surface0 text-text font-body text-base border border-surface2 focus:outline-none focus:ring-2 focus:ring-peach"
