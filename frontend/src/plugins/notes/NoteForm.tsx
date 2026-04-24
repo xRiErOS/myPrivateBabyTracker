@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
+import { MarkdownEditor } from "../../components/MarkdownEditor";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateNote, useUpdateNote } from "../../hooks/useNotes";
 import { ApiError } from "../../api/client";
@@ -70,13 +71,11 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
           <label className="font-label text-sm text-subtext0 mb-1 block">
             {t("label_content")}
           </label>
-          <textarea
+          <MarkdownEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={t("content_placeholder")}
-            maxLength={5000}
+            onChange={setContent}
             rows={5}
-            className="w-full rounded-lg border border-surface1 bg-ground px-3 py-2 text-base text-text resize-y"
+            placeholder={t("content_placeholder")}
           />
         </div>
         <div className="flex justify-end gap-2">
