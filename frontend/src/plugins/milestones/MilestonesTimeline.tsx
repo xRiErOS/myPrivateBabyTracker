@@ -1,12 +1,14 @@
 /** Milestones timeline — vertical chronological view with photos. */
 
-import { useMemo, useState } from "react";
-import { Star, X, ZoomIn } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Camera, Star, X, ZoomIn } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { photoUrl } from "../../api/milestones";
 import { useActiveChild } from "../../context/ChildContext";
-import { useCategories, useMilestoneEntries } from "../../hooks/useMilestones";
+import { useCategories, useMilestoneEntries, useUploadPhoto } from "../../hooks/useMilestones";
 import type { MilestoneCategory, MilestoneEntry, MilestonePhoto } from "../../api/types";
+
+const MAX_PHOTOS = 3;
 
 /** Calculate age label from birth date to achieved date. */
 function ageLabel(birthDate: string, achievedDate: string): string {
@@ -34,12 +36,23 @@ interface TimelineItemProps {
   birthDate: string;
   side: "left" | "right";
   onPhotoClick: (url: string) => void;
+  onUploadPhoto: (entryId: number, file: File) => void;
+  uploading: boolean;
 }
 
-function TimelineItem({ entry, category, birthDate, side, onPhotoClick }: TimelineItemProps) {
+function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUploadPhoto, uploading }: TimelineItemProps) {
   const photo = entry.photos[0] as MilestonePhoto | undefined;
   const catColor = category?.color ?? "#8087a2";
   const catIcon = category?.icon;
+  const canUpload = entry.photos.length < MAX_PHOTOS;
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    onUploadPhoto(entry.id, file);
+    if (e.target) e.target.value = "";
+  }
 
   return (
     <div
@@ -114,6 +127,33 @@ function TimelineItem({ entry, category, birthDate, side, onPhotoClick }: Timeli
               {entry.notes}
             </p>
           )}
+
+          {/* Upload button — only when < 3 photos */}
+          {canUpload && (
+            <div className="mt-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-1.5 text-xs font-label text-overlay0 hover:text-mauve transition-colors disabled:opacity-50"
+              >
+                {uploading ? (
+                  <span className="h-3.5 w-3.5 border border-mauve border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="h-3.5 w-3.5" />
+                )}
+                Foto hinzufügen ({entry.photos.length}/{MAX_PHOTOS})
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -144,6 +184,8 @@ export function MilestonesTimeline() {
   });
   const { data: categories = [] } = useCategories(childId);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const uploadMut = useUploadPhoto();
 
   const categoryMap = useMemo(() => {
     const m = new Map<number, MilestoneCategory>();
@@ -157,6 +199,14 @@ export function MilestonesTimeline() {
       .filter((e) => e.completed_date)
       .sort((a, b) => (a.completed_date ?? "").localeCompare(b.completed_date ?? ""));
   }, [entries]);
+
+  function handleUploadPhoto(milestoneId: number, file: File) {
+    setUploadingId(milestoneId);
+    uploadMut.mutate(
+      { milestoneId, file },
+      { onSettled: () => setUploadingId(null) },
+    );
+  }
 
   if (sorted.length === 0) {
     return (
@@ -183,6 +233,8 @@ export function MilestonesTimeline() {
               birthDate={birthDate}
               side={idx % 2 === 0 ? "left" : "right"}
               onPhotoClick={setLightboxUrl}
+              onUploadPhoto={handleUploadPhoto}
+              uploading={uploadingId === entry.id}
             />
           ))}
         </div>
