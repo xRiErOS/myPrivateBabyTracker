@@ -8,6 +8,7 @@ from app.api.errors import NotFoundError
 from app.database import get_session
 from app.logging import get_logger
 from app.middleware.auth import get_current_user
+from app.models.tag import delete_entry_tags
 from app.models.user import User
 from app.plugins.notes.models import SharedNote
 from app.plugins.notes.schemas import NoteCreate, NoteResponse, NoteUpdate
@@ -129,6 +130,7 @@ async def delete_note(
     if note is None:
         raise NotFoundError(f"Note with id {note_id} not found")
 
+    await delete_entry_tags(db, "note", note_id)
     await db.delete(note)
     await db.commit()
     logger.info("note_deleted", note_id=note_id)

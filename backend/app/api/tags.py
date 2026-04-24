@@ -138,7 +138,9 @@ async def _enrich_summaries(
 
 # Valid entry types matching plugin table names
 VALID_ENTRY_TYPES = frozenset([
-    "sleep", "feeding", "diaper", "vitamind3", "temperature", "weight", "medication", "todo",
+    "sleep", "feeding", "diaper", "vitamind3", "temperature", "weight",
+    "medication", "todo", "health", "tummytime", "note", "photo",
+    "milestones", "checkup", "growth",
 ])
 
 
