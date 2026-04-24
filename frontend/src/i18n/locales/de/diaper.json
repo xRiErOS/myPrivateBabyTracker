@@ -4,7 +4,7 @@
   "type": {
     "wet": "Nass",
     "dirty": "Stuhl",
-    "mixed": "Dreckig",
+    "mixed": "Beides",
     "dry": "Trocken"
   },
   "type_short": {
@@ -38,7 +38,7 @@
     "last": "Zuletzt"
   },
   "change": {
-    "mixed": "Dreckig"
+    "mixed": "Beides"
   },
   "avg": {
     "total": "\u00d8 Windeln/Tag",

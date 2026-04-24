@@ -4,22 +4,25 @@ import { AlertTriangle, Droplets } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDiaperEntries } from "../../hooks/useDiaper";
-import { formatTimeSince, startOfTodayISO } from "../../lib/dateUtils";
+import { useTranslation } from "react-i18next";
+import { formatTimeSince } from "../../lib/dateUtils";
+import { berlinDayBounds } from "../../lib/timelineUtils";
 import type { DiaperType } from "../../api/types";
 
-const TYPE_LABELS: Record<DiaperType, string> = {
-  wet: "Nass",
-  dirty: "Stuhl",
-  mixed: "Dreckig",
-  dry: "Trocken",
-};
-
 export function DiaperWidget() {
+  const { t } = useTranslation("diaper");
   const { activeChild } = useActiveChild();
   const { data: entries = [], isLoading } = useDiaperEntries({
     child_id: activeChild?.id ?? 0,
-    date_from: startOfTodayISO(),
+    date_from: berlinDayBounds(new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" })).min,
   });
+
+  const TYPE_LABELS: Record<DiaperType, string> = {
+    wet: t("type.wet"),
+    dirty: t("type.dirty"),
+    mixed: t("type.mixed"),
+    dry: t("type.dry"),
+  };
 
   const lastEntry = entries[0];
   const hasRashToday = entries.some((e) => e.has_rash);
