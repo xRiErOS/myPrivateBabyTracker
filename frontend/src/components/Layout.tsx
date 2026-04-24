@@ -1,8 +1,9 @@
-/** Responsive shell — Header + Sidebar (desktop) / BottomNav (mobile). */
+/** Responsive shell — Header + Sidebar (desktop) / BottomNav + FAB (mobile). */
 
 import type { ReactNode } from "react";
 import { useTheme } from "../hooks/useTheme";
 import { BottomNav } from "./BottomNav";
+import { FAB } from "./FAB";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 
@@ -24,6 +25,7 @@ export function Layout({ children }: LayoutProps) {
         </main>
       </div>
       <BottomNav />
+      <FAB />
     </div>
   );
 }
