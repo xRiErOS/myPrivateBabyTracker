@@ -239,12 +239,13 @@ async def export_child_data(
             "child": {
                 "id": child.id,
                 "name": child.name,
-                "birth_date": child.birth_date,
+                "birth_date": child.birth_date.isoformat() if child.birth_date else None,
+                "estimated_birth_date": child.estimated_birth_date.isoformat() if child.estimated_birth_date else None,
                 "exported_at": datetime.utcnow().isoformat() + "Z",
             },
             "data": data,
         }
-        content = json.dumps(payload, ensure_ascii=False, indent=2)
+        content = json.dumps(payload, ensure_ascii=False, indent=2, default=str)
         filename = f"mybaby_export_{child_slug}.json"
         return StreamingResponse(
             iter([content.encode("utf-8")]),

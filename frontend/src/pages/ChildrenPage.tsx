@@ -320,42 +320,6 @@ export default function ChildrenPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {/* Export Dropdown */}
-                  <div className="relative group">
-                    <button
-                      className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-sapphire transition-colors"
-                      aria-label={`${child.name} exportieren`}
-                      title={t("children.export_title")}
-                    >
-                      <Download size={18} />
-                    </button>
-                    {/* Dropdown on hover */}
-                    <div className="absolute right-0 top-full z-10 hidden group-hover:flex flex-col bg-surface0 border border-surface1 rounded-[8px] shadow-lg min-w-[120px] overflow-hidden">
-                      <button
-                        onClick={() => handleExport(child.id, "json")}
-                        className="px-3 py-2 font-body text-sm text-text hover:bg-surface1 text-left transition-colors"
-                      >
-                        {t("children.export_json")}
-                      </button>
-                      <button
-                        onClick={() => handleExport(child.id, "csv")}
-                        className="px-3 py-2 font-body text-sm text-text hover:bg-surface1 text-left transition-colors"
-                      >
-                        {t("children.export_csv")}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Purge Button */}
-                  <button
-                    onClick={() => setPurgeChild(child)}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-red transition-colors"
-                    aria-label={`${child.name} Daten loeschen`}
-                    title={t("children.purge_title")}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-
                   {/* Edit Button */}
                   <button
                     onClick={() =>
@@ -421,6 +385,36 @@ export default function ChildrenPage() {
                     </div>
                   </form>
                 </Card>
+              )}
+
+              {/* Data actions — always visible below child card */}
+              {editingId !== child.id && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Button
+                    variant="secondary"
+                    className="flex items-center gap-1.5 text-sm"
+                    onClick={() => handleExport(child.id, "json")}
+                  >
+                    <Download size={16} />
+                    Export JSON
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="flex items-center gap-1.5 text-sm"
+                    onClick={() => handleExport(child.id, "csv")}
+                  >
+                    <Download size={16} />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="flex items-center gap-1.5 text-sm"
+                    onClick={() => setPurgeChild(child)}
+                  >
+                    <Trash2 size={16} />
+                    {t("children.purge_title", { defaultValue: "Alle Daten loeschen" })}
+                  </Button>
+                </div>
               )}
             </div>
           ))}
