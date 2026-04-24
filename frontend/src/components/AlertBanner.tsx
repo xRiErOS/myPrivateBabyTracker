@@ -1,7 +1,13 @@
-/** Alert banner — shows active warnings in the dashboard. Dismissable for 6h. */
+/** Alert banner — shows active warnings in the dashboard. Dismissable for 6h.
+
+Layout:
+- Mobile: Stacked (flex-col)
+- Desktop: Grid nebeneinander (grid-cols-2 oder 3), max-width pro Kachel
+- Visually staerker: groessere Icons (h-5 w-5), kraeftigere Hintergrundfarben
+*/
 
 import { useState } from "react";
-import { AlertTriangle, Info, X } from "lucide-react";
+import { AlertOctagon, AlertTriangle, Info, X } from "lucide-react";
 import { useActiveChild } from "../context/ChildContext";
 import { useActiveAlerts } from "../hooks/useAlerts";
 
@@ -31,6 +37,26 @@ function isAlertDismissed(alertKey: string): boolean {
   return Date.now() - ts < DISMISS_DURATION_MS;
 }
 
+function severityStyles(severity: string) {
+  switch (severity) {
+    case "critical":
+      return {
+        container: "bg-red/20 border border-red/40 text-red",
+        icon: <AlertOctagon className="h-5 w-5 shrink-0 mt-0.5" />,
+      };
+    case "info":
+      return {
+        container: "bg-sapphire/15 border border-sapphire/30 text-sapphire",
+        icon: <Info className="h-5 w-5 shrink-0 mt-0.5" />,
+      };
+    default: // warning
+      return {
+        container: "bg-yellow/20 border border-yellow/40 text-yellow",
+        icon: <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />,
+      };
+  }
+}
+
 export function AlertBanner() {
   const { activeChild } = useActiveChild();
   const { data } = useActiveAlerts(activeChild?.id);
@@ -44,37 +70,38 @@ export function AlertBanner() {
 
   if (!visibleAlerts.length) return null;
 
+  // Responsive grid: 1 col on mobile, 2+ cols on sm+ (max 3 per row)
+  const gridCols =
+    visibleAlerts.length === 1
+      ? "grid-cols-1"
+      : visibleAlerts.length === 2
+        ? "sm:grid-cols-2"
+        : "sm:grid-cols-2 lg:grid-cols-3";
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`grid gap-2 ${gridCols}`}>
       {data.alerts.map((alert, i) => {
         const alertKey = `${activeChild?.id}-${alert.type}-${i}`;
         if (isAlertDismissed(alertKey)) return null;
 
+        const { container, icon } = severityStyles(alert.severity);
+
         return (
           <div
             key={alertKey}
-            className={`flex items-start gap-2 rounded-lg px-3 py-2.5 ${
-              alert.severity === "critical"
-                ? "bg-red/15 text-red"
-                : alert.severity === "info"
-                  ? "bg-blue/15 text-blue"
-                  : "bg-peach/15 text-peach"
-            }`}
+            className={`flex items-start gap-3 rounded-xl px-4 py-3 ${container}`}
           >
-            {alert.severity === "info"
-              ? <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              : <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            }
-            <p className="font-body text-sm flex-1">{alert.message}</p>
+            {icon}
+            <p className="font-body text-sm font-medium flex-1 leading-snug">{alert.message}</p>
             <button
               onClick={() => {
                 dismissAlert(alertKey);
                 setTick((t) => t + 1);
               }}
-              className="mt-0.5 shrink-0 min-h-[28px] min-w-[28px] flex items-center justify-center rounded hover:bg-black/10 transition-colors"
+              className="shrink-0 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-lg hover:bg-black/10 transition-colors"
               aria-label="Warnung fuer 6 Stunden ausblenden"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         );
