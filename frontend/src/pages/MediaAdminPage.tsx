@@ -348,14 +348,14 @@ export default function MediaAdminPage() {
                     <button
                       type="button"
                       onClick={() => handleDownload(photo)}
-                      className="h-9 w-9 flex items-center justify-center rounded-full bg-white/90 text-text"
+                      className="h-9 w-9 flex items-center justify-center rounded-full bg-surface0/90 text-text border border-surface2"
                     >
                       <Download className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => startReplace(photo)}
-                      className="h-9 w-9 flex items-center justify-center rounded-full bg-white/90 text-text"
+                      className="h-9 w-9 flex items-center justify-center rounded-full bg-surface0/90 text-text border border-surface2"
                     >
                       <RefreshCw className="h-4 w-4" />
                     </button>
