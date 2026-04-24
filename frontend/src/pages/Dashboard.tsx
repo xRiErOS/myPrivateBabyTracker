@@ -21,6 +21,7 @@ import { HealthWidget } from "../plugins/health/HealthWidget";
 import { TummyTimeWidget } from "../plugins/tummytime/TummyTimeWidget";
 import { MilestoneWidget } from "../plugins/milestones/MilestoneWidget";
 import { TodoWidget } from "../plugins/todo/TodoWidget";
+import { HabitWidget } from "../plugins/todo/HabitWidget";
 import { TagsWidget } from "../plugins/tags/TagsWidget";
 import { CheckupWidget } from "../plugins/checkup/CheckupWidget";
 import { NoteWidget } from "../plugins/notes/NoteWidget";
@@ -320,6 +321,7 @@ function TodayView({
           tummytime: <TummyTimeWidget />,
           milestones: <MilestoneWidget childId={childId} />,
           todo: <TodoWidget />,
+          habits: <HabitWidget />,
           tags: <TagsWidget />,
           checkup: <CheckupWidget />,
           notes: <NoteWidget />,

@@ -57,20 +57,27 @@ export function togglePlugin(key: string): void {
 
 /* ─── Dashboard visibility (independent of plugin activation) ─── */
 
-/** All plugin keys — used as default when no dashboard config exists. */
+/** All plugin keys + standalone widget keys — used as default when no dashboard config exists. */
 const ALL_PLUGIN_KEYS = PLUGINS.map((p) => p.key);
+
+/** Standalone widget keys that are not plugins but can appear on the dashboard.
+ *  These are sub-widgets of an existing plugin (e.g. habits is part of todo). */
+const STANDALONE_WIDGET_KEYS = ["habits"] as const;
+
+/** All valid dashboard keys (plugins + standalone widgets). */
+const ALL_DASHBOARD_KEYS = [...ALL_PLUGIN_KEYS, ...STANDALONE_WIDGET_KEYS];
 
 /** Read dashboard-visible plugin keys from localStorage. */
 export function getDashboardVisiblePlugins(): string[] {
   try {
     const raw = localStorage.getItem(DASHBOARD_KEY);
-    if (!raw) return ALL_PLUGIN_KEYS;
+    if (!raw) return ALL_DASHBOARD_KEYS;
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return ALL_PLUGIN_KEYS;
-    const validKeys = new Set(ALL_PLUGIN_KEYS);
+    if (!Array.isArray(parsed)) return ALL_DASHBOARD_KEYS;
+    const validKeys = new Set(ALL_DASHBOARD_KEYS);
     return parsed.filter((k): k is string => typeof k === "string" && validKeys.has(k));
   } catch {
-    return ALL_PLUGIN_KEYS;
+    return ALL_DASHBOARD_KEYS;
   }
 }
 
@@ -80,10 +87,23 @@ export function setDashboardVisiblePlugins(keys: string[]): void {
   window.dispatchEvent(new StorageEvent("storage", { key: DASHBOARD_KEY }));
 }
 
-/** Check whether a plugin is visible on the dashboard.
- *  Only relevant if the plugin is also enabled. */
+/** Map of standalone widget keys to their parent plugin key.
+ *  The parent plugin must be enabled for the widget to be visible. */
+const WIDGET_PARENT: Record<string, string> = {
+  habits: "todo",
+};
+
+/** Check whether a plugin or standalone widget is visible on the dashboard.
+ *  For regular plugins: only relevant if the plugin is also enabled.
+ *  For standalone widgets: parent plugin must be enabled. */
 export function isVisibleOnDashboard(key: string): boolean {
-  if (!isPluginEnabled(key)) return false;
+  const parentKey = WIDGET_PARENT[key];
+  if (parentKey !== undefined) {
+    // Standalone widget — parent plugin must be enabled
+    if (!isPluginEnabled(parentKey)) return false;
+  } else {
+    if (!isPluginEnabled(key)) return false;
+  }
   return getDashboardVisiblePlugins().includes(key);
 }
 
@@ -103,7 +123,7 @@ const ORDER_KEY = "mybaby_widget_order";
 /** Default widget order for the dashboard grid. */
 const DEFAULT_WIDGET_ORDER = [
   "temperature", "medication", "weight", "health",
-  "tummytime", "milestones", "todo", "tags",
+  "tummytime", "milestones", "todo", "habits", "tags",
 ];
 
 /** Read widget order from localStorage. */
