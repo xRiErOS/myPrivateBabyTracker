@@ -32,6 +32,8 @@ const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AuthSettingsPage = lazy(() => import("./pages/AuthSettingsPage"));
 const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const CheckupPage = lazy(() => import("./pages/CheckupPage"));
+const NotesPage = lazy(() => import("./pages/NotesPage"));
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, authMode, loading } = useAuth();
@@ -79,6 +81,8 @@ function AppRoutes() {
               <Route path="/admin/auth" element={<AuthSettingsPage />} />
               <Route path="/admin/users" element={<UserManagementPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/checkup" element={<CheckupPage />} />
+              <Route path="/notes" element={<NotesPage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

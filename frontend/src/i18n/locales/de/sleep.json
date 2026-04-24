@@ -38,5 +38,13 @@
     "interval": "\u00d8 Abstand"
   },
   "since": "seit {{time}}",
-  "last_entry_sub": "Letzter: {{time}}"
+  "last_entry_sub": "Letzter: {{time}}",
+  "location": {
+    "toggle": "Schlafplatz",
+    "bed": "Bett",
+    "carrier": "Tragetuch",
+    "stroller": "Kinderwagen",
+    "car": "Auto",
+    "other": "Andere"
+  }
 }

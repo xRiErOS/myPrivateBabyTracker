@@ -11,7 +11,7 @@ import { useFeedingEntries } from "../../hooks/useFeeding";
 import { formatTime, isoToLocalInput, localInputToISO, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 import { ApiError } from "../../api/client";
 import { attachTag } from "../../api/tags";
-import type { HealthEntry, HealthEntryType, HealthSeverity, HealthDuration } from "../../api/types";
+import type { HealthEntry, HealthEntryType, HealthSeverity, HealthDuration, SoothingMethod } from "../../api/types";
 
 interface HealthFormProps {
   entry?: HealthEntry;
@@ -31,6 +31,18 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
   const ENTRY_TYPES: { value: HealthEntryType; label: string }[] = [
     { value: "spit_up", label: t("entry_type.spit_up") },
     { value: "tummy_ache", label: t("entry_type.tummy_ache") },
+    { value: "crying", label: t("entry_type.crying") },
+  ];
+
+  const SOOTHING_METHODS: { value: SoothingMethod; label: string }[] = [
+    { value: "nursing", label: t("soothing_method.nursing") },
+    { value: "rocking", label: t("soothing_method.rocking") },
+    { value: "carrying", label: t("soothing_method.carrying") },
+    { value: "pacifier", label: t("soothing_method.pacifier") },
+    { value: "singing", label: t("soothing_method.singing") },
+    { value: "white_noise", label: t("soothing_method.white_noise") },
+    { value: "swaddling", label: t("soothing_method.swaddling") },
+    { value: "other", label: t("soothing_method.other") },
   ];
 
   const SEVERITIES: { value: HealthSeverity; label: string }[] = [
@@ -55,6 +67,8 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
   const [entryType, setEntryType] = useState<HealthEntryType>(entry?.entry_type ?? "spit_up");
   const [severity, setSeverity] = useState<HealthSeverity>(entry?.severity ?? "mild");
   const [duration, setDuration] = useState<HealthDuration | null>(entry?.duration ?? null);
+  const [durationMinutes, setDurationMinutes] = useState(entry?.duration_minutes?.toString() ?? "");
+  const [soothingMethod, setSoothingMethod] = useState<SoothingMethod | null>(entry?.soothing_method ?? null);
   const [time, setTime] = useState(
     entry?.time ? isoToLocalInput(entry.time) : isoToLocalInput(nowISO()),
   );
@@ -94,7 +108,9 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
       child_id: activeChild.id,
       entry_type: entryType,
       severity: severity,
-      duration: entryType === "tummy_ache" ? duration : null,
+      duration: (entryType === "tummy_ache" || entryType === "crying") ? duration : null,
+      duration_minutes: entryType === "crying" && durationMinutes ? parseInt(durationMinutes) : null,
+      soothing_method: entryType === "crying" ? soothingMethod : null,
       time: localInputToISO(time),
       notes: notes || null,
       feeding_id: feedingId,
@@ -133,14 +149,15 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
         <label className="font-label text-sm font-medium text-text block mb-1">
           {t("label_type")} *
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {ENTRY_TYPES.map((t) => (
             <button
               key={t.value}
               type="button"
               onClick={() => {
                 setEntryType(t.value);
-                if (t.value !== "tummy_ache") setDuration(null);
+                if (t.value !== "tummy_ache" && t.value !== "crying") setDuration(null);
+                if (t.value !== "crying") { setSoothingMethod(null); setDurationMinutes(""); }
               }}
               className={`min-h-[44px] rounded-[8px] font-label text-sm font-medium transition-colors ${
                 entryType === t.value
@@ -181,8 +198,8 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
         </div>
       </div>
 
-      {/* Duration selector — only for tummy_ache */}
-      {entryType === "tummy_ache" && (
+      {/* Duration selector — for tummy_ache and crying */}
+      {(entryType === "tummy_ache" || entryType === "crying") && (
         <div>
           <label className="font-label text-sm font-medium text-text block mb-1">
             {t("label_duration")}
@@ -200,6 +217,44 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
                 }`}
               >
                 {d.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Crying-specific: duration in minutes */}
+      {entryType === "crying" && (
+        <Input
+          label={t("label_duration_minutes")}
+          type="number"
+          value={durationMinutes}
+          onChange={(e) => setDurationMinutes(e.target.value)}
+          min="1"
+          max="1440"
+          placeholder="Min"
+        />
+      )}
+
+      {/* Crying-specific: soothing method */}
+      {entryType === "crying" && (
+        <div>
+          <label className="font-label text-sm font-medium text-text block mb-1">
+            {t("soothing_method.label")}
+          </label>
+          <div className="grid grid-cols-4 gap-1.5">
+            {SOOTHING_METHODS.map((sm) => (
+              <button
+                key={sm.value}
+                type="button"
+                onClick={() => setSoothingMethod(soothingMethod === sm.value ? null : sm.value)}
+                className={`min-h-[44px] rounded-[8px] font-label text-xs font-medium transition-colors px-1 ${
+                  soothingMethod === sm.value
+                    ? "bg-lavender text-ground"
+                    : "bg-surface1 text-text hover:bg-surface2"
+                }`}
+              >
+                {sm.label}
               </button>
             ))}
           </div>

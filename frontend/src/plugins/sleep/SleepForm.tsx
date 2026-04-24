@@ -39,6 +39,14 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
     { value: "night", label: t("type.night") },
   ];
 
+  const LOCATION_OPTIONS = [
+    { value: "bed", label: t("location.bed") },
+    { value: "carrier", label: t("location.carrier") },
+    { value: "stroller", label: t("location.stroller") },
+    { value: "car", label: t("location.car") },
+    { value: "other", label: t("location.other") },
+  ];
+
   const [sleepType, setSleepType] = useState<SleepType>(entry?.sleep_type ?? "nap");
   const [startTime, setStartTime] = useState(
     entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
@@ -46,6 +54,8 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
   const [endTime, setEndTime] = useState(
     entry?.end_time ? isoToLocalInput(entry.end_time) : "",
   );
+  const [location, setLocation] = useState(entry?.location ?? "");
+  const [showLocation, setShowLocation] = useState(!!entry?.location);
   const [notes, setNotes] = useState(entry?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -82,6 +92,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
         start_time: nowISO(),
         end_time: null,
         sleep_type: sleepType,
+        location: location || null,
         notes: notes || null,
       });
       if (pendingTagIds.length > 0) {
@@ -150,6 +161,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
       start_time: localInputToISO(startTime),
       end_time: endTime ? localInputToISO(endTime) : null,
       sleep_type: sleepType,
+      location: location || null,
       notes: notes || null,
     };
 
@@ -213,6 +225,36 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             onChange={(e) => setSleepType(e.target.value as SleepType)}
           />
 
+          {/* Optional location toggle */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => { setShowLocation(!showLocation); if (showLocation) setLocation(""); }}
+              className={`relative h-8 w-[52px] rounded-full transition-colors ${showLocation ? "bg-green" : "bg-surface2"}`}
+            >
+              <span className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-transform ${showLocation ? "translate-x-[26px]" : "translate-x-1"}`} />
+            </button>
+            <span className="font-label text-sm text-subtext0">{t("location.toggle")}</span>
+          </div>
+          {showLocation && (
+            <div className="grid grid-cols-5 gap-1.5">
+              {LOCATION_OPTIONS.map((loc) => (
+                <button
+                  key={loc.value}
+                  type="button"
+                  onClick={() => setLocation(location === loc.value ? "" : loc.value)}
+                  className={`min-h-[44px] rounded-[8px] font-label text-xs font-medium transition-colors ${
+                    location === loc.value
+                      ? "bg-mauve text-ground"
+                      : "bg-surface1 text-text hover:bg-surface2"
+                  }`}
+                >
+                  {loc.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="pt-3 border-t border-surface1">
             <TagSelector entryType="sleep" pendingTagIds={pendingTagIds} onPendingChange={setPendingTagIds} />
           </div>
@@ -273,6 +315,12 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             options={SLEEP_TYPE_OPTIONS}
             value={sleepType}
             onChange={(e) => setSleepType(e.target.value as SleepType)}
+          />
+          <Select
+            label={t("location.toggle")}
+            options={[{ value: "", label: "-" }, ...LOCATION_OPTIONS]}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
           />
           <Input
             label="Beginn"

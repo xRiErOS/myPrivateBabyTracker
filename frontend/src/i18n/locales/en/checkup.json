@@ -1,0 +1,23 @@
+{
+  "title": "Checkups",
+  "widget_title": "Next checkup",
+  "label_type": "Checkup type",
+  "label_date": "Date",
+  "label_doctor": "Doctor",
+  "label_weight": "Weight (kg)",
+  "label_height": "Height (cm)",
+  "label_head": "Head circ. (cm)",
+  "select_type": "Please select...",
+  "doctor_placeholder": "Pediatrician name",
+  "date_label": "Date",
+  "doctor_label": "Doctor",
+  "head_short": "HC",
+  "recommended_age": "Recommended age",
+  "weeks": "weeks",
+  "empty": "No checkups recorded",
+  "confirm_delete": "Delete checkup?",
+  "overdue": "Overdue",
+  "due_now": "Due now",
+  "days_until": "In {{days}} days",
+  "all_done": "All done!"
+}

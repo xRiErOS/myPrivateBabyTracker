@@ -14,6 +14,9 @@
   "active_ingredient": "Wirkstoff",
   "default_unit": "Standardeinheit",
   "confirm_delete": "Eintrag loeschen?",
+  "widget_title": "Medikamente",
+  "widget_empty": "Keine Medikamente heute",
+  "widget_more": "weitere",
   "summary": {
     "doses": "Gaben",
     "medications": "Medikamente",

@@ -175,6 +175,11 @@ export function SleepList() {
           <p className="font-body text-sm text-overlay0">
             {t("duration", { duration: formatDuration(entry.duration_minutes) })}
           </p>
+          {entry.location && (
+            <span className="inline-block font-body text-xs text-lavender bg-lavender/10 px-1.5 py-0.5 rounded mt-1">
+              {t(`location.${entry.location}`, { defaultValue: entry.location })}
+            </span>
+          )}
           {entry.notes && (
             <p className="font-body text-xs text-overlay0 mt-1">{entry.notes}</p>
           )}

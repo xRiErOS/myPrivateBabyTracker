@@ -23,13 +23,19 @@ class HealthEntry(TimestampMixin, Base):
     )
     entry_type: Mapped[str] = mapped_column(
         String(20), nullable=False
-    )  # "spit_up" | "tummy_ache"
+    )  # "spit_up" | "tummy_ache" | "crying"
     severity: Mapped[str] = mapped_column(
         String(10), nullable=False
     )  # "mild" | "moderate" | "severe"
     duration: Mapped[str | None] = mapped_column(
         String(10), nullable=True
-    )  # "short" | "medium" | "long" — only for tummy_ache
+    )  # "short" | "medium" | "long" — for tummy_ache and crying
+    duration_minutes: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )  # Specific duration in minutes — for crying
+    soothing_method: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )  # Soothing method — only for crying
     time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     feeding_id: Mapped[int | None] = mapped_column(

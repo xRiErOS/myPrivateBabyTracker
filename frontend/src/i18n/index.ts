@@ -17,6 +17,8 @@ import de_todo from "./locales/de/todo.json";
 import de_dashboard from "./locales/de/dashboard.json";
 import de_admin from "./locales/de/admin.json";
 import de_auth from "./locales/de/auth.json";
+import de_checkup from "./locales/de/checkup.json";
+import de_notes from "./locales/de/notes.json";
 
 import en_common from "./locales/en/common.json";
 import en_sleep from "./locales/en/sleep.json";
@@ -33,6 +35,8 @@ import en_todo from "./locales/en/todo.json";
 import en_dashboard from "./locales/en/dashboard.json";
 import en_admin from "./locales/en/admin.json";
 import en_auth from "./locales/en/auth.json";
+import en_checkup from "./locales/en/checkup.json";
+import en_notes from "./locales/en/notes.json";
 
 i18n
   .use(LanguageDetector)
@@ -57,6 +61,8 @@ i18n
       "dashboard",
       "admin",
       "auth",
+      "checkup",
+      "notes",
     ],
     resources: {
       de: {
@@ -75,6 +81,8 @@ i18n
         dashboard: de_dashboard,
         admin: de_admin,
         auth: de_auth,
+        checkup: de_checkup,
+        notes: de_notes,
       },
       en: {
         common: en_common,
@@ -92,6 +100,8 @@ i18n
         dashboard: en_dashboard,
         admin: en_admin,
         auth: en_auth,
+        checkup: en_checkup,
+        notes: en_notes,
       },
     },
     detection: {

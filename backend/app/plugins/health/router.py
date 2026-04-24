@@ -37,6 +37,8 @@ async def create_health(
         entry_type=data.entry_type.value,
         severity=data.severity.value,
         duration=data.duration.value if data.duration else None,
+        duration_minutes=data.duration_minutes,
+        soothing_method=data.soothing_method.value if data.soothing_method else None,
         time=data.time,
         notes=data.notes,
         feeding_id=data.feeding_id,
@@ -102,7 +104,7 @@ async def update_health(
 
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
-        if field in ("entry_type", "severity", "duration") and value is not None:
+        if field in ("entry_type", "severity", "duration", "soothing_method") and value is not None:
             setattr(entry, field, value.value if hasattr(value, "value") else value)
         else:
             setattr(entry, field, value)

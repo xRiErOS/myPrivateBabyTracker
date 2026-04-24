@@ -67,7 +67,9 @@
     "admin": "Settings",
     "more": "More",
     "profile": "My Profile",
-    "tags": "Tags"
+    "tags": "Tags",
+    "checkup": "Checkups",
+    "notes": "Notes"
   },
   "errors": {
     "unknown": "Unknown error",
