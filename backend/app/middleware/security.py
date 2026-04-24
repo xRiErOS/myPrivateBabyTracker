@@ -107,7 +107,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
-    """K3: Reject requests with body larger than max_size bytes."""
+    """K3: Reject requests with body larger than max_size bytes.
+
+    Photo upload paths get a higher limit (12 MB) since images can be 5-10 MB.
+    """
+
+    UPLOAD_PATHS = frozenset({"/photo", "/photos/"})
+    UPLOAD_MAX_SIZE = 12 * 1024 * 1024  # 12 MB for photo uploads
 
     def __init__(self, app, max_size: int = 1_048_576):
         super().__init__(app)
@@ -115,10 +121,16 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         content_length = request.headers.get("content-length")
-        if content_length and int(content_length) > self.max_size:
-            from starlette.responses import JSONResponse
-            return JSONResponse(
-                {"detail": f"Request body too large. Max {self.max_size} bytes."},
-                status_code=413,
-            )
+        if content_length:
+            size = int(content_length)
+            # Use higher limit for photo upload endpoints
+            path = request.url.path
+            is_upload = any(seg in path for seg in self.UPLOAD_PATHS)
+            limit = self.UPLOAD_MAX_SIZE if is_upload else self.max_size
+            if size > limit:
+                from starlette.responses import JSONResponse
+                return JSONResponse(
+                    {"detail": f"Request body too large. Max {limit} bytes."},
+                    status_code=413,
+                )
         return await call_next(request)
