@@ -87,7 +87,8 @@ export default function MediaAdminPage() {
   // Delete selected
   const handleBulkDelete = useCallback(() => {
     if (!selectedIds.size) return;
-    if (!confirm(t("media.confirm_bulk_delete", { count: selectedIds.size, defaultValue: `${selectedIds.size} Fotos loeschen?` }))) return;
+    const count = selectedIds.size;
+    if (!confirm(`${count} ${count === 1 ? "Foto" : "Fotos"} endgueltig loeschen?\n\nDieser Vorgang kann nicht rueckgaengig gemacht werden.`)) return;
     for (const id of selectedIds) {
       deleteMut.mutate(id);
     }
@@ -196,30 +197,46 @@ export default function MediaAdminPage() {
           ))}
         </select>
 
-        {/* Bulk actions */}
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            className="flex items-center gap-1.5"
-            onClick={selectAll}
-          >
-            <Check className="h-4 w-4" />
-            {selectedIds.size === photos.length && photos.length > 0
-              ? t("media.deselect_all", { defaultValue: "Keine" })
-              : t("media.select_all", { defaultValue: "Alle" })}
-          </Button>
-          {selectedIds.size > 0 && (
+        {/* Select all toggle */}
+        <Button
+          variant="secondary"
+          className="flex items-center gap-1.5"
+          onClick={selectAll}
+        >
+          <Check className="h-4 w-4" />
+          {selectedIds.size === photos.length && photos.length > 0
+            ? t("media.deselect_all", { defaultValue: "Keine" })
+            : t("media.select_all", { defaultValue: "Alle" })}
+        </Button>
+      </div>
+
+      {/* Bulk delete bar — shown when photos are selected */}
+      {selectedIds.size > 0 && (
+        <Card className="p-3 flex items-center justify-between bg-red/10 border border-red/30">
+          <p className="font-label text-sm text-text">
+            <span className="font-semibold">{selectedIds.size}</span>{" "}
+            {selectedIds.size === 1 ? "Foto" : "Fotos"} ausgewaehlt
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex items-center gap-1.5"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              <X className="h-4 w-4" />
+              Abbrechen
+            </Button>
             <Button
               variant="danger"
               className="flex items-center gap-1.5"
               onClick={handleBulkDelete}
             >
               <Trash2 className="h-4 w-4" />
-              {selectedIds.size}
+              Endgueltig loeschen
             </Button>
-          )}
-        </div>
-      </div>
+          </div>
+        </Card>
+      )}
 
       {/* Photo grid */}
       {isLoading ? (
