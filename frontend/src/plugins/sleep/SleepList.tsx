@@ -11,15 +11,9 @@ import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDateTime, formatDuration, formatTimeSince, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
+import { formatDateTime, formatDuration, formatTimeSince, daysAgoISO } from "../../lib/dateUtils";
+import { berlinDayBounds } from "../../lib/timelineUtils";
 import { SleepForm } from "./SleepForm";
-
-const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
-  today: startOfTodayISO(),
-  week: daysAgoISO(7),
-  twoWeeks: daysAgoISO(14),
-  all: undefined,
-};
 
 export function SleepList() {
   const { t } = useTranslation("sleep");
@@ -40,8 +34,15 @@ export function SleepList() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteSleep();
 
-  const dateFrom = specificDate ? `${specificDate}T00:00:00Z` : DATE_RANGE_MAP[dateRange];
-  const dateTo = specificDate ? `${specificDate}T23:59:59Z` : undefined;
+  // Compute date range using Berlin timezone — avoids UTC-midnight bug for post-midnight entries
+  const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
+    today: berlinDayBounds(new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" })).min,
+    week: daysAgoISO(7),
+    twoWeeks: daysAgoISO(14),
+    all: undefined,
+  };
+  const dateFrom = specificDate ? berlinDayBounds(specificDate).min : DATE_RANGE_MAP[dateRange];
+  const dateTo = specificDate ? berlinDayBounds(specificDate).max : undefined;
 
   const { data: allEntries = [], isLoading } = useSleepEntries({
     child_id: activeChild?.id,

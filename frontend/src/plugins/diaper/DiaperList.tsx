@@ -11,17 +11,10 @@ import { Select } from "../../components/Select";
 import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilter";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteDiaper, useDiaperEntries } from "../../hooks/useDiaper";
-import { formatDateTime, formatTimeSince, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
-import { isWet } from "../../lib/timelineUtils";
+import { formatDateTime, formatTimeSince, daysAgoISO } from "../../lib/dateUtils";
+import { isWet, berlinDayBounds } from "../../lib/timelineUtils";
 import { DiaperForm } from "./DiaperForm";
 import type { DiaperEntry, DiaperType } from "../../api/types";
-
-const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
-  today: startOfTodayISO(),
-  week: daysAgoISO(7),
-  twoWeeks: daysAgoISO(14),
-  all: undefined,
-};
 
 function DiaperBar({ diapers }: { diapers: DiaperEntry[] }) {
   const { t } = useTranslation("diaper");
@@ -89,8 +82,15 @@ export function DiaperList() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const deleteMut = useDeleteDiaper();
 
-  const dateFrom = specificDate ? `${specificDate}T00:00:00Z` : DATE_RANGE_MAP[dateRange];
-  const dateTo = specificDate ? `${specificDate}T23:59:59Z` : undefined;
+  // Compute date range using Berlin timezone — avoids UTC-midnight bug for post-midnight entries
+  const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
+    today: berlinDayBounds(new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" })).min,
+    week: daysAgoISO(7),
+    twoWeeks: daysAgoISO(14),
+    all: undefined,
+  };
+  const dateFrom = specificDate ? berlinDayBounds(specificDate).min : DATE_RANGE_MAP[dateRange];
+  const dateTo = specificDate ? berlinDayBounds(specificDate).max : undefined;
 
   const { data: entries = [], isLoading } = useDiaperEntries({
     child_id: activeChild?.id,

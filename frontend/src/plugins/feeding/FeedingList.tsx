@@ -12,17 +12,11 @@ import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilte
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteFeeding, useFeedingEntries } from "../../hooks/useFeeding";
 import { useCreateHealth, useHealthEntries } from "../../hooks/useHealth";
-import { formatDateTime, formatTimeSince, nowISO, startOfTodayISO, daysAgoISO } from "../../lib/dateUtils";
+import { formatDateTime, formatTimeSince, nowISO, daysAgoISO } from "../../lib/dateUtils";
+import { berlinDayBounds } from "../../lib/timelineUtils";
 import { FeedingForm } from "./FeedingForm";
 import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
 import type { FeedingType, HealthSeverity } from "../../api/types";
-
-const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
-  today: startOfTodayISO(),
-  week: daysAgoISO(7),
-  twoWeeks: daysAgoISO(14),
-  all: undefined,
-};
 
 type HealthOverlay = { feedingId: number; type: "spit_up" | "tummy_ache" };
 
@@ -62,8 +56,15 @@ export function FeedingList() {
   const deleteMut = useDeleteFeeding();
   const createHealthMut = useCreateHealth();
 
-  const dateFrom = specificDate ? `${specificDate}T00:00:00Z` : DATE_RANGE_MAP[dateRange];
-  const dateTo = specificDate ? `${specificDate}T23:59:59Z` : undefined;
+  // Compute date range using Berlin timezone — avoids UTC-midnight bug for post-midnight feedings
+  const DATE_RANGE_MAP: Record<DateRange, string | undefined> = {
+    today: berlinDayBounds(new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" })).min,
+    week: daysAgoISO(7),
+    twoWeeks: daysAgoISO(14),
+    all: undefined,
+  };
+  const dateFrom = specificDate ? berlinDayBounds(specificDate).min : DATE_RANGE_MAP[dateRange];
+  const dateTo = specificDate ? berlinDayBounds(specificDate).max : undefined;
 
   const { data: entries = [], isLoading } = useFeedingEntries({
     child_id: activeChild?.id,
