@@ -42,10 +42,10 @@ interface TimelineItemProps {
 }
 
 function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUploadPhoto, uploading }: TimelineItemProps) {
-  const photo = entry.photos[0] as MilestonePhoto | undefined;
+  const photos = entry.photos as MilestonePhoto[];
   const catColor = category?.color ?? "#8087a2";
   const CategoryIcon = getCategoryIcon(category?.name);
-  const canUpload = entry.photos.length < MAX_PHOTOS;
+  const canUpload = photos.length < MAX_PHOTOS;
   const fileRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -64,27 +64,32 @@ function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUpload
       {/* Content card */}
       <div className="flex-1 min-w-0">
         <div className="bg-surface0 rounded-card p-3">
-          {/* Photo or placeholder */}
-          {photo ? (
-            <div
-              className="relative w-full aspect-[4/3] rounded-[8px] overflow-hidden bg-surface1 mb-2 cursor-pointer group"
-              onClick={() => onPhotoClick(photoUrl(photo.file_path, false))}
-            >
-              <img
-                src={photoUrl(photo.file_path, true)}
-                alt={entry.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <ZoomIn className="h-8 w-8 text-white" />
-              </div>
-              {/* Additional photo count badge */}
-              {entry.photos.length > 1 && (
-                <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs font-label px-2 py-0.5 rounded-full">
-                  +{entry.photos.length - 1}
-                </span>
-              )}
+          {/* Photos grid or placeholder */}
+          {photos.length > 0 ? (
+            <div className={`mb-2 gap-1 ${
+              photos.length === 1 ? "" :
+              "grid grid-cols-2"
+            }`}>
+              {photos.map((p, idx) => (
+                <div
+                  key={p.id}
+                  className={`relative rounded-[8px] overflow-hidden bg-surface1 cursor-pointer group ${
+                    photos.length === 1 ? "w-full aspect-[4/3]" :
+                    "aspect-square"
+                  }`}
+                  onClick={() => onPhotoClick(photoUrl(p.file_path, false))}
+                >
+                  <img
+                    src={photoUrl(p.file_path, true)}
+                    alt={`${entry.title} ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <ZoomIn className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div
