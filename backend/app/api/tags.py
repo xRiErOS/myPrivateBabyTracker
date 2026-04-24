@@ -43,6 +43,8 @@ SUMMARY_QUERIES: dict[str, str] = {
     "medication": "SELECT id, given_at, medication_name, dose, notes FROM medication_entries WHERE id IN ({ids})",
     "health": "SELECT id, time, entry_type, severity, notes FROM health_entries WHERE id IN ({ids})",
     "todo": "SELECT id, title, completed_at FROM todo_entries WHERE id IN ({ids})",
+    "note": "SELECT id, title, content FROM shared_notes WHERE id IN ({ids})",
+    "photo": "SELECT p.id, p.file_path, p.file_name, p.created_at, e.title as milestone_title FROM milestone_photos p LEFT JOIN milestone_entries e ON e.id = p.milestone_entry_id WHERE p.id IN ({ids})",
 }
 
 
@@ -97,6 +99,14 @@ def _build_summary(entry_type: str, row: dict) -> str:
         title = row.get("title") or "ToDo"
         done = "erledigt" if row.get("completed_at") else "offen"
         return f"{title} ({done})"
+    elif entry_type == "note":
+        title = row.get("title") or "Notiz"
+        return title
+    elif entry_type == "photo":
+        title = row.get("milestone_title") or "Foto"
+        t = _fmt_time(row.get("created_at"))
+        file_path = row.get("file_path") or ""
+        return f"{title} — {t}|photo_path:{file_path}"
 
     return ""
 

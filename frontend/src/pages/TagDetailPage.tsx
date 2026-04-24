@@ -2,7 +2,8 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Search, Tags, Trash2 } from "lucide-react";
+import { Image as ImageIcon, Search, Tags, Trash2 } from "lucide-react";
+import { photoUrl } from "../api/milestones";
 import { PageHeader } from "../components/PageHeader";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
@@ -24,6 +25,8 @@ const ENTRY_TYPE_LABELS: Record<string, string> = {
   health: "Wohlbefinden",
   tummytime: "Bauchlage",
   milestone: "Meilenstein",
+  note: "Notiz",
+  photo: "Foto",
 };
 
 /** Swipeable entry card with visual feedback. */
@@ -108,6 +111,35 @@ function SwipeableEntry({
           onClick={(e) => e.stopPropagation()}
           className="accent-peach flex-shrink-0"
         />
+        {/* Photo entries: show thumbnail */}
+        {et.entry_type === "photo" && (() => {
+          const raw = et.entry_summary ?? "";
+          const pathMatch = raw.match(/photo_path:(.+)$/);
+          const filePath = pathMatch?.[1] ?? "";
+          const label = raw.replace(/\|photo_path:.+$/, "");
+          return (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {filePath ? (
+                <img
+                  src={photoUrl(filePath, true)}
+                  alt="Foto"
+                  className="w-12 h-12 rounded-[6px] object-cover flex-shrink-0"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-[6px] bg-surface1 flex items-center justify-center flex-shrink-0">
+                  <ImageIcon className="h-5 w-5 text-overlay0" />
+                </div>
+              )}
+              <span className="font-label text-sm font-semibold text-peach truncate">
+                {label || `Foto #${et.entry_id}`}
+                {et.is_archived && <span className="ml-1 font-normal text-xs text-overlay0">(archiviert)</span>}
+              </span>
+            </div>
+          );
+        })()}
+        {/* Non-photo entries: text display */}
+        {et.entry_type !== "photo" && (
         <div className="flex flex-col flex-1 min-w-0">
           {(() => {
             const raw = et.entry_summary ?? `#${et.entry_id}`;
@@ -127,6 +159,7 @@ function SwipeableEntry({
             );
           })()}
         </div>
+        )}
       </Card>
     </div>
   );

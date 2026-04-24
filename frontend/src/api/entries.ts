@@ -53,6 +53,10 @@ export async function getEntry(entryType: string, id: number): Promise<AnyEntry>
       return apiFetch<VitaminD3Entry>(`/v1/vitamind3/${id}`);
     case "milestone":
       return getMilestone(id);
+    case "note":
+      return apiFetch<any>(`/v1/notes/${id}`);
+    case "photo":
+      return apiFetch<any>(`/v1/milestones/media/${id}`);
     default:
       throw new Error(`Unknown entry type: ${entryType}`);
   }
