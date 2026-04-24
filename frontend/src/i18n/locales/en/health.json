@@ -1,6 +1,6 @@
 {
-  "title": "Health",
-  "list_title": "Health entries",
+  "title": "Well-being",
+  "list_title": "Well-being entries",
   "entry_type": {
     "spit_up": "Spit-up",
     "tummy_ache": "Tummy ache"
@@ -19,8 +19,8 @@
   "label_severity": "Severity",
   "label_duration": "Duration",
   "label_time": "Time",
-  "empty": "No health entries yet",
-  "widget_title": "Health",
+  "empty": "No well-being entries yet",
+  "widget_title": "Well-being",
   "no_feedings_today": "No feedings recorded today",
   "feeding_linked": "Related feeding",
   "loading": "Loading...",

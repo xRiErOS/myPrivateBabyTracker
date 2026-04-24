@@ -4,7 +4,7 @@ from app.plugins._base import WidgetDef
 
 health_widget = WidgetDef(
     name="health_summary",
-    display_name="Gesundheit heute",
+    display_name="Wohlbefinden heute",
     size="small",
     endpoint="/api/v1/health/",
 )

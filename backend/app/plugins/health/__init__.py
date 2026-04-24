@@ -15,7 +15,7 @@ class HealthPlugin(PluginBase):
     """Health tracking plugin."""
 
     name = "health"
-    display_name = "Gesundheit"
+    display_name = "Wohlbefinden"
 
     def register_routes(self, app: FastAPI) -> None:
         """Register health CRUD routes under /api/v1/health/."""

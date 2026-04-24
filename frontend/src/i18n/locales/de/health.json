@@ -1,6 +1,6 @@
 {
-  "title": "Gesundheit",
-  "list_title": "Gesundheit-Eintraege",
+  "title": "Wohlbefinden",
+  "list_title": "Wohlbefinden-Eintraege",
   "entry_type": {
     "spit_up": "Spucken",
     "tummy_ache": "Bauchschmerzen"
@@ -19,8 +19,8 @@
   "label_severity": "Staerke",
   "label_duration": "Dauer",
   "label_time": "Zeitpunkt",
-  "empty": "Noch keine Gesundheit-Eintraege",
-  "widget_title": "Gesundheit",
+  "empty": "Noch keine Wohlbefinden-Eintraege",
+  "widget_title": "Wohlbefinden",
   "no_feedings_today": "Heute keine Mahlzeiten erfasst",
   "feeding_linked": "Zugehoerige Mahlzeit",
   "loading": "Laden...",

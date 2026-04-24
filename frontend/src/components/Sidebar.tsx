@@ -21,7 +21,7 @@ const ALL_NAV_ITEMS: SidebarItem[] = [
   { to: "/temperature", icon: Thermometer, label: "Temperatur", pluginKey: "temperature" },
   { to: "/weight", icon: Scale, label: "Gewicht", pluginKey: "weight" },
   { to: "/medication", icon: Pill, label: "Medikamente", pluginKey: "medication" },
-  { to: "/health", icon: Activity, label: "Gesundheit", pluginKey: "health" },
+  { to: "/health", icon: Activity, label: "Wohlbefinden", pluginKey: "health" },
   { to: "/tummy-time", icon: Timer, label: "Bauchlage", pluginKey: "tummytime" },
   { to: "/todo", icon: CheckSquare, label: "ToDo", pluginKey: "todo" },
   { to: "/milestones", icon: Star, label: "Meilensteine", pluginKey: "milestones" },

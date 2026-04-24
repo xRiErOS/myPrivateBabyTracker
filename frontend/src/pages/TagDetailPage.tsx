@@ -21,7 +21,7 @@ const ENTRY_TYPE_LABELS: Record<string, string> = {
   medication: "Medikament",
   vitamind3: "Vitamin D3",
   todo: "ToDo",
-  health: "Gesundheit",
+  health: "Wohlbefinden",
   tummytime: "Bauchlage",
   milestone: "Meilenstein",
 };

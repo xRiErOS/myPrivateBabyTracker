@@ -21,7 +21,7 @@ export const PLUGINS: PluginDef[] = [
   { key: "weight", label: "Gewicht", icon: Scale, route: "/weight", isBase: false },
   { key: "medication", label: "Medikament", icon: Pill, route: "/medication", isBase: false },
   { key: "vitamind3", label: "Vitamin D3", icon: Sun, route: "", isBase: false },
-  { key: "health", label: "Gesundheit", icon: Activity, route: "/health", isBase: false },
+  { key: "health", label: "Wohlbefinden", icon: Activity, route: "/health", isBase: false },
   { key: "todo", label: "ToDo", icon: CheckSquare, route: "/todo", isBase: false },
   { key: "tummytime", label: "Bauchlage", icon: Timer, route: "/tummy-time", isBase: false },
   { key: "milestones", label: "Meilensteine", icon: Star, route: "/milestones", isBase: false },
