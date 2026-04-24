@@ -32,14 +32,6 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function fmtDate(iso: string): string {
-  return new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(iso));
-}
-
 export default function MediaAdminPage() {
   const { t } = useTranslation("admin");
   const { activeChild } = useActiveChild();
@@ -263,16 +255,27 @@ export default function MediaAdminPage() {
                   loading="lazy"
                 />
 
-                {/* Selection checkbox */}
-                <div
-                  className={`absolute top-1 left-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                {/* Selection checkbox — always visible */}
+                <button
+                  type="button"
+                  className={`absolute top-1 left-1 z-10 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors ${
                     isSelected
                       ? "bg-mauve border-mauve text-white"
-                      : "border-white/60 bg-black/20 text-transparent group-hover:text-white"
+                      : "border-white/80 bg-black/30 text-white/60"
                   }`}
+                  onClick={(e) => { e.stopPropagation(); toggleSelect(photo.id); }}
                 >
                   <Check className="h-3.5 w-3.5" />
-                </div>
+                </button>
+
+                {/* Fullscreen button — always visible */}
+                <button
+                  type="button"
+                  className="absolute top-1 right-1 z-10 w-7 h-7 rounded-full bg-black/30 border border-white/40 flex items-center justify-center text-white/80 active:bg-black/60"
+                  onClick={(e) => { e.stopPropagation(); setLightboxUrl(photoUrl(photo.file_path, false)); }}
+                >
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </button>
 
                 {/* Caption: milestone title + category */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-1.5 pb-1 pt-4">
@@ -286,50 +289,34 @@ export default function MediaAdminPage() {
                   )}
                 </div>
 
-                {/* Hover actions */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setLightboxUrl(photoUrl(photo.file_path, false))}
-                    className="h-8 w-8 flex items-center justify-center rounded-full bg-white/80 text-text"
-                    title={t("media.view", { defaultValue: "Ansehen" })}
+                {/* Action buttons — visible when selected */}
+                {isSelected && (
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center gap-1.5"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <ZoomIn className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDownload(photo)}
-                    className="h-8 w-8 flex items-center justify-center rounded-full bg-white/80 text-text"
-                    title={t("media.download", { defaultValue: "Download" })}
-                  >
-                    <Download className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => startReplace(photo)}
-                    className="h-8 w-8 flex items-center justify-center rounded-full bg-white/80 text-text"
-                    title={t("media.replace", { defaultValue: "Ersetzen" })}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(photo)}
-                    className="h-8 w-8 flex items-center justify-center rounded-full bg-red/80 text-white"
-                    title={t("media.delete", { defaultValue: "Loeschen" })}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* Info tooltip on hover */}
-                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[9px] font-label text-white bg-black/50 px-1.5 py-0.5 rounded-full">
-                    {fmtDate(photo.created_at)}
-                  </span>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(photo)}
+                      className="h-9 w-9 flex items-center justify-center rounded-full bg-white/90 text-text"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startReplace(photo)}
+                      className="h-9 w-9 flex items-center justify-center rounded-full bg-white/90 text-text"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(photo)}
+                      className="h-9 w-9 flex items-center justify-center rounded-full bg-red/90 text-white"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
