@@ -162,8 +162,8 @@ export default function MilestonesOverview() {
 
   // Hidden file input for quick photo flow
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // Pending milestone ID waiting for file selection
-  const pendingMilestoneId = useRef<number | null>(null);
+  // Store suggestion data for after file selection (iOS requires synchronous click)
+  const pendingSuggestion = useRef<MilestoneSuggestion | null>(null);
 
   const cats = categories ?? [];
   const activeLeap = leapStatus?.active_leap ?? null;
@@ -195,39 +195,46 @@ export default function MilestonesOverview() {
     });
   };
 
-  const handleCompleteAndPhoto = async (s: MilestoneSuggestion) => {
+  // iOS blocks programmatic file input clicks after async operations.
+  // Solution: open file picker FIRST (synchronous tap handler), then create + upload after selection.
+  const handleCompleteAndPhoto = (s: MilestoneSuggestion) => {
     if (!childId) return;
-    // Check if an entry already exists for this template (avoid duplicates)
-    const existing = (recentEntries ?? []).find(
-      (e) => e.template_id === s.id && e.completed,
-    );
-    let entryId: number;
-    if (existing) {
-      entryId = existing.id;
-    } else {
-      const entry = await createMilestone.mutateAsync({
-        child_id: childId,
-        template_id: s.id,
-        title: s.title,
-        category_id: s.category_id,
-        source_type: s.source_type,
-        completed: true,
-        completed_date: new Date().toISOString().split("T")[0],
-      });
-      entryId = entry.id;
-    }
-    // Store entry ID and trigger file picker
-    pendingMilestoneId.current = entryId;
+    pendingSuggestion.current = s;
     fileInputRef.current?.click();
   };
 
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    const milestoneId = pendingMilestoneId.current;
-    if (!file || milestoneId == null) return;
-    uploadPhoto.mutate({ milestoneId, file });
-    pendingMilestoneId.current = null;
+    const suggestion = pendingSuggestion.current;
+    if (!file || !suggestion || !childId) {
+      pendingSuggestion.current = null;
+      return;
+    }
+    pendingSuggestion.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
+
+    // Now do async work: find or create milestone, then upload
+    (async () => {
+      const existing = (recentEntries ?? []).find(
+        (entry) => entry.template_id === suggestion.id && entry.completed,
+      );
+      let entryId: number;
+      if (existing) {
+        entryId = existing.id;
+      } else {
+        const entry = await createMilestone.mutateAsync({
+          child_id: childId,
+          template_id: suggestion.id,
+          title: suggestion.title,
+          category_id: suggestion.category_id,
+          source_type: suggestion.source_type,
+          completed: true,
+          completed_date: new Date().toISOString().split("T")[0],
+        });
+        entryId = entry.id;
+      }
+      uploadPhoto.mutate({ milestoneId: entryId, file });
+    })();
   }
 
   if (!childId) return null;
