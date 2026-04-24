@@ -247,10 +247,13 @@ export default function MediaAdminPage() {
               variant="secondary"
               className="flex items-center gap-1.5"
               onClick={() => {
-                // Download each selected photo
-                for (const id of selectedIds) {
-                  const photo = photos.find((p) => p.id === id);
+                if (selectedIds.size === 1) {
+                  // Single photo: direct download
+                  const photo = photos.find((p) => selectedIds.has(p.id));
                   if (photo) handleDownload(photo);
+                } else if (childId) {
+                  // Multiple photos: use ZIP endpoint
+                  window.open(`/api/v1/milestones/media/download-zip?child_id=${childId}`, "_blank");
                 }
               }}
             >
