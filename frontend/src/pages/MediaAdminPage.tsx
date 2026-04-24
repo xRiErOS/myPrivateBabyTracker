@@ -274,14 +274,17 @@ export default function MediaAdminPage() {
                   <Check className="h-3.5 w-3.5" />
                 </div>
 
-                {/* Category badge */}
-                {cat && (
-                  <span
-                    className="absolute bottom-1 left-1 text-[9px] font-label text-white bg-black/50 px-1.5 py-0.5 rounded-full max-w-[90%] truncate"
-                  >
-                    {cat.name}
-                  </span>
-                )}
+                {/* Caption: milestone title + category */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-1.5 pb-1 pt-4">
+                  <p className="text-[10px] font-label text-white font-semibold truncate leading-tight">
+                    {photo.milestone_title}
+                  </p>
+                  {cat && (
+                    <p className="text-[9px] font-label text-white/70 truncate leading-tight">
+                      {cat.name}
+                    </p>
+                  )}
+                </div>
 
                 {/* Hover actions */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
