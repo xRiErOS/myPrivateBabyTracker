@@ -19,6 +19,7 @@ import {
 import { formatDate } from "../../lib/dateUtils";
 import type { MilestoneCategory, MilestoneEntry, MilestoneTemplate } from "../../api/types";
 import type { MilestoneListParams } from "../../api/milestones";
+import { PhotoSection } from "./PhotoSection";
 
 function CategoryBadge({ category }: { category: MilestoneCategory | undefined }) {
   if (!category) return null;
@@ -386,6 +387,12 @@ export function MilestonesList() {
                       {entry.notes}
                     </p>
                   )}
+                  {/* Photo thumbnails (read-only view) */}
+                  {entry.photos.length > 0 && !isEditing && (
+                    <div className="mt-2">
+                      <PhotoSection entryId={entry.id} photos={entry.photos} />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -473,6 +480,8 @@ export function MilestonesList() {
                     placeholder="Optional..."
                   />
                 </div>
+                {/* Photo upload/manage in edit mode */}
+                <PhotoSection entryId={entry.id} photos={entry.photos} />
                 <div className="flex gap-2">
                   <Button
                     variant="primary"

@@ -6,6 +6,7 @@ import type {
   CategoryUpdate,
   LeapDefinition,
   LeapStatusResponse,
+  MediaPhoto,
   MilestoneCategory,
   MilestoneCompleteRequest,
   MilestoneCreate,
@@ -15,6 +16,7 @@ import type {
   MilestoneSuggestion,
   MilestoneTemplate,
   MilestoneUpdate,
+  StorageInfo,
 } from "./types";
 
 // --- Categories ---
@@ -135,6 +137,47 @@ export async function uploadPhoto(milestoneId: number, file: File): Promise<Mile
 
 export async function deletePhoto(milestoneId: number, photoId: number): Promise<void> {
   return apiFetch<void>(`/v1/milestones/${milestoneId}/photo/${photoId}`, { method: "DELETE" });
+}
+
+// --- Media Management ---
+
+export async function listMedia(childId: number, categoryId?: number): Promise<MediaPhoto[]> {
+  const sp = new URLSearchParams({ child_id: String(childId) });
+  if (categoryId) sp.set("category_id", String(categoryId));
+  return apiFetch<MediaPhoto[]>(`/v1/milestones/media/?${sp}`);
+}
+
+export async function getStorageInfo(childId?: number): Promise<StorageInfo> {
+  const qs = childId ? `?child_id=${childId}` : "";
+  return apiFetch<StorageInfo>(`/v1/milestones/media/storage${qs}`);
+}
+
+export async function deleteMediaPhoto(photoId: number): Promise<void> {
+  return apiFetch<void>(`/v1/milestones/media/${photoId}`, { method: "DELETE" });
+}
+
+export async function replacePhoto(entryId: number, photoId: number, file: File): Promise<MilestonePhoto> {
+  const form = new FormData();
+  form.append("file", file);
+  const resp = await fetch(`/api/v1/milestones/${entryId}/photos/${photoId}`, {
+    method: "PATCH",
+    body: form,
+    credentials: "same-origin",
+  });
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => "");
+    throw new Error(`Replace failed: ${resp.status} ${body}`);
+  }
+  return resp.json();
+}
+
+/** Build auth-proxied photo URL. Use thumb=true for thumbnail. */
+export function photoUrl(filePath: string, thumb = false): string {
+  // filePath format: milestones/{child_id}/{filename}
+  const parts = filePath.split("/");
+  if (parts.length < 3) return "";
+  const subPath = `${parts[1]}/${parts[2]}`;
+  return `/api/v1/milestones/photos/${subPath}${thumb ? "?thumb=true" : ""}`;
 }
 
 // --- Leaps ---
