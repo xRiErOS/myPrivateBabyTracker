@@ -2,6 +2,7 @@
 
 import { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
+import { ChangelogOverlay } from "./components/ChangelogOverlay";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Layout } from "./components/Layout";
 import { LoadingSpinner } from "./components/LoadingSpinner";
@@ -51,6 +52,7 @@ function AppRoutes() {
 
   return (
     <AuthGuard>
+      <ChangelogOverlay />
       <Layout>
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>

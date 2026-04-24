@@ -1,0 +1,26 @@
+[
+  {
+    "version": "0.6.3",
+    "date": "2026-04-24",
+    "title": "Tasks & Habits, FAB, Warnhinweise-Update",
+    "entries": [
+      "Tasks & Habits: Neues Habit-System mit täglichen und wöchentlichen Gewohnheiten + Streak-Tracking",
+      "Floating Action Button (FAB) auf Mobile für schnellen Zugriff auf Quick-Actions",
+      "Warnhinweise: Nebeneinander-Layout auf Desktop, stärkere visuelle Darstellung",
+      "Warnhinweise: Altersbereich-Filter (min/max Wochen) konfigurierbar",
+      "Markdown-Editor im Aufgaben-Detailbereich (Preview-Toggle)"
+    ]
+  },
+  {
+    "version": "0.6.2",
+    "date": "2026-04-23",
+    "title": "Sprint 14 — i18n, Wonder Weeks Fix",
+    "entries": [
+      "i18n: Vollständige Übersetzung (de/en) für alle 15 Namespaces",
+      "Wonder Weeks: Alle 10 Sprungzeiträume korrigiert",
+      "Gesundheit → Wohlbefinden umbenannt",
+      "Health-Kaskaden-Löschung bei Feeding-Löschung",
+      "Inline-Edit für Entries überarbeitet"
+    ]
+  }
+]
