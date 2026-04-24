@@ -10,10 +10,12 @@ import { useActiveChild } from "../context/ChildContext";
 import { useSwipe } from "../hooks/useSwipe";
 import MilestonesOverview from "../plugins/milestones/MilestonesOverview";
 import { MilestonesList } from "../plugins/milestones/MilestonesList";
+import { MilestonesTimeline } from "../plugins/milestones/MilestonesTimeline";
 import { LeapCalendar } from "../plugins/milestones/LeapCalendar";
 
 const TAB_KEYS = [
   { key: "overview", labelKey: "tab_overview" },
+  { key: "timeline", labelKey: "tab_timeline" },
   { key: "all", labelKey: "tab_all" },
   { key: "leaps", labelKey: "tab_leaps" },
 ] as const;
@@ -77,6 +79,7 @@ export default function MilestonesPage() {
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div {...swipeHandlers}>
         {activeTab === "overview" && <MilestonesOverview />}
+        {activeTab === "timeline" && <MilestonesTimeline />}
         {activeTab === "all" && <MilestonesList />}
         {activeTab === "leaps" && <LeapCalendar />}
       </div>

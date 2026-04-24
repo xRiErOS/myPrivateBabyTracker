@@ -16,7 +16,25 @@
     "users": "Users",
     "users_desc": "Create, edit, deactivate users",
     "changelog": "Changelog",
-    "changelog_desc": "Manage release notes"
+    "changelog_desc": "Manage release notes",
+    "media": "Media",
+    "media_desc": "Manage milestone photos"
+  },
+  "media": {
+    "title": "Media management",
+    "no_child": "Please select a child first.",
+    "photos_count": "Photos",
+    "storage_used": "storage used",
+    "all_categories": "All categories",
+    "select_all": "All",
+    "deselect_all": "None",
+    "empty": "No photos yet",
+    "view": "View",
+    "download": "Download",
+    "replace": "Replace",
+    "delete": "Delete",
+    "confirm_delete": "Delete photo?",
+    "confirm_bulk_delete": "Delete {{count}} photos?"
   },
   "children": {
     "title": "Children",

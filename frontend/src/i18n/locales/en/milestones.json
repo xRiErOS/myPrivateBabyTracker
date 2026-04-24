@@ -24,6 +24,13 @@
     "far_future": "Far future"
   },
   "photo_upload": "Upload photo",
+  "photos": "Photos",
+  "photo_delete_confirm": "Delete photo?",
+  "timeline": "Timeline",
+  "tab_timeline": "Timeline",
+  "timeline_empty": "No completed milestones with dates yet",
+  "age_weeks": "{{count}} weeks",
+  "age_months": "{{count}} months",
   "disclaimer": "Every child develops at their own pace",
   "empty": "No milestones recorded yet",
   "widget_title": "Milestones",

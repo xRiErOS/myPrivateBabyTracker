@@ -16,7 +16,25 @@
     "users": "Benutzer",
     "users_desc": "Benutzer anlegen, bearbeiten, deaktivieren",
     "changelog": "Changelog",
-    "changelog_desc": "Release-Hinweise verwalten"
+    "changelog_desc": "Release-Hinweise verwalten",
+    "media": "Medien",
+    "media_desc": "Meilenstein-Fotos verwalten"
+  },
+  "media": {
+    "title": "Medienverwaltung",
+    "no_child": "Bitte waehle zuerst ein Kind aus.",
+    "photos_count": "Fotos",
+    "storage_used": "Speicher belegt",
+    "all_categories": "Alle Kategorien",
+    "select_all": "Alle",
+    "deselect_all": "Keine",
+    "empty": "Keine Fotos vorhanden",
+    "view": "Ansehen",
+    "download": "Download",
+    "replace": "Ersetzen",
+    "delete": "Loeschen",
+    "confirm_delete": "Foto loeschen?",
+    "confirm_bulk_delete": "{{count}} Fotos loeschen?"
   },
   "children": {
     "title": "Kinder",

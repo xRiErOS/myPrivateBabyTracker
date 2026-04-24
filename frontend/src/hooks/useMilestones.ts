@@ -6,14 +6,18 @@ import {
   createCategory,
   createMilestone,
   deleteCategory,
+  deleteMediaPhoto,
   deleteMilestone,
   deletePhoto,
   getLeapStatus,
+  getStorageInfo,
   getSuggestions,
   listCategories,
   listLeaps,
+  listMedia,
   listMilestones,
   listTemplates,
+  replacePhoto,
   updateCategory,
   updateMilestone,
   uploadPhoto,
@@ -177,6 +181,52 @@ export function useDeletePhoto() {
     mutationFn: ({ milestoneId, photoId }: { milestoneId: number; photoId: number }) => deletePhoto(milestoneId, photoId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MILESTONES_KEY });
+      showToast("Foto geloescht");
+    },
+  });
+}
+
+export function useReplacePhoto() {
+  const qc = useQueryClient();
+  const { showToast } = useToast();
+  return useMutation({
+    mutationFn: ({ entryId, photoId, file }: { entryId: number; photoId: number; file: File }) =>
+      replacePhoto(entryId, photoId, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: MILESTONES_KEY });
+      qc.invalidateQueries({ queryKey: MEDIA_KEY });
+      showToast("Foto ersetzt");
+    },
+  });
+}
+
+// --- Media Management ---
+
+const MEDIA_KEY = ["milestones-media"] as const;
+
+export function useMedia(childId?: number, categoryId?: number) {
+  return useQuery({
+    queryKey: [...MEDIA_KEY, childId, categoryId],
+    queryFn: () => listMedia(childId!, categoryId),
+    enabled: !!childId,
+  });
+}
+
+export function useStorageInfo(childId?: number) {
+  return useQuery({
+    queryKey: [...MEDIA_KEY, "storage", childId],
+    queryFn: () => getStorageInfo(childId),
+  });
+}
+
+export function useDeleteMediaPhoto() {
+  const qc = useQueryClient();
+  const { showToast } = useToast();
+  return useMutation({
+    mutationFn: (photoId: number) => deleteMediaPhoto(photoId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: MILESTONES_KEY });
+      qc.invalidateQueries({ queryKey: MEDIA_KEY });
       showToast("Foto geloescht");
     },
   });

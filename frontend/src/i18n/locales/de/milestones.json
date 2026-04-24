@@ -24,6 +24,13 @@
     "far_future": "Weit entfernt"
   },
   "photo_upload": "Foto hochladen",
+  "photos": "Fotos",
+  "photo_delete_confirm": "Foto loeschen?",
+  "timeline": "Zeitleiste",
+  "tab_timeline": "Zeitleiste",
+  "timeline_empty": "Noch keine abgeschlossenen Meilensteine mit Datum",
+  "age_weeks": "{{count}} Wochen",
+  "age_months": "{{count}} Monate",
   "disclaimer": "Jedes Kind entwickelt sich in eigenem Tempo",
   "empty": "Noch keine Meilensteine erfasst",
   "widget_title": "Meilensteine",

@@ -149,6 +149,29 @@ class PhotoResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class MediaPhotoResponse(BaseModel):
+    """Extended photo response for media management — includes milestone context."""
+
+    id: int
+    milestone_entry_id: int
+    milestone_title: str
+    category_id: int
+    child_id: int
+    file_path: str
+    file_name: str
+    file_size: int
+    mime_type: str
+    created_at: UTCDatetime
+
+
+class StorageInfoResponse(BaseModel):
+    """Storage usage info for uploaded photos."""
+
+    total_photos: int
+    total_size_bytes: int
+    total_size_with_thumbs_bytes: int
+
+
 class MilestoneResponse(BaseModel):
     """Schema for milestone entry API responses."""
 

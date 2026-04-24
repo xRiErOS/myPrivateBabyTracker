@@ -571,6 +571,27 @@ export interface LeapStatusResponse {
   active_leap: LeapStatusItem | null;
 }
 
+// --- Media Management ---
+
+export interface MediaPhoto {
+  id: number;
+  milestone_entry_id: number;
+  milestone_title: string;
+  category_id: number;
+  child_id: number;
+  file_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+}
+
+export interface StorageInfo {
+  total_photos: number;
+  total_size_bytes: number;
+  total_size_with_thumbs_bytes: number;
+}
+
 // --- Todo Templates ---
 
 export interface TodoTemplate {
