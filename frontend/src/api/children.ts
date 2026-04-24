@@ -33,3 +33,31 @@ export async function updateChild(
 export async function deleteChild(id: number): Promise<void> {
   return apiFetch<void>(`${BASE}${id}`, { method: "DELETE" });
 }
+
+export interface PurgePreview {
+  child_id: number;
+  child_name: string;
+  counts: Record<string, number>;
+}
+
+export interface PurgeResult {
+  success: boolean;
+  child_id: number;
+  child_name: string;
+  deleted_child: boolean;
+}
+
+export async function getPurgePreview(id: number): Promise<PurgePreview> {
+  return apiFetch<PurgePreview>(`${BASE}${id}/purge-preview`);
+}
+
+export async function purgeChildData(
+  id: number,
+  deleteChild = false,
+): Promise<PurgeResult> {
+  const params = deleteChild ? "?delete_child=true" : "";
+  return apiFetch<PurgeResult>(`${BASE}${id}/purge${params}`, {
+    method: "DELETE",
+    body: JSON.stringify({ confirm: "DELETE ALL DATA" }),
+  });
+}

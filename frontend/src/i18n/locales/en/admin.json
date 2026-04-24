@@ -49,7 +49,20 @@
     "estimated_birth_date_hint": "Important for calculating developmental leaps.",
     "name": "Name",
     "name_placeholder": "Child's name",
-    "confirm_delete": "Really delete \"{{name}}\"?"
+    "confirm_delete": "Really delete \"{{name}}\"?",
+    "export_json": "Export JSON",
+    "export_csv": "Export CSV",
+    "export_title": "Export data",
+    "purge_title": "Delete all data",
+    "purge_warning": "ALL data of {{name}} will be deleted irreversibly.",
+    "purge_counts_label": "The following records will be deleted:",
+    "purge_confirm_label": "Type the child's name to confirm:",
+    "purge_confirm_placeholder": "Enter child's name",
+    "purge_confirm_mismatch": "Name does not match.",
+    "purge_success": "All data of {{name}} has been deleted.",
+    "purge_btn": "Delete irreversibly",
+    "purge_loading": "Deleting...",
+    "purge_preview_loading": "Loading preview..."
   },
   "medication_masters": {
     "title": "Medication master data",

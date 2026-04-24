@@ -49,7 +49,20 @@
     "estimated_birth_date_hint": "Wichtig fuer die Berechnung der Entwicklungsspruenge.",
     "name": "Name",
     "name_placeholder": "Name des Kindes",
-    "confirm_delete": "\"{{name}}\" wirklich loeschen?"
+    "confirm_delete": "\"{{name}}\" wirklich loeschen?",
+    "export_json": "Export JSON",
+    "export_csv": "Export CSV",
+    "export_title": "Daten exportieren",
+    "purge_title": "Alle Daten loeschen",
+    "purge_warning": "ALLE Daten von {{name}} werden unwiderruflich geloescht.",
+    "purge_counts_label": "Folgende Datensaetze werden geloescht:",
+    "purge_confirm_label": "Kindnamen eingeben zur Bestaetigung:",
+    "purge_confirm_placeholder": "Kindnamen eingeben",
+    "purge_confirm_mismatch": "Name stimmt nicht ueberein.",
+    "purge_success": "Alle Daten von {{name}} wurden geloescht.",
+    "purge_btn": "Unwiderruflich loeschen",
+    "purge_loading": "Wird geloescht...",
+    "purge_preview_loading": "Lade Vorschau..."
   },
   "medication_masters": {
     "title": "Medikamenten-Stammdaten",

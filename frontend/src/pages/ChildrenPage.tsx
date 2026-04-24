@@ -1,8 +1,8 @@
-/** Children management — list + create/edit form. */
+/** Children management — list + create/edit form + export + purge. */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Baby, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Baby, Download, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../components/Button";
 import { PageHeader } from "../components/PageHeader";
@@ -13,21 +13,160 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import {
   useChildren,
   useCreateChild,
-  useDeleteChild,
   useUpdateChild,
 } from "../hooks/useChildren";
+import { getPurgePreview, purgeChildData, type PurgePreview } from "../api/children";
+import { useToast } from "../context/ToastContext";
 import type { Child } from "../api/types";
+
+// ---------------------------------------------------------------------------
+// Purge Modal
+// ---------------------------------------------------------------------------
+
+interface PurgeModalProps {
+  child: Child;
+  onClose: () => void;
+  onPurged: () => void;
+}
+
+function PurgeModal({ child, onClose, onPurged }: PurgeModalProps) {
+  const { t } = useTranslation("admin");
+  const { showToast } = useToast();
+  const [preview, setPreview] = useState<PurgePreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(true);
+  const [confirmName, setConfirmName] = useState("");
+  const [isPurging, setIsPurging] = useState(false);
+  const [nameError, setNameError] = useState(false);
+
+  // Load preview on mount
+  useEffect(() => {
+    getPurgePreview(child.id)
+      .then((p) => setPreview(p))
+      .finally(() => setPreviewLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [child.id]);
+
+  const totalRecords = preview
+    ? Object.values(preview.counts).reduce((a, b) => a + b, 0)
+    : 0;
+
+  const handlePurge = async () => {
+    if (confirmName !== child.name) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
+    setIsPurging(true);
+    try {
+      await purgeChildData(child.id, false);
+      showToast(t("children.purge_success", { name: child.name }));
+      onPurged();
+      onClose();
+    } catch {
+      showToast(t("children.purge_success", { name: child.name }), "error");
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-md bg-surface0 rounded-[12px] shadow-xl p-5 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="font-headline text-base font-semibold text-red">
+            {t("children.purge_title")}
+          </h2>
+          <button
+            onClick={onClose}
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-text"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Warning */}
+        <div className="rounded-[8px] bg-red/10 border border-red/30 p-3">
+          <p className="font-body text-sm text-red font-medium">
+            {t("children.purge_warning", { name: child.name })}
+          </p>
+        </div>
+
+        {/* Preview counts */}
+        {previewLoading ? (
+          <p className="font-body text-xs text-subtext0">{t("children.purge_preview_loading")}</p>
+        ) : preview ? (
+          <div className="space-y-1">
+            <p className="font-label text-xs font-semibold text-subtext0 uppercase tracking-wide">
+              {t("children.purge_counts_label")}
+            </p>
+            <div className="max-h-40 overflow-y-auto space-y-0.5">
+              {Object.entries(preview.counts)
+                .filter(([, count]) => count > 0)
+                .map(([table, count]) => (
+                  <div key={table} className="flex justify-between font-body text-xs text-text">
+                    <span className="text-subtext0">{table}</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+              {totalRecords === 0 && (
+                <p className="font-body text-xs text-subtext0">Keine Datensaetze vorhanden.</p>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Name confirmation */}
+        <div className="space-y-1">
+          <label className="font-label text-xs font-semibold text-subtext0">
+            {t("children.purge_confirm_label")}
+          </label>
+          <Input
+            value={confirmName}
+            onChange={(e) => {
+              setConfirmName(e.target.value);
+              setNameError(false);
+            }}
+            placeholder={child.name}
+          />
+          {nameError && (
+            <p className="font-body text-xs text-red">{t("children.purge_confirm_mismatch")}</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <Button
+            variant="danger"
+            disabled={isPurging || confirmName !== child.name}
+            onClick={handlePurge}
+            className="flex-1"
+          >
+            {isPurging ? t("children.purge_loading") : t("children.purge_btn")}
+          </Button>
+          <Button variant="secondary" onClick={onClose}>
+            Abbrechen
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Page
+// ---------------------------------------------------------------------------
 
 export default function ChildrenPage() {
   const { t } = useTranslation("admin");
   const { t: tc } = useTranslation("common");
-  const { data: children = [], isLoading } = useChildren();
+  const { data: children = [], isLoading, refetch } = useChildren();
   const createChild = useCreateChild();
   const updateChild = useUpdateChild();
-  const deleteChild = useDeleteChild();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [purgeChild, setPurgeChild] = useState<Child | null>(null);
 
   // Create form state
   const [name, setName] = useState("");
@@ -90,6 +229,10 @@ export default function ChildrenPage() {
     });
 
     setEditingId(null);
+  };
+
+  const handleExport = (childId: number, format: "json" | "csv") => {
+    window.open(`/api/v1/children/${childId}/export?format=${format}`, "_blank");
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -177,6 +320,43 @@ export default function ChildrenPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
+                  {/* Export Dropdown */}
+                  <div className="relative group">
+                    <button
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-sapphire transition-colors"
+                      aria-label={`${child.name} exportieren`}
+                      title={t("children.export_title")}
+                    >
+                      <Download size={18} />
+                    </button>
+                    {/* Dropdown on hover */}
+                    <div className="absolute right-0 top-full z-10 hidden group-hover:flex flex-col bg-surface0 border border-surface1 rounded-[8px] shadow-lg min-w-[120px] overflow-hidden">
+                      <button
+                        onClick={() => handleExport(child.id, "json")}
+                        className="px-3 py-2 font-body text-sm text-text hover:bg-surface1 text-left transition-colors"
+                      >
+                        {t("children.export_json")}
+                      </button>
+                      <button
+                        onClick={() => handleExport(child.id, "csv")}
+                        className="px-3 py-2 font-body text-sm text-text hover:bg-surface1 text-left transition-colors"
+                      >
+                        {t("children.export_csv")}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Purge Button */}
+                  <button
+                    onClick={() => setPurgeChild(child)}
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-red transition-colors"
+                    aria-label={`${child.name} Daten loeschen`}
+                    title={t("children.purge_title")}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+
+                  {/* Edit Button */}
                   <button
                     onClick={() =>
                       editingId === child.id ? cancelEdit() : startEdit(child)
@@ -189,17 +369,6 @@ export default function ChildrenPage() {
                     ) : (
                       <Pencil size={18} />
                     )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(t("children.confirm_delete", { name: child.name }))) {
-                        deleteChild.mutate(child.id);
-                      }
-                    }}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-overlay0 hover:text-red transition-colors"
-                    aria-label={`${child.name} loeschen`}
-                  >
-                    <Trash2 size={18} />
                   </button>
                 </div>
               </Card>
@@ -256,6 +425,17 @@ export default function ChildrenPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Purge Modal */}
+      {purgeChild && (
+        <PurgeModal
+          child={purgeChild}
+          onClose={() => setPurgeChild(null)}
+          onPurged={() => {
+            void refetch();
+          }}
+        />
       )}
     </div>
   );
