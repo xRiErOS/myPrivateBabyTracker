@@ -50,9 +50,9 @@ const emptyForm = (): FormState => ({
 });
 
 const VARIANT_OPTIONS: { value: ChangelogVariant; label: string; color: string }[] = [
-  { value: "update", label: "Update", color: "bg-peach text-ground" },
-  { value: "info", label: "Info", color: "bg-sapphire text-ground" },
-  { value: "warning", label: "Warnung", color: "bg-red text-ground" },
+  { value: "update", label: "Update", color: "bg-peach text-mantle" },
+  { value: "info", label: "Info", color: "bg-sapphire text-mantle" },
+  { value: "warning", label: "Warnung", color: "bg-red text-mantle" },
 ];
 
 export default function ChangelogAdminPage() {
@@ -165,7 +165,7 @@ export default function ChangelogAdminPage() {
         <button
           type="button"
           onClick={openCreate}
-          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-[8px] bg-peach text-base font-label font-medium text-crust"
+          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-[8px] bg-peach text-base font-label font-medium text-mantle"
         >
           <Plus className="h-4 w-4" />
           {t("changelog.add")}
@@ -254,7 +254,7 @@ export default function ChangelogAdminPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-[8px] bg-peach text-ground font-label font-medium text-sm disabled:opacity-50"
+                className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-[8px] bg-peach text-mantle font-label font-medium text-sm disabled:opacity-50"
               >
                 <Check className="h-4 w-4" />
                 {editVersion ? t("changelog.update_btn") : t("changelog.create_btn")}
