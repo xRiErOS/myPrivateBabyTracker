@@ -12,6 +12,25 @@ function formatWeight(grams: number): string {
   return `${(grams / 1000).toFixed(2)} kg`;
 }
 
+/**
+ * Calculate calendar date range for a U-Untersuchung based on birth_date.
+ * Uses estimated_birth_date (corrected age) if available for premature babies.
+ */
+function getCheckupDateRange(
+  birthDate: string,
+  estimatedBirthDate: string | null | undefined,
+  minWeeks: number,
+  maxWeeks: number,
+): string {
+  const refDate = new Date(estimatedBirthDate ?? birthDate);
+  const MS_PER_WEEK = 7 * 24 * 3600 * 1000;
+  const minDate = new Date(refDate.getTime() + minWeeks * MS_PER_WEEK);
+  const maxDate = new Date(refDate.getTime() + maxWeeks * MS_PER_WEEK);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  return `${fmt(minDate)} – ${fmt(maxDate)}`;
+}
+
 export function CheckupList() {
   const { t } = useTranslation("checkup");
   const { t: tc } = useTranslation("common");
@@ -71,6 +90,16 @@ export function CheckupList() {
                   )}
                   <p className="font-body text-xs text-overlay0 mt-1">
                     {t("recommended_age")}: {ct.recommended_age_weeks_min}-{ct.recommended_age_weeks_max} {t("weeks")}
+                    {activeChild?.birth_date && (
+                      <span className="ml-1 text-subtext0">
+                        ({getCheckupDateRange(
+                          activeChild.birth_date,
+                          activeChild.estimated_birth_date,
+                          ct.recommended_age_weeks_min,
+                          ct.recommended_age_weeks_max,
+                        )})
+                      </span>
+                    )}
                   </p>
                   {entry && (
                     <div className="mt-2 space-y-1">
