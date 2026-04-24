@@ -1,13 +1,98 @@
-/** Markdown Editor with Preview Toggle and Format Toolbar.
+/** CodeMirror 6 WYSIWYG Markdown Editor — single pane, live syntax highlighting.
 
-Mobile: Tab-bar toggle Bearbeiten | Vorschau
-Desktop (md+): Split-view editor left, live preview right
-No WYSIWYG dependency.
+No split view. Markdown source stored as-is, formatted on-screen via CodeMirror.
+Ctrl+B = Bold, Ctrl+I = Italic.
+Theme: Catppuccin Latte (light) / Macchiato (dark) via CSS variable awareness.
 */
 
-import { useCallback, useRef, useState } from "react";
-import { Bold, CheckSquare, Eye, EyeOff, Italic, List, ListOrdered } from "lucide-react";
+import { useCallback, useEffect, useRef } from "react";
+import { EditorView, keymap, placeholder as cmPlaceholder } from "@codemirror/view";
+import { EditorState, EditorSelection, Compartment } from "@codemirror/state";
+import { markdown } from "@codemirror/lang-markdown";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { renderMarkdown, toggleCheckbox } from "../lib/markdown";
+
+// ---------------------------------------------------------------------------
+// Catppuccin theme for CodeMirror
+// ---------------------------------------------------------------------------
+
+/** Build a CodeMirror theme using Catppuccin CSS variables.
+ *  Uses literal fallback values matching Catppuccin Latte.
+ */
+const catppuccinTheme = EditorView.theme(
+  {
+    "&": {
+      color: "var(--color-text, #4c4f69)",
+      backgroundColor: "var(--color-surface1, #ccd0da)",
+      fontSize: "16px",
+      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+    },
+    ".cm-content": {
+      caretColor: "var(--color-peach, #fe640b)",
+      padding: "10px 12px",
+      lineHeight: "1.6",
+      minHeight: "80px",
+    },
+    ".cm-focused .cm-selectionBackground, .cm-selectionBackground": {
+      backgroundColor: "var(--color-peach, #fe640b)20",
+    },
+    ".cm-cursor": {
+      borderLeftColor: "var(--color-peach, #fe640b)",
+    },
+    ".cm-line": {
+      padding: "0",
+    },
+    // Markdown syntax highlighting via Catppuccin
+    ".cm-strong": { fontWeight: "bold", color: "var(--color-text, #4c4f69)" },
+    ".cm-emphasis": { fontStyle: "italic", color: "var(--color-text, #4c4f69)" },
+    ".cm-monospace": { fontFamily: "monospace", color: "var(--color-green, #40a02b)" },
+    ".cm-link": { color: "var(--color-blue, #1e66f5)" },
+    ".cm-url": { color: "var(--color-sapphire, #209fb5)" },
+    ".cm-header-1, .cm-header-2, .cm-header-3": {
+      fontWeight: "bold",
+      color: "var(--color-mauve, #8839ef)",
+    },
+    ".cm-quote": { color: "var(--color-subtext0, #6c6f85)" },
+    ".cm-meta": { color: "var(--color-overlay0, #9ca0b0)" },
+    ".cm-atom": { color: "var(--color-green, #40a02b)" },
+    // Faint styling for markdown markup characters (**, *, #, etc.)
+    ".cm-formatting": { color: "var(--color-overlay0, #9ca0b0)" },
+    "&.cm-focused": { outline: "2px solid var(--color-peach, #fe640b)50" },
+    ".cm-scroller": { overflow: "auto" },
+  },
+  { dark: false },
+);
+
+// ---------------------------------------------------------------------------
+// Bold / Italic helpers operating on CodeMirror transaction
+// ---------------------------------------------------------------------------
+
+function wrapSelection(view: EditorView, marker: string): boolean {
+  const { state } = view;
+  const changes = state.changeByRange((range) => {
+    const selected = state.sliceDoc(range.from, range.to);
+    if (selected) {
+      const replacement = `${marker}${selected}${marker}`;
+      return {
+        changes: { from: range.from, to: range.to, insert: replacement },
+        range: EditorSelection.range(range.from, range.from + replacement.length),
+      };
+    }
+    // No selection: insert markers and place cursor between
+    const replacement = `${marker}${marker}`;
+    const insertPos = range.from + marker.length;
+    return {
+      changes: { from: range.from, insert: replacement },
+      range: EditorSelection.cursor(insertPos),
+    };
+  });
+  view.dispatch(changes);
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Main editor component
+// ---------------------------------------------------------------------------
 
 interface MarkdownEditorProps {
   value: string;
@@ -17,51 +102,6 @@ interface MarkdownEditorProps {
   disabled?: boolean;
 }
 
-/** Apply inline markup (bold/italic) wrapping selection or inserting at cursor. */
-function applyInline(
-  textarea: HTMLTextAreaElement,
-  value: string,
-  onChange: (val: string) => void,
-  marker: string,
-) {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selected = value.slice(start, end);
-  const replacement = selected
-    ? `${marker}${selected}${marker}`
-    : `${marker}${marker}`;
-  const next = value.slice(0, start) + replacement + value.slice(end);
-  onChange(next);
-  // Restore cursor inside markers when no selection
-  requestAnimationFrame(() => {
-    textarea.focus();
-    if (!selected) {
-      const pos = start + marker.length;
-      textarea.setSelectionRange(pos, pos);
-    } else {
-      textarea.setSelectionRange(start, start + replacement.length);
-    }
-  });
-}
-
-/** Insert a line prefix at the start of the current line. */
-function applyLinePrefix(
-  textarea: HTMLTextAreaElement,
-  value: string,
-  onChange: (val: string) => void,
-  prefix: string,
-) {
-  const pos = textarea.selectionStart;
-  const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
-  const next = value.slice(0, lineStart) + prefix + value.slice(lineStart);
-  onChange(next);
-  requestAnimationFrame(() => {
-    textarea.focus();
-    const newPos = pos + prefix.length;
-    textarea.setSelectionRange(newPos, newPos);
-  });
-}
-
 export function MarkdownEditor({
   value,
   onChange,
@@ -69,114 +109,97 @@ export function MarkdownEditor({
   rows = 6,
   disabled = false,
 }: MarkdownEditorProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Mobile-only toggle: "edit" | "preview"
-  const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<EditorView | null>(null);
+  // Track last external value to avoid re-setting when we own the change
+  const lastValueRef = useRef(value);
+  // Compartment to toggle editable without rebuilding
+  const editableCompartment = useRef(new Compartment());
 
-  function handleToolbar(action: "bold" | "italic" | "ul" | "ol" | "checkbox") {
-    const ta = textareaRef.current;
-    if (!ta) return;
-    switch (action) {
-      case "bold":
-        applyInline(ta, value, onChange, "**");
-        break;
-      case "italic":
-        applyInline(ta, value, onChange, "*");
-        break;
-      case "ul":
-        applyLinePrefix(ta, value, onChange, "- ");
-        break;
-      case "ol":
-        applyLinePrefix(ta, value, onChange, "1. ");
-        break;
-      case "checkbox":
-        applyLinePrefix(ta, value, onChange, "- [ ] ");
-        break;
+  // Build editor on mount
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const boldCmd = {
+      key: "Mod-b",
+      run: (v: EditorView) => wrapSelection(v, "**"),
+    };
+    const italicCmd = {
+      key: "Mod-i",
+      run: (v: EditorView) => wrapSelection(v, "*"),
+    };
+
+    const startState = EditorState.create({
+      doc: value,
+      extensions: [
+        history(),
+        markdown(),
+        catppuccinTheme,
+        cmPlaceholder(placeholder),
+        keymap.of([boldCmd, italicCmd, ...defaultKeymap, ...historyKeymap]),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            const newVal = update.state.doc.toString();
+            lastValueRef.current = newVal;
+            onChange(newVal);
+          }
+        }),
+        editableCompartment.current.of(EditorView.editable.of(!disabled)),
+        EditorView.lineWrapping,
+      ],
+    });
+
+    const view = new EditorView({
+      state: startState,
+      parent: containerRef.current,
+    });
+    viewRef.current = view;
+
+    // Set min-height based on rows
+    const lineHeight = 26; // approximate
+    view.dom.style.minHeight = `${rows * lineHeight}px`;
+
+    return () => {
+      view.destroy();
+      viewRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount only
+
+  // Sync external value changes into CodeMirror (e.g. form reset)
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    const current = view.state.doc.toString();
+    if (current !== value && lastValueRef.current !== value) {
+      // External change — replace the whole document
+      view.dispatch({
+        changes: { from: 0, to: current.length, insert: value },
+      });
+      lastValueRef.current = value;
     }
-  }
+  }, [value]);
+
+  // Sync disabled state via compartment reconfiguration
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: editableCompartment.current.reconfigure(EditorView.editable.of(!disabled)),
+    });
+  }, [disabled]);
 
   return (
-    <div className="rounded-xl border border-surface2 overflow-hidden">
-      {/* Toolbar row: format buttons + mobile preview toggle */}
-      <div className="flex items-center gap-0.5 px-2 py-1 bg-surface1 border-b border-surface2">
-        {/* Format buttons — hidden in mobile preview mode */}
-        <div className={`flex gap-0.5 flex-1 ${mobileTab === "preview" ? "md:flex hidden" : "flex"}`}>
-          {(
-            [
-              { action: "bold", icon: <Bold className="h-3.5 w-3.5" />, title: "Fett" },
-              { action: "italic", icon: <Italic className="h-3.5 w-3.5" />, title: "Kursiv" },
-              { action: "ul", icon: <List className="h-3.5 w-3.5" />, title: "Liste" },
-              { action: "ol", icon: <ListOrdered className="h-3.5 w-3.5" />, title: "Nummerierte Liste" },
-              { action: "checkbox", icon: <CheckSquare className="h-3.5 w-3.5" />, title: "Aufgabe" },
-            ] as const
-          ).map(({ action, icon, title }) => (
-            <button
-              key={action}
-              type="button"
-              title={title}
-              disabled={disabled}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleToolbar(action);
-              }}
-              className="flex items-center justify-center rounded px-2 text-subtext0 hover:text-text hover:bg-surface2 transition-colors disabled:opacity-40"
-              style={{ minHeight: 36 }}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
-
-        {/* Mobile-only: toggle edit/preview */}
-        <button
-          type="button"
-          title={mobileTab === "edit" ? "Vorschau" : "Bearbeiten"}
-          onClick={() => setMobileTab((t) => t === "edit" ? "preview" : "edit")}
-          className="md:hidden flex items-center gap-1 rounded px-2 py-1 text-xs text-subtext0 hover:text-text hover:bg-surface2 transition-colors ml-auto"
-          style={{ minHeight: 36 }}
-        >
-          {mobileTab === "edit"
-            ? <><Eye className="h-3.5 w-3.5" /> Vorschau</>
-            : <><EyeOff className="h-3.5 w-3.5" /> Bearbeiten</>
-          }
-        </button>
-      </div>
-
-      {/* Desktop: split view (md+). Mobile: single pane toggled via mobileTab */}
-      <div className="md:flex">
-        {/* Editor pane */}
-        <div className={`md:flex-1 md:border-r md:border-surface2 ${mobileTab === "preview" ? "hidden md:block" : "block"}`}>
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            rows={rows}
-            disabled={disabled}
-            maxLength={2000}
-            className="w-full bg-surface1 px-3 py-2.5 text-sm text-text font-mono focus:outline-none resize-none disabled:opacity-50"
-            style={{ fontSize: "16px" }}
-          />
-        </div>
-
-        {/* Preview pane — always visible on desktop, toggled on mobile */}
-        <div
-          className={`md:flex-1 px-3 py-2.5 bg-surface0 min-h-[3rem] ${mobileTab === "edit" ? "hidden md:block" : "block"}`}
-        >
-          {value.trim() ? (
-            <div
-              className="prose-like text-sm"
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }}
-            />
-          ) : (
-            <p className="text-xs text-overlay0 italic">Vorschau</p>
-          )}
-        </div>
-      </div>
-    </div>
+    <div
+      className="rounded-xl border border-surface2 overflow-hidden bg-surface1"
+      ref={containerRef}
+    />
   );
 }
+
+// ---------------------------------------------------------------------------
+// MarkdownDisplay — read-only renderer, unchanged from previous implementation
+// ---------------------------------------------------------------------------
 
 /** Markdown renderer for display in lists/detail views.
  *  When `onContentChange` is provided, checkboxes are interactive (click to toggle).
