@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CalendarClock, CheckSquare, Pencil, Search, Square, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { MarkdownDisplay } from "../../components/MarkdownEditor";
 import { TagBadges } from "../../components/TagBadges";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteTodo, useTodos, useUpdateTodo } from "../../hooks/useTodos";
@@ -168,9 +169,9 @@ export function TodoList() {
                     </span>
                     {entry.details && (
                       <div>
-                        <p className={`font-body text-xs text-subtext0 whitespace-pre-wrap break-words mt-0.5 ${expandedIds.has(entry.id) ? "" : "line-clamp-2"}`}>
-                          {entry.details}
-                        </p>
+                        <div className={`mt-0.5 ${expandedIds.has(entry.id) ? "" : "line-clamp-3 overflow-hidden"}`}>
+                          <MarkdownDisplay content={entry.details} />
+                        </div>
                         <button
                           type="button"
                           onClick={() => toggleExpand(entry.id)}

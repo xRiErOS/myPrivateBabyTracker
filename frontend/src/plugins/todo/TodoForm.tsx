@@ -1,8 +1,9 @@
-/** Todo form — create or edit a todo entry. */
+/** Todo form — create or edit a todo entry. Details field uses Markdown editor. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "../../components/Button";
+import { MarkdownEditor } from "../../components/MarkdownEditor";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTodo, useUpdateTodo } from "../../hooks/useTodos";
@@ -31,7 +32,6 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
   const titleRef = useRef<HTMLTextAreaElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea helper
   const autoResizeEl = useCallback((el: HTMLTextAreaElement | null) => {
@@ -41,14 +41,12 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
     }
   }, []);
 
-  useEffect(() => { autoResizeEl(textareaRef.current); }, [details, autoResizeEl]);
   useEffect(() => { autoResizeEl(titleRef.current); }, [title, autoResizeEl]);
 
   // Also resize on mount (for pre-filled content)
   useEffect(() => {
     requestAnimationFrame(() => {
       autoResizeEl(titleRef.current);
-      autoResizeEl(textareaRef.current);
     });
   }, [autoResizeEl]);
 
@@ -109,18 +107,14 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="todo-details" className="font-label text-sm font-medium text-subtext0">
-          Details
+        <label className="font-label text-sm font-medium text-subtext0">
+          Details <span className="text-xs text-overlay0">(Markdown)</span>
         </label>
-        <textarea
-          id="todo-details"
-          ref={textareaRef}
+        <MarkdownEditor
           value={details}
-          onChange={(e) => setDetails(e.target.value)}
-          placeholder="Optionale Details..."
-          maxLength={2000}
-          rows={2}
-          className="w-full min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text placeholder:text-overlay0 border-none outline-none focus:ring-2 focus:ring-mauve transition-all resize-none overflow-hidden"
+          onChange={setDetails}
+          rows={4}
+          disabled={isPending}
         />
       </div>
       <div className="flex gap-3">

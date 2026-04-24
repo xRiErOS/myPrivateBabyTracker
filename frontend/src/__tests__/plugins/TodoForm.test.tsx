@@ -52,8 +52,10 @@ describe("TodoForm", () => {
   it("renders all form fields", () => {
     renderForm();
     expect(screen.getByLabelText(/Titel/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Details/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Faellig/)).toBeInTheDocument();
+    // Details label is a span (not for= linked), find by text content
+    expect(screen.getByText(/Details/)).toBeInTheDocument();
+    // Due date label is not for= linked — check input presence
+    expect(screen.getByText(/Fällig|Faellig|am/i)).toBeInTheDocument();
   });
 
   it("shows 'Speichern' button for new entry", () => {
@@ -104,6 +106,7 @@ describe("TodoForm", () => {
     };
     renderForm({ entry });
     expect(screen.getByDisplayValue("Gewicht messen")).toBeInTheDocument();
+    // Details are now in MarkdownEditor textarea
     expect(screen.getByDisplayValue("Beim naechsten Termin")).toBeInTheDocument();
   });
 });
