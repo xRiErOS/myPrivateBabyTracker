@@ -194,6 +194,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # User preferences (per-user settings)
     from app.api.preferences import router as preferences_router
     app.include_router(preferences_router, prefix="/api/v1")
+    # Changelog management (file-backed)
+    from app.routers.changelog import router as changelog_router
+    app.include_router(changelog_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

@@ -14,7 +14,9 @@
     "auth": "Authentifizierung",
     "auth_desc": "Auth-Modus, Benutzer, Sicherheit",
     "users": "Benutzer",
-    "users_desc": "Benutzer anlegen, bearbeiten, deaktivieren"
+    "users_desc": "Benutzer anlegen, bearbeiten, deaktivieren",
+    "changelog": "Changelog",
+    "changelog_desc": "Release-Hinweise verwalten"
   },
   "children": {
     "title": "Kinder",
@@ -113,6 +115,32 @@
     "password_new_label": "Neues Passwort * (min. 8)",
     "password_min": "Passwort * (min. 8)",
     "device_name": "Geraetename"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "add": "Neuer Eintrag",
+    "new": "Neuer Eintrag",
+    "edit": "Eintrag bearbeiten",
+    "version": "Version",
+    "date": "Datum",
+    "title_label": "Titel",
+    "title_placeholder": "z.B. Sprint 15 — Neue Features",
+    "entries_label": "Aenderungen (eine pro Zeile)",
+    "entries_placeholder": "Neue Funktion X\nBug Y behoben",
+    "entries_hint": "Jede Zeile wird als separater Punkt angezeigt.",
+    "create_btn": "Eintragen",
+    "update_btn": "Aktualisieren",
+    "cancel": "Abbrechen",
+    "delete": "Loeschen",
+    "confirm_delete": "Loeschen bestaetigen",
+    "no_entries": "Noch keine Eintraege vorhanden",
+    "loading": "Wird geladen...",
+    "load_failed": "Eintraege konnten nicht geladen werden",
+    "save_failed": "Speichern fehlgeschlagen",
+    "delete_failed": "Loeschen fehlgeschlagen",
+    "created": "Eintrag erstellt",
+    "updated": "Eintrag aktualisiert",
+    "deleted": "Eintrag geloescht"
   },
   "quick_actions": {
     "title": "Quick Actions",

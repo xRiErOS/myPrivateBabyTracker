@@ -14,7 +14,9 @@
     "auth": "Authentication",
     "auth_desc": "Auth mode, users, security",
     "users": "Users",
-    "users_desc": "Create, edit, deactivate users"
+    "users_desc": "Create, edit, deactivate users",
+    "changelog": "Changelog",
+    "changelog_desc": "Manage release notes"
   },
   "children": {
     "title": "Children",
@@ -113,6 +115,32 @@
     "password_new_label": "New password * (min. 8)",
     "password_min": "Password * (min. 8)",
     "device_name": "Device name"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "add": "New entry",
+    "new": "New entry",
+    "edit": "Edit entry",
+    "version": "Version",
+    "date": "Date",
+    "title_label": "Title",
+    "title_placeholder": "e.g. Sprint 15 — New features",
+    "entries_label": "Changes (one per line)",
+    "entries_placeholder": "New feature X\nFixed bug Y",
+    "entries_hint": "Each line is shown as a separate bullet point.",
+    "create_btn": "Create",
+    "update_btn": "Update",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm_delete": "Confirm delete",
+    "no_entries": "No entries yet",
+    "loading": "Loading...",
+    "load_failed": "Could not load entries",
+    "save_failed": "Save failed",
+    "delete_failed": "Delete failed",
+    "created": "Entry created",
+    "updated": "Entry updated",
+    "deleted": "Entry deleted"
   },
   "quick_actions": {
     "title": "Quick Actions",
