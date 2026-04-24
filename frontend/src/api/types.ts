@@ -335,9 +335,10 @@ export interface TodoUpdate {
   is_done?: boolean | null;
 }
 
-export type HealthEntryType = "spit_up" | "tummy_ache";
+export type HealthEntryType = "spit_up" | "tummy_ache" | "crying";
 export type HealthSeverity = "mild" | "moderate" | "severe";
 export type HealthDuration = "short" | "medium" | "long";
+export type SoothingMethod = "nursing" | "rocking" | "carrying" | "pacifier" | "singing" | "white_noise" | "swaddling" | "other";
 
 export interface HealthEntry {
   id: number;
@@ -345,6 +346,8 @@ export interface HealthEntry {
   entry_type: HealthEntryType;
   severity: HealthSeverity;
   duration: HealthDuration | null;
+  duration_minutes: number | null;
+  soothing_method: SoothingMethod | null;
   time: string;
   notes: string | null;
   feeding_id: number | null;
@@ -356,6 +359,8 @@ export interface HealthCreate {
   entry_type: HealthEntryType;
   severity: HealthSeverity;
   duration?: HealthDuration | null;
+  duration_minutes?: number | null;
+  soothing_method?: SoothingMethod | null;
   time: string;
   notes?: string | null;
   feeding_id?: number | null;
@@ -365,6 +370,8 @@ export interface HealthUpdate {
   entry_type?: HealthEntryType | null;
   severity?: HealthSeverity | null;
   duration?: HealthDuration | null;
+  duration_minutes?: number | null;
+  soothing_method?: SoothingMethod | null;
   time?: string | null;
   notes?: string | null;
   feeding_id?: number | null;

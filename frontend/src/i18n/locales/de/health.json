@@ -3,7 +3,8 @@
   "list_title": "Gesundheit-Eintraege",
   "entry_type": {
     "spit_up": "Spucken",
-    "tummy_ache": "Bauchschmerzen"
+    "tummy_ache": "Bauchschmerzen",
+    "crying": "Schreien"
   },
   "severity": {
     "mild": "Wenig",
@@ -34,10 +35,23 @@
   "type_filter": {
     "all": "Alle Typen"
   },
+  "soothing_method": {
+    "label": "Beruhigungsmethode",
+    "nursing": "Stillen",
+    "rocking": "Wiegen",
+    "carrying": "Tragen",
+    "pacifier": "Schnuller",
+    "singing": "Singen",
+    "white_noise": "Rauschen",
+    "swaddling": "Pucken",
+    "other": "Andere"
+  },
+  "label_duration_minutes": "Dauer (Min)",
   "summary": {
     "total": "Gesamt",
     "spit_up": "Spucken",
     "tummy_ache": "Bauchschm.",
+    "crying": "Schreien",
     "last": "Zuletzt"
   },
   "feeding_type": {

@@ -3,7 +3,8 @@
   "list_title": "Health entries",
   "entry_type": {
     "spit_up": "Spit-up",
-    "tummy_ache": "Tummy ache"
+    "tummy_ache": "Tummy ache",
+    "crying": "Crying"
   },
   "severity": {
     "mild": "Mild",
@@ -34,10 +35,23 @@
   "type_filter": {
     "all": "All types"
   },
+  "soothing_method": {
+    "label": "Soothing method",
+    "nursing": "Nursing",
+    "rocking": "Rocking",
+    "carrying": "Carrying",
+    "pacifier": "Pacifier",
+    "singing": "Singing",
+    "white_noise": "White noise",
+    "swaddling": "Swaddling",
+    "other": "Other"
+  },
+  "label_duration_minutes": "Duration (min)",
   "summary": {
     "total": "Total",
     "spit_up": "Spit-up",
     "tummy_ache": "Tummy ache",
+    "crying": "Crying",
     "last": "Last"
   },
   "feeding_type": {
