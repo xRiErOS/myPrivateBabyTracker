@@ -67,7 +67,9 @@
     "admin": "Verwaltung",
     "more": "Mehr",
     "profile": "Mein Profil",
-    "tags": "Tags"
+    "tags": "Tags",
+    "checkup": "U-Untersuchungen",
+    "notes": "Notizen"
   },
   "errors": {
     "unknown": "Unbekannter Fehler",

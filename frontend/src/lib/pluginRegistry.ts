@@ -1,6 +1,6 @@
 /** Central plugin registry — single source of truth for plugin metadata. */
 
-import { Activity, CheckSquare, Droplets, Moon, Pill, Scale, Star, Sun, Tags, Thermometer, Timer, Utensils } from "lucide-react";
+import { Activity, CheckSquare, ClipboardCheck, Droplets, FileText, Moon, Pill, Scale, Star, Sun, Tags, Thermometer, Timer, Utensils } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import i18n from "../i18n";
 
@@ -26,6 +26,8 @@ export const PLUGINS: PluginDef[] = [
   { key: "tummytime", label: "Bauchlage", icon: Timer, route: "/tummy-time", isBase: false },
   { key: "milestones", label: "Meilensteine", icon: Star, route: "/milestones", isBase: false },
   { key: "tags", label: "Tags", icon: Tags, route: "/tags", isBase: false },
+  { key: "checkup", label: "U-Untersuchungen", icon: ClipboardCheck, route: "/checkup", isBase: false },
+  { key: "notes", label: "Notizen", icon: FileText, route: "/notes", isBase: false },
 ];
 
 /** Plugins that are always active and cannot be disabled. */

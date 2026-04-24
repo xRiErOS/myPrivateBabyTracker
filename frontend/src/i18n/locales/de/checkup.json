@@ -1,0 +1,23 @@
+{
+  "title": "U-Untersuchungen",
+  "widget_title": "Naechste U",
+  "label_type": "Untersuchung",
+  "label_date": "Datum",
+  "label_doctor": "Arzt/Aerztin",
+  "label_weight": "Gewicht (kg)",
+  "label_height": "Groesse (cm)",
+  "label_head": "Kopfumfang (cm)",
+  "select_type": "Bitte waehlen...",
+  "doctor_placeholder": "Name der Kinderaerztin",
+  "date_label": "Datum",
+  "doctor_label": "Arzt/Aerztin",
+  "head_short": "KU",
+  "recommended_age": "Empfohlenes Alter",
+  "weeks": "Wochen",
+  "empty": "Keine U-Untersuchungen vorhanden",
+  "confirm_delete": "U-Untersuchung loeschen?",
+  "overdue": "Ueberfaellig",
+  "due_now": "Jetzt faellig",
+  "days_until": "In {{days}} Tagen",
+  "all_done": "Alle erledigt!"
+}
