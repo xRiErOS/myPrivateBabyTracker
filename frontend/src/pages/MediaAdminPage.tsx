@@ -388,13 +388,10 @@ export default function MediaAdminPage() {
               {tagsEnabled && <TagBadges entryType="photo" entryId={photo.id} />}
               {/* Tag selector panel */}
               {tagsEnabled && tagEditPhotoId === photo.id && (
-                <div className="rounded-lg border border-surface2 bg-surface0 p-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-label text-xs text-subtext0">Tags</span>
-                    <button type="button" onClick={() => setTagEditPhotoId(null)} className="text-overlay0 hover:text-text">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
+                <div className="rounded-lg border border-surface2 bg-surface0 p-2 relative">
+                  <button type="button" onClick={() => setTagEditPhotoId(null)} className="absolute top-1 right-1 text-overlay0 hover:text-text">
+                    <X className="h-3 w-3" />
+                  </button>
                   <TagSelector entryType="photo" entryId={photo.id} />
                 </div>
               )}
