@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, Circle, Flame, Pencil, Plus, Trash2 } from "lucide-react";
 import { Card } from "../../components/Card";
+import { MarkdownDisplay } from "../../components/MarkdownEditor";
 import { useActiveChild } from "../../context/ChildContext";
 import {
   useHabits,
@@ -62,6 +63,11 @@ function HabitCard({ habit, onEdit }: HabitCardProps) {
         <p className="font-body text-xs text-subtext0 mt-0.5">
           {habit.recurrence === "weekly" ? weekdayLabel(habit.weekdays) : "Taeglich"}
         </p>
+        {habit.details && (
+          <div className="mt-1 text-xs text-subtext0">
+            <MarkdownDisplay content={habit.details} />
+          </div>
+        )}
       </div>
 
       {habit.streak > 0 && (

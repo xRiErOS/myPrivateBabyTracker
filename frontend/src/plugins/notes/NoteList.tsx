@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FileText, Pencil, Pin, PinOff, Trash2, X } from "lucide-react";
 import { Card } from "../../components/Card";
+import { MarkdownDisplay } from "../../components/MarkdownEditor";
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteNote, useNotes, useUpdateNote } from "../../hooks/useNotes";
 import { NoteForm } from "./NoteForm";
@@ -48,9 +49,9 @@ export function NoteList() {
                   {note.title}
                 </h3>
               </div>
-              <p className="font-body text-sm text-text mt-1 whitespace-pre-wrap">
-                {note.content}
-              </p>
+              <div className="mt-1">
+                <MarkdownDisplay content={note.content} />
+              </div>
               <div className="flex items-center gap-2 mt-2 text-xs text-subtext0">
                 {note.author_name && <span>{note.author_name}</span>}
                 <span>{new Date(note.updated_at).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>

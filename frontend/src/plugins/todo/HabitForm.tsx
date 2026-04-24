@@ -1,6 +1,7 @@
 /** Form to create or edit a Habit. */
 
 import { useState } from "react";
+import { MarkdownEditor } from "../../components/MarkdownEditor";
 import type { Habit, HabitCreate, HabitUpdate } from "../../api/types";
 
 const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -57,13 +58,11 @@ export function HabitForm({ childId, initial, onSubmit, onCancel, isLoading }: H
 
       <div>
         <label className="font-label text-sm text-subtext0 block mb-1">Details</label>
-        <textarea
+        <MarkdownEditor
           value={details}
-          onChange={(e) => setDetails(e.target.value)}
-          className="w-full rounded-lg bg-surface1 px-3 py-2 text-base text-text focus:outline-none focus:ring-2 focus:ring-peach resize-none"
+          onChange={setDetails}
           rows={2}
-          maxLength={2000}
-          style={{ fontSize: "16px" }}
+          placeholder="Details..."
         />
       </div>
 
