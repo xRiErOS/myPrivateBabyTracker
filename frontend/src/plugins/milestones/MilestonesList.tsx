@@ -19,7 +19,9 @@ import {
 import { formatDate } from "../../lib/dateUtils";
 import type { MilestoneCategory, MilestoneEntry, MilestoneTemplate } from "../../api/types";
 import type { MilestoneListParams } from "../../api/milestones";
+import { photoUrl } from "../../api/milestones";
 import { PhotoSection } from "./PhotoSection";
+import type { MilestonePhoto } from "../../api/types";
 
 function CategoryBadge({ category }: { category: MilestoneCategory | undefined }) {
   if (!category) return null;
@@ -387,10 +389,25 @@ export function MilestonesList() {
                       {entry.notes}
                     </p>
                   )}
-                  {/* Photo thumbnails (read-only view) */}
+                  {/* Photo thumbnails (read-only compact grid) */}
                   {entry.photos.length > 0 && !isEditing && (
-                    <div className="mt-2">
-                      <PhotoSection entryId={entry.id} photos={entry.photos} />
+                    <div className={`mt-2 gap-1 ${
+                      entry.photos.length === 1 ? "flex" :
+                      "grid grid-cols-2"
+                    }`} style={{ maxWidth: entry.photos.length === 1 ? "120px" : "248px" }}>
+                      {(entry.photos as MilestonePhoto[]).map((p, idx) => (
+                        <div
+                          key={p.id}
+                          className="relative rounded-[6px] overflow-hidden bg-surface1 aspect-square"
+                        >
+                          <img
+                            src={photoUrl(p.file_path, true)}
+                            alt={`${entry.title} ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
