@@ -1,0 +1,49 @@
+[
+  {
+    "version": "0.7.0",
+    "date": "2026-04-24",
+    "title": "Sprint 16+17 — Neue Plugins, Habits & UX-Verbesserungen",
+    "variant": "update",
+    "entries": [
+      "Wohlbefinden: Plugin umbenannt (ehem. Gesundheit), Schreien & Beruhigung Tracking neu",
+      "U-Untersuchungen: Neues Plugin — U1 bis U9 mit Seed-Daten und Abhaken",
+      "Wachstumskurven: WHO-Perzentilen (P3–P97) mit Frühgeborenen-Kalibrierung",
+      "Schlafübersicht: Tages-Gesamtschlaf mit altersspezifischem Zielwert-Diagramm",
+      "Schlaf-Ort: Optionaler Schlafplatz (Bett, Tragetuch, Kinderwagen, Auto, Andere)",
+      "Eltern-Notizen: Neues Plugin mit Markdown, Checkboxen und Tags",
+      "Tasks & Habits: Gewohnheiten mit Streak-Tracking, eigene Dashboard-Kachel",
+      "FAB: Floating Action Button auf Mobile mit Schnellzugriff + Weitere-Menü",
+      "Warnhinweise: Referenzwerte-Tabelle mit Übernahme-Funktion, Abweichungswarnung",
+      "Warnhinweise: Altersbereich-Filter und stärkere visuelle Darstellung",
+      "Changelog: Admin-UI zum Verwalten von Release-Hinweisen",
+      "Markdown: Formatleiste (Fett, Kursiv, Listen, Checkboxen) + Live-Preview",
+      "Checkboxen in Notizen und Aufgaben direkt abhakbar ohne Edit-Modus"
+    ]
+  },
+  {
+    "version": "0.6.3",
+    "date": "2026-04-24",
+    "title": "Tasks & Habits, FAB, Warnhinweise-Update",
+    "variant": "update",
+    "entries": [
+      "Tasks & Habits: Neues Habit-System mit täglichen und wöchentlichen Gewohnheiten + Streak-Tracking",
+      "Floating Action Button (FAB) auf Mobile für schnellen Zugriff auf Quick-Actions",
+      "Warnhinweise: Nebeneinander-Layout auf Desktop, stärkere visuelle Darstellung",
+      "Warnhinweise: Altersbereich-Filter (min/max Wochen) konfigurierbar",
+      "Markdown-Editor im Aufgaben-Detailbereich (Preview-Toggle)"
+    ]
+  },
+  {
+    "version": "0.6.2",
+    "date": "2026-04-23",
+    "title": "Sprint 14 — i18n, Wonder Weeks Fix",
+    "variant": "update",
+    "entries": [
+      "i18n: Vollständige Übersetzung (de/en) für alle 15 Namespaces",
+      "Wonder Weeks: Alle 10 Sprungzeiträume korrigiert",
+      "Gesundheit → Wohlbefinden umbenannt",
+      "Health-Kaskaden-Löschung bei Feeding-Löschung",
+      "Inline-Edit für Entries überarbeitet"
+    ]
+  }
+]

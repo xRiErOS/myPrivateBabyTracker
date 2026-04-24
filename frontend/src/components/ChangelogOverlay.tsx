@@ -1,7 +1,7 @@
 /** Changelog overlay — shown on app-start when a new version is detected.
 
 Compares current app version (from /health) with last seen version in localStorage.
-Shows release notes from /changelog.json when a new version is detected.
+Shows release notes from /api/v1/changelog when a new version is detected.
 Dismissed via button — stores seen version in localStorage.
 */
 
@@ -30,7 +30,7 @@ async function fetchCurrentVersion(): Promise<string | null> {
 
 async function fetchChangelog(): Promise<ChangelogEntry[]> {
   try {
-    const res = await fetch("/changelog.json");
+    const res = await fetch("/api/v1/changelog", { credentials: "same-origin" });
     if (!res.ok) return [];
     return await res.json();
   } catch {

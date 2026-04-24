@@ -1,4 +1,4 @@
-"""Changelog CRUD router — reads/writes frontend/public/changelog.json."""
+"""Changelog CRUD router — reads/writes data/changelog.json (persistent volume)."""
 
 import json
 from pathlib import Path
@@ -14,8 +14,8 @@ logger = get_logger("changelog")
 
 router = APIRouter(prefix="/changelog", tags=["changelog"])
 
-# Path to the changelog file (relative to project root in container, or resolved at import)
-_CHANGELOG_PATH = Path(__file__).resolve().parent.parent.parent.parent / "frontend" / "public" / "changelog.json"
+# Persistent data directory (same volume as the SQLite DB: /app/data/ in container)
+_CHANGELOG_PATH = Path("data") / "changelog.json"
 
 
 def _load() -> list[dict]:
