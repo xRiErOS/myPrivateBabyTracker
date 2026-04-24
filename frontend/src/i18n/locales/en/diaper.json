@@ -48,5 +48,6 @@
   },
   "summary_total_short": "Tot.",
   "summary_both_short": "Both",
-  "summary_wet_short": "Wet"
+  "summary_wet_short": "Wet",
+  "avg_7days_short": "\u00d8 7d: {{count}}/day"
 }

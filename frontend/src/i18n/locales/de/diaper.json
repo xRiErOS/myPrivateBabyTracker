@@ -48,5 +48,6 @@
   },
   "summary_total_short": "Ges.",
   "summary_both_short": "Beid.",
-  "summary_wet_short": "Nass"
+  "summary_wet_short": "Nass",
+  "avg_7days_short": "\u00d8 7T: {{count}}/Tag"
 }

@@ -37,7 +37,7 @@ import {
 } from "../lib/timelineUtils";
 
 const VIEW_DAYS: Record<DashboardView, number> = {
-  today: 8, // today + 7 previous days for average
+  today: 15, // today + 14 previous days for 7+14 day averages
   week: 7,
   pattern: 14,
 };

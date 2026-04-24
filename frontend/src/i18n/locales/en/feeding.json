@@ -57,6 +57,7 @@
   "yesterday_total": "Yesterday: {{amount}} ml",
   "avg_7days": "\u00d8 6 days: {{amount}} ml",
   "yesterday_short": "Yesterday: {{amount}} ml",
-  "avg_7days_short": "\u00d8 6d: {{amount}} ml",
+  "avg_7days_short": "\u00d8 7d: {{amount}} ml",
+  "avg_14days_short": "\u00d8 14d: {{amount}} ml",
   "last_entry": "Last: {{time}}"
 }

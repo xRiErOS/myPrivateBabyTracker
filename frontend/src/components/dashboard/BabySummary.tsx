@@ -305,16 +305,40 @@ export function BabySummary({
   const todayTotal = todayFeedings.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
   const yesterdayTotal = yesterdayFeedings.reduce((s, f) => s + (f.amount_ml ?? 0), 0);
 
-  // 7-day average (excluding today)
+  // 7-day average feeding (excluding today)
   const avg7days = (() => {
-    const past7 = Array.from({ length: 7 }, (_, i) => {
+    const past = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(Date.now() - (i + 1) * 86400000);
       return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
     });
-    const totals = past7
+    const totals = past
       .map((day) => (feedByDay[day] ?? []).reduce((s, f) => s + (f.amount_ml ?? 0), 0))
       .filter((t) => t > 0);
     return totals.length > 0 ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length) : null;
+  })();
+
+  // 14-day average feeding (excluding today)
+  const avg14days = (() => {
+    const past = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date(Date.now() - (i + 1) * 86400000);
+      return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+    });
+    const totals = past
+      .map((day) => (feedByDay[day] ?? []).reduce((s, f) => s + (f.amount_ml ?? 0), 0))
+      .filter((t) => t > 0);
+    return totals.length >= 7 ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length) : null;
+  })();
+
+  // 7-day average diaper count (excluding today)
+  const avgDiapers7days = (() => {
+    const past = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(Date.now() - (i + 1) * 86400000);
+      return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+    });
+    const counts = past
+      .map((day) => (diaperByDay[day] ?? []).length)
+      .filter((c) => c > 0);
+    return counts.length > 0 ? Math.round(counts.reduce((a, b) => a + b, 0) / counts.length) : null;
   })();
 
   const trend =
@@ -389,9 +413,10 @@ export function BabySummary({
               </>
             }
             sub={
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <span>{tFeeding("yesterday_short", { amount: yesterdayTotal })}</span>
                 {avg7days != null && <span className="text-mauve">{tFeeding("avg_7days_short", { amount: avg7days })}</span>}
+                {avg14days != null && <span className="text-lavender">{tFeeding("avg_14days_short", { amount: avg14days })}</span>}
               </div>
             }
           />
@@ -419,6 +444,11 @@ export function BabySummary({
           ))}
         </div>
         <DiaperBar diapers={todayDiapers} />
+        {avgDiapers7days != null && (
+          <p className="font-body text-[10px] text-mauve mt-1">
+            {tDiaper("avg_7days_short", { count: avgDiapers7days })}
+          </p>
+        )}
       </Tile>
 
       <SleepTile childId={childId} onClick={() => onTileClick?.("sleep")} />
