@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Baby, Globe, RefreshCw, Zap } from "lucide-react";
+import { Clock, Baby, Globe, RefreshCw, Sparkles, Zap } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "../components/Card";
+import { ChangelogModal, useShowChangelog } from "../components/ChangelogOverlay";
 import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../hooks/useAuth";
 import { getPreferences, updatePreferences, type UserPreferences } from "../api/preferences";
@@ -43,6 +44,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const changelogHook = useShowChangelog();
 
   useEffect(() => {
     getPreferences()
@@ -210,6 +212,32 @@ export default function ProfilePage() {
           ))}
         </div>
       </Card>
+
+      {/* Release Notes */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-peach" />
+          <h3 className="font-headline text-base font-semibold text-text">{t("profile.release_notes")}</h3>
+        </div>
+        <p className="text-xs text-subtext0">
+          {t("profile.release_notes_hint")}
+        </p>
+        <button
+          type="button"
+          onClick={() => changelogHook.trigger()}
+          className="w-full py-2.5 rounded-lg bg-surface1 text-text font-label text-sm font-semibold hover:bg-surface2 active:bg-surface2 transition-colors flex items-center justify-center gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          {t("profile.release_notes_button")}
+        </button>
+      </Card>
+      {changelogHook.show && changelogHook.version && (
+        <ChangelogModal
+          version={changelogHook.version}
+          entries={changelogHook.entries}
+          onDismiss={changelogHook.close}
+        />
+      )}
 
       {/* Clear Cache */}
       <Card className="p-4 space-y-3">

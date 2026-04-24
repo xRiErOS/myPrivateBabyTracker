@@ -46,6 +46,24 @@ function setLastSeenVersion(version: string): void {
   localStorage.setItem(SEEN_KEY, version);
 }
 
+/** Manually show the changelog overlay (e.g. from ProfilePage). */
+export function useShowChangelog() {
+  const [show, setShow] = useState(false);
+  const [version, setVersion] = useState<string | null>(null);
+  const [entries, setEntries] = useState<ChangelogEntry[]>([]);
+
+  async function trigger() {
+    const v = await fetchCurrentVersion();
+    if (!v) return;
+    const log = await fetchChangelog();
+    setVersion(v);
+    setEntries(log);
+    setShow(true);
+  }
+
+  return { show, version, entries, trigger, close: () => setShow(false) };
+}
+
 export function ChangelogOverlay() {
   const [show, setShow] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<string | null>(null);
@@ -85,6 +103,25 @@ export function ChangelogOverlay() {
   });
 
   return (
+    <ChangelogModal
+      version={currentVersion}
+      entries={relevantEntries}
+      onDismiss={handleDismiss}
+    />
+  );
+}
+
+/** Reusable changelog modal — used by auto-overlay and manual trigger. */
+export function ChangelogModal({
+  version,
+  entries,
+  onDismiss,
+}: {
+  version: string;
+  entries: ChangelogEntry[];
+  onDismiss: () => void;
+}) {
+  return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-surface0 rounded-2xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
         {/* Header */}
@@ -92,11 +129,11 @@ export function ChangelogOverlay() {
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-peach" />
             <h2 className="font-label text-base font-semibold text-text">
-              Update auf v{currentVersion}
+              MyBaby v{version}
             </h2>
           </div>
           <button
-            onClick={handleDismiss}
+            onClick={onDismiss}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-surface1 transition-colors"
             aria-label="Schliessen"
           >
@@ -106,10 +143,10 @@ export function ChangelogOverlay() {
 
         {/* Content — scrollable */}
         <div className="overflow-y-auto flex-1 px-5 pb-2 space-y-4">
-          {relevantEntries.length === 0 ? (
+          {entries.length === 0 ? (
             <p className="font-body text-sm text-subtext0">Keine Details verfügbar.</p>
           ) : (
-            relevantEntries.map((entry) => (
+            entries.map((entry) => (
               <div key={entry.version}>
                 <div className="flex items-baseline gap-2 mb-2">
                   <span className="font-label text-sm font-semibold text-peach">v{entry.version}</span>
@@ -132,7 +169,7 @@ export function ChangelogOverlay() {
         {/* Footer */}
         <div className="px-5 py-4 border-t border-surface1">
           <button
-            onClick={handleDismiss}
+            onClick={onDismiss}
             className="w-full rounded-xl bg-peach py-3 text-sm font-semibold text-ground transition-opacity hover:opacity-90"
           >
             Verstanden
