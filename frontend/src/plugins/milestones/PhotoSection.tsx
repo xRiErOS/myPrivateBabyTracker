@@ -151,7 +151,7 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
         ref={fileRef}
         type="file"
         accept="image/*"
-        capture="environment"
+
         className="hidden"
         onChange={handleFileSelect}
       />

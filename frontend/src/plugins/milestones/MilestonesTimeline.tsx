@@ -132,7 +132,7 @@ function TimelineItem({ entry, category, birthDate, side, onPhotoClick, onUpload
                 ref={fileRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
+
                 className="hidden"
                 onChange={handleFileChange}
               />

@@ -239,7 +239,7 @@ export default function MilestonesOverview() {
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
+
         className="hidden"
         onChange={handleFileSelected}
       />
