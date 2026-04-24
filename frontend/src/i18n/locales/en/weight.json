@@ -19,5 +19,11 @@
     "trend": "Trend",
     "measurements": "Measurements",
     "last_measurement": "Last measurement"
+  },
+  "growth_chart": {
+    "title": "WHO Growth Chart",
+    "corrected_age": "Corrected age",
+    "tab_list": "Entries",
+    "tab_chart": "Growth chart"
   }
 }
