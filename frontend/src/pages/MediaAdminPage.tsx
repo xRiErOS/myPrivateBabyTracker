@@ -7,6 +7,7 @@ import {
   HardDrive,
   Image as ImageIcon,
   RefreshCw,
+  Tag,
   Trash2,
   X,
   ZoomIn,
@@ -16,6 +17,9 @@ import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { useActiveChild } from "../context/ChildContext";
+import { TagBadges } from "../components/TagBadges";
+import { TagSelector } from "../components/TagSelector";
+import { isPluginEnabled } from "../lib/pluginConfig";
 import { photoUrl } from "../api/milestones";
 import {
   useCategories,
@@ -58,6 +62,8 @@ export default function MediaAdminPage() {
   const replaceRef = useRef<HTMLInputElement>(null);
   const [replaceTargetId, setReplaceTargetId] = useState<number | null>(null);
   const [replaceEntryId, setReplaceEntryId] = useState<number | null>(null);
+  const [tagEditPhotoId, setTagEditPhotoId] = useState<number | null>(null);
+  const tagsEnabled = isPluginEnabled("tags");
 
   // Category map
   const categoryMap = useMemo(() => {
@@ -292,8 +298,8 @@ export default function MediaAdminPage() {
             const isSelected = selectedIds.has(photo.id);
             const cat = categoryMap.get(photo.category_id);
             return (
+              <div key={photo.id} className="flex flex-col gap-1">
               <div
-                key={photo.id}
                 className={`relative group aspect-square rounded-[8px] overflow-hidden bg-surface1 cursor-pointer ${
                   isSelected ? "ring-2 ring-mauve" : ""
                 }`}
@@ -352,6 +358,15 @@ export default function MediaAdminPage() {
                     >
                       <Download className="h-4 w-4" />
                     </button>
+                    {tagsEnabled && (
+                      <button
+                        type="button"
+                        onClick={() => setTagEditPhotoId(tagEditPhotoId === photo.id ? null : photo.id)}
+                        className="h-9 w-9 flex items-center justify-center rounded-full bg-surface0/90 text-mauve border border-surface2"
+                      >
+                        <Tag className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => startReplace(photo)}
@@ -368,6 +383,21 @@ export default function MediaAdminPage() {
                     </button>
                   </div>
                 )}
+              </div>
+              {/* Tag badges below photo */}
+              {tagsEnabled && <TagBadges entryType="photo" entryId={photo.id} />}
+              {/* Tag selector panel */}
+              {tagsEnabled && tagEditPhotoId === photo.id && (
+                <div className="rounded-lg border border-surface2 bg-surface0 p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-label text-xs text-subtext0">Tags</span>
+                    <button type="button" onClick={() => setTagEditPhotoId(null)} className="text-overlay0 hover:text-text">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <TagSelector entryType="photo" entryId={photo.id} />
+                </div>
+              )}
               </div>
             );
           })}
