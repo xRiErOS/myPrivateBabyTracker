@@ -1,4 +1,4 @@
-"""Todo plugin — task list with recurring templates.
+"""Todo plugin — task list with recurring templates and habits.
 
 Discovered automatically by PluginRegistry (ADR-1).
 """
@@ -6,24 +6,25 @@ Discovered automatically by PluginRegistry (ADR-1).
 from fastapi import FastAPI
 
 from app.plugins._base import PluginBase
-from app.plugins.todo.models import TodoEntry, TodoTemplate
-from app.plugins.todo.router import router, template_router
+from app.plugins.todo.models import Habit, HabitCompletion, TodoEntry, TodoTemplate
+from app.plugins.todo.router import habit_router, router, template_router
 
 
 class TodoPlugin(PluginBase):
-    """Baby todo list plugin."""
+    """Baby todo list + habits plugin."""
 
     name = "todo"
-    display_name = "ToDo-Liste"
+    display_name = "Tasks & Habits"
 
     def register_routes(self, app: FastAPI) -> None:
-        """Register todo CRUD + template routes under /api/v1/."""
+        """Register todo CRUD + template + habit routes under /api/v1/."""
         app.include_router(router, prefix="/api/v1")
         app.include_router(template_router, prefix="/api/v1")
+        app.include_router(habit_router, prefix="/api/v1")
 
     def register_models(self) -> list[type]:
-        """Return TodoEntry and TodoTemplate models for Alembic discovery."""
-        return [TodoEntry, TodoTemplate]
+        """Return all models for Alembic discovery."""
+        return [TodoEntry, TodoTemplate, Habit, HabitCompletion]
 
     def register_widgets(self) -> list:
         """No dashboard widget for todos."""

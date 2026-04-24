@@ -584,3 +584,44 @@ export interface TodoTemplateUpdate {
   details?: string | null;
   is_active?: boolean;
 }
+
+// --- Habits ---
+
+export type HabitRecurrence = "daily" | "weekly";
+
+export interface Habit {
+  id: number;
+  child_id: number;
+  title: string;
+  details: string | null;
+  recurrence: HabitRecurrence;
+  weekdays: number[] | null;
+  is_active: boolean;
+  streak: number;
+  completed_today: boolean;
+  created_at: string;
+}
+
+export interface HabitCreate {
+  child_id: number;
+  title: string;
+  details?: string | null;
+  recurrence?: HabitRecurrence;
+  weekdays?: number[] | null;
+}
+
+export interface HabitUpdate {
+  title?: string;
+  details?: string | null;
+  recurrence?: HabitRecurrence;
+  weekdays?: number[] | null;
+  is_active?: boolean;
+}
+
+export interface HabitCompletion {
+  id: number;
+  habit_id: number;
+  child_id: number;
+  completed_date: string;
+  completed_at: string;
+}

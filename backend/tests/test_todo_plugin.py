@@ -162,3 +162,121 @@ async def test_title_max_length(async_client: AsyncClient):
         json={"child_id": child_id, "title": "x" * 201},
     )
     assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Habit Tests
+# ---------------------------------------------------------------------------
+
+
+async def _create_habit(client: AsyncClient, child_id: int, **kwargs) -> dict:
+    payload = {"child_id": child_id, "title": "Spaziergang", **kwargs}
+    resp = await client.post("/api/v1/habits/", json=payload)
+    assert resp.status_code == 201, resp.text
+    return resp.json()
+
+
+@pytest.mark.anyio
+async def test_create_daily_habit(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    data = await _create_habit(async_client, child_id, recurrence="daily")
+    assert data["title"] == "Spaziergang"
+    assert data["recurrence"] == "daily"
+    assert data["streak"] == 0
+    assert data["completed_today"] is False
+    assert data["is_active"] is True
+
+
+@pytest.mark.anyio
+async def test_create_weekly_habit(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    data = await _create_habit(async_client, child_id, recurrence="weekly", weekdays=[0, 2, 4])
+    assert data["recurrence"] == "weekly"
+    assert data["weekdays"] == [0, 2, 4]
+
+
+@pytest.mark.anyio
+async def test_list_habits(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    await _create_habit(async_client, child_id, title="Habit A")
+    await _create_habit(async_client, child_id, title="Habit B")
+    resp = await async_client.get(f"/api/v1/habits/?child_id={child_id}")
+    assert resp.status_code == 200
+    assert len(resp.json()) == 2
+
+
+@pytest.mark.anyio
+async def test_complete_habit_today(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    habit = await _create_habit(async_client, child_id)
+    resp = await async_client.post(f"/api/v1/habits/{habit['id']}/complete")
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["habit_id"] == habit["id"]
+    assert data["completed_date"] is not None
+
+
+@pytest.mark.anyio
+async def test_complete_habit_idempotent(async_client: AsyncClient):
+    """Completing twice should return existing record, not 500."""
+    child_id = await _create_child(async_client)
+    habit = await _create_habit(async_client, child_id)
+    await async_client.post(f"/api/v1/habits/{habit['id']}/complete")
+    resp = await async_client.post(f"/api/v1/habits/{habit['id']}/complete")
+    assert resp.status_code == 201  # returns existing, no duplicate
+
+
+@pytest.mark.anyio
+async def test_uncomplete_habit(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    habit = await _create_habit(async_client, child_id)
+    await async_client.post(f"/api/v1/habits/{habit['id']}/complete")
+    resp = await async_client.delete(f"/api/v1/habits/{habit['id']}/complete")
+    assert resp.status_code == 204
+
+
+@pytest.mark.anyio
+async def test_habit_streak_after_completion(async_client: AsyncClient):
+    """After completing today, streak should be at least 1."""
+    child_id = await _create_child(async_client)
+    habit = await _create_habit(async_client, child_id)
+    await async_client.post(f"/api/v1/habits/{habit['id']}/complete")
+    resp = await async_client.get(f"/api/v1/habits/{habit['id']}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["streak"] >= 1
+    assert data["completed_today"] is True
+
+
+@pytest.mark.anyio
+async def test_update_habit(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    habit = await _create_habit(async_client, child_id)
+    resp = await async_client.patch(
+        f"/api/v1/habits/{habit['id']}",
+        json={"title": "Baden", "recurrence": "weekly", "weekdays": [1, 4, 6]},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["title"] == "Baden"
+    assert data["weekdays"] == [1, 4, 6]
+
+
+@pytest.mark.anyio
+async def test_delete_habit(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    habit = await _create_habit(async_client, child_id)
+    resp = await async_client.delete(f"/api/v1/habits/{habit['id']}")
+    assert resp.status_code == 204
+    resp2 = await async_client.get(f"/api/v1/habits/{habit['id']}")
+    assert resp2.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_habit_invalid_weekday(async_client: AsyncClient):
+    child_id = await _create_child(async_client)
+    resp = await async_client.post(
+        "/api/v1/habits/",
+        json={"child_id": child_id, "title": "Test", "recurrence": "weekly", "weekdays": [7]},
+    )
+    assert resp.status_code == 422

@@ -1,11 +1,12 @@
-/** React Query hooks for Todo CRUD + Templates. */
+/** React Query hooks for Todo CRUD + Templates + Habits. */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createTodo, deleteTodo, listTodos, updateTodo,
   listTemplates, createTemplate, updateTemplate, deleteTemplate, cloneTemplate,
+  listHabits, createHabit, updateHabit, deleteHabit, completeHabit, uncompleteHabit,
 } from "../api/todo";
-import type { TodoCreate, TodoUpdate, TodoTemplateCreate, TodoTemplateUpdate } from "../api/types";
+import type { TodoCreate, TodoUpdate, TodoTemplateCreate, TodoTemplateUpdate, HabitCreate, HabitUpdate } from "../api/types";
 import { useToast } from "../context/ToastContext";
 
 const TODO_KEY = ["todos"] as const;
@@ -105,6 +106,72 @@ export function useCloneTemplate() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TODO_KEY });
       showToast("ToDo aus Vorlage erstellt");
+    },
+  });
+}
+
+// --- Habit hooks ---
+
+const HABIT_KEY = ["habits"] as const;
+
+export function useHabits(childId?: number, activeOnly = true) {
+  return useQuery({
+    queryKey: [...HABIT_KEY, { childId, activeOnly }],
+    queryFn: () => listHabits(childId, activeOnly),
+    enabled: childId != null,
+  });
+}
+
+export function useCreateHabit() {
+  const qc = useQueryClient();
+  const { showToast } = useToast();
+  return useMutation({
+    mutationFn: (data: HabitCreate) => createHabit(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: HABIT_KEY });
+      showToast("Habit angelegt");
+    },
+  });
+}
+
+export function useUpdateHabit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: HabitUpdate }) => updateHabit(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: HABIT_KEY });
+    },
+  });
+}
+
+export function useDeleteHabit() {
+  const qc = useQueryClient();
+  const { showToast } = useToast();
+  return useMutation({
+    mutationFn: (id: number) => deleteHabit(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: HABIT_KEY });
+      showToast("Habit geloescht");
+    },
+  });
+}
+
+export function useCompleteHabit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => completeHabit(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: HABIT_KEY });
+    },
+  });
+}
+
+export function useUncompleteHabit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => uncompleteHabit(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: HABIT_KEY });
     },
   });
 }

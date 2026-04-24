@@ -1,9 +1,10 @@
-/** Todo API — CRUD operations for baby todo entries + templates. */
+/** Todo API — CRUD operations for baby todo entries + templates + habits. */
 
 import { apiFetch } from "./client";
 import type {
   TodoEntry, TodoCreate, TodoUpdate,
   TodoTemplate, TodoTemplateCreate, TodoTemplateUpdate,
+  Habit, HabitCreate, HabitUpdate, HabitCompletion,
 } from "./types";
 
 const BASE = "/v1/todo/";
@@ -53,4 +54,36 @@ export async function deleteTemplate(id: number): Promise<void> {
 
 export async function cloneTemplate(id: number): Promise<TodoEntry> {
   return apiFetch<TodoEntry>(`${TPL_BASE}${id}/clone`, { method: "POST" });
+}
+
+// --- Habits ---
+
+const HABIT_BASE = "/v1/habits/";
+
+export async function listHabits(childId?: number, activeOnly = true): Promise<Habit[]> {
+  const params = new URLSearchParams();
+  if (childId) params.set("child_id", String(childId));
+  if (!activeOnly) params.set("active_only", "false");
+  const qs = params.toString() ? `?${params}` : "";
+  return apiFetch<Habit[]>(`${HABIT_BASE}${qs}`);
+}
+
+export async function createHabit(data: HabitCreate): Promise<Habit> {
+  return apiFetch<Habit>(HABIT_BASE, { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateHabit(id: number, data: HabitUpdate): Promise<Habit> {
+  return apiFetch<Habit>(`${HABIT_BASE}${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export async function deleteHabit(id: number): Promise<void> {
+  return apiFetch<void>(`${HABIT_BASE}${id}`, { method: "DELETE" });
+}
+
+export async function completeHabit(id: number): Promise<HabitCompletion> {
+  return apiFetch<HabitCompletion>(`${HABIT_BASE}${id}/complete`, { method: "POST" });
+}
+
+export async function uncompleteHabit(id: number): Promise<void> {
+  return apiFetch<void>(`${HABIT_BASE}${id}/complete`, { method: "DELETE" });
 }
