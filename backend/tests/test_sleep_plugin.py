@@ -457,6 +457,94 @@ async def test_overlap_update_rejected(async_client):
 
 
 # ---------------------------------------------------------------------------
+# Chart Endpoint Tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.anyio
+async def test_sleep_chart_basic(async_client):
+    """GET /api/v1/sleep/chart returns aggregated daily sleep data."""
+    child_id = await _create_child(async_client)
+
+    # Create entries across two days
+    await _create_sleep(async_client, child_id, start="2026-04-19T14:00:00Z", end="2026-04-19T15:30:00Z", sleep_type="nap")
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-20T06:00:00Z", sleep_type="night")
+
+    resp = await async_client.get(f"/api/v1/sleep/chart?child_id={child_id}&days=30")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert data["child_name"] == "TestBaby"
+    assert data["is_preterm"] is False
+    assert "target_min_hours" in data
+    assert "target_max_hours" in data
+    assert "age_group" in data
+    assert len(data["measurements"]) == 30
+
+
+@pytest.mark.anyio
+async def test_sleep_chart_midnight_split(async_client):
+    """Chart correctly splits sleep entries across midnight."""
+    child_id = await _create_child(async_client)
+
+    # Night sleep: 22:00 to 06:00 = 2h on day 1, 6h on day 2
+    await _create_sleep(async_client, child_id, start="2026-04-19T22:00:00Z", end="2026-04-20T06:00:00Z", sleep_type="night")
+
+    resp = await async_client.get(f"/api/v1/sleep/chart?child_id={child_id}&days=30")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    # Find the two days with data
+    day_map = {m["date"]: m for m in data["measurements"]}
+    if "2026-04-19" in day_map:
+        assert day_map["2026-04-19"]["night_hours"] == 2.0
+    if "2026-04-20" in day_map:
+        assert day_map["2026-04-20"]["night_hours"] == 6.0
+
+
+@pytest.mark.anyio
+async def test_sleep_chart_child_not_found(async_client):
+    """GET /api/v1/sleep/chart returns 404 for non-existent child."""
+    resp = await async_client.get("/api/v1/sleep/chart?child_id=9999&days=30")
+    assert resp.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_sleep_chart_excludes_ongoing(async_client):
+    """Chart ignores ongoing (no end_time) entries."""
+    child_id = await _create_child(async_client)
+
+    # Create an ongoing sleep entry (no end_time)
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end=None, sleep_type="night")
+
+    resp = await async_client.get(f"/api/v1/sleep/chart?child_id={child_id}&days=30")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    # All days should show 0 hours since the ongoing entry is excluded
+    for m in data["measurements"]:
+        assert m["total_hours"] == 0.0
+
+
+@pytest.mark.anyio
+async def test_sleep_chart_nap_vs_night(async_client):
+    """Chart correctly separates nap and night hours."""
+    child_id = await _create_child(async_client)
+
+    await _create_sleep(async_client, child_id, start="2026-04-19T13:00:00Z", end="2026-04-19T14:00:00Z", sleep_type="nap")
+    await _create_sleep(async_client, child_id, start="2026-04-19T20:00:00Z", end="2026-04-19T22:00:00Z", sleep_type="night")
+
+    resp = await async_client.get(f"/api/v1/sleep/chart?child_id={child_id}&days=30")
+    assert resp.status_code == 200
+
+    day_map = {m["date"]: m for m in resp.json()["measurements"]}
+    if "2026-04-19" in day_map:
+        assert day_map["2026-04-19"]["nap_hours"] == 1.0
+        assert day_map["2026-04-19"]["night_hours"] == 2.0
+        assert day_map["2026-04-19"]["total_hours"] == 3.0
+
+
+# ---------------------------------------------------------------------------
 # Plugin Discovery Test
 # ---------------------------------------------------------------------------
 
