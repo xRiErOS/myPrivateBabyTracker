@@ -8,6 +8,7 @@ class ChangelogEntry(BaseModel):
     date: str = Field(max_length=10)  # YYYY-MM-DD
     title: str = Field(max_length=200)
     entries: list[str] = Field(max_length=20)
+    variant: str | None = Field(default="update", max_length=20)  # update, info, warning
 
 
 class ChangelogCreate(ChangelogEntry):
@@ -18,3 +19,4 @@ class ChangelogUpdate(BaseModel):
     date: str | None = Field(default=None, max_length=10)
     title: str | None = Field(default=None, max_length=200)
     entries: list[str] | None = Field(default=None, max_length=20)
+    variant: str | None = Field(default=None, max_length=20)

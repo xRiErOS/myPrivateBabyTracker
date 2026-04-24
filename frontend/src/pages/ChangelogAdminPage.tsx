@@ -6,11 +6,14 @@ import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 
+type ChangelogVariant = "update" | "info" | "warning";
+
 interface ChangelogEntry {
   version: string;
   date: string;
   title: string;
   entries: string[];
+  variant?: ChangelogVariant;
 }
 
 async function apiFetch(path: string, options?: RequestInit) {
@@ -49,7 +52,8 @@ interface FormState {
   version: string;
   date: string;
   title: string;
-  entriesText: string; // one entry per line
+  entriesText: string; // markdown text
+  variant: ChangelogVariant;
 }
 
 const emptyForm = (): FormState => ({
@@ -57,7 +61,14 @@ const emptyForm = (): FormState => ({
   date: new Date().toISOString().slice(0, 10),
   title: "",
   entriesText: "",
+  variant: "update",
 });
+
+const VARIANT_OPTIONS: { value: ChangelogVariant; label: string; color: string }[] = [
+  { value: "update", label: "Update", color: "bg-peach text-ground" },
+  { value: "info", label: "Info", color: "bg-sapphire text-ground" },
+  { value: "warning", label: "Warnung", color: "bg-red text-ground" },
+];
 
 export default function ChangelogAdminPage() {
   const { t } = useTranslation("admin");
@@ -98,6 +109,7 @@ export default function ChangelogAdminPage() {
       date: entry.date,
       title: entry.title,
       entriesText: entry.entries.join("\n"),
+      variant: entry.variant ?? "update",
     });
     setEditVersion(entry.version);
     setShowForm(true);
@@ -120,10 +132,10 @@ export default function ChangelogAdminPage() {
       .filter(Boolean);
     try {
       if (editVersion) {
-        await updateChangelog(editVersion, { date: form.date, title: form.title, entries: entriesList });
+        await updateChangelog(editVersion, { date: form.date, title: form.title, entries: entriesList, variant: form.variant });
         setMsg({ ok: true, text: t("changelog.updated") });
       } else {
-        await createChangelog({ version: form.version, date: form.date, title: form.title, entries: entriesList });
+        await createChangelog({ version: form.version, date: form.date, title: form.title, entries: entriesList, variant: form.variant });
         setMsg({ ok: true, text: t("changelog.created") });
       }
       cancelForm();
@@ -223,7 +235,26 @@ export default function ChangelogAdminPage() {
             </div>
             <div>
               <label className="font-label text-sm text-subtext0 block mb-1">
-                {t("changelog.entries_label")}
+                Variante
+              </label>
+              <div className="flex gap-2">
+                {VARIANT_OPTIONS.map((v) => (
+                  <button
+                    key={v.value}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, variant: v.value }))}
+                    className={`min-h-[44px] px-4 py-2 rounded-[8px] font-label text-sm font-medium transition-colors ${
+                      form.variant === v.value ? v.color : "bg-surface1 text-subtext0"
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="font-label text-sm text-subtext0 block mb-1">
+                Text
               </label>
               <textarea
                 rows={6}
@@ -238,7 +269,7 @@ export default function ChangelogAdminPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-[8px] bg-peach text-crust font-label font-medium text-sm disabled:opacity-50"
+                className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-[8px] bg-peach text-ground font-label font-medium text-sm disabled:opacity-50"
               >
                 <Check className="h-4 w-4" />
                 {editVersion ? t("changelog.update_btn") : t("changelog.create_btn")}
