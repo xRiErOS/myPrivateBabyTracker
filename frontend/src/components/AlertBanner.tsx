@@ -206,7 +206,10 @@ export function ReferenceDeviationBanner() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const current = (config as any)[rule.thresholdKey] as number;
-    if (current === ref.recommended) continue;
+    // No deviation if current is within the recommended range [min, max]
+    const min = ref.recommended;
+    const max = ref.recommendedMax ?? ref.recommended;
+    if (current >= min && current <= max) continue;
 
     const dismissKey = `${activeChild.id}_ref_${rule.ruleKey}`;
     if (isRefDismissed(dismissKey)) continue;

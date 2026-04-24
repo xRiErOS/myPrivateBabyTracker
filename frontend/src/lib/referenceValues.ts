@@ -7,7 +7,10 @@
 export interface ReferenceRange {
   label: string;
   maxAgeDays: number;
+  /** Lower bound of recommended range */
   recommended: number;
+  /** Upper bound of recommended range (if different from recommended) */
+  recommendedMax?: number;
   /** Display string for the table (e.g. "6-8") */
   display: string;
 }
@@ -16,20 +19,20 @@ export type RuleKey = "wet_diaper_min" | "feeding_interval_hours" | "fever_thres
 
 /** Nasse Windeln pro Tag — Minimum */
 const WET_DIAPER_REFERENCES: ReferenceRange[] = [
-  { label: "0-1 Tag", maxAgeDays: 1, recommended: 1, display: "1-2" },
-  { label: "1-3 Tage", maxAgeDays: 3, recommended: 3, display: "3-4" },
-  { label: "4-7 Tage", maxAgeDays: 7, recommended: 4, display: "4-6" },
-  { label: "1-4 Wochen", maxAgeDays: 28, recommended: 6, display: "6-8" },
-  { label: "1-6 Monate", maxAgeDays: 180, recommended: 6, display: "6-8" },
-  { label: "6-12 Monate", maxAgeDays: 365, recommended: 4, display: "4-6" },
+  { label: "0-1 Tag", maxAgeDays: 1, recommended: 1, recommendedMax: 2, display: "1-2" },
+  { label: "1-3 Tage", maxAgeDays: 3, recommended: 3, recommendedMax: 4, display: "3-4" },
+  { label: "4-7 Tage", maxAgeDays: 7, recommended: 4, recommendedMax: 6, display: "4-6" },
+  { label: "1-4 Wochen", maxAgeDays: 28, recommended: 6, recommendedMax: 8, display: "6-8" },
+  { label: "1-6 Monate", maxAgeDays: 180, recommended: 6, recommendedMax: 8, display: "6-8" },
+  { label: "6-12 Monate", maxAgeDays: 365, recommended: 4, recommendedMax: 6, display: "4-6" },
 ];
 
 /** Fuetterungsintervall in Stunden — Maximum */
 const FEEDING_INTERVAL_REFERENCES: ReferenceRange[] = [
-  { label: "0-4 Wochen", maxAgeDays: 28, recommended: 3, display: "2-3 h" },
-  { label: "1-3 Monate", maxAgeDays: 90, recommended: 3.5, display: "2.5-3.5 h" },
-  { label: "3-6 Monate", maxAgeDays: 180, recommended: 4, display: "3-4 h" },
-  { label: "6-12 Monate", maxAgeDays: 365, recommended: 5, display: "4-5 h" },
+  { label: "0-4 Wochen", maxAgeDays: 28, recommended: 2, recommendedMax: 3, display: "2-3 h" },
+  { label: "1-3 Monate", maxAgeDays: 90, recommended: 2.5, recommendedMax: 3.5, display: "2.5-3.5 h" },
+  { label: "3-6 Monate", maxAgeDays: 180, recommended: 3, recommendedMax: 4, display: "3-4 h" },
+  { label: "6-12 Monate", maxAgeDays: 365, recommended: 4, recommendedMax: 5, display: "4-5 h" },
 ];
 
 /** Temperatur-Schwellwerte */
@@ -46,11 +49,11 @@ const NO_STOOL_REFERENCES: ReferenceRange[] = [
 
 /** Trinkmenge ml/Tag (Flasche) */
 const LOW_FEEDING_REFERENCES: ReferenceRange[] = [
-  { label: "0-2 Wochen", maxAgeDays: 14, recommended: 300, display: "300-500 ml" },
-  { label: "2-8 Wochen", maxAgeDays: 56, recommended: 500, display: "500-700 ml" },
-  { label: "2-4 Monate", maxAgeDays: 120, recommended: 700, display: "700-900 ml" },
-  { label: "4-6 Monate", maxAgeDays: 180, recommended: 800, display: "800-1000 ml" },
-  { label: "6-12 Monate", maxAgeDays: 365, recommended: 500, display: "500-700 ml" },
+  { label: "0-2 Wochen", maxAgeDays: 14, recommended: 300, recommendedMax: 500, display: "300-500 ml" },
+  { label: "2-8 Wochen", maxAgeDays: 56, recommended: 500, recommendedMax: 700, display: "500-700 ml" },
+  { label: "2-4 Monate", maxAgeDays: 120, recommended: 700, recommendedMax: 900, display: "700-900 ml" },
+  { label: "4-6 Monate", maxAgeDays: 180, recommended: 800, recommendedMax: 1000, display: "800-1000 ml" },
+  { label: "6-12 Monate", maxAgeDays: 365, recommended: 500, recommendedMax: 700, display: "500-700 ml" },
 ];
 
 export const REFERENCE_VALUES: Record<RuleKey, ReferenceRange[]> = {
