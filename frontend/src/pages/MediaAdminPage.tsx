@@ -172,10 +172,27 @@ export default function MediaAdminPage() {
               {t("media.storage_used", { defaultValue: "Speicher belegt" })}
             </p>
           </div>
-          <Button variant="secondary" className="flex items-center gap-1.5" onClick={handleBulkDownload}>
-            <Download className="h-4 w-4" />
-            ZIP
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="flex items-center gap-1.5" onClick={handleBulkDownload}>
+              <Download className="h-4 w-4" />
+              ZIP
+            </Button>
+            <Button
+              variant="danger"
+              className="flex items-center gap-1.5"
+              onClick={() => {
+                if (!confirm(`Alle ${storageInfo.total_photos} Fotos endgueltig loeschen?\n\nDieser Vorgang kann nicht rueckgaengig gemacht werden.\nAlle Meilenstein-Fotos werden unwiderruflich entfernt.`)) return;
+                // Select all and delete
+                for (const photo of photos) {
+                  deleteMut.mutate(photo.id);
+                }
+                setSelectedIds(new Set());
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              Alle loeschen
+            </Button>
+          </div>
         </Card>
       )}
 
