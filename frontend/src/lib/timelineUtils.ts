@@ -8,6 +8,7 @@ const TZ = "Europe/Berlin";
 export interface SleepSegment extends SleepEntry {
   _splitStart: string;
   _splitEnd: string;
+  _ongoing?: boolean;
 }
 
 /** Get Berlin timezone offset in ms for a given date. */
@@ -46,9 +47,10 @@ export function splitSleepByDay(
 ): Record<string, SleepSegment[]> {
   const map: Record<string, SleepSegment[]> = {};
   sleeps.forEach((sl) => {
-    if (!sl.start_time || !sl.end_time) return;
+    if (!sl.start_time) return;
+    const isOngoing = !sl.end_time;
     const start = new Date(sl.start_time);
-    const end = new Date(sl.end_time);
+    const end = isOngoing ? new Date() : new Date(sl.end_time!);
     let cursor = start;
     while (cursor < end) {
       const cursorDay = cursor.toLocaleDateString("sv-SE", { timeZone: TZ });
@@ -62,6 +64,7 @@ export function splitSleepByDay(
         ...sl,
         _splitStart: cursor.toISOString(),
         _splitEnd: segEnd.toISOString(),
+        ...(isOngoing ? { _ongoing: true } : {}),
       });
       cursor = segEnd;
     }
@@ -135,6 +138,7 @@ export interface TimelineItem {
   startPct: number;
   widthPct: number;
   label?: string;
+  ongoing?: boolean;
 }
 
 export interface TimelinePoint {
@@ -151,7 +155,7 @@ export function buildTimelineItems(
     const startMin = toMinutes(s._splitStart);
     const endMin = toMinutes(s._splitEnd);
     const width = endMin > startMin ? endMin - startMin : 1440 - startMin + endMin;
-    return { startPct: pct(startMin), widthPct: pct(width) };
+    return { startPct: pct(startMin), widthPct: pct(width), ongoing: s._ongoing };
   });
 
   const feedItems: TimelinePoint[] = feedings.map((f) => ({

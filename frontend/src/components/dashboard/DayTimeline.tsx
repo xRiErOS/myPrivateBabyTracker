@@ -2,7 +2,7 @@
  *  Ported from home-dashboard Timeline.jsx — bg-surface1 track bands,
  *  labels on all modes, sapphire diaper dots, axis at bottom. */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Settings } from "lucide-react";
 import type { FeedingEntry, DiaperEntry } from "../../api/types";
@@ -56,11 +56,13 @@ function NowMarker() {
 function TrackRow({
   label,
   color,
+  ongoingColor,
   items,
   compact = false,
 }: {
   label: string;
   color: string;
+  ongoingColor?: string;
   items: TimelineItem[];
   compact?: boolean;
 }) {
@@ -81,7 +83,7 @@ function TrackRow({
         {items.map((it, i) => (
           <div
             key={i}
-            className={`absolute top-0 bottom-0 rounded-sm ${color}`}
+            className={`absolute top-0 bottom-0 rounded-sm ${it.ongoing && ongoingColor ? ongoingColor : color}`}
             style={{
               left: `${it.startPct}%`,
               width: `${Math.max(it.widthPct, 0.5)}%`,
@@ -163,6 +165,15 @@ export function DayTimeline({
     localStorage.setItem("mybaby-timeline-visibility", JSON.stringify(next));
   }
 
+  // Re-render every 10 minutes so the ongoing sleep bar grows visually
+  const hasOngoing = sleepSegments.some((s) => s._ongoing);
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!hasOngoing) return;
+    const id = setInterval(() => setTick((t) => t + 1), 600_000);
+    return () => clearInterval(id);
+  }, [hasOngoing]);
+
   const { sleepItems, feedItems, changeItems } = buildTimelineItems(
     feedings,
     diapers,
@@ -215,7 +226,7 @@ export function DayTimeline({
       )}
       <div className="relative">
         {visibility.sleep && (
-          <TrackRow label={t("track_sleep")} color="bg-lavender" items={sleepItems} />
+          <TrackRow label={t("track_sleep")} color="bg-lavender" ongoingColor="bg-green" items={sleepItems} />
         )}
         {visibility.feeding && (
           <DotRow label={t("track_bottle")} color="bg-peach" items={feedItems} />
@@ -266,7 +277,7 @@ export function MiniTimeline({
 
   return (
     <div className="relative mt-2">
-      <TrackRow label={tDash("track_sleep")} color="bg-lavender" items={sleepItems} compact />
+      <TrackRow label={tDash("track_sleep")} color="bg-lavender" ongoingColor="bg-green" items={sleepItems} compact />
       <DotRow label={tDash("track_bottle")} color="bg-peach" items={feedItems} compact />
       <DotRow
         label={tDash("track_diaper")}
