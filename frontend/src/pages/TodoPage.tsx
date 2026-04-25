@@ -27,10 +27,18 @@ export default function TodoPage() {
   const cameFromDashboard = useRef(false);
 
   useEffect(() => {
-    if (searchParams.get("new") === "1") {
+    const tab = searchParams.get("tab");
+    const wantsNew = searchParams.get("new") === "1";
+    if (wantsNew) {
       setShowForm(true);
       setActiveTab("tasks");
       cameFromDashboard.current = true;
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    if (tab === "habits" || tab === "templates" || tab === "tasks") {
+      setActiveTab(tab);
+      setShowForm(false);
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
