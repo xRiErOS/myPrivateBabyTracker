@@ -26,8 +26,8 @@ def _to_response(prefs: UserPreferences, user: User) -> PreferencesResponse:
         quick_actions=json.loads(prefs.quick_actions) if prefs.quick_actions else None,
         widget_order=json.loads(prefs.widget_order) if prefs.widget_order else None,
         track_visibility=json.loads(prefs.track_visibility) if prefs.track_visibility else None,
-        timezone=user.timezone,
-        locale=user.locale,
+        timezone=user.timezone or "Europe/Berlin",
+        locale=user.locale or "de",
     )
 
 
