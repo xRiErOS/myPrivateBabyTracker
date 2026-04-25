@@ -9,6 +9,7 @@ import { ChildSelector } from "./ChildSelector";
 import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 import { useToast } from "../context/ToastContext";
+import { AlertBell } from "./AlertBell";
 
 interface HeaderProps {
   theme: Theme;
@@ -33,6 +34,7 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
       <header className="bg-mantle px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
         <ChildSelector />
         <div className="flex items-center gap-1">
+          <AlertBell />
           <button
             onClick={handleRefresh}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"

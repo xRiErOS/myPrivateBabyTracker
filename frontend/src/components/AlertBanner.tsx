@@ -17,32 +17,7 @@ import {
   getRecommendedValue,
   type RuleKey,
 } from "../lib/referenceValues";
-
-const DISMISS_KEY = "mybaby_dismissed_alerts";
-const DISMISS_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
-
-function getDismissedAlerts(): Record<string, number> {
-  try {
-    const raw = localStorage.getItem(DISMISS_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
-}
-
-function dismissAlert(alertKey: string): void {
-  const dismissed = getDismissedAlerts();
-  dismissed[alertKey] = Date.now();
-  localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissed));
-}
-
-function isAlertDismissed(alertKey: string): boolean {
-  const dismissed = getDismissedAlerts();
-  const ts = dismissed[alertKey];
-  if (!ts) return false;
-  return Date.now() - ts < DISMISS_DURATION_MS;
-}
+import { dismissAlert, isAlertDismissed, buildAlertKey, DISMISS_DURATION_MS } from "../lib/alertDismiss";
 
 function severityStyles(severity: string) {
   switch (severity) {
@@ -72,7 +47,7 @@ export function AlertBanner() {
   if (!data?.alerts.length) return null;
 
   const visibleAlerts = data.alerts.filter(
-    (alert, i) => !isAlertDismissed(`${activeChild?.id}-${alert.type}-${i}`)
+    (alert, i) => !isAlertDismissed(buildAlertKey(activeChild?.id, alert.type, i))
   );
 
   if (!visibleAlerts.length) return null;
@@ -88,7 +63,7 @@ export function AlertBanner() {
   return (
     <div className={`grid gap-2 ${gridCols}`}>
       {data.alerts.map((alert, i) => {
-        const alertKey = `${activeChild?.id}-${alert.type}-${i}`;
+        const alertKey = buildAlertKey(activeChild?.id, alert.type, i);
         if (isAlertDismissed(alertKey)) return null;
 
         const { container, icon } = severityStyles(alert.severity);
