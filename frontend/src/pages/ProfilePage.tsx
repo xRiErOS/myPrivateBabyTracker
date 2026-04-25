@@ -53,7 +53,7 @@ export default function ProfilePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function save(patch: Partial<UserPreferences>) {
+  async function save(patch: Partial<UserPreferences>): Promise<UserPreferences | null> {
     setSaving(true);
     setMsg(null);
     try {
@@ -61,8 +61,10 @@ export default function ProfilePage() {
       setPrefs(updated);
       setMsg({ ok: true, text: t("profile.saved") });
       setTimeout(() => setMsg(null), 2000);
+      return updated;
     } catch {
       setMsg({ ok: false, text: t("profile.save_failed") });
+      return null;
     } finally {
       setSaving(false);
     }
@@ -119,11 +121,16 @@ export default function ProfilePage() {
         </div>
         <select
           value={prefs.locale}
-          onChange={(e) => {
+          onChange={async (e) => {
             const lang = e.target.value;
-            save({ locale: lang });
-            i18n.changeLanguage(lang);
-            localStorage.setItem("mybaby_language", lang);
+            const updated = await save({ locale: lang });
+            if (!updated) return;
+            await i18n.changeLanguage(updated.locale);
+            try {
+              localStorage.setItem("mybaby_language", updated.locale);
+            } catch {
+              // Storage unavailable (private mode, jsdom) — non-fatal
+            }
           }}
           disabled={saving}
           className="w-full px-3 py-2 text-base bg-ground text-text rounded-lg border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
