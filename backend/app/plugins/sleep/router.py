@@ -153,7 +153,10 @@ async def list_sleep(
                     SleepEntry.start_time < date_from,
                     or_(
                         SleepEntry.end_time >= date_from,
-                        SleepEntry.end_time.is_(None),  # ongoing sleep
+                        and_(
+                            SleepEntry.end_time.is_(None),
+                            SleepEntry.start_time >= date_from - timedelta(hours=24),
+                        ),
                     ),
                 ),
             )
@@ -180,9 +183,9 @@ _SLEEP_TARGETS: list[tuple[int, float, float, str]] = [
 ]
 
 
-def _get_sleep_target(child: Child) -> tuple[float, float, str]:
+def _get_sleep_target(child: Child, tz: ZoneInfo | None = None) -> tuple[float, float, str]:
     """Return (min_hours, max_hours, age_group) for a child's current age."""
-    today = datetime.now(ZoneInfo("Europe/Berlin")).date()
+    today = datetime.now(tz or ZoneInfo("Europe/Berlin")).date()
     # Use corrected age for preterm babies
     ref_date = (
         child.estimated_birth_date
@@ -243,8 +246,8 @@ async def sleep_chart(
     if child is None:
         raise NotFoundError(f"Child with id {child_id} not found")
 
-    # Date range in user timezone (default Europe/Berlin)
-    tz = ZoneInfo("Europe/Berlin")
+    # Date range in user timezone
+    tz = ZoneInfo(user.timezone if user and user.timezone else "Europe/Berlin")
     today = datetime.now(tz).date()
     start_date = today - timedelta(days=days - 1)
     start_dt = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
@@ -291,7 +294,7 @@ async def sleep_chart(
         )
         current_date += timedelta(days=1)
 
-    target_min, target_max, age_group = _get_sleep_target(child)
+    target_min, target_max, age_group = _get_sleep_target(child, tz)
 
     return SleepChartResponse(
         child_name=child.name,
