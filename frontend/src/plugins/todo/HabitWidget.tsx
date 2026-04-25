@@ -11,8 +11,18 @@ export function HabitWidget() {
   const { activeChild } = useActiveChild();
   const { data: habits = [], isLoading } = useHabits(activeChild?.id);
 
-  const total = habits.length;
-  const done = habits.filter((h) => h.completed_today).length;
+  // JS getDay(): 0=Sun..6=Sat → Mon=0..Sun=6 to match weekday model
+  const jsDay = new Date().getDay();
+  const todayIdx = jsDay === 0 ? 6 : jsDay - 1;
+  const todayHabits = habits.filter((h) => {
+    if (h.recurrence === "weekly" && h.weekdays && h.weekdays.length > 0) {
+      return h.weekdays.includes(todayIdx);
+    }
+    return true;
+  });
+
+  const total = todayHabits.length;
+  const done = todayHabits.filter((h) => h.completed_today).length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
   return (
