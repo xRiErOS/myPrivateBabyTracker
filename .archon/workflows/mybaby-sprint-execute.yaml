@@ -223,3 +223,14 @@ nodes:
   - id: snapshot
     depends_on: [sprint-close]
     command: save-session-snapshot
+
+  - id: done-notify
+    depends_on: [snapshot]
+    bash: |
+      TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
+        "/Users/erik/Obsidian/Vault/400 AI Agent/430 Claude-Telegram-Bot/claude-telegram-bot.env" \
+        | cut -d'=' -f2 | tr -d '"')
+      RID="${RUN_ID:-unknown}"
+      MSG="MyBaby%20Sprint%20DURCH%20%E2%9C%85%0AAlle%20Tasks%20done%2C%20Push%20OK%20%E2%80%94%20Run%3A%20${RID}"
+      curl -fsS "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+        -d "chat_id=96239239&text=${MSG}" > /dev/null || echo "Done-Notify übersprungen"
