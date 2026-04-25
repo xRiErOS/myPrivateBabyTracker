@@ -114,6 +114,20 @@ Details: `DESIGN.md`
 - Wird der NAS-Proxy committet, bricht der Container-Build auf der NAS (Tailscale-IP im Container nicht erreichbar)
 - Dokumentation: `500 CONTEXTS/Home Lab Wiki/20 - Projekte/MyBabyTracker/MyBaby Lokales Test-Setup (Mac zu NAS API Proxy).md`
 
+### Sprint-Dashboard (PO-Tool — PFLICHT im Sprint-Workflow)
+
+Separates React-Tool zur Sprint-Planung und -Review mit Menschen. Liest direkt aus `data/project.db`.
+
+- **Pfad:** `_dashboard/`
+- **Starten:** `cd _dashboard && npm run dev`
+- **URL:** `http://localhost:5555` (Vite) + Express-API auf Port 5556 (startet automatisch)
+- **Views:** Roadmap Board (`RoadmapBoard.jsx`), Sprint Review (`SprintReview.jsx`), Item Detail (`ItemDetail.jsx`)
+
+**Wann nutzen:**
+- Scrum Master: vor Sprint-Planung (Backlog priorisieren) und nach Sprint-Abschluss (Review vorbereiten)
+- Coding Lead: zur Orientierung welche Items im aktiven Sprint liegen
+- Kein Bestandteil des App-Builds — reines lokales Planungstool, nicht committen
+
 ## Security-Checkliste (K1-K4) — IMPLEMENTIERT
 
 - [x] K1: Header-Stripping-Middleware als erste Middleware
