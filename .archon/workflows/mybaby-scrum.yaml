@@ -1,0 +1,16 @@
+name: mybaby-scrum
+description: "Sprint planen: Backlog reviewen, Tasks erzeugen, Sprint aktivieren"
+interactive: true
+
+nodes:
+  - id: load-context
+    command: load-sprint-context
+
+  - id: plan
+    command: scrum-master
+    denied_tools: [Write, Edit]
+    depends_on: [load-context]
+
+  - id: snapshot
+    command: save-session-snapshot
+    depends_on: [plan]

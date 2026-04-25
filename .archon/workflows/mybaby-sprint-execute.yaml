@@ -1,0 +1,225 @@
+name: mybaby-sprint-execute
+description: |
+  Aktiven Sprint sequentiell abarbeiten: alle Tasks in Prio-Reihenfolge per TDD,
+  abschließend Review + Tests + Approval + Push + Sprint-Close.
+
+  Ersetzt den manuellen Lead-Coding-Agent-Session-Prompt. Pro Iteration eine Task,
+  fresh_context damit das Context-Window stabil bleibt.
+
+  Aufruf:
+    archon workflow run mybaby-sprint-execute ""
+
+  Voraussetzung:
+    - Aktiver Sprint mit mindestens einer offenen Task in project.db
+    - Tasks haben backlog_id für Prio-Sortierung
+interactive: true
+provider: claude
+
+nodes:
+  - id: load-context
+    command: load-sprint-context
+
+  - id: sprint-loop
+    depends_on: [load-context]
+    loop:
+      prompt: |
+        # Sprint-Task-Loop — eine Iteration = eine Task
+
+        Du bist Coding-Lead. Lies vor der ersten Aktion:
+        - `~/.claude/agents/coding-lead.md` (Rolle und Regeln)
+        - `$ARTIFACTS_DIR/context/sprint-context.md` (aus load-sprint-context)
+        - `MyBaby_Agent_Context.md` (Plugin-Struktur, Konventionen)
+        - `DESIGN.md` (UI-Tokens — bindend)
+
+        ## DB-Pfad ermitteln (PFLICHT, Worktree-sicher)
+
+        ```bash
+        COMMON=$(git rev-parse --git-common-dir)
+        case "$COMMON" in
+          /*) MAIN_REPO=$(dirname "$COMMON") ;;
+          *)  MAIN_REPO=$(cd "$COMMON/.." && pwd) ;;
+        esac
+        DB="$MAIN_REPO/data/project.db"
+        [ -f "$DB" ] || { echo "DB nicht gefunden: $DB"; exit 1; }
+        ```
+
+        ## Schritt 1 — Nächste offene Task holen
+
+        Sortierung: Backlog-Priorität ASC (1 = höchste), dann task.id.
+
+        ```sql
+        SELECT t.id, t.title, t.backlog_id, t.effort,
+               b.title AS backlog_title, b.type AS backlog_type, b.priority
+        FROM tasks t
+        LEFT JOIN backlog b ON t.backlog_id = b.id
+        WHERE t.sprint_id IN (SELECT id FROM sprints WHERE status='active')
+          AND t.status = 'todo'
+        ORDER BY COALESCE(b.priority, 99) ASC, t.id ASC
+        LIMIT 1;
+        ```
+
+        **Wenn KEINE Task übrig** (Result leer):
+        - Kurzen Statusbericht ausgeben (welche Tasks done, welche skipped/blocked)
+        - Sprint ist fertig — emittiere genau diesen Tag und beende:
+
+        ```
+        <promise>SPRINT_COMPLETE</promise>
+        ```
+
+        Danach geht der Workflow zu `review` + `ai-test`. **Niemals** SPRINT_COMPLETE
+        emittieren, solange noch Tasks mit `status='todo'` existieren.
+
+        ## Schritt 2 — Task starten
+
+        ```sql
+        UPDATE tasks SET status='in_progress', started_at=datetime('now') WHERE id=<task-id>;
+        ```
+
+        ## Schritt 3 — TDD-Implementierung (PFLICHT)
+
+        1. **Test rot schreiben** (pytest oder Vitest, je nach Layer)
+        2. **Implementieren** bis grün — Plugin-Struktur strikt:
+           - Backend: `backend/app/plugins/{name}/` mit `__init__.py`, `models.py`, `schemas.py`, `router.py`, `widget.py`
+           - Frontend: `frontend/src/plugins/{name}/` mit `{Name}Form.tsx`, `{Name}Widget.tsx`, `{Name}List.tsx`
+           - DESIGN.md: Catppuccin-Tokens (`ground`, `peach`, `sapphire`, `green`, `red`, `text`), `rounded-card`, Touch-Target ≥ 44px
+           - UTC-Timestamps mit `DateTime(timezone=True)` + `func.now()`
+        3. **Refactor** — grün halten
+        4. **Lokale Validierung**:
+           ```bash
+           cd backend && python -m pytest -q
+           cd ../frontend && npm run test -- --run
+           ```
+        5. **Vite-Proxy-Guard**: Niemals `100.71.39.53` in `frontend/vite.config.ts` committen — `localhost:8080` ist Pflicht.
+        6. **Conventional Commit** je Task (eine Task = ein Commit, gerne mehrere Commits bei klar abgrenzbaren Subschritten):
+           - `feat(<plugin>): ...`
+           - `fix(<plugin>): ...`
+           - `chore: ...`
+
+        ## Schritt 4 — Alembic-Reminder
+
+        Wenn `models.py` oder Schema-Dateien geändert wurden:
+
+        ```
+        ALEMBIC-MIGRATION ERFORDERLICH:
+          cd backend && alembic revision --autogenerate -m "<beschreibung>"
+          alembic upgrade head
+        ```
+
+        Migration committen.
+
+        ## Schritt 5 — Task abschließen + ggf. Backlog schließen
+
+        ```sql
+        UPDATE tasks
+        SET status='done', completed_at=datetime('now'),
+            validation_output='<test+commit summary kurzform>'
+        WHERE id=<task-id>;
+
+        -- Backlog-Item schließen, wenn alle zugehörigen Tasks done
+        UPDATE backlog SET status='closed', completed_at=datetime('now')
+        WHERE id=<backlog-id> AND NOT EXISTS (
+          SELECT 1 FROM tasks WHERE backlog_id=<backlog-id> AND status<>'done'
+        );
+        ```
+
+        ## Schritt 6 — Iteration beenden (KEIN Promise)
+
+        Status-Zeile ausgeben:
+        ```
+        Task #<id> done. Nächste Iteration startet — frischer Context.
+        ```
+
+        Loop-Engine startet automatisch eine neue Iteration für die nächste Task.
+
+        ## Bei Blocker (Bug, fehlende Spezifikation, Test-Lücke)
+
+        - Task auf `status='blocked'` setzen mit `notes='<grund>'`
+        - **Nicht** SPRINT_COMPLETE emittieren — eine geblockte Task ist nicht "done"
+        - Iteration trotzdem normal beenden — die nächste Iteration zieht die nächste Task
+
+      until: SPRINT_COMPLETE
+      max_iterations: 20
+      fresh_context: true
+
+  - id: review
+    depends_on: [sprint-loop]
+    command: code-reviewer
+    denied_tools: [Write, Edit, MultiEdit]
+    context: fresh
+
+  - id: ai-test
+    depends_on: [sprint-loop]
+    command: tester
+    denied_tools: [Write, Edit, MultiEdit]
+    context: fresh
+
+  - id: notify
+    depends_on: [review, ai-test]
+    bash: |
+      TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
+        "/Users/erik/Obsidian/Vault/400 AI Agent/430 Claude-Telegram-Bot/claude-telegram-bot.env" \
+        | cut -d'=' -f2 | tr -d '"')
+      RID="${RUN_ID:-unknown}"
+      MSG="MyBaby%20Sprint%20fertig%2C%20Review%20%2B%20AI-Test%20OK.%0AApprove%3A%20archon%20workflow%20approve%20${RID}"
+      curl -fsS "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+        -d "chat_id=96239239&text=${MSG}" > /dev/null || echo "Telegram-Notify übersprungen"
+
+  - id: gate
+    depends_on: [notify]
+    approval:
+      message: "Sprint vollständig: alle Tasks done, Review + AI-Test OK. Pushen?"
+      on_reject:
+        prompt: "Überarbeite den Sprint basierend auf diesem Feedback: $REJECTION_REASON"
+
+  - id: push
+    depends_on: [gate]
+    bash: |
+      set -e
+      if grep -q '100\.71\.39\.53' frontend/vite.config.ts; then
+        echo "FEHLER: NAS-IP in vite.config.ts — Proxy auf localhost zurücksetzen!"
+        exit 1
+      fi
+      git push
+
+  - id: sprint-close
+    depends_on: [push]
+    prompt: |
+      Du bist Scrum-Master. Schließe den aktiven Sprint formell ab.
+
+      ## DB-Pfad
+      ```bash
+      COMMON=$(git rev-parse --git-common-dir)
+      case "$COMMON" in
+        /*) MAIN_REPO=$(dirname "$COMMON") ;;
+        *)  MAIN_REPO=$(cd "$COMMON/.." && pwd) ;;
+      esac
+      DB="$MAIN_REPO/data/project.db"
+      ```
+
+      ## Aufgaben
+
+      1. Aktiven Sprint auf `completed` setzen:
+         ```sql
+         UPDATE sprints SET status='completed' WHERE status='active';
+         ```
+
+      2. Sprint-Retrospektive in `decisions` (nur wenn nennenswerte Erkenntnis):
+         ```sql
+         INSERT INTO decisions (title, decision, rationale, alternatives, status, created_at)
+         VALUES (
+           'Sprint <id> Retro: <thema>',
+           '<entscheidung>',
+           '<rationale>',
+           '<alternativen>',
+           'active',
+           datetime('now')
+         );
+         ```
+
+      3. CLAUDE.md aktualisieren — nur wenn der Sprint Test-Zahlen, Plugin-Anzahl oder Versionsstand ändert. Sonst auslassen.
+
+      4. Optional: Memory schreiben über `mcp__memory__add_memory` — nur bei wiederkehrendem Pattern oder ADR. Domain `mybaby`, Area `sprint` oder `architecture`.
+
+  - id: snapshot
+    depends_on: [sprint-close]
+    command: save-session-snapshot

@@ -44,5 +44,12 @@ pytest-of-*/
 # Node compile cache
 node-compile-cache/
 
+
 # Claude Code
 .claude/settings.local.json
+
+# PO-Dashboard — lokales Tool, nicht Teil des App-Builds
+_dashboard/node_modules/
+_dashboard/dist/
+_dashboard/.vite/
+_dashboard/uploads/

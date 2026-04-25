@@ -1,0 +1,60 @@
+name: mybaby-direct-issue
+description: "Backlog-Item direkt per ID implementieren — kein Sprint-Overhead"
+interactive: true
+
+nodes:
+  - id: load-issue
+    command: load-issue-by-id
+
+  - id: code
+    command: coding-lead
+    depends_on: [load-issue]
+
+  - id: run-tests
+    bash: |
+      set -e
+      cd backend && python -m pytest -q
+      cd ../frontend && npm run test -- --run
+    depends_on: [code]
+
+  - id: review
+    command: code-reviewer
+    denied_tools: [Write, Edit, MultiEdit]
+    depends_on: [run-tests]
+
+  - id: ai-test
+    command: tester
+    denied_tools: [Write, Edit, MultiEdit]
+    depends_on: [run-tests]
+
+  - id: notify
+    bash: |
+      TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
+        "/Users/erik/Obsidian/Vault/400 AI Agent/430 Claude-Telegram-Bot/claude-telegram-bot.env" \
+        | cut -d'=' -f2 | tr -d '"')
+      RID="${RUN_ID:-unknown}"
+      MSG="MyBaby%20Issue%20%23${ARGUMENTS}%20bereit.%0AApprove%3A%20archon%20workflow%20approve%20${RID}"
+      curl -fsS "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+        -d "chat_id=96239239&text=${MSG}" > /dev/null || echo "Telegram-Notify übersprungen"
+    depends_on: [review, ai-test]
+
+  - id: gate
+    approval:
+      message: "Issue #$ARGUMENTS implementiert. Telegram-Benachrichtigung gesendet. Pushen?"
+      on_reject:
+        prompt: "Überarbeite die Implementierung: $REJECTION_REASON"
+    depends_on: [notify]
+
+  - id: push
+    bash: |
+      set -e
+      if grep -q '100\.71\.39\.53' frontend/vite.config.ts; then
+        echo "FEHLER: NAS-IP in vite.config.ts — Proxy auf localhost zurücksetzen!"
+        exit 1
+      fi
+      git push
+    depends_on: [gate]
+
+  - id: snapshot
+    command: save-session-snapshot
+    depends_on: [push]

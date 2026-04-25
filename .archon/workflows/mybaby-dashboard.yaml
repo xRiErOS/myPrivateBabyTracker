@@ -1,0 +1,37 @@
+name: mybaby-dashboard
+description: "PO-Dashboard (_dashboard/) erweitern"
+interactive: true
+
+nodes:
+  - id: load-context
+    command: load-sprint-context
+
+  - id: extend
+    command: po-dashboard-extend
+    depends_on: [load-context]
+
+  - id: notify
+    bash: |
+      TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
+        "/Users/erik/Obsidian/Vault/400 AI Agent/430 Claude-Telegram-Bot/claude-telegram-bot.env" \
+        | cut -d'=' -f2 | tr -d '"')
+      RID="${RUN_ID:-unknown}"
+      MSG="MyBaby%20Dashboard%20bereit.%0AApprove%3A%20archon%20workflow%20approve%20${RID}"
+      curl -fsS "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+        -d "chat_id=96239239&text=${MSG}" > /dev/null || echo "Telegram-Notify übersprungen"
+    depends_on: [extend]
+
+  - id: gate
+    approval:
+      message: "Dashboard-Änderungen OK? Telegram-Benachrichtigung gesendet."
+      on_reject:
+        prompt: "Überarbeite die Implementierung: $REJECTION_REASON"
+    depends_on: [notify]
+
+  - id: push
+    bash: "git push"
+    depends_on: [gate]
+
+  - id: snapshot
+    command: save-session-snapshot
+    depends_on: [push]

@@ -1,0 +1,12 @@
+name: mybaby-bug-capture
+description: "Bug in project.db erfassen (kein Worktree nötig)"
+interactive: false
+
+nodes:
+  - id: capture
+    command: bug-capture
+
+  - id: confirm
+    approval:
+      message: "Bug erfasst. Korrekt?"
+    depends_on: [capture]
