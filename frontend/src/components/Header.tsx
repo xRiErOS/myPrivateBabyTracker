@@ -1,7 +1,8 @@
 /** App header with child selector, refresh, theme toggle, and mobile burger menu. */
 
 import { useState } from "react";
-import { Menu, RefreshCw } from "lucide-react";
+import { Menu, RefreshCw, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Theme } from "../hooks/useTheme";
 import { ChildSelector } from "./ChildSelector";
@@ -39,6 +40,13 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
           >
             <RefreshCw size={20} className={spinning ? "animate-spin-once" : ""} />
           </button>
+          <Link
+            to="/profile"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
+            aria-label="Profil"
+          >
+            <User size={20} />
+          </Link>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           {/* Burger menu — mobile only */}
           <button
