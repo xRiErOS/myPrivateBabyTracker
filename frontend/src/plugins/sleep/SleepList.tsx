@@ -12,7 +12,7 @@ import { DateRangeFilter, type DateRange } from "../../components/DateRangeFilte
 import { useActiveChild } from "../../context/ChildContext";
 import { useDeleteSleep, useSleepEntries } from "../../hooks/useSleep";
 import { formatDateTime, formatDuration, formatTimeSince, daysAgoISO } from "../../lib/dateUtils";
-import { berlinDayBounds } from "../../lib/timelineUtils";
+import { berlinDayBounds, splitSleepByDay, toBerlinDate } from "../../lib/timelineUtils";
 import { SleepForm } from "./SleepForm";
 
 export function SleepList() {
@@ -81,18 +81,16 @@ export function SleepList() {
       {entries.length > 0 && dateRange !== "all" && (() => {
         const maxDays = dateRange === "twoWeeks" ? 13 : 6;
 
-        // Group entries by day (Berlin timezone)
-        const byDay = new Map<string, typeof entries>();
-        for (const e of entries) {
-          const day = new Date(e.start_time).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
-          const arr = byDay.get(day) ?? [];
-          arr.push(e);
-          byDay.set(day, arr);
-        }
+        // Split sleep entries at Berlin midnight for correct per-day aggregation
+        const splitMap = splitSleepByDay(entries);
 
         const todayStr = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
-        const fullDays = [...byDay.entries()]
+        // Only include days within the actual fetch range — overnight entries create
+        // partial fragments for the day before dateFrom which must be excluded
+        const rangeStartDay = dateFrom ? toBerlinDate(dateFrom) : undefined;
+        const fullDays = Object.entries(splitMap)
           .filter(([day]) => day !== todayStr)
+          .filter(([day]) => !rangeStartDay || day >= rangeStartDay)
           .sort(([a], [b]) => b.localeCompare(a))
           .slice(0, maxDays);
 
@@ -102,14 +100,16 @@ export function SleepList() {
           const m = Math.round(mins % 60);
           return `${h}:${String(m).padStart(2, "0")} h`;
         };
+        const segMinutes = (seg: { _splitStart: string; _splitEnd: string }) =>
+          (new Date(seg._splitEnd).getTime() - new Date(seg._splitStart).getTime()) / 60000;
         const avgTotalMin = n > 0
-          ? fullDays.reduce((s, [, v]) => s + v.reduce((a, e) => a + (e.duration_minutes ?? 0), 0), 0) / n
+          ? fullDays.reduce((s, [, segs]) => s + segs.reduce((a, seg) => a + segMinutes(seg), 0), 0) / n
           : null;
         const avgNightMin = n > 0
-          ? fullDays.reduce((s, [, v]) => s + v.filter((e) => e.sleep_type === "night").reduce((a, e) => a + (e.duration_minutes ?? 0), 0), 0) / n
+          ? fullDays.reduce((s, [, segs]) => s + segs.filter((seg) => seg.sleep_type === "night").reduce((a, seg) => a + segMinutes(seg), 0), 0) / n
           : null;
         const avgNapMin = n > 0
-          ? fullDays.reduce((s, [, v]) => s + v.filter((e) => e.sleep_type === "nap").reduce((a, e) => a + (e.duration_minutes ?? 0), 0), 0) / n
+          ? fullDays.reduce((s, [, segs]) => s + segs.filter((seg) => seg.sleep_type === "nap").reduce((a, seg) => a + segMinutes(seg), 0), 0) / n
           : null;
 
         // Average interval between consecutive sleep entries

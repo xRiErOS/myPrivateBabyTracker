@@ -15,26 +15,26 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "health_entries",
-        sa.Column("feeding_id", sa.Integer(), nullable=True),
-    )
-    op.create_foreign_key(
-        "fk_health_entries_feeding_id",
-        "health_entries",
-        "feeding_entries",
-        ["feeding_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
-    op.create_index(
-        "ix_health_entries_feeding_id", "health_entries", ["feeding_id"]
-    )
+    with op.batch_alter_table("health_entries") as batch_op:
+        batch_op.add_column(
+            sa.Column("feeding_id", sa.Integer(), nullable=True),
+        )
+        batch_op.create_foreign_key(
+            "fk_health_entries_feeding_id",
+            "feeding_entries",
+            ["feeding_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
+        batch_op.create_index(
+            "ix_health_entries_feeding_id", ["feeding_id"]
+        )
 
 
 def downgrade() -> None:
-    op.drop_index("ix_health_entries_feeding_id", table_name="health_entries")
-    op.drop_constraint(
-        "fk_health_entries_feeding_id", "health_entries", type_="foreignkey"
-    )
-    op.drop_column("health_entries", "feeding_id")
+    with op.batch_alter_table("health_entries") as batch_op:
+        batch_op.drop_index("ix_health_entries_feeding_id")
+        batch_op.drop_constraint(
+            "fk_health_entries_feeding_id", type_="foreignkey"
+        )
+        batch_op.drop_column("feeding_id")

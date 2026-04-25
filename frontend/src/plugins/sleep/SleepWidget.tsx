@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Moon, Pencil, Play, Square, X } from "lucide-react";
 import { Card } from "../../components/Card";
 import { useCreateSleep, useUpdateSleep, useSleepEntries } from "../../hooks/useSleep";
-import { formatDuration, formatTime, formatTimeSince, isoToLocalInput, localInputToISO, nowISO, startOfTodayISO } from "../../lib/dateUtils";
+import { formatDuration, formatTime, formatTimeSince, isoToLocalInput, localInputToISO, nowISO, daysAgoISO } from "../../lib/dateUtils";
+import { splitSleepByDay, todayBerlin } from "../../lib/timelineUtils";
 
 function useElapsedSeconds(startIso: string | undefined): number {
   const [seconds, setSeconds] = useState(() =>
@@ -34,9 +35,10 @@ interface SleepWidgetProps {
 }
 
 export function SleepWidget({ childId }: SleepWidgetProps) {
+  // Fetch from yesterday to catch overnight sleep that extends into today
   const { data: entries = [], isLoading } = useSleepEntries({
     child_id: childId,
-    date_from: startOfTodayISO(),
+    date_from: daysAgoISO(1),
   });
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
@@ -44,10 +46,14 @@ export function SleepWidget({ childId }: SleepWidgetProps) {
   const [showAdjust, setShowAdjust] = useState(false);
   const [adjustStart, setAdjustStart] = useState("");
 
-  const totalMinutes = entries.reduce(
-    (sum, e) => sum + (e.duration_minutes ?? 0),
-    0,
-  );
+  // Split sleep at Berlin midnight and only count today's portion
+  const today = todayBerlin();
+  const todaySegments = splitSleepByDay(entries)[today] ?? [];
+  const totalMinutes = Math.round(todaySegments.reduce((sum, seg) => {
+    const start = new Date(seg._splitStart).getTime();
+    const end = new Date(seg._splitEnd).getTime();
+    return sum + (end - start) / 60000;
+  }, 0));
   const running = entries.find((e) => !e.end_time);
   const elapsedSec = useElapsedSeconds(running?.start_time);
   const lastEntry = entries[0];

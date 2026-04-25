@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import and_, or_, select
@@ -144,7 +145,19 @@ async def list_sleep(
     if child_id is not None:
         stmt = stmt.where(SleepEntry.child_id == child_id)
     if date_from is not None:
-        stmt = stmt.where(SleepEntry.start_time >= date_from)
+        # Include overnight entries: started before range but ending within it
+        stmt = stmt.where(
+            or_(
+                SleepEntry.start_time >= date_from,
+                and_(
+                    SleepEntry.start_time < date_from,
+                    or_(
+                        SleepEntry.end_time >= date_from,
+                        SleepEntry.end_time.is_(None),  # ongoing sleep
+                    ),
+                ),
+            )
+        )
     if date_to is not None:
         stmt = stmt.where(SleepEntry.start_time <= date_to)
     if sleep_type is not None:
@@ -169,7 +182,7 @@ _SLEEP_TARGETS: list[tuple[int, float, float, str]] = [
 
 def _get_sleep_target(child: Child) -> tuple[float, float, str]:
     """Return (min_hours, max_hours, age_group) for a child's current age."""
-    today = date.today()
+    today = datetime.now(ZoneInfo("Europe/Berlin")).date()
     # Use corrected age for preterm babies
     ref_date = (
         child.estimated_birth_date
@@ -185,28 +198,34 @@ def _get_sleep_target(child: Child) -> tuple[float, float, str]:
 
 
 def _split_sleep_by_day(
-    start: datetime, end: datetime
+    start: datetime, end: datetime, tz: ZoneInfo | None = None
 ) -> list[tuple[date, float]]:
-    """Split a sleep entry across midnight boundaries.
+    """Split a sleep entry across midnight boundaries in the given timezone.
 
-    Returns list of (date, hours) tuples.
+    Returns list of (local_date, hours) tuples.
+    Splits at local midnight (default: Europe/Berlin), not UTC midnight.
     """
-    # Normalize to naive UTC
-    st = start.replace(tzinfo=None) if start.tzinfo else start
-    et = end.replace(tzinfo=None) if end.tzinfo else end
+    if tz is None:
+        tz = ZoneInfo("Europe/Berlin")
+
+    # Convert to local time for date boundaries
+    local_start = start.astimezone(tz) if start.tzinfo else start.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz)
+    local_end = end.astimezone(tz) if end.tzinfo else end.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz)
 
     result: list[tuple[date, float]] = []
-    current = st
-    while current.date() < et.date():
-        # Remaining hours until midnight
-        midnight = datetime(current.year, current.month, current.day) + timedelta(days=1)
-        hours = (midnight - current).total_seconds() / 3600
-        result.append((current.date(), hours))
-        current = midnight
+    cursor = local_start
+    while cursor.date() < local_end.date():
+        # Next local midnight
+        next_day = cursor.date() + timedelta(days=1)
+        local_midnight = datetime(next_day.year, next_day.month, next_day.day, tzinfo=tz)
+        hours = (local_midnight - cursor).total_seconds() / 3600
+        if hours > 0:
+            result.append((cursor.date(), hours))
+        cursor = local_midnight
     # Last segment (or only segment if no midnight crossing)
-    hours = (et - current).total_seconds() / 3600
+    hours = (local_end - cursor).total_seconds() / 3600
     if hours > 0:
-        result.append((current.date(), hours))
+        result.append((cursor.date(), hours))
     return result
 
 
@@ -224,10 +243,11 @@ async def sleep_chart(
     if child is None:
         raise NotFoundError(f"Child with id {child_id} not found")
 
-    # Date range
-    today = date.today()
+    # Date range in user timezone (default Europe/Berlin)
+    tz = ZoneInfo("Europe/Berlin")
+    today = datetime.now(tz).date()
     start_date = today - timedelta(days=days - 1)
-    start_dt = datetime(start_date.year, start_date.month, start_date.day)
+    start_dt = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
     # Fetch all completed sleep entries in range
     stmt = (
@@ -247,7 +267,7 @@ async def sleep_chart(
     night_by_day: dict[date, float] = defaultdict(float)
 
     for entry in entries:
-        segments = _split_sleep_by_day(entry.start_time, entry.end_time)
+        segments = _split_sleep_by_day(entry.start_time, entry.end_time, tz)
         for day, hours in segments:
             if entry.sleep_type == "nap":
                 nap_by_day[day] += hours

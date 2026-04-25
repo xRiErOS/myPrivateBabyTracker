@@ -1,6 +1,7 @@
 """Tests for the Sleep plugin — CRUD, filters, validation, duration, discovery."""
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 
 import pytest
 from httpx import AsyncClient
@@ -484,22 +485,25 @@ async def test_sleep_chart_basic(async_client):
 
 @pytest.mark.anyio
 async def test_sleep_chart_midnight_split(async_client):
-    """Chart correctly splits sleep entries across midnight."""
+    """Chart correctly splits sleep entries across Berlin midnight."""
     child_id = await _create_child(async_client)
 
-    # Night sleep: 22:00 to 06:00 = 2h on day 1, 6h on day 2
-    await _create_sleep(async_client, child_id, start="2026-04-19T22:00:00Z", end="2026-04-20T06:00:00Z", sleep_type="night")
+    # Night sleep: 21:00 UTC = 23:00 Berlin to 00:00 UTC = 02:00 Berlin
+    # Berlin split: 1h on 2026-04-19 (23:00-00:00), 2h on 2026-04-20 (00:00-02:00)
+    await _create_sleep(
+        async_client, child_id,
+        start="2026-04-19T21:00:00Z",
+        end="2026-04-20T00:00:00Z",
+        sleep_type="night",
+    )
 
     resp = await async_client.get(f"/api/v1/sleep/chart?child_id={child_id}&days=30")
     assert resp.status_code == 200
     data = resp.json()
 
-    # Find the two days with data
     day_map = {m["date"]: m for m in data["measurements"]}
-    if "2026-04-19" in day_map:
-        assert day_map["2026-04-19"]["night_hours"] == 2.0
-    if "2026-04-20" in day_map:
-        assert day_map["2026-04-20"]["night_hours"] == 6.0
+    assert day_map["2026-04-19"]["night_hours"] == 1.0
+    assert day_map["2026-04-20"]["night_hours"] == 2.0
 
 
 @pytest.mark.anyio
@@ -570,3 +574,157 @@ async def test_sleep_plugin_widgets():
     assert len(widgets) == 1
     assert widgets[0].name == "sleep_summary"
     assert widgets[0].size == "medium"
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for _split_sleep_by_day (timezone-aware midnight splitting)
+# ---------------------------------------------------------------------------
+
+BERLIN = ZoneInfo("Europe/Berlin")
+UTC = timezone.utc
+
+
+class TestSplitSleepByDay:
+    """Direct unit tests for _split_sleep_by_day with Berlin timezone."""
+
+    def _split(self, start: datetime, end: datetime) -> list[tuple[date, float]]:
+        from app.plugins.sleep.router import _split_sleep_by_day
+        return _split_sleep_by_day(start, end, ZoneInfo("Europe/Berlin"))
+
+    def test_no_midnight_crossing(self):
+        """Sleep within a single day — no splitting needed."""
+        # 14:00-16:00 Berlin = 12:00-14:00 UTC (CEST +2)
+        result = self._split(
+            datetime(2026, 4, 19, 12, 0, tzinfo=UTC),
+            datetime(2026, 4, 19, 14, 0, tzinfo=UTC),
+        )
+        assert len(result) == 1
+        assert result[0] == (date(2026, 4, 19), 2.0)
+
+    def test_overnight_split(self):
+        """23:00-02:00 Berlin → 1h on day 1, 2h on day 2."""
+        # 23:00 Berlin = 21:00 UTC, 02:00 Berlin = 00:00 UTC (CEST)
+        result = self._split(
+            datetime(2026, 4, 19, 21, 0, tzinfo=UTC),
+            datetime(2026, 4, 20, 0, 0, tzinfo=UTC),
+        )
+        assert len(result) == 2
+        assert result[0] == (date(2026, 4, 19), 1.0)
+        assert result[1] == (date(2026, 4, 20), 2.0)
+
+    def test_exactly_at_midnight(self):
+        """Sleep ending exactly at Berlin midnight — no zero-minute segment."""
+        # 22:00 Berlin = 20:00 UTC, 00:00 Berlin = 22:00 UTC
+        result = self._split(
+            datetime(2026, 4, 19, 20, 0, tzinfo=UTC),
+            datetime(2026, 4, 19, 22, 0, tzinfo=UTC),
+        )
+        assert len(result) == 1
+        assert result[0] == (date(2026, 4, 19), 2.0)
+
+    def test_starting_at_midnight(self):
+        """Sleep starting exactly at Berlin midnight."""
+        # 00:00 Berlin = 22:00 UTC prev day, 03:00 Berlin = 01:00 UTC
+        result = self._split(
+            datetime(2026, 4, 19, 22, 0, tzinfo=UTC),
+            datetime(2026, 4, 20, 1, 0, tzinfo=UTC),
+        )
+        assert len(result) == 1
+        assert result[0] == (date(2026, 4, 20), 3.0)
+
+    def test_spanning_two_midnights(self):
+        """Very long sleep spanning two midnight boundaries."""
+        # 22:00 Berlin Apr 19 = 20:00 UTC to 08:00 Berlin Apr 21 = 06:00 UTC
+        result = self._split(
+            datetime(2026, 4, 19, 20, 0, tzinfo=UTC),
+            datetime(2026, 4, 21, 6, 0, tzinfo=UTC),
+        )
+        assert len(result) == 3
+        assert result[0] == (date(2026, 4, 19), 2.0)   # 22:00-00:00
+        assert result[1] == (date(2026, 4, 20), 24.0)   # 00:00-00:00
+        assert result[2] == (date(2026, 4, 21), 8.0)    # 00:00-08:00
+
+    def test_dst_spring_forward(self):
+        """DST spring forward: 2026-03-29 02:00→03:00 Berlin (clocks skip 1h).
+
+        Sleep 00:00-02:00 UTC = 01:00-04:00 Berlin wall clock.
+        Duration = 2h real elapsed. Stays within one Berlin calendar day.
+        """
+        # 2026-03-29: CET→CEST, 01:00 Berlin = 00:00 UTC, 04:00 Berlin = 02:00 UTC
+        result = self._split(
+            datetime(2026, 3, 29, 0, 0, tzinfo=UTC),
+            datetime(2026, 3, 29, 2, 0, tzinfo=UTC),
+        )
+        assert len(result) == 1
+        assert result[0][0] == date(2026, 3, 29)
+        # Duration: no midnight crossing, all on one day
+        assert result[0][1] > 0
+
+    def test_dst_fall_back(self):
+        """DST fall back: 2026-10-25 03:00→02:00 Berlin (clocks repeat 1h).
+
+        Sleep 23:00 UTC Oct 24 = 01:00 CEST Oct 25 Berlin
+        to 03:00 UTC Oct 25 = 04:00 CET Oct 25 Berlin.
+        All on Berlin Oct 25, no midnight crossing → 1 segment.
+        """
+        result = self._split(
+            datetime(2026, 10, 24, 23, 0, tzinfo=UTC),
+            datetime(2026, 10, 25, 3, 0, tzinfo=UTC),
+        )
+        # Both timestamps fall on Berlin Oct 25 (01:00 → 04:00)
+        assert len(result) == 1
+        assert result[0][0] == date(2026, 10, 25)
+        assert result[0][1] > 0
+
+    def test_overnight_across_dst_fall_back(self):
+        """Overnight sleep crossing Berlin midnight during DST fall back."""
+        # 20:00 UTC Oct 24 = 22:00 CEST Berlin Oct 24
+        # 03:00 UTC Oct 25 = 04:00 CET Berlin Oct 25
+        # Berlin split: 2h on Oct 24 (22:00-00:00), rest on Oct 25
+        result = self._split(
+            datetime(2026, 10, 24, 20, 0, tzinfo=UTC),
+            datetime(2026, 10, 25, 3, 0, tzinfo=UTC),
+        )
+        assert len(result) == 2
+        assert result[0][0] == date(2026, 10, 24)
+        assert result[1][0] == date(2026, 10, 25)
+        total = sum(h for _, h in result)
+        assert total > 0
+
+    def test_naive_utc_fallback(self):
+        """Naive datetimes (no tzinfo) are treated as UTC."""
+        result = self._split(
+            datetime(2026, 4, 19, 21, 0),  # naive → assumed UTC
+            datetime(2026, 4, 20, 0, 0),   # naive → assumed UTC
+        )
+        # 21:00 UTC = 23:00 Berlin, 00:00 UTC = 02:00 Berlin → 1h + 2h
+        assert len(result) == 2
+        assert result[0] == (date(2026, 4, 19), 1.0)
+        assert result[1] == (date(2026, 4, 20), 2.0)
+
+
+# ---------------------------------------------------------------------------
+# Integration test: overnight filter in list endpoint
+# ---------------------------------------------------------------------------
+
+@pytest.mark.anyio
+async def test_list_sleep_includes_overnight(async_client):
+    """GET /api/v1/sleep/ returns entries that started before date_from but end within range."""
+    child_id = await _create_child(async_client)
+
+    # Sleep starts 23:00 Berlin (21:00 UTC) on Apr 19, ends 06:00 Berlin (04:00 UTC) on Apr 20
+    await _create_sleep(
+        async_client, child_id,
+        start="2026-04-19T21:00:00Z",
+        end="2026-04-20T04:00:00Z",
+        sleep_type="night",
+    )
+
+    # Query for Apr 20 only — should still find the overnight entry
+    resp = await async_client.get(
+        f"/api/v1/sleep/?child_id={child_id}&date_from=2026-04-20T00:00:00Z"
+    )
+    assert resp.status_code == 200
+    entries = resp.json()
+    assert len(entries) == 1
+    assert entries[0]["start_time"].startswith("2026-04-19")
