@@ -179,6 +179,12 @@ nodes:
         echo "FEHLER: NAS-IP in vite.config.ts — Proxy auf localhost zurücksetzen!"
         exit 1
       fi
+      CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+      if [ "$CURRENT_BRANCH" != "main" ]; then
+        echo "Worktree-Branch $CURRENT_BRANCH → merge nach main"
+        git checkout main
+        git merge --no-edit "$CURRENT_BRANCH"
+      fi
       git push
 
   - id: sprint-close
