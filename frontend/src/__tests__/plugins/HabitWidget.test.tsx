@@ -23,7 +23,6 @@ vi.mock("../../hooks/useTodos", () => ({
 
 function makeHabit(partial: Partial<Habit> & { id: number }): Habit {
   return {
-    id: partial.id,
     child_id: 1,
     title: `Habit ${partial.id}`,
     details: null,
