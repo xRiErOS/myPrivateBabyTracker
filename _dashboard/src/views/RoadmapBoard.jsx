@@ -106,9 +106,13 @@ function SortableIssueCard({ item }) {
 }
 
 // Sprint column header
-function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon }) {
+function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon, onSprintUpdated }) {
   const [archonRunning, setArchonRunning] = useState(false)
   const [archonResult, setArchonResult] = useState(null)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState(sprint.name)
+  const [editNotes, setEditNotes] = useState(sprint.notes || '')
+  const [saving, setSaving] = useState(false)
 
   const handleRunArchon = async () => {
     setArchonRunning(true)
@@ -125,6 +129,31 @@ function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon 
     if (onRunArchon) onRunArchon()
   }
 
+  const handleSave = async () => {
+    if (!editName.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/sprints/${sprint.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName.trim(), notes: editNotes }),
+      })
+      if (!res.ok) throw new Error()
+      const updated = await res.json()
+      if (onSprintUpdated) onSprintUpdated(updated)
+      setEditing(false)
+    } catch {
+      // keep editing open on error
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSave() }
+    if (e.key === 'Escape') { setEditing(false); setEditName(sprint.name); setEditNotes(sprint.notes || '') }
+  }
+
   const itemCount = sprint._itemCount || 0
   const capacityPct = sprint.capacity ? Math.min(100, Math.round((itemCount / sprint.capacity) * 100)) : null
 
@@ -132,36 +161,92 @@ function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon 
     <div className="mb-3">
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-sm truncate">{sprint.name}</h3>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <StatusBadge status={sprint.status === 'active' ? 'in_progress' : sprint.status === 'planning' ? 'new' : sprint.status} />
-            <span className="text-xs" style={{ color: 'var(--subtext0)' }}>
-              {sprint.done_count || 0}/{sprint.item_count || 0}
-              {sprint.capacity ? ` (cap: ${sprint.capacity})` : ''}
-            </span>
+          {editing ? (
+            <div className="flex flex-col gap-1.5">
+              <input
+                autoFocus
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full rounded px-2 py-1 text-sm font-bold border-0 outline-none"
+                style={{ background: 'var(--surface1)', color: 'var(--text)', fontSize: '16px' }}
+                placeholder="Sprint-Name"
+              />
+              <textarea
+                value={editNotes}
+                onChange={e => setEditNotes(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={2}
+                className="w-full rounded px-2 py-1 text-xs border-0 outline-none resize-none"
+                style={{ background: 'var(--surface1)', color: 'var(--subtext1)', fontSize: '14px' }}
+                placeholder="Ziel dieses Sprints…"
+              />
+              <div className="flex gap-1.5">
+                <button
+                  onClick={handleSave}
+                  disabled={saving || !editName.trim()}
+                  className="text-xs px-2 py-1 rounded font-medium"
+                  style={{ background: 'var(--green)', color: 'white', minHeight: '28px', opacity: saving ? 0.7 : 1 }}
+                >
+                  {saving ? '...' : 'Speichern'}
+                </button>
+                <button
+                  onClick={() => { setEditing(false); setEditName(sprint.name); setEditNotes(sprint.notes || '') }}
+                  className="text-xs px-2 py-1 rounded"
+                  style={{ background: 'var(--surface1)', color: 'var(--subtext0)', minHeight: '28px' }}
+                >
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="cursor-pointer group"
+              onClick={() => setEditing(true)}
+              title="Klicken zum Bearbeiten"
+            >
+              <h3 className="font-bold text-sm truncate group-hover:underline decoration-dotted">{sprint.name}</h3>
+              {sprint.notes && (
+                <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--subtext1)' }}>{sprint.notes}</p>
+              )}
+              {!sprint.notes && (
+                <p className="text-xs mt-0.5 italic" style={{ color: 'var(--overlay0)' }}>Ziel hinzufügen…</p>
+              )}
+            </div>
+          )}
+          {!editing && (
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <StatusBadge status={sprint.status === 'active' ? 'in_progress' : sprint.status === 'planning' ? 'new' : sprint.status} />
+              <span className="text-xs" style={{ color: 'var(--subtext0)' }}>
+                {sprint.done_count || 0}/{sprint.item_count || 0}
+                {sprint.capacity ? ` (cap: ${sprint.capacity})` : ''}
+              </span>
+            </div>
+          )}
+        </div>
+        {!editing && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => onReorder(sprint.id, 'up')}
+              className="w-7 h-7 rounded flex items-center justify-center text-xs"
+              style={{ background: 'var(--surface1)', color: 'var(--subtext0)', minHeight: '28px' }}
+              title="Nach links schieben"
+            >
+              &larr;
+            </button>
+            <button
+              onClick={() => onReorder(sprint.id, 'down')}
+              className="w-7 h-7 rounded flex items-center justify-center text-xs"
+              style={{ background: 'var(--surface1)', color: 'var(--subtext0)', minHeight: '28px' }}
+              title="Nach rechts schieben"
+            >
+              &rarr;
+            </button>
           </div>
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => onReorder(sprint.id, 'up')}
-            className="w-7 h-7 rounded flex items-center justify-center text-xs"
-            style={{ background: 'var(--surface1)', color: 'var(--subtext0)', minHeight: '28px' }}
-            title="Nach links schieben"
-          >
-            &larr;
-          </button>
-          <button
-            onClick={() => onReorder(sprint.id, 'down')}
-            className="w-7 h-7 rounded flex items-center justify-center text-xs"
-            style={{ background: 'var(--surface1)', color: 'var(--subtext0)', minHeight: '28px' }}
-            title="Nach rechts schieben"
-          >
-            &rarr;
-          </button>
-        </div>
+        )}
       </div>
 
-      {capacityPct !== null && (
+      {!editing && capacityPct !== null && (
         <div className="h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: 'var(--surface1)' }}>
           <div
             className="h-full rounded-full transition-all"
@@ -173,33 +258,35 @@ function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon 
         </div>
       )}
 
-      <div className="flex gap-1.5 flex-wrap">
-        <button
-          onClick={onAddIssue}
-          className="text-xs px-2 py-1 rounded font-medium"
-          style={{ background: 'var(--blue)', color: 'white', minHeight: '28px' }}
-        >
-          + Issue
-        </button>
-        {sprint.status !== 'cancelled' && (
-          <Link
-            to={`/review/${sprint.id}`}
+      {!editing && (
+        <div className="flex gap-1.5 flex-wrap">
+          <button
+            onClick={onAddIssue}
             className="text-xs px-2 py-1 rounded font-medium"
-            style={{ background: 'var(--surface1)', color: 'var(--text)', minHeight: '28px', display: 'inline-flex', alignItems: 'center' }}
+            style={{ background: 'var(--blue)', color: 'white', minHeight: '28px' }}
           >
-            Review
-          </Link>
-        )}
-        <button
-          onClick={handleRunArchon}
-          disabled={archonRunning}
-          className="text-xs px-2 py-1 rounded font-medium"
-          style={{ background: 'var(--mauve)', color: 'white', minHeight: '28px', opacity: archonRunning ? 0.7 : 1 }}
-          title="Archon-Workflow starten"
-        >
-          {archonRunning ? '...' : 'Archon'}
-        </button>
-      </div>
+            + Issue
+          </button>
+          {sprint.status !== 'cancelled' && (
+            <Link
+              to={`/review/${sprint.id}`}
+              className="text-xs px-2 py-1 rounded font-medium"
+              style={{ background: 'var(--surface1)', color: 'var(--text)', minHeight: '28px', display: 'inline-flex', alignItems: 'center' }}
+            >
+              Review
+            </Link>
+          )}
+          <button
+            onClick={handleRunArchon}
+            disabled={archonRunning}
+            className="text-xs px-2 py-1 rounded font-medium"
+            style={{ background: 'var(--mauve)', color: 'white', minHeight: '28px', opacity: archonRunning ? 0.7 : 1 }}
+            title="Archon-Workflow starten"
+          >
+            {archonRunning ? '...' : 'Archon'}
+          </button>
+        </div>
+      )}
       {archonResult && (
         <p className="text-xs mt-1" style={{ color: 'var(--green)' }}>{archonResult}</p>
       )}
@@ -392,6 +479,10 @@ export default function RoadmapBoard() {
     setSprints(prev => [...prev, newSprint])
   }
 
+  const handleSprintUpdated = (updatedSprint) => {
+    setSprints(prev => prev.map(s => s.id === updatedSprint.id ? { ...s, ...updatedSprint } : s))
+  }
+
   const activeItem = activeId ? backlog.find(b => String(b.id) === String(activeId)) : null
 
   if (loading) return <p className="text-center py-12" style={{ color: 'var(--subtext0)' }}>Laden...</p>
@@ -507,6 +598,7 @@ export default function RoadmapBoard() {
               sprintCount={enrichedSprints.length}
               onReorder={handleReorder}
               onAddIssue={() => setIssueModal({ open: true, sprintId: sprint.id })}
+              onSprintUpdated={handleSprintUpdated}
             />
             <SortableContext
               items={(sprintItems[sprint.id] || []).map(i => String(i.id))}
