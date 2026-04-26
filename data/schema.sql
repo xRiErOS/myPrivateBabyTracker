@@ -20,6 +20,10 @@ CREATE TABLE audit_log (
   old_value TEXT,
   new_value TEXT
 );
+INSERT INTO "audit_log" VALUES(1,'2026-04-26 06:46:28','dashboard-po','create','backlog',189,NULL,'{"id":189,"title":"Test-Issue Phase2","type":"bug","description":null,"priority":3,"milestone":null,"assigned_sprint":null,"status":"new","created_at":"2026-04-26 06:46:28","completed_at":null,"plugin_key":null,"goal":null,"background":null,"relevant_files":null,"context_notes":null,"refined_at":null}');
+INSERT INTO "audit_log" VALUES(2,'2026-04-26 06:46:28','dashboard-po','status_change','backlog',1,'{"status":"done"}','{"status":"planned"}');
+INSERT INTO "audit_log" VALUES(3,'2026-04-26 06:46:28','dashboard-po','status_change','backlog',1,'{"status":"planned"}','{"status":"refined"}');
+INSERT INTO "audit_log" VALUES(4,'2026-04-26 06:46:42','dashboard-po','status_change','backlog',189,'{"status":"new"}','{"status":"cancelled","notes":"Nicht mehr benötigt"}');
 CREATE TABLE backlog (
   id INTEGER PRIMARY KEY,
   title TEXT NOT NULL,
@@ -32,7 +36,7 @@ CREATE TABLE backlog (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   completed_at DATETIME
 , plugin_key TEXT, goal TEXT, background TEXT, relevant_files TEXT, context_notes TEXT, refined_at DATETIME);
-INSERT INTO "backlog" VALUES(1,'Repo Setup + Project Scaffolding','core','Task 1: Git init, pyproject.toml, package.json, tsconfig, vite config, tailwind config, DESIGN.md',1,NULL,1,'done','2026-04-19 13:37:05','2026-04-20 03:04:44',NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO "backlog" VALUES(1,'Repo Setup + Project Scaffolding','core','Task 1: Git init, pyproject.toml, package.json, tsconfig, vite config, tailwind config, DESIGN.md',1,NULL,1,'refined','2026-04-19 13:37:05',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "backlog" VALUES(2,'Core Config + Logging + Database','feature','Task 2: Pydantic Settings with startup validation (K4), structlog JSON logging (W6), SQLite WAL database',1,NULL,1,'done','2026-04-19 13:37:05','2026-04-20 03:04:44',NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "backlog" VALUES(3,'Core Models + Alembic Migrations','feature','Task 3: User, Child, PluginState, AuditLog models. Timezone UTC convention (W1). Alembic setup.',1,NULL,1,'done','2026-04-19 13:37:05','2026-04-20 03:04:44',NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "backlog" VALUES(4,'Plugin SDK Base Class + Discovery','feature','Task 4: PluginBase ABC, WidgetDef, filesystem scan discovery, plugin_registry',1,NULL,1,'done','2026-04-19 13:37:05','2026-04-20 03:04:44',NULL,NULL,NULL,NULL,NULL,NULL);
@@ -228,6 +232,7 @@ INSERT INTO "backlog" VALUES(185,'FAB: 4 Quick-Actions als Radial-Menü','featur
 INSERT INTO "backlog" VALUES(186,'Bug: Navigation Habit Widget — Klick navigiert nicht korrekt','bug','MyBaby Todo #12: Navigation Habit Widget — aus user-reported Todo-Liste',2,NULL,23,'done','2026-04-25 20:43:05','2026-04-25 21:42:19',NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "backlog" VALUES(187,'Bug: Habits Dashboard — falsche Zählung aktiver Habits','bug','MyBaby Todo #13: Habits werden mehr gezählt als täglich aktiv sein sollten (z.B. sonntags-only Habits werden mitgezählt)',2,NULL,23,'done','2026-04-25 20:43:05','2026-04-25 21:46:42',NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "backlog" VALUES(188,'Smoke-Test: Setup-Validierung','bug','Smoke-Test: Setup-Validierung',3,NULL,NULL,'new','2026-04-25 20:52:20',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO "backlog" VALUES(189,'Test-Issue Phase2','bug',NULL,3,NULL,NULL,'cancelled','2026-04-26 06:46:28','2026-04-26 06:46:42',NULL,NULL,NULL,NULL,NULL,NULL);
 CREATE TABLE conversation_snapshots (
   id INTEGER PRIMARY KEY,
   agent_id TEXT,
@@ -314,6 +319,7 @@ CREATE TABLE issue_dependencies (
   UNIQUE(issue_id, depends_on_id),
   CHECK(issue_id != depends_on_id)
 );
+INSERT INTO "issue_dependencies" VALUES(1,189,2,'Blockiert durch Item 2','2026-04-26 06:46:42');
 CREATE TABLE review_feedback (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     backlog_id INTEGER NOT NULL REFERENCES backlog(id),
@@ -322,54 +328,54 @@ CREATE TABLE review_feedback (
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  , round_number INTEGER DEFAULT 1, review_status TEXT DEFAULT 'pending', submitted_to_archon_at DATETIME);
-INSERT INTO "review_feedback" VALUES(1,106,'not_passed',NULL,NULL,'2026-04-22 14:46:29','2026-04-22 14:46:29',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(2,116,'passed','',NULL,'2026-04-22 14:48:50','2026-04-23 20:47:40',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(3,47,'not_passed','Wird zu einem späteren Zeitraum gemacht, wenn Auth aktiviert wird. Test Issue sollte bereits angelegt sein. ',NULL,'2026-04-22 14:51:02','2026-04-22 14:51:02',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(4,99,'not_passed','Wird zu einem späteren Zeitraum gemacht, wenn Auth aktiviert wird. Test Issue sollte bereits angelegt sein. ',NULL,'2026-04-22 14:51:04','2026-04-22 14:51:04',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(5,106,'not_passed','Die Datem der Wonderweeks sind im Test identisch mit der Prod. Auch weichen die Daten von der oje ich wachse app (referenz) ab. ',NULL,'2026-04-22 14:54:15','2026-04-22 15:08:36',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(6,132,'passed','',NULL,'2026-04-23 20:47:26','2026-04-23 20:47:26',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(7,136,'passed','',NULL,'2026-04-23 20:47:30','2026-04-23 20:47:30',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(8,127,'passed','Wenn ich auf dem Dashboard mobile oder Browser versuche den Timer anzupassen, passiert nichts.',NULL,'2026-04-23 20:48:09','2026-04-23 20:59:48',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(9,128,'passed','Es kommt weiterhin zur Duplikation der Inhalte. Ich als Benutzer möchte, dass sich der editierte Task vollständig als Formular öffnet und nicht die Altdaten mit angezeigt werden. ',NULL,'2026-04-23 20:49:00','2026-04-23 21:01:57',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(10,129,'passed','',NULL,'2026-04-23 20:50:18','2026-04-23 20:50:18',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(11,138,'passed','',NULL,'2026-04-23 20:50:25','2026-04-23 20:50:25',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(12,26,'passed','',NULL,'2026-04-24 06:00:57','2026-04-24 06:00:57',1,'pending',NULL);
+  , round_number INTEGER DEFAULT 1, review_status TEXT DEFAULT 'pending', submitted_to_archon_at DATETIME, ui_target TEXT);
+INSERT INTO "review_feedback" VALUES(1,106,'not_passed',NULL,NULL,'2026-04-22 14:46:29','2026-04-22 14:46:29',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(2,116,'passed','',NULL,'2026-04-22 14:48:50','2026-04-23 20:47:40',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(3,47,'not_passed','Wird zu einem späteren Zeitraum gemacht, wenn Auth aktiviert wird. Test Issue sollte bereits angelegt sein. ',NULL,'2026-04-22 14:51:02','2026-04-22 14:51:02',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(4,99,'not_passed','Wird zu einem späteren Zeitraum gemacht, wenn Auth aktiviert wird. Test Issue sollte bereits angelegt sein. ',NULL,'2026-04-22 14:51:04','2026-04-22 14:51:04',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(5,106,'not_passed','Die Datem der Wonderweeks sind im Test identisch mit der Prod. Auch weichen die Daten von der oje ich wachse app (referenz) ab. ',NULL,'2026-04-22 14:54:15','2026-04-22 15:08:36',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(6,132,'passed','',NULL,'2026-04-23 20:47:26','2026-04-23 20:47:26',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(7,136,'passed','',NULL,'2026-04-23 20:47:30','2026-04-23 20:47:30',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(8,127,'passed','Wenn ich auf dem Dashboard mobile oder Browser versuche den Timer anzupassen, passiert nichts.',NULL,'2026-04-23 20:48:09','2026-04-23 20:59:48',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(9,128,'passed','Es kommt weiterhin zur Duplikation der Inhalte. Ich als Benutzer möchte, dass sich der editierte Task vollständig als Formular öffnet und nicht die Altdaten mit angezeigt werden. ',NULL,'2026-04-23 20:49:00','2026-04-23 21:01:57',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(10,129,'passed','',NULL,'2026-04-23 20:50:18','2026-04-23 20:50:18',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(11,138,'passed','',NULL,'2026-04-23 20:50:25','2026-04-23 20:50:25',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(12,26,'passed','',NULL,'2026-04-24 06:00:57','2026-04-24 06:00:57',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(13,27,'not_passed','Die Lösung, dass Warnhinweise für die Säuglinge im Alter eingestellt werden können sind super. Ich möchte jedoch mit der User Story erreichen, dass Eltern Standardwerte als Hilfestellung erhalten. Daher braucht es eine Lösung, bei welcher die Richtwerte den Eltern unter /admin/alerts bereitgestellt werden. Ich stelle mir einen Button für bspw. Nasse Windeln vor. Klickt Mutter auf Button öffnet sich eine Übersicht der Richtwerte für nasse Windeln. Dort werden tabellarisch die Richtwerte ausgegeben und die Mutter kann den entsprechenden Richtwert übernehmen. Dadurch wird der Richtwert eingetragen. 
 Dann braucht es eine Erweiterung des Warnsystems, dass die App prüft, ob der eingestellt Warnwert zur Referenztabelle passt. Wenn der Wert abweicht, soll eine Warnung auf dem Dashboard erscheinen, dass der Warnwert nicht den Empfehlungen entspricht. Diese Warnungen sollen Eltern schließen können (wie bisher) UND eine Option haben, dass Sie nicht mehr benachrichtigt werden. 
-Denke diese Erweiterung durch und realisiere eine optimale User-Experience. Mein Feedback gibt nur die Vision vor. ',NULL,'2026-04-24 06:01:32','2026-04-24 07:42:13',1,'pending',NULL);
+Denke diese Erweiterung durch und realisiere eine optimale User-Experience. Mein Feedback gibt nur die Vision vor. ',NULL,'2026-04-24 06:01:32','2026-04-24 07:42:13',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(14,107,'not_passed','1) Ich kann hier noch keine Varianten auswählen (Update peach, Info saphire, Warnung red) 
 2) Der Button "Eintragen" hat weiße Schrift > schwer lesbar
 3) Das Feld "Aenderungen" in "Text" umändern 
-4) für das Feld "Aenderungen" Markdown aktivieren.',NULL,'2026-04-24 06:08:05','2026-04-24 07:42:07',1,'pending',NULL);
+4) für das Feld "Aenderungen" Markdown aktivieren.',NULL,'2026-04-24 06:08:05','2026-04-24 07:42:07',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(15,100,'not_passed','Unter /admin/plugins ist die Umbenennung korrekt erfolgt. Aber nicht in der Randleiste. 
 
 Eintragen neuer Habits funktioniert sehr gut. Es fehlt jedoch an einer Kachel für das Dashboard. Unter admin/plugins braucht es 2 Tooggles für das Anzeigen auf dem Dashboard. 1) ToDo''s und 2) Habits
 
-Die neue Kachel für die Habits soll mit einem Fortschrittbalken angeben, wie viele Habits am Tag bereits abgehakt sind. ',NULL,'2026-04-24 06:08:08','2026-04-24 07:42:09',1,'pending',NULL);
+Die neue Kachel für die Habits soll mit einem Fortschrittbalken angeben, wie viele Habits am Tag bereits abgehakt sind. ',NULL,'2026-04-24 06:08:08','2026-04-24 07:42:09',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(16,135,'not_passed','Hat sehr gut funktioniert. Es braucht jedoch noch eine weitere Schaltfläche "weitere" dadurch öffnet sich ein Overlay, wie im bestehenden Bitten "+ Neu", um auch alle anderen Entitäten, die nicht in den Quick-Actions vorhanden sind, zugänglich macht. Wenn du das eingerichtet hast, dann kann für die mobile Ansicht der Add Button sowie die Quick-Actions entfert werden. 
 
-Review 2: Keine Änderung erkennbar',NULL,'2026-04-24 06:13:15','2026-04-24 07:43:01',1,'pending',NULL);
+Review 2: Keine Änderung erkennbar',NULL,'2026-04-24 06:13:15','2026-04-24 07:43:01',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(17,131,'passed','Hat prinzipiell funktioniert. Jedoch Feedback von meiner Frau: 
-Ich als Mutter ohne Wissen über Markdown brauche eine Formatierunhshilfe für Markdown. Eine Formatleiste, die sich beim Text über den Schirm legt wäre super. Format wie bei Obsidian on mobile wäre super.',NULL,'2026-04-24 06:14:33','2026-04-24 07:43:01',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(18,133,'passed','',NULL,'2026-04-24 06:17:06','2026-04-24 07:34:30',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(19,134,'passed','',NULL,'2026-04-24 06:17:30','2026-04-24 06:18:31',1,'pending',NULL);
+Ich als Mutter ohne Wissen über Markdown brauche eine Formatierunhshilfe für Markdown. Eine Formatleiste, die sich beim Text über den Schirm legt wäre super. Format wie bei Obsidian on mobile wäre super.',NULL,'2026-04-24 06:14:33','2026-04-24 07:43:01',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(18,133,'passed','',NULL,'2026-04-24 06:17:06','2026-04-24 07:34:30',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(19,134,'passed','',NULL,'2026-04-24 06:17:30','2026-04-24 06:18:31',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(20,130,'partially_passed','Navigation passt. 
-Es fehlt noch die Option für das Tagging der Notizen, wie für alle anderen Entitäten. ',NULL,'2026-04-24 06:17:35','2026-04-24 07:34:28',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(21,117,'partially_passed','Toogle und Funktion vorhanden. Das Toggle ist jedoch falsch gestaltet. Bitte apple toggle verwenden, wie im rest des Tools. ',NULL,'2026-04-24 06:17:46','2026-04-24 07:33:52',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(22,113,'passed','Done',NULL,'2026-04-24 06:17:48','2026-04-24 07:31:47',1,'pending',NULL);
+Es fehlt noch die Option für das Tagging der Notizen, wie für alle anderen Entitäten. ',NULL,'2026-04-24 06:17:35','2026-04-24 07:34:28',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(21,117,'partially_passed','Toogle und Funktion vorhanden. Das Toggle ist jedoch falsch gestaltet. Bitte apple toggle verwenden, wie im rest des Tools. ',NULL,'2026-04-24 06:17:46','2026-04-24 07:33:52',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(22,113,'passed','Done',NULL,'2026-04-24 06:17:48','2026-04-24 07:31:47',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(23,110,'partially_passed','Seite ist vorhanden. 
-kann nicht abgehakt werden. ',NULL,'2026-04-24 06:17:59','2026-04-24 07:31:18',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(24,111,'passed','Done',NULL,'2026-04-24 06:18:00','2026-04-24 07:31:41',1,'pending',NULL);
+kann nicht abgehakt werden. ',NULL,'2026-04-24 06:17:59','2026-04-24 07:31:18',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(24,111,'passed','Done',NULL,'2026-04-24 06:18:00','2026-04-24 07:31:41',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(25,141,'pending',NULL,'Ich möchte zwischen 3 Call-Out Styles unterscheiden können: Warnung, Info, Update. Diese sollen auch farblich differenziert sein. 
-Zudem möchte ich eine Option, dass ich das Changelog pushen kann, damit die Info den Eltern direkt angezeigt wird, auch wenn sie die App offen haben und das nächste mal zum Dashboard wechseln (um aktuelles Tracking nicht zu behindern) ','2026-04-24 06:32:19','2026-04-24 06:32:19',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(26,151,'passed','',NULL,'2026-04-24 17:29:12','2026-04-24 17:29:12',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(27,152,'passed','',NULL,'2026-04-24 17:39:57','2026-04-24 17:39:57',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(28,153,'passed','',NULL,'2026-04-24 17:43:16','2026-04-24 17:43:16',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(29,154,'passed','',NULL,'2026-04-24 17:43:18','2026-04-24 17:43:18',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(30,155,'passed','',NULL,'2026-04-24 17:43:20','2026-04-24 17:43:20',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(31,157,'passed','',NULL,'2026-04-24 17:44:01','2026-04-24 17:44:01',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(32,158,'partially_passed','Ich kann ohne Edit die Notiz nicht lesen. Wie bei Tasks braucht es eine Lösung zum Aufklappen des Volltextes.',NULL,'2026-04-24 17:44:17','2026-04-24 17:44:41',1,'pending',NULL);
+Zudem möchte ich eine Option, dass ich das Changelog pushen kann, damit die Info den Eltern direkt angezeigt wird, auch wenn sie die App offen haben und das nächste mal zum Dashboard wechseln (um aktuelles Tracking nicht zu behindern) ','2026-04-24 06:32:19','2026-04-24 06:32:19',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(26,151,'passed','',NULL,'2026-04-24 17:29:12','2026-04-24 17:29:12',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(27,152,'passed','',NULL,'2026-04-24 17:39:57','2026-04-24 17:39:57',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(28,153,'passed','',NULL,'2026-04-24 17:43:16','2026-04-24 17:43:16',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(29,154,'passed','',NULL,'2026-04-24 17:43:18','2026-04-24 17:43:18',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(30,155,'passed','',NULL,'2026-04-24 17:43:20','2026-04-24 17:43:20',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(31,157,'passed','',NULL,'2026-04-24 17:44:01','2026-04-24 17:44:01',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(32,158,'partially_passed','Ich kann ohne Edit die Notiz nicht lesen. Wie bei Tasks braucht es eine Lösung zum Aufklappen des Volltextes.',NULL,'2026-04-24 17:44:17','2026-04-24 17:44:41',1,'pending',NULL,NULL);
 INSERT INTO "review_feedback" VALUES(33,145,'not_passed','HOHE PRIORITÄT. 
 Das Note-Feature in myBaby rendert aktuell Markdown-Syntax literal im Editor-Feld (z. B. `**text**` statt **text**). Ziel ist ein Live-Editing-Modus ohne Split zwischen Schreiben und Rendering — analog zu Obsidian.
 
@@ -398,32 +404,32 @@ Ersetze das bestehende Texteingabefeld im Note-Editor durch einen WYSIWYG-fähig
 - Bestehende State-Logik (controlled component) anpassen: CodeMirror arbeitet mit eigenem State → Synchronisation über `EditorView.updateListener`
 - Styling: CodeMirror-Theme an das bestehende UI-Design anpassen (Dark Mode beachten)
 - Optional: `@codemirror/commands` für Keyboard-Shortcuts (Bold, Italic via Strg+B / Strg+I)
-',NULL,'2026-04-24 17:44:41','2026-04-24 17:49:43',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(34,150,'passed','',NULL,'2026-04-24 17:49:43','2026-04-24 17:49:43',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(35,156,'passed','',NULL,'2026-04-24 17:49:47','2026-04-24 17:50:37',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(36,159,'passed','',NULL,'2026-04-24 17:50:37','2026-04-24 17:50:37',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(37,163,'passed','',NULL,'2026-04-24 17:51:52','2026-04-24 17:52:30',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(38,160,'passed','',NULL,'2026-04-24 17:52:32','2026-04-24 17:52:32',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(39,161,'passed','',NULL,'2026-04-24 17:52:33','2026-04-24 17:52:33',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(40,162,'passed','',NULL,'2026-04-24 17:52:35','2026-04-24 17:52:35',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(41,151,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(42,152,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(43,153,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(44,154,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(45,155,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(46,157,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(47,158,'partially_passed','Ohne Edit kann die Notiz nicht gelesen werden. Braucht Aufklapp-Lösung wie Tasks (Expand/Collapse).',NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(48,145,'not_passed','HOHE PRIORITÄT. Markdown wird literal gerendert. Ersetze durch CodeMirror 6 WYSIWYG-Editor (Obsidian-Stil, kein Split-View).',NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(49,150,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(50,156,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(51,159,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(52,163,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(53,160,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(54,161,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(55,162,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(56,183,'not_passed','',NULL,'2026-04-25 22:10:12','2026-04-25 22:10:12',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(57,186,'passed','',NULL,'2026-04-25 22:10:20','2026-04-25 22:10:20',1,'pending',NULL);
-INSERT INTO "review_feedback" VALUES(58,187,'not_passed','Obwohl Sonntag ist, werden mir die Habits von Samstag mit angezeigt, die erledigt sind (00:10)',NULL,'2026-04-25 22:10:23','2026-04-25 22:10:57',1,'pending',NULL);
+',NULL,'2026-04-24 17:44:41','2026-04-24 17:49:43',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(34,150,'passed','',NULL,'2026-04-24 17:49:43','2026-04-24 17:49:43',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(35,156,'passed','',NULL,'2026-04-24 17:49:47','2026-04-24 17:50:37',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(36,159,'passed','',NULL,'2026-04-24 17:50:37','2026-04-24 17:50:37',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(37,163,'passed','',NULL,'2026-04-24 17:51:52','2026-04-24 17:52:30',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(38,160,'passed','',NULL,'2026-04-24 17:52:32','2026-04-24 17:52:32',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(39,161,'passed','',NULL,'2026-04-24 17:52:33','2026-04-24 17:52:33',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(40,162,'passed','',NULL,'2026-04-24 17:52:35','2026-04-24 17:52:35',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(41,151,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(42,152,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(43,153,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(44,154,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(45,155,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(46,157,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(47,158,'partially_passed','Ohne Edit kann die Notiz nicht gelesen werden. Braucht Aufklapp-Lösung wie Tasks (Expand/Collapse).',NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(48,145,'not_passed','HOHE PRIORITÄT. Markdown wird literal gerendert. Ersetze durch CodeMirror 6 WYSIWYG-Editor (Obsidian-Stil, kein Split-View).',NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(49,150,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(50,156,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(51,159,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(52,163,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(53,160,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(54,161,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(55,162,'passed',NULL,NULL,'2026-04-24 17:55:59','2026-04-24 17:55:59',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(56,183,'not_passed','',NULL,'2026-04-25 22:10:12','2026-04-25 22:10:12',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(57,186,'passed','',NULL,'2026-04-25 22:10:20','2026-04-25 22:10:20',1,'pending',NULL,NULL);
+INSERT INTO "review_feedback" VALUES(58,187,'not_passed','Obwohl Sonntag ist, werden mir die Habits von Samstag mit angezeigt, die erledigt sind (00:10)',NULL,'2026-04-25 22:10:23','2026-04-25 22:10:57',1,'pending',NULL,NULL);
 CREATE TABLE review_screenshots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     feedback_id INTEGER NOT NULL REFERENCES review_feedback(id) ON DELETE CASCADE,
@@ -447,6 +453,7 @@ INSERT INTO "schema_migrations" VALUES('002_type_mapping','2026-04-26 06:43:25')
 INSERT INTO "schema_migrations" VALUES('003_status_mapping','2026-04-26 06:43:25');
 INSERT INTO "schema_migrations" VALUES('004_sprint_position','2026-04-26 06:43:25');
 INSERT INTO "schema_migrations" VALUES('005_review_rounds_bootstrap','2026-04-26 06:43:25');
+INSERT INTO "schema_migrations" VALUES('002_v2_visual_feedback.sql','2026-04-26 18:10:17');
 CREATE TABLE sprints (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
@@ -456,29 +463,30 @@ CREATE TABLE sprints (
   capacity INTEGER,
   notes TEXT
 , position INTEGER);
-INSERT INTO "sprints" VALUES(1,'Sprint 1 — MVP','2026-04-19','2026-04-19','closed',NULL,'Core + Sleep/Feeding/Diaper + Forward-Auth + Security + Dashboard + Import',1);
-INSERT INTO "sprints" VALUES(2,'Sprint 2 — Plugins + Warnhinweise','2026-04-20','2026-04-20','closed',14,'Sprint 2: Neue Plugins (Temperatur, Gewicht, Medikamente), Warnhinweise-System, Adaptive BottomNav, EntryListOverlay',2);
-INSERT INTO "sprints" VALUES(3,'Sprint 3 — UX-Polish + Stammdaten','2026-04-20','2026-04-20','closed',15,'Sprint 3: Medikamenten-Stammdaten, Temperatur +/- Buttons, Dashboard Timer, Untertemperatur-Warnung, Pflichtfelder *, Konsistenz entfernen, ViewTabs',3);
-INSERT INTO "sprints" VALUES(4,'Sprint 4 — Tag-System + ToDo-Liste','2026-04-20','2026-04-20','closed',28,'Sprint 4: Tag-System (8 Tasks), Baby ToDo-Liste (5 Tasks), 2 Bugfixes, 1 Quick Win',4);
-INSERT INTO "sprints" VALUES(5,'Sprint 5 — Plugins & UX','2026-05-01','2026-05-21','closed',10,'Plugins, UX-Erweiterungen, Plugin-Management, API-Key Security. Kein i18n.',5);
-INSERT INTO "sprints" VALUES(6,'Sprint 6 — UX-Feedback + Hebammen-Features','2026-04-21','2026-05-01','closed',12,'User-Feedback von 3 Muettern + Hebammen-Empfehlungen. Schwerpunkte: (1) Stillseiten-Tracking + Fuetterungsalarm (Prio 1), (2) Dashboard-Redesign (Add-Menue, Quick Actions, Widget-Layout), (3) UI-Polish (Edit-Form, Button-Text, Bugs). Voraussetzung: Sprint 4 abgeschlossen.',6);
-INSERT INTO "sprints" VALUES(7,'Sprint 7 — Milestones + Recurring','2026-05-22','2026-04-21','closed',NULL,'Weitere Plugins, Wiederkehrende ToDos, Ereignisse.',7);
-INSERT INTO "sprints" VALUES(8,'Sprint 8 — Milestones Frontend','2026-04-21','2026-04-21','closed',NULL,'Anzeige der 10 Entwicklungssprünge (Plooij) basierend auf ET des Kindes. Aktuelle Phase + Sturmwarnung im Dashboard.',8);
-INSERT INTO "sprints" VALUES(9,'Sprint 9 — User-Feedback','2026-04-21','2026-04-21','closed',NULL,'Nutzerfeedback Julia: Sofort-Fixes + UX-Backlog. Sofort-Fixes werden in laufender Coding-Lead-Session bearbeitet.',9);
-INSERT INTO "sprints" VALUES(10,'Sprint 10 — Admin UX + Emotionale Events','2026-04-21','2026-04-21','closed',NULL,'Admin-Verbesserungen und Emotionale Events Plugin',10);
-INSERT INTO "sprints" VALUES(11,'Sprint 11 — Entwicklungssprünge UX','2026-04-21',NULL,'cancelled',NULL,'Entwicklungssprünge Dashboard + Sturmphase-Alert',11);
-INSERT INTO "sprints" VALUES(12,'Sprint 12 — SSO + Deployment','2026-04-21','2026-04-22','closed',NULL,'Authelia SSO, OAuth2 Proxy, NPM-Integration, Domain baby.familie-riedel.org',12);
-INSERT INTO "sprints" VALUES(13,'Sprint 13 — Nutzerverwaltung + Einstellungen','2026-04-21','2026-04-22','closed',NULL,'Lokale Nutzerverwaltung, Nutzereinstellungen pro User',13);
-INSERT INTO "sprints" VALUES(14,'Sprint 14 — i18n + Mehrsprachigkeit','2026-04-21','2026-04-23','closed',NULL,'de/en Mehrsprachigkeit, erweiterbar',14);
-INSERT INTO "sprints" VALUES(15,'Sprint 15 — Bug-Fixing & HotFixes','2026-04-21',NULL,'closed',NULL,'Prio-1-Fixes + MicroFeatures vor Go Live. Bugs: #132 (Due-Date löschen), #136 (Abbrechen-Navigation). UX MicroFeatures: #127 (Sleep-Timer-Overlay), #128 (Inline-Edit Tasks), #129 (Task-Details einklappbar), #116 (Windel-Typ "gemischt"→"dreckig"), #138 (Dashboard Countdown statt Kindname).',15);
-INSERT INTO "sprints" VALUES(16,'Sprint 16 — Plugin Wohlbefinden','2026-04-24','2026-04-24','closed',NULL,'Wohlbefinden-Gruppe: #134 (Gesundheit→Wohlbefinden umbenennen, Voraussetzung!), #110 (U-Untersuchungen U1-U9), #111 (Schreien & Beruhigung Timer), #113 (Wachstumskurven WHO-Perzentilen), #117 (Schlaf-Ort Toggle), #133 (Medikamenten-Widget kompakt). Reihenfolge: #134 zuerst (Breaking Change auf Plugin-Key).',16);
-INSERT INTO "sprints" VALUES(17,'Sprint 17 — UI/UX Polish','2026-04-24','2026-04-24','closed',NULL,'UX-Verbesserungen: #100 (Tasks & Habits Plugin-Umbenennung + Habits-Tab), #131 (Markdown Editor im Aufgaben-Detail), #137 (Auto-grow Titelfeld Mobile). Weitere UX-Items aus Backlog prüfen.',17);
-INSERT INTO "sprints" VALUES(18,'Sprint 18 — Security & Quality Review (Go Live)','2026-04-21','2026-04-25','closed',NULL,'Aufgelöst 2026-04-25 — Items zurück ins Backlog',18);
-INSERT INTO "sprints" VALUES(19,'Sprint 19 — Julia-Feedback Bugs + Notes UX','2026-04-24','2026-04-24','closed',NULL,'Bug-Fixes (Sleep-Timer, Datumswechsel, Windel, Session-Cookie) + Notes UX',19);
-INSERT INTO "sprints" VALUES(20,'Sprint 20 — Milestone-Fotos + Medienverwaltung','2026-04-24','2026-04-24','closed',NULL,'Photo-Proxy + Thumbnails, Foto-Upload UI, Timeline, Admin Media',20);
-INSERT INTO "sprints" VALUES(21,'Sprint 21 — Review-Fixes + Foto-Workflow + Tags','2026-04-24','2026-04-24','closed',NULL,'Review-Nachbesserungen Sprint 19+20: CodeMirror WYSIWYG, Notes Expand, Notes-Tags Bug, Quick-Photo Übersicht, Timeline-Upload, Foto-Tags',21);
-INSERT INTO "sprints" VALUES(22,'Sprint 22 — Onboarding Tutorial + Wonder Weeks + Muttergesundheit',NULL,'2026-04-25','closed',NULL,'Aufgelöst 2026-04-25 — Items zurück ins Backlog',22);
-INSERT INTO "sprints" VALUES(23,'Sprint 23 — Bug-Fixing','2026-04-25',NULL,'active',NULL,'Alle offenen Bugs: Sprachwechsel, Habit-Widget-Navigation, Habit-Zählung',23);
+INSERT INTO "sprints" VALUES(1,'Sprint 1 — MVP','2026-04-19','2026-04-19','closed',NULL,'Core + Sleep/Feeding/Diaper + Forward-Auth + Security + Dashboard + Import',0);
+INSERT INTO "sprints" VALUES(2,'Sprint 2 — Plugins + Warnhinweise','2026-04-20','2026-04-20','closed',14,'Sprint 2: Neue Plugins (Temperatur, Gewicht, Medikamente), Warnhinweise-System, Adaptive BottomNav, EntryListOverlay',1);
+INSERT INTO "sprints" VALUES(3,'Sprint 3 — UX-Polish + Stammdaten','2026-04-20','2026-04-20','closed',15,'Sprint 3: Medikamenten-Stammdaten, Temperatur +/- Buttons, Dashboard Timer, Untertemperatur-Warnung, Pflichtfelder *, Konsistenz entfernen, ViewTabs',2);
+INSERT INTO "sprints" VALUES(4,'Sprint 4 — Tag-System + ToDo-Liste','2026-04-20','2026-04-20','closed',28,'Sprint 4: Tag-System (8 Tasks), Baby ToDo-Liste (5 Tasks), 2 Bugfixes, 1 Quick Win',3);
+INSERT INTO "sprints" VALUES(5,'Sprint 5 — Plugins & UX','2026-05-01','2026-05-21','closed',10,'Plugins, UX-Erweiterungen, Plugin-Management, API-Key Security. Kein i18n.',4);
+INSERT INTO "sprints" VALUES(6,'Sprint 6 — UX-Feedback + Hebammen-Features','2026-04-21','2026-05-01','closed',12,'User-Feedback von 3 Muettern + Hebammen-Empfehlungen. Schwerpunkte: (1) Stillseiten-Tracking + Fuetterungsalarm (Prio 1), (2) Dashboard-Redesign (Add-Menue, Quick Actions, Widget-Layout), (3) UI-Polish (Edit-Form, Button-Text, Bugs). Voraussetzung: Sprint 4 abgeschlossen.',5);
+INSERT INTO "sprints" VALUES(7,'Sprint 7 — Milestones + Recurring','2026-05-22','2026-04-21','closed',NULL,'Weitere Plugins, Wiederkehrende ToDos, Ereignisse.',6);
+INSERT INTO "sprints" VALUES(8,'Sprint 8 — Milestones Frontend','2026-04-21','2026-04-21','closed',NULL,'Anzeige der 10 Entwicklungssprünge (Plooij) basierend auf ET des Kindes. Aktuelle Phase + Sturmwarnung im Dashboard.',7);
+INSERT INTO "sprints" VALUES(9,'Sprint 9 — User-Feedback','2026-04-21','2026-04-21','closed',NULL,'Nutzerfeedback Julia: Sofort-Fixes + UX-Backlog. Sofort-Fixes werden in laufender Coding-Lead-Session bearbeitet.',8);
+INSERT INTO "sprints" VALUES(10,'Sprint 10 — Admin UX + Emotionale Events','2026-04-21','2026-04-21','closed',NULL,'Admin-Verbesserungen und Emotionale Events Plugin',9);
+INSERT INTO "sprints" VALUES(11,'Sprint 11 — Entwicklungssprünge UX','2026-04-21',NULL,'cancelled',NULL,'Entwicklungssprünge Dashboard + Sturmphase-Alert',10);
+INSERT INTO "sprints" VALUES(12,'Sprint 12 — SSO + Deployment','2026-04-21','2026-04-22','closed',NULL,'Authelia SSO, OAuth2 Proxy, NPM-Integration, Domain baby.familie-riedel.org',11);
+INSERT INTO "sprints" VALUES(13,'Sprint 13 — Nutzerverwaltung + Einstellungen','2026-04-21','2026-04-22','closed',NULL,'Lokale Nutzerverwaltung, Nutzereinstellungen pro User',12);
+INSERT INTO "sprints" VALUES(14,'Sprint 14 — i18n + Mehrsprachigkeit','2026-04-21','2026-04-23','closed',NULL,'de/en Mehrsprachigkeit, erweiterbar',13);
+INSERT INTO "sprints" VALUES(15,'Sprint 15 — Bug-Fixing & HotFixes','2026-04-21',NULL,'closed',NULL,'Prio-1-Fixes + MicroFeatures vor Go Live. Bugs: #132 (Due-Date löschen), #136 (Abbrechen-Navigation). UX MicroFeatures: #127 (Sleep-Timer-Overlay), #128 (Inline-Edit Tasks), #129 (Task-Details einklappbar), #116 (Windel-Typ "gemischt"→"dreckig"), #138 (Dashboard Countdown statt Kindname).',14);
+INSERT INTO "sprints" VALUES(16,'Sprint 16 — Plugin Wohlbefinden','2026-04-24','2026-04-24','closed',NULL,'Wohlbefinden-Gruppe: #134 (Gesundheit→Wohlbefinden umbenennen, Voraussetzung!), #110 (U-Untersuchungen U1-U9), #111 (Schreien & Beruhigung Timer), #113 (Wachstumskurven WHO-Perzentilen), #117 (Schlaf-Ort Toggle), #133 (Medikamenten-Widget kompakt). Reihenfolge: #134 zuerst (Breaking Change auf Plugin-Key).',15);
+INSERT INTO "sprints" VALUES(17,'Sprint 17 — UI/UX Polish','2026-04-24','2026-04-24','closed',NULL,'UX-Verbesserungen: #100 (Tasks & Habits Plugin-Umbenennung + Habits-Tab), #131 (Markdown Editor im Aufgaben-Detail), #137 (Auto-grow Titelfeld Mobile). Weitere UX-Items aus Backlog prüfen.',16);
+INSERT INTO "sprints" VALUES(18,'Sprint 18 — Security & Quality Review (Go Live)','2026-04-21','2026-04-25','closed',NULL,'Aufgelöst 2026-04-25 — Items zurück ins Backlog',17);
+INSERT INTO "sprints" VALUES(19,'Sprint 19 — Julia-Feedback Bugs + Notes UX','2026-04-24','2026-04-24','closed',NULL,'Bug-Fixes (Sleep-Timer, Datumswechsel, Windel, Session-Cookie) + Notes UX',18);
+INSERT INTO "sprints" VALUES(20,'Sprint 20 — Milestone-Fotos + Medienverwaltung','2026-04-24','2026-04-24','closed',NULL,'Photo-Proxy + Thumbnails, Foto-Upload UI, Timeline, Admin Media',19);
+INSERT INTO "sprints" VALUES(21,'Sprint 21 — Review-Fixes + Foto-Workflow + Tags','2026-04-24','2026-04-24','closed',NULL,'Review-Nachbesserungen Sprint 19+20: CodeMirror WYSIWYG, Notes Expand, Notes-Tags Bug, Quick-Photo Übersicht, Timeline-Upload, Foto-Tags',20);
+INSERT INTO "sprints" VALUES(22,'Sprint 22 — Onboarding Tutorial + Wonder Weeks + Muttergesundheit',NULL,'2026-04-25','closed',NULL,'Aufgelöst 2026-04-25 — Items zurück ins Backlog',21);
+INSERT INTO "sprints" VALUES(23,'Sprint 23 — Bug-Fixing','2026-04-25',NULL,'active',NULL,'Alle offenen Bugs: Sprachwechsel, Habit-Widget-Navigation, Habit-Zählung',22);
+INSERT INTO "sprints" VALUES(24,'Test-Sprint Phase2',NULL,NULL,'planning',NULL,NULL,23);
 CREATE TABLE tasks (
   id INTEGER PRIMARY KEY,
   backlog_id INTEGER REFERENCES backlog(id),
@@ -672,6 +680,7 @@ CREATE INDEX idx_backlog_sprint ON backlog(assigned_sprint);
 CREATE INDEX idx_backlog_status ON backlog(status);
 CREATE INDEX idx_tasks_backlog ON tasks(backlog_id);
 CREATE INDEX idx_tasks_sprint ON tasks(sprint_id);
+CREATE INDEX idx_review_feedback_backlog ON review_feedback(backlog_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('review_feedback',58);
 INSERT INTO "sqlite_sequence" VALUES('review_screenshots',13);

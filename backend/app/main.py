@@ -135,7 +135,10 @@ def create_app(testing: bool = False) -> FastAPI:
         )
 
     # 4. Security headers
-    app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        preview_origin=settings.dashboard_preview_origin,
+    )
 
     # 3. Request size limit (K3)
     app.add_middleware(

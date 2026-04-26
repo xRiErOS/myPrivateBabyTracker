@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     # Environment
     environment: Literal["dev", "staging", "prod"] = "dev"
 
+    # Live-Preview im PO-Dashboard: erlaubte Embed-Origin (z.B. http://localhost:5555).
+    # Wenn gesetzt, wird X-Frame-Options weggelassen und CSP frame-ancestors gesetzt.
+    dashboard_preview_origin: str = Field(default="")
+
     model_config = {
         "env_prefix": "",
         "env_file": ".env",

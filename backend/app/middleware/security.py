@@ -87,9 +87,16 @@ class HeaderStrippingMiddleware(BaseHTTPMiddleware):
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """K2: Add security headers (CSP, X-Content-Type-Options, etc.) to all responses."""
+    """K2: Add security headers (CSP, X-Content-Type-Options, etc.) to all responses.
 
-    CSP = (
+    Wenn ``preview_origin`` gesetzt ist (z.B. ``http://localhost:5555``), wird der
+    Embed-Schutz so gelockert, dass das PO-Dashboard die Baby-App im iframe laden
+    kann: X-Frame-Options entfällt, CSP setzt ``frame-ancestors`` auf ``self`` +
+    den erlaubten Ursprung. In Production bleibt ``preview_origin`` leer und alle
+    Header verhalten sich exakt wie zuvor.
+    """
+
+    BASE_CSP = (
         "default-src 'self'; "
         "script-src 'self'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
@@ -97,11 +104,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "font-src 'self' https://fonts.gstatic.com"
     )
 
+    def __init__(self, app, preview_origin: str = ""):
+        super().__init__(app)
+        self.preview_origin = (preview_origin or "").strip()
+
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        response.headers["Content-Security-Policy"] = self.CSP
+        if self.preview_origin:
+            csp = (
+                f"{self.BASE_CSP}; "
+                f"frame-ancestors 'self' {self.preview_origin}"
+            )
+            response.headers["Content-Security-Policy"] = csp
+            # Kein X-Frame-Options — würde frame-ancestors überstimmen
+        else:
+            response.headers["Content-Security-Policy"] = self.BASE_CSP
+            response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         return response
 
