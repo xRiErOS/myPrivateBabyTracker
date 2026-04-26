@@ -1,3 +1,6 @@
+import http from 'node:http'
+import os from 'node:os'
+import path from 'node:path'
 import express from 'express'
 import cors from 'cors'
 import Database from 'better-sqlite3'
@@ -7,7 +10,9 @@ import { fileURLToPath } from 'url'
 import { existsSync, mkdirSync } from 'fs'
 import { spawn } from 'child_process'
 import { randomUUID } from 'crypto'
+import { WebSocketServer } from 'ws'
 import { canTransition } from './lib/lifecycle.js'
+import { attachStream, subscribe } from './lib/archonStream.js'
 
 const ARCHON_TOKEN = process.env.ARCHON_INTERNAL_TOKEN || 'dev-archon-token'
 
@@ -509,12 +514,19 @@ app.post('/api/sprints/:id/run-archon', async (req, res) => {
   const child = spawnArchon(['workflow', 'run', 'mybaby-sprint-execute', String(sprintId)])
   const runId = (await parseRunId(child)) || randomUUID()
 
+  const logPath = path.join(
+    os.homedir(),
+    '.archon/workspaces/xRiErOS/myPrivateBabyTracker/logs',
+    `${runId}.jsonl`,
+  )
+
   try {
     db.prepare(
-      `INSERT OR IGNORE INTO archon_runs (run_id, workflow, sprint_id, status) VALUES (?, ?, ?, 'running')`
-    ).run(runId, 'mybaby-sprint-execute', sprintId)
+      `INSERT OR IGNORE INTO archon_runs (run_id, workflow, sprint_id, status, log_path) VALUES (?, ?, ?, 'running', ?)`
+    ).run(runId, 'mybaby-sprint-execute', sprintId, logPath)
   } catch (_) {}
 
+  attachStream(runId, logPath, db)
   res.json({ run_id: runId, status: 'running' })
 })
 
@@ -524,12 +536,19 @@ app.post('/api/sprints/:id/run-refinement', async (req, res) => {
   const child = spawnArchon(['workflow', 'run', 'mybaby-refinement', String(sprintId)])
   const runId = (await parseRunId(child)) || randomUUID()
 
+  const logPath = path.join(
+    os.homedir(),
+    '.archon/workspaces/xRiErOS/myPrivateBabyTracker/logs',
+    `${runId}.jsonl`,
+  )
+
   try {
     db.prepare(
-      `INSERT OR IGNORE INTO archon_runs (run_id, workflow, sprint_id, status) VALUES (?, ?, ?, 'running')`
-    ).run(runId, 'mybaby-refinement', sprintId)
+      `INSERT OR IGNORE INTO archon_runs (run_id, workflow, sprint_id, status, log_path) VALUES (?, ?, ?, 'running', ?)`
+    ).run(runId, 'mybaby-refinement', sprintId, logPath)
   } catch (_) {}
 
+  attachStream(runId, logPath, db)
   res.json({ run_id: runId, status: 'running' })
 })
 
@@ -570,6 +589,16 @@ app.post('/api/sprints/:id/submit-feedback', (req, res) => {
   }
 
   res.json({ action, run_id })
+})
+
+// GET /api/sprints/:id/active-run
+app.get('/api/sprints/:id/active-run', (req, res) => {
+  const row = db
+    .prepare(
+      "SELECT run_id, status FROM archon_runs WHERE sprint_id=? AND status IN ('running','awaiting_approval') ORDER BY started_at DESC LIMIT 1",
+    )
+    .get(req.params.id)
+  res.json(row ?? null)
 })
 
 // GET /api/archon-runs
@@ -638,4 +667,16 @@ app.patch('/api/reviews/:id', (req, res) => {
 })
 
 const PORT = 5556
-app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`))
+const server = http.createServer(app)
+const wss = new WebSocketServer({ noServer: true })
+
+server.on('upgrade', (req, socket, head) => {
+  const m = req.url.match(/^\/ws\/archon\/([^/?]+)/)
+  if (!m) { socket.destroy(); return }
+  const runId = decodeURIComponent(m[1])
+  wss.handleUpgrade(req, socket, head, ws => {
+    subscribe(runId, ws, db)
+  })
+})
+
+server.listen(PORT, () => console.log(`API + WSS running on http://localhost:${PORT}`))

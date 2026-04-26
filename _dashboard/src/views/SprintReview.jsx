@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge.jsx'
+import ArchonLogPanel from '../components/ArchonLogPanel.jsx'
 
 const REVIEW_STATUSES = [
   { value: 'passed', label: 'Passed', bg: 'var(--green)' },
@@ -394,9 +395,9 @@ export default function SprintReview() {
 
   useEffect(() => { loadSprint() }, [loadSprint])
 
-  // Load latest archon run_id for this sprint
+  // Load latest active archon run_id for this sprint
   useEffect(() => {
-    fetch(`/api/sprints/${sprintId}/archon-run`)
+    fetch(`/api/sprints/${sprintId}/active-run`)
       .then(r => r.json())
       .then(data => { if (data?.run_id) setRunId(data.run_id) })
       .catch(() => {})
@@ -532,6 +533,13 @@ export default function SprintReview() {
       {sprint.items?.map(item => (
         <ReviewCard key={item.id} item={item} onUpdate={loadSprint} />
       ))}
+
+      {/* Archon Live Log */}
+      {runId && (
+        <div className="mt-4">
+          <ArchonLogPanel runId={runId} defaultOpen={false} />
+        </div>
+      )}
 
       {/* Footer: Submit to Archon */}
       <div className="rounded-xl p-5 mt-4" style={{ background: 'var(--mantle)' }}>

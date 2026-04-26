@@ -17,6 +17,7 @@ import { CSS } from '@dnd-kit/utilities'
 import StatusBadge from '../components/StatusBadge.jsx'
 import IssueCreateModal from '../components/IssueCreateModal.jsx'
 import SprintCreateModal from '../components/SprintCreateModal.jsx'
+import ArchonLogPanel from '../components/ArchonLogPanel.jsx'
 
 const TYPE_ICONS = { feature: 'F', bug: 'B', improvement: 'I', chore: 'C', refactor: 'R', security: 'S' }
 const DONE_STATUSES = ['done', 'passed', 'cancelled']
@@ -108,24 +109,36 @@ function SortableIssueCard({ item }) {
 // Sprint column header
 function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon, onSprintUpdated }) {
   const [archonRunning, setArchonRunning] = useState(false)
-  const [archonResult, setArchonResult] = useState(null)
+  const [activeRunId, setActiveRunId] = useState(null)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(sprint.name)
   const [editNotes, setEditNotes] = useState(sprint.notes || '')
   const [saving, setSaving] = useState(false)
 
+  useEffect(() => {
+    let cancelled = false
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/sprints/${sprint.id}/active-run`)
+        if (!cancelled && res.ok) {
+          const data = await res.json()
+          setActiveRunId(data?.run_id ?? null)
+        }
+      } catch {}
+    }
+    poll()
+    const iv = setInterval(poll, 5000)
+    return () => { cancelled = true; clearInterval(iv) }
+  }, [sprint.id])
+
   const handleRunArchon = async () => {
     setArchonRunning(true)
-    setArchonResult(null)
     try {
       const res = await fetch(`/api/sprints/${sprint.id}/run-archon`, { method: 'POST' })
       const data = await res.json()
-      setArchonResult(data.run_id ? `run_id: ${data.run_id}` : 'Gestartet')
-    } catch {
-      setArchonResult('Fehler')
-    } finally {
-      setArchonRunning(false)
-    }
+      if (data.run_id) setActiveRunId(data.run_id)
+    } catch {}
+    finally { setArchonRunning(false) }
     if (onRunArchon) onRunArchon()
   }
 
@@ -287,8 +300,10 @@ function SprintHeader({ sprint, sprintCount, onReorder, onAddIssue, onRunArchon,
           </button>
         </div>
       )}
-      {archonResult && (
-        <p className="text-xs mt-1" style={{ color: 'var(--green)' }}>{archonResult}</p>
+      {activeRunId && (
+        <div className="mt-2">
+          <ArchonLogPanel runId={activeRunId} defaultOpen={archonRunning} />
+        </div>
       )}
     </div>
   )
