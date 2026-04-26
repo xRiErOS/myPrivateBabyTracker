@@ -299,20 +299,37 @@ export default function RoadmapBoard() {
   }))
 
   const handleReorder = async (sprintId, direction) => {
+    const sorted = [...sprints].sort((a, b) => (a.position ?? a.id) - (b.position ?? b.id))
+    const idx = sorted.findIndex(s => s.id === sprintId)
+    if (idx === -1) return
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= sorted.length) return
+
+    const reordered = [...sorted]
+    ;[reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]]
+    const ordered_ids = reordered.map(s => s.id)
+
+    // Optimistic update
+    const updated = reordered.map((s, i) => ({ ...s, position: i }))
+    setSprints(prev => prev.map(s => {
+      const u = updated.find(u => u.id === s.id)
+      return u ? { ...s, position: u.position } : s
+    }))
+
     try {
       const res = await fetch('/api/sprints/reorder', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sprint_id: sprintId, direction }),
+        body: JSON.stringify({ ordered_ids }),
       })
       if (!res.ok) throw new Error()
-      const updated = await res.json()
-      setSprints(prev => prev.map(s => {
-        const u = updated.find(u => u.id === s.id)
-        return u ? { ...s, position: u.position } : s
-      }))
     } catch {
       showToast('Reorder fehlgeschlagen')
+      // Rollback
+      setSprints(prev => prev.map(s => {
+        const orig = sorted.find(o => o.id === s.id)
+        return orig ? { ...s, position: orig.position } : s
+      }))
     }
   }
 
