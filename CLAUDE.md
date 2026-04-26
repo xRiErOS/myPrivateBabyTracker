@@ -114,19 +114,25 @@ Details: `DESIGN.md`
 - Wird der NAS-Proxy committet, bricht der Container-Build auf der NAS (Tailscale-IP im Container nicht erreichbar)
 - Dokumentation: `500 CONTEXTS/Home Lab Wiki/20 - Projekte/MyBabyTracker/MyBaby Lokales Test-Setup (Mac zu NAS API Proxy).md`
 
-### Sprint-Dashboard (PO-Tool — PFLICHT im Sprint-Workflow)
+### Developer Dashboard (DevD — PFLICHT im Sprint-Workflow)
 
-Separates React-Tool zur Sprint-Planung und -Review mit Menschen. Liest direkt aus `data/project.db`.
+Separates React-Tool zur Sprint-Planung, -Review und Live-Preview mit Menschen. Liest direkt aus `data/project.db` (via `DEVD_DB_PATH`-Default `../myPrivateBabyTracker/data/project.db`).
 
-- **Pfad:** `_dashboard/`
-- **Starten:** `cd _dashboard && npm run dev`
+- **Repo:** `~/Obsidian/tools/DeveloperDashboard/` (eigenes Git-Repo: `xRiErOS/DeveloperDashboard`)
+- **Starten:** `cd ~/Obsidian/tools/DeveloperDashboard && PREVIEW_BASE_URL=http://localhost:3000 npm run dev`
 - **URL:** `http://localhost:5555` (Vite) + Express-API auf Port 5556 (startet automatisch)
-- **Views:** Roadmap Board (`RoadmapBoard.jsx`), Sprint Review (`SprintReview.jsx`), Item Detail (`ItemDetail.jsx`)
+- **Views:** Roadmap Board (`RoadmapBoard.jsx`), Sprint Review mit Live-Preview-Accordion (`SprintReview.jsx`), Item Detail (`ItemDetail.jsx`)
+- **Vault-Doku:** `500 CONTEXTS/Home Lab Wiki/20 - Projekte/DOCS-DeveloperDashboard/`
+
+**Live-Preview-Setup (Baby-App im iframe):**
+- Backend mit `DASHBOARD_PREVIEW_ORIGIN=http://localhost:5555` starten → CSP `frame-ancestors` erlaubt iframe
+- Frontend separat auf Port 3000 (Vite Dev) — wird im DevD-iframe gerendert
+- Klick-Annotation koordinatenbasiert (x %, y %, JSON-Blob in `review_feedback.ui_target`)
 
 **Wann nutzen:**
 - Scrum Master: vor Sprint-Planung (Backlog priorisieren) und nach Sprint-Abschluss (Review vorbereiten)
 - Coding Lead: zur Orientierung welche Items im aktiven Sprint liegen
-- Kein Bestandteil des App-Builds — reines lokales Planungstool, nicht committen
+- DevD ist NICHT mehr Bestandteil dieses Repos — eigene CodeBase seit 2026-04-26
 
 ## Security-Checkliste (K1-K4) — IMPLEMENTIERT
 
