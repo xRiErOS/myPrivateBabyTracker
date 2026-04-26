@@ -19,8 +19,22 @@ nodes:
   - id: load-context
     command: load-sprint-context
 
-  - id: sprint-loop
+  - id: set-in-progress
     depends_on: [load-context]
+    bash: |
+      COMMON=$(git rev-parse --git-common-dir)
+      case "$COMMON" in
+        /*) MAIN_REPO=$(dirname "$COMMON") ;;
+        *)  MAIN_REPO=$(cd "$COMMON/.." && pwd) ;;
+      esac
+      DB="$MAIN_REPO/data/project.db"
+      SPRINT_ID=$(sqlite3 "$DB" "SELECT id FROM sprints WHERE status='active' LIMIT 1;")
+      sqlite3 "$DB" "UPDATE backlog SET status='in_progress' WHERE assigned_sprint=$SPRINT_ID AND status='planned';"
+      UPDATED=$(sqlite3 "$DB" "SELECT changes();")
+      echo "Set $UPDATED issues to in_progress for sprint $SPRINT_ID"
+
+  - id: sprint-loop
+    depends_on: [set-in-progress]
     loop:
       prompt: |
         # Sprint-Task-Loop — eine Iteration = eine Task
@@ -141,20 +155,39 @@ nodes:
       max_iterations: 20
       fresh_context: true
 
-  - id: review
+  - id: set-to-review
     depends_on: [sprint-loop]
+    bash: |
+      COMMON=$(git rev-parse --git-common-dir)
+      case "$COMMON" in
+        /*) MAIN_REPO=$(dirname "$COMMON") ;;
+        *)  MAIN_REPO=$(cd "$COMMON/.." && pwd) ;;
+      esac
+      DB="$MAIN_REPO/data/project.db"
+      SPRINT_ID=$(sqlite3 "$DB" "SELECT id FROM sprints WHERE status='active' LIMIT 1;")
+      sqlite3 "$DB" "UPDATE backlog SET status='to_review' WHERE assigned_sprint=$SPRINT_ID AND status='in_progress';"
+      UPDATED=$(sqlite3 "$DB" "SELECT changes();")
+      echo "Set $UPDATED issues to to_review for sprint $SPRINT_ID"
+
+  - id: review
+    depends_on: [set-to-review]
     command: code-reviewer
     denied_tools: [Write, Edit, MultiEdit]
     context: fresh
 
   - id: ai-test
-    depends_on: [sprint-loop]
+    depends_on: [set-to-review]
     command: tester
     denied_tools: [Write, Edit, MultiEdit]
     context: fresh
 
-  - id: notify
+  - id: capture-findings
     depends_on: [review, ai-test]
+    bash: |
+      bash /Users/erik/Obsidian/tools/myPrivateBabyTracker/.archon/snippets/capture-findings.sh
+
+  - id: notify
+    depends_on: [capture-findings]
     bash: |
       TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
         "/Users/erik/Obsidian/Vault/400 AI Agent/430 Claude-Telegram-Bot/claude-telegram-bot.env" \
@@ -226,8 +259,21 @@ nodes:
 
       4. Optional: Memory schreiben über `mcp__memory__add_memory` — nur bei wiederkehrendem Pattern oder ADR. Domain `mybaby`, Area `sprint` oder `architecture`.
 
-  - id: snapshot
+  - id: set-passed
     depends_on: [sprint-close]
+    bash: |
+      COMMON=$(git rev-parse --git-common-dir)
+      case "$COMMON" in
+        /*) MAIN_REPO=$(dirname "$COMMON") ;;
+        *)  MAIN_REPO=$(cd "$COMMON/.." && pwd) ;;
+      esac
+      DB="$MAIN_REPO/data/project.db"
+      SPRINT_ID=$(sqlite3 "$DB" "SELECT id FROM sprints WHERE status='completed' ORDER BY id DESC LIMIT 1;")
+      sqlite3 "$DB" "UPDATE backlog SET status='passed' WHERE assigned_sprint=$SPRINT_ID AND status='to_review';"
+      echo "Set issues to passed for sprint $SPRINT_ID"
+
+  - id: snapshot
+    depends_on: [set-passed]
     command: save-session-snapshot
 
   - id: done-notify

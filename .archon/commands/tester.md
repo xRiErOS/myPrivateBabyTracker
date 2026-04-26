@@ -74,3 +74,19 @@ APPROVE | NEEDS_TESTS
 ## Regel
 
 - **Niemals** Tests schreiben — nur identifizieren, was fehlt. Implementierung ist Aufgabe von `coding-lead`/`bug-fixer`.
+
+## Findings-Capture (Pflicht)
+
+Wenn du auf Probleme stößt, die du NICHT im Rahmen dieses Test-Audits beheben kannst (z.B. fehlende Tests in anderen Plugins, Test-Inkonsistenzen außerhalb des aktuellen Scope, Edge Cases die systemweit ungetestet sind), emittiere sie als strukturierte Findings.
+
+Schreibe jedes Finding als JSONL-Zeile in `$ARTIFACTS_DIR/findings.jsonl` (eine Zeile pro Finding):
+
+```
+{"type":"bug|improvement|core","title":"Kurzbeschreibung (max 120 Zeichen)","description":"Ausführlichere Beschreibung des Problems und wo es liegt"}
+```
+
+Regeln:
+- NUR emittieren für Findings AUSSERHALB des aktuellen Scope
+- Kein JSON auf mehrere Zeilen verteilen — alles auf einer Zeile
+- type: `bug` für Fehler, `improvement` für UX/Code-Verbesserungen, `core` für technische Schulden
+- Maximal 5 Findings pro Agent-Lauf

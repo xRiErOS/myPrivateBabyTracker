@@ -27,6 +27,11 @@ nodes:
     denied_tools: [Write, Edit, MultiEdit]
     depends_on: [run-tests]
 
+  - id: capture-findings
+    bash: |
+      bash /Users/erik/Obsidian/tools/myPrivateBabyTracker/.archon/snippets/capture-findings.sh
+    depends_on: [review, ai-test]
+
   - id: notify
     bash: |
       TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
@@ -36,7 +41,7 @@ nodes:
       MSG="MyBaby%20mybaby-bug-fix%20bereit.%0AApprove%3A%20archon%20workflow%20approve%20${RID}"
       curl -fsS "https://api.telegram.org/bot${TOKEN}/sendMessage" \
         -d "chat_id=96239239&text=${MSG}" > /dev/null || echo "Telegram-Notify übersprungen"
-    depends_on: [review, ai-test]
+    depends_on: [capture-findings]
 
   - id: gate
     approval:

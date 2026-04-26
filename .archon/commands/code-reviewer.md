@@ -82,3 +82,19 @@ Schreibe nach `$ARTIFACTS_DIR/review/review-findings.md`:
 ## Regel
 
 - **Niemals** Code ändern. Nur lesen, analysieren, schreiben in `$ARTIFACTS_DIR/review/`.
+
+## Findings-Capture (Pflicht)
+
+Wenn du auf Probleme stößt, die du NICHT im Rahmen dieses Reviews beheben kannst (z.B. Code-Inkonsistenzen außerhalb des aktuellen Diffs, fehlende Tests in anderen Bereichen, Tech-Schulden), emittiere sie als strukturierte Findings.
+
+Schreibe jedes Finding als JSONL-Zeile in `$ARTIFACTS_DIR/findings.jsonl` (eine Zeile pro Finding):
+
+```
+{"type":"bug|improvement|core","title":"Kurzbeschreibung (max 120 Zeichen)","description":"Ausführlichere Beschreibung des Problems und wo es liegt"}
+```
+
+Regeln:
+- NUR emittieren für Findings AUSSERHALB des aktuellen Scope
+- Kein JSON auf mehrere Zeilen verteilen — alles auf einer Zeile
+- type: `bug` für Fehler, `improvement` für UX/Code-Verbesserungen, `core` für technische Schulden
+- Maximal 5 Findings pro Agent-Lauf

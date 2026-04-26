@@ -17,7 +17,8 @@ archon workflow run <name> "<args>"
 | Workflow | Beschreibung | Aufruf |
 |---|---|---|
 | `mybaby-scrum` | Sprint planen, Tasks erzeugen, Sprint aktivieren | `archon workflow run mybaby-scrum --no-worktree ""` |
-| `mybaby-sprint-execute` | **Aktiven Sprint** sequentiell abarbeiten (Loop, eine Task pro Iteration) | `archon workflow run mybaby-sprint-execute ""` |
+| `mybaby-sprint-execute` | **Aktiven Sprint** sequentiell abarbeiten (Loop, eine Task pro Iteration) | `archon workflow run mybaby-sprint-execute "<sprint-id>"` |
+| `mybaby-refinement` | Alle `new`-Issues refinen (goal/background/files/context befüllen) | `archon workflow run mybaby-refinement --no-worktree ""` |
 | `mybaby-feature` | Einzelne Feature-Task (TDD → Tests → Review → Push) | `archon workflow run mybaby-feature "<task-id>"` |
 | `mybaby-bug-fix` | Einzelnen Bug fixen mit Root-Cause + Regressionstest | `archon workflow run mybaby-bug-fix "<task-id>"` |
 | `mybaby-direct-issue` | Backlog-Item per ID direkt implementieren | `archon workflow run mybaby-direct-issue "<issue-id>"` |
@@ -36,6 +37,7 @@ archon workflow run <name> "<args>"
 | `bug-fixer` | Root-Cause + Regressionstest + Fix |
 | `code-reviewer` | Read-Only Review: Security K1-K4, DESIGN.md, Plugin-Struktur |
 | `tester` | Read-Only Test-Audit: Coverage, Edge Cases, K-Tests |
+| `refiner` | Backlog-Issues aus `new_issue_ids.txt` anreichern (goal, background, files, context) |
 | `save-session-snapshot` | Pflicht-Abschluss: `conversation_snapshots` + selektiv memory.db |
 | `po-dashboard-extend` | Erweiterungen für `_dashboard/` (lokales PO-Tool, Port 5555/5556) |
 
@@ -122,21 +124,43 @@ Hintergrund: NAS-IP `100.71.39.53` (Tailscale) im Container nicht erreichbar —
 Zentrale Referenz, damit Commands konsistent bleiben. Mehrfach im Setup-Dokument abweichend dokumentiert — diese Tabelle ist verifiziert per `PRAGMA table_info`:
 
 ```
-sprints                  id, name, start_date, end_date, status, capacity, notes
+sprints                  id, name, start_date, end_date, status, capacity, notes, position
 tasks                    id, backlog_id, sprint_id, title, assignee, status, effort,
                          started_at, completed_at, validation_output, notes
 backlog                  id, title, type, description, priority, milestone,
-                         assigned_sprint, status, created_at, completed_at
+                         assigned_sprint, status, created_at, completed_at,
+                         plugin_key, goal, background, relevant_files, context_notes, refined_at
 decisions                id, title, decision, rationale, alternatives, status, created_at
 conversation_snapshots   id, agent_id, session_timestamp, summary,
                          decisions_made, next_session_goals
+issue_dependencies       id, issue_id, depends_on_id, note, created_at
+archon_runs              id, run_id, workflow, sprint_id, backlog_id, status, started_at,
+                         finished_at, log_path
 ```
+
+**Backlog-Status-Lifecycle** (v2, seit 2026-04-26):
+`new → refined → planned → in_progress → to_review → passed → done` (+`cancelled` jederzeit)
+
+**Backlog-Types** (v2, seit 2026-04-26):
+`bug`, `feature`, `improvement`, `core`
 
 Häufige Stolpersteine — Felder, die im Setup-Dokument erwähnt werden, aber **nicht existieren**:
 - `sprints.goal` → in `notes` schreiben (Freitext)
 - `backlog.acceptance_criteria` → in `description` einbetten
 - `backlog.source` → als `[Quelle: ai-agent]`-Prefix in `description`
 - `tasks.created_at` → existiert nicht; Tasks haben nur `started_at`/`completed_at`
+
+## Findings-Capture (capture-findings Node)
+
+Alle interaktiven Workflows haben vor dem `snapshot`-Node einen `capture-findings`-Node.
+
+**Sub-Agents** (coding-lead, code-reviewer, tester) emittieren außerhalb-des-Scope-Findings als:
+```
+<<<FINDING>>>{"type":"bug|improvement|core","title":"max 120 Zeichen","description":"..."}<<<END>>>
+```
+Der `capture-findings`-Node parst diese aus `findings.jsonl` in `$ARTIFACTS_DIR` und legt Issues mit `status='new'` an.
+
+Script: `.archon/snippets/capture-findings.sh`
 - `conversation_snapshots.sprint_id`/`task_id`/`artifacts_path` → in `summary` als Freitext einbetten
 
 ## DB-Pfad im Worktree (Worktree-sicher)

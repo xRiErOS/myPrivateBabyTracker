@@ -99,3 +99,19 @@ ALEMBIC-MIGRATION ERFORDERLICH:
 - Tests: `cd backend && python -m pytest -q` und `cd frontend && npm run test -- --run` müssen grün sein.
 - DB-Update an `tasks`.
 - Commits im Worktree.
+
+## Findings-Capture (Pflicht)
+
+Wenn du auf Probleme stößt, die du NICHT im Rahmen dieses Tasks beheben kannst (z.B. Nebeneffekte, fehlgeschlagene Tests die nicht zum Task gehören, Code-Inkonsistenzen, fehlende Tests in anderen Bereichen), emittiere sie als strukturierte Findings in stdout.
+
+Schreibe zusätzlich jedes Finding als JSONL-Zeile in `$ARTIFACTS_DIR/findings.jsonl` (eine Zeile pro Finding):
+
+```
+{"type":"bug|improvement|core","title":"Kurzbeschreibung (max 120 Zeichen)","description":"Ausführlichere Beschreibung des Problems und wo es liegt"}
+```
+
+Regeln:
+- NUR emittieren für Findings AUSSERHALB des aktuellen Scope
+- Kein JSON auf mehrere Zeilen verteilen — alles auf einer Zeile
+- type: `bug` für Fehler, `improvement` für UX/Code-Verbesserungen, `core` für technische Schulden
+- Maximal 5 Findings pro Agent-Lauf

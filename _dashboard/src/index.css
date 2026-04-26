@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  /* Catppuccin Latte (Light) — Default */
+  --crust: #dce0e8;
+  --mantle: #e6e9ef;
+  --base: #eff1f5;
+  --surface0: #ccd0da;
+  --surface1: #bcc0cc;
+  --surface2: #acb0be;
+  --overlay0: #9ca0b0;
+  --overlay1: #8c8fa1;
+  --text: #4c4f69;
+  --subtext0: #6c6f85;
+  --subtext1: #5c5f77;
+  --red: #d20f39;
+  --peach: #fe640b;
+  --yellow: #df8e1d;
+  --green: #40a02b;
+  --teal: #179299;
+  --blue: #1e66f5;
+  --sapphire: #209fb5;
+  --lavender: #7287fd;
+  --mauve: #8839ef;
+}
+
+html[data-theme="dark"] {
+  /* Catppuccin Macchiato (Dark) */
+  --crust: #181926;
+  --mantle: #1e2030;
+  --base: #24273a;
+  --surface0: #363a4f;
+  --surface1: #494d64;
+  --surface2: #5b6078;
+  --overlay0: #6e738d;
+  --overlay1: #8087a2;
+  --text: #cad3f5;
+  --subtext0: #a5adcb;
+  --subtext1: #b8c0e0;
+  --red: #ed8796;
+  --peach: #f5a97f;
+  --yellow: #eed49f;
+  --green: #a6da95;
+  --teal: #8bd5ca;
+  --blue: #8aadf4;
+  --sapphire: #7dc4e4;
+  --lavender: #b7bdf8;
+  --mauve: #c6a0f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    --crust: #181926;
+    --mantle: #1e2030;
+    --base: #24273a;
+    --surface0: #363a4f;
+    --surface1: #494d64;
+    --surface2: #5b6078;
+    --overlay0: #6e738d;
+    --overlay1: #8087a2;
+    --text: #cad3f5;
+    --subtext0: #a5adcb;
+    --subtext1: #b8c0e0;
+    --red: #ed8796;
+    --peach: #f5a97f;
+    --yellow: #eed49f;
+    --green: #a6da95;
+    --teal: #8bd5ca;
+    --blue: #8aadf4;
+    --sapphire: #7dc4e4;
+    --lavender: #b7bdf8;
+    --mauve: #c6a0f6;
+  }
+}
+
+body {
+  background: var(--base);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.badge-p1 { background: var(--red); color: white; }
+.badge-p2 { background: var(--peach); color: white; }
+.badge-p3 { background: var(--blue); color: white; }
+.badge-p4 { background: var(--teal); color: white; }
+.badge-p5 { background: var(--overlay0); color: white; }
+
+.status-open { border-left: 4px solid var(--blue); }
+.status-in_progress { border-left: 4px solid var(--peach); }
+.status-done { border-left: 4px solid var(--green); }
+.status-blocked { border-left: 4px solid var(--red); }
+.status-deferred { border-left: 4px solid var(--overlay0); }
+
+.review-passed { background: color-mix(in srgb, var(--green) 15%, transparent); }
+.review-partially_passed { background: color-mix(in srgb, var(--yellow) 15%, transparent); }
+.review-not_passed { background: color-mix(in srgb, var(--red) 15%, transparent); }

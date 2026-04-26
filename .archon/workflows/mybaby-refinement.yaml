@@ -1,0 +1,33 @@
+name: mybaby-refinement
+description: "Refines all 'new' backlog issues — fills goal, background, relevant_files, context_notes from codebase analysis"
+interactive: false
+
+nodes:
+  - id: load-issues
+    bash: |
+      DB="/Users/erik/Obsidian/tools/myPrivateBabyTracker/data/project.db"
+      IDS=$(sqlite3 "$DB" "SELECT id FROM backlog WHERE status='new' ORDER BY priority, id;" 2>/dev/null)
+      if [ -z "$IDS" ]; then
+        echo "No issues with status='new' found. Nothing to refine."
+        exit 0
+      fi
+      COUNT=$(echo "$IDS" | wc -l | tr -d ' ')
+      echo "Found $COUNT issues to refine: $(echo $IDS | tr '\n' ',')"
+      echo "$IDS" > "$ARTIFACTS_DIR/new_issue_ids.txt"
+
+  - id: refine-loop
+    command: refiner
+    depends_on: [load-issues]
+
+  - id: done-notify
+    depends_on: [refine-loop]
+    bash: |
+      TOKEN=$(grep CLAUDE_TELEGRAM_BOT_API \
+        "/Users/erik/Obsidian/Vault/400 AI Agent/430 Claude-Telegram-Bot/claude-telegram-bot.env" \
+        | cut -d'=' -f2 | tr -d '"')
+      RID="${RUN_ID:-unknown}"
+      DB="/Users/erik/Obsidian/tools/myPrivateBabyTracker/data/project.db"
+      REFINED=$(sqlite3 "$DB" "SELECT COUNT(*) FROM backlog WHERE status='refined' AND refined_at > datetime('now','-1 hour');")
+      MSG="MyBaby%20Refinement%20DURCH%20%E2%9C%85%0ARefined%3A%20${REFINED}%20Issues%20%E2%80%94%20Run%3A%20${RID}"
+      curl -fsS "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+        -d "chat_id=96239239&text=${MSG}" > /dev/null || echo "Telegram-Notify übersprungen"
