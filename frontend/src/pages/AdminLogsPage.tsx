@@ -206,12 +206,14 @@ export default function AdminLogsPage() {
             onClick={() => load(true)}
             disabled={refreshing}
           >
-            <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
-            <span className="ml-2">{t("logs.refresh")}</span>
+            <span className="inline-flex items-center gap-2">
+              <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
+              {t("logs.refresh")}
+            </span>
           </Button>
 
           <label
-            className={`flex items-center gap-2 min-h-[44px] px-3 rounded-[8px] cursor-pointer select-none border-2 transition-colors ${
+            className={`inline-flex items-center gap-2 min-h-[44px] px-4 rounded-[8px] cursor-pointer select-none border-2 transition-colors ${
               autoRefresh
                 ? "bg-green/15 text-green border-green"
                 : "bg-surface0 text-subtext0 border-surface2 hover:border-overlay0"
@@ -223,22 +225,29 @@ export default function AdminLogsPage() {
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="sr-only"
             />
-            <span className="font-label text-sm font-semibold">{t("logs.auto_refresh")}</span>
-            {autoRefresh && (
-              <RefreshCw size={14} className="animate-spin" />
-            )}
+            <RefreshCw
+              size={16}
+              className={autoRefresh ? "animate-spin" : "opacity-60"}
+            />
+            <span className="font-label text-sm font-semibold">
+              {t("logs.auto_refresh")}
+            </span>
           </label>
 
           <div className="flex-1" />
 
           <Button type="button" variant="secondary" onClick={handleDownload}>
-            <Download size={18} />
-            <span className="ml-2">{t("logs.download")}</span>
+            <span className="inline-flex items-center gap-2">
+              <Download size={18} />
+              {t("logs.download")}
+            </span>
           </Button>
 
           <Button type="button" variant="danger" onClick={handleClear}>
-            <Trash2 size={18} />
-            <span className="ml-2">{t("logs.clear")}</span>
+            <span className="inline-flex items-center gap-2">
+              <Trash2 size={18} />
+              {t("logs.clear")}
+            </span>
           </Button>
         </div>
       </Card>
