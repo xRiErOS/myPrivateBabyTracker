@@ -16,6 +16,21 @@ Self-hosted, plugin-basierter Baby-Tracker. Ersetzt Baby Buddy mit modularem, AI
 | Design System | `DESIGN.md` | Bindende UI-Referenz: Catppuccin, Typografie, 12 Komponenten |
 | Architecture Review | (im home-dashboard Repo) | Unabhängiges Review mit 4 kritischen + 8 wichtigen Findings |
 
+## Lebende Dokumentation — PFLICHT mit jedem Sprint zu pflegen
+
+Diese Dateien sind die **Source-of-Truth für Onboarding und Refactoring**. Sie MÜSSEN aktualisiert werden, sobald sich der zugrundeliegende Code-Stand ändert (neue Plugins, neue Cross-cutting-Features, neue Dependencies, neue Abhängigkeiten). Sprint-Close ohne Doku-Sync ist verboten.
+
+| Dokument | Pfad | Wann aktualisieren |
+|----------|------|--------------------|
+| Feature-Inventar | [`docs/FEATURES.md`](docs/FEATURES.md) | Neues Plugin, neues Cross-cutting-Feature, geänderte Entry Points / Key Files, neue Page/Route, geänderter `pluginRegistry.ts` |
+| Abhängigkeitsgraph | [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) | Neue Layer-Abhängigkeit, neuer kritischer Refactor-Pfad, geänderte Foundation/Cross-cutting-Schnittstelle |
+| Security Audit | [`docs/SECURITY-AUDIT.md`](docs/SECURITY-AUDIT.md) | Vor Sprint-Close mit Dependency-Updates, neuer Major-Release einer Top-Level-Dep, CVE-Hinweis aus Watch-Channels |
+| Wonder-Weeks-Verifikation | [`docs/research/wonder-weeks-verification-2026-04-28.md`](docs/research/wonder-weeks-verification-2026-04-28.md) | Bei Änderung von `LEAP_DEFINITIONS` oder Migrations zu `leap_definitions` |
+
+**Trigger-Pfade** (Code-Änderungen hier verlangen Doku-Review): `backend/app/{plugins,api,middleware,models,services,routers}/`, `frontend/src/{plugins,pages,components,hooks,api}/`, `frontend/src/lib/pluginRegistry.ts`, `frontend/src/lib/pluginConfig.ts`, `backend/requirements.txt`, `backend/pyproject.toml`, `frontend/package.json`.
+
+**Automatischer Reminder:** `.claude/hooks/check-docs-currency.sh` läuft bei `SessionStart` + `SessionEnd` (registriert in `.claude/settings.json`). Erkennt der Hook Code-Änderungen ohne Doku-Update, gibt er einen Hinweis aus (Stderr beim Session-Ende, additionalContext beim Session-Start). Der Hook ist eine Erinnerung, kein Block — die Verantwortung liegt beim Coding Lead bzw. Scrum Master vor Sprint-Close.
+
 ## Projekt-DB (SQLite — Source of Truth)
 
 Pfad: `data/project.db`
@@ -121,13 +136,25 @@ Separates React-Tool zur Sprint-Planung, -Review und Live-Preview mit Menschen. 
 - **Repo:** `~/Obsidian/tools/DeveloperDashboard/` (eigenes Git-Repo: `xRiErOS/DeveloperDashboard`)
 - **Starten:** `cd ~/Obsidian/tools/DeveloperDashboard && PREVIEW_BASE_URL=http://localhost:3000 npm run dev`
 - **URL:** `http://localhost:5555` (Vite) + Express-API auf Port 5556 (startet automatisch)
-- **Views:** Roadmap Board (`RoadmapBoard.jsx`), Sprint Review mit Live-Preview-Accordion (`SprintReview.jsx`), Item Detail (`ItemDetail.jsx`)
+- **Views:** Roadmap Board (`RoadmapBoard.jsx`), Sprint Review (`SprintReview.jsx`), Item Detail (`ItemDetail.jsx`)
 - **Vault-Doku:** `500 CONTEXTS/Home Lab Wiki/20 - Projekte/DOCS-DeveloperDashboard/`
 
-**Live-Preview-Setup (Baby-App im iframe):**
-- Backend mit `DASHBOARD_PREVIEW_ORIGIN=http://localhost:5555` starten → CSP `frame-ancestors` erlaubt iframe
-- Frontend separat auf Port 3000 (Vite Dev) — wird im DevD-iframe gerendert
-- Klick-Annotation koordinatenbasiert (x %, y %, JSON-Blob in `review_feedback.ui_target`)
+**SOPs für KI-Agenten — PFLICHTLEKTÜRE vor jeder DevD-Aufgabe:**
+
+| Aufgabe | SOP |
+|---|---|
+| Neues Issue im MBT-Backlog erfassen (kein Refinement, kein Sprint) | `[[DOCS-DeveloperDashboard/SOP - Issues erfassen]]` |
+| Issue auf `refined` heben (goal + background + Acceptance) | `[[DOCS-DeveloperDashboard/SOP - Issue Refinement]]` |
+| Sprint von `planning` bis `closed` durchführen (HIL / Autonom) | `[[DOCS-DeveloperDashboard/SOP - Sprint Durchfuehrung]]` |
+| DevD lokal hochfahren (für MBT-Sprint-Arbeit) | `[[DOCS-DeveloperDashboard/SOP - Set-Up starten]]` |
+
+Pfad-Mapping: SOPs liegen im Vault unter `500 CONTEXTS/Home Lab Wiki/20 - Projekte/DOCS-DeveloperDashboard/`. Die SOPs sind tool-übergreifend — sie definieren das Vorgehen sowohl für DD- als auch MBT-Issues. Das aktive Projekt wird per `X-Project-Id`-Header gewählt (DevD = 2, MyBaby = 1).
+
+**Archon + Live-Preview (deferred seit 2026-04-26):**
+- Beide Features per Feature-Flag aus (`ENABLE_ARCHON`, `ENABLE_LIVE_PREVIEW`, Default off)
+- DB-Spalten `review_feedback.ui_target`, `review_feedback.submitted_to_archon_at` und Tabelle `archon_runs` via Migration 006 entfernt
+- ADR + Reaktivierung: `500 CONTEXTS/Home Lab Wiki/20 - Projekte/DOCS-DeveloperDashboard/ADR Archon und LivePreview deferred.md`
+- Workaround Sprint-Lifecycle ohne Archon: `planned → in_progress → to_review → passed → done` aktuell nur via SQL auf `data/devd.db`
 
 **Wann nutzen:**
 - Scrum Master: vor Sprint-Planung (Backlog priorisieren) und nach Sprint-Abschluss (Review vorbereiten)
