@@ -6,7 +6,7 @@ import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCheckupTypes, useCreateCheckup, useUpdateCheckup } from "../../hooks/useCheckup";
-import { ApiError } from "../../api/client";
+import { formatApiError } from "../../lib/errorMessages";
 import type { CheckupEntry } from "../../api/checkup";
 
 interface CheckupFormProps {
@@ -68,7 +68,7 @@ export function CheckupForm({ entry, onDone, onCancel }: CheckupFormProps) {
       }
       onDone?.();
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
+      setError(formatApiError(err));
     }
   }
 

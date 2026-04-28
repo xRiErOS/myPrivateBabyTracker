@@ -20,6 +20,7 @@ import {
   Tags,
   Thermometer,
   Timer,
+  User,
   Utensils,
   X,
 } from "lucide-react";
@@ -50,6 +51,7 @@ const ALL_ITEMS: NavItem[] = [
   { to: "/milestones", icon: Star, labelKey: "nav.milestones", pluginKey: "milestones" },
   { to: "/checkup", icon: ClipboardCheck, labelKey: "nav.checkup", pluginKey: "checkup" },
   { to: "/notes", icon: FileText, labelKey: "nav.notes", pluginKey: "notes" },
+  { to: "/profile", icon: User, labelKey: "nav.profile" },
   { to: "/admin", icon: Settings, labelKey: "nav.admin" },
 ];
 

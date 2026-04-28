@@ -8,7 +8,7 @@ import { MarkdownEditor } from "../../components/MarkdownEditor";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateNote, useUpdateNote } from "../../hooks/useNotes";
-import { ApiError } from "../../api/client";
+import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { SharedNote } from "../../api/notes";
 
@@ -59,7 +59,7 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
       }
       onDone?.();
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
+      setError(formatApiError(err));
     }
   }
 

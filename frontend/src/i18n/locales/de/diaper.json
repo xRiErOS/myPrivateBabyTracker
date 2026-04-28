@@ -3,7 +3,7 @@
   "list_title": "Windel-Eintraege",
   "type": {
     "wet": "Nass",
-    "dirty": "Stuhl",
+    "dirty": "Dreckig",
     "mixed": "Beides",
     "dry": "Trocken"
   },
@@ -44,7 +44,7 @@
     "total": "\u00d8 Windeln/Tag",
     "wet": "\u00d8 Nass",
     "mixed": "\u00d8 Dreckig",
-    "dirty": "\u00d8 Stuhl"
+    "dirty": "\u00d8 Dreckig"
   },
   "summary_total_short": "Ges.",
   "summary_both_short": "Beid.",

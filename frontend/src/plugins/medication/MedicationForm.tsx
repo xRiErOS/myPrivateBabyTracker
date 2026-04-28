@@ -10,7 +10,7 @@ import { useActiveChild } from "../../context/ChildContext";
 import { useCreateMedication, useUpdateMedication } from "../../hooks/useMedication";
 import { useMedicationMasters } from "../../hooks/useMedicationMasters";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
-import { ApiError } from "../../api/client";
+import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { MedicationEntry } from "../../api/types";
 
@@ -105,7 +105,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
         onDone?.();
       }
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
+      setError(formatApiError(err));
     }
   }
 

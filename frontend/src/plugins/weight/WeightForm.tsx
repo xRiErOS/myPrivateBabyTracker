@@ -8,7 +8,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateWeight, useUpdateWeight } from "../../hooks/useWeight";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
-import { ApiError } from "../../api/client";
+import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { WeightEntry } from "../../api/types";
 
@@ -82,7 +82,7 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
         onDone?.();
       }
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
+      setError(formatApiError(err));
     }
   }
 

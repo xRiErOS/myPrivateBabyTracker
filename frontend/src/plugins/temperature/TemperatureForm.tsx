@@ -8,7 +8,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTemperature, useUpdateTemperature } from "../../hooks/useTemperature";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
-import { ApiError } from "../../api/client";
+import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { TemperatureEntry } from "../../api/types";
 
@@ -74,7 +74,7 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
         onDone?.();
       }
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
+      setError(formatApiError(err));
     }
   }
 

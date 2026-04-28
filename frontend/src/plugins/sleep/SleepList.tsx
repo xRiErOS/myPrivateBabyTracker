@@ -58,15 +58,6 @@ export function SleepList() {
     return <p className="font-body text-sm text-overlay0">{tc("loading")}</p>;
   }
 
-  if (entries.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
-        <Moon className="h-8 w-8" />
-        <p className="font-body text-sm">{t("empty")}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
@@ -77,6 +68,13 @@ export function SleepList() {
         value={typeFilter}
         onChange={(e) => setTypeFilter(e.target.value)}
       />
+
+      {entries.length === 0 && (
+        <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
+          <Moon className="h-8 w-8" />
+          <p className="font-body text-sm">{t("empty")}</p>
+        </div>
+      )}
 
       {entries.length > 0 && dateRange !== "all" && (() => {
         const maxDays = dateRange === "twoWeeks" ? 13 : 6;

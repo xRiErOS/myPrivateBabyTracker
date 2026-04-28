@@ -7,8 +7,8 @@ import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTummyTime, useUpdateTummyTime } from "../../hooks/useTummyTime";
-import { formatDateTime, isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
-import { ApiError } from "../../api/client";
+import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
+import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { TummyTimeEntry } from "../../api/types";
 
@@ -102,32 +102,8 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
     }
   }
 
-  /** Replace ISO timestamps in error messages with local date/time. */
-  function localizeTimestamps(msg: string): string {
-    return msg.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?/g, (match) => {
-      try {
-        const iso = /Z|[+-]\d{2}:\d{2}$/.test(match) ? match : match + "Z";
-        return formatDateTime(iso);
-      } catch {
-        return match;
-      }
-    });
-  }
-
   function handleApiError(err: unknown) {
-    if (err instanceof ApiError) {
-      try {
-        const body = JSON.parse(err.message.replace(/^API \d+: /, ""));
-        setError(localizeTimestamps(body.detail || err.message));
-      } catch {
-        const msg = err.message.replace(/^API \d+: /, "");
-        setError(localizeTimestamps(msg));
-      }
-    } else if (err instanceof Error) {
-      setError(localizeTimestamps(err.message));
-    } else {
-      setError(tc("errors.unknown"));
-    }
+    setError(formatApiError(err, tc("errors.unknown")));
   }
 
   /** Manual save: only for entries with start + end (nachtraegen or editing) */

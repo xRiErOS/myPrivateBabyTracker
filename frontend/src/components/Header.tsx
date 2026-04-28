@@ -44,7 +44,7 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
           </button>
           <Link
             to="/profile"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
+            className="hidden md:flex min-h-[44px] min-w-[44px] items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
             aria-label="Profil"
           >
             <User size={20} />

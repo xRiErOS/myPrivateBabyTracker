@@ -55,11 +55,11 @@ export function DiaperWidget() {
             ))}
           </div>
 
-          {/* Stuhl + Trocken kompakt */}
+          {/* Dreckig + Trocken kompakt */}
           <p className="font-body text-xs text-subtext0 mt-1">
-            Stuhl: {entries.filter((e) => e.diaper_type === "dirty").length}
+            {t("type.dirty")}: {entries.filter((e) => e.diaper_type === "dirty").length}
             {" \u00B7 "}
-            Trocken: {entries.filter((e) => e.diaper_type === "dry").length}
+            {t("type.dry")}: {entries.filter((e) => e.diaper_type === "dry").length}
           </p>
 
           {lastEntry && (

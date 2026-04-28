@@ -9,7 +9,7 @@ import { useActiveChild } from "../../context/ChildContext";
 import { useCreateHealth, useUpdateHealth } from "../../hooks/useHealth";
 import { useFeedingEntries } from "../../hooks/useFeeding";
 import { formatTime, isoToLocalInput, localInputToISO, nowISO, startOfTodayISO } from "../../lib/dateUtils";
-import { ApiError } from "../../api/client";
+import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { HealthEntry, HealthEntryType, HealthSeverity, HealthDuration, SoothingMethod } from "../../api/types";
 
@@ -89,14 +89,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
   const isPending = createMut.isPending || updateMut.isPending;
 
   function handleApiError(err: unknown) {
-    if (err instanceof ApiError) {
-      const msg = err.message.replace(/^API \d+: /, "");
-      setError(msg);
-    } else if (err instanceof Error) {
-      setError(err.message);
-    } else {
-      setError(tc("errors.unknown"));
-    }
+    setError(formatApiError(err, tc("errors.unknown")));
   }
 
   async function handleSubmit(e: FormEvent) {
