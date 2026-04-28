@@ -210,10 +210,21 @@ def create_app(testing: bool = False) -> FastAPI:
     # Note: Photo uploads are served via auth-protected proxy at /api/v1/milestones/photos/
     index_html = STATIC_DIR / "index.html"
     assets_dir = STATIC_DIR / "assets"
+    # index.html darf nie gecached werden, sonst zeigen Browser nach Deploy
+    # auf alte Vite-Asset-Hashes und werfen "Importing a module script failed".
+    NO_CACHE_HEADERS = {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    }
     if index_html.exists():
-        # Mount static assets (JS, CSS, images)
+        # Mount static assets (JS, CSS, images) — Vite-Hashes garantieren Immutability
         if assets_dir.exists():
-            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+            app.mount(
+                "/assets",
+                StaticFiles(directory=assets_dir),
+                name="assets",
+            )
 
         # SPA fallback: non-API routes serve index.html
         @app.get("/{path:path}")
@@ -226,12 +237,15 @@ def create_app(testing: bool = False) -> FastAPI:
             # Prevent path traversal
             file_path = (STATIC_DIR / path).resolve()
             if not str(file_path).startswith(str(STATIC_DIR.resolve())):
-                return FileResponse(index_html)
-            # Try to serve the exact file first (favicon.ico, etc.)
+                return FileResponse(index_html, headers=NO_CACHE_HEADERS)
+            # Try to serve the exact file first (favicon.ico, manifest.json, changelog.json …)
             if path and file_path.exists() and file_path.is_file():
+                # JSON/HTML-Dateien im public/ ändern sich pro Deploy — nicht cachen
+                if file_path.suffix in {".json", ".html"}:
+                    return FileResponse(file_path, headers=NO_CACHE_HEADERS)
                 return FileResponse(file_path)
             # Otherwise serve index.html for client-side routing
-            return FileResponse(index_html)
+            return FileResponse(index_html, headers=NO_CACHE_HEADERS)
 
     return app
 
