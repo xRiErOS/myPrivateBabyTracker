@@ -67,8 +67,13 @@ async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown."""
     settings = get_settings()
 
-    # Initialize structured logging (JSON, UTC timestamps)
-    setup_logging(settings.log_level)
+    # Initialize structured logging (JSON, UTC timestamps, optional file rotation)
+    setup_logging(
+        settings.log_level,
+        log_file=settings.log_file,
+        max_bytes=settings.log_file_max_bytes,
+        backup_count=settings.log_file_backups,
+    )
 
     # Run Alembic migrations before DB engine init
     run_migrations()
@@ -200,6 +205,9 @@ def create_app(testing: bool = False) -> FastAPI:
     # Changelog management (file-backed)
     from app.routers.changelog import router as changelog_router
     app.include_router(changelog_router, prefix="/api/v1")
+    # Admin Log-Viewer (admin only)
+    from app.api.admin_logs import router as admin_logs_router
+    app.include_router(admin_logs_router, prefix="/api/v1")
 
     # --- Plugin routers (must be before SPA fallback) ---
     plugins = discover_plugins()

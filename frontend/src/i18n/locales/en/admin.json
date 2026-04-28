@@ -18,7 +18,27 @@
     "changelog": "Changelog",
     "changelog_desc": "Manage release notes",
     "media": "Media",
-    "media_desc": "Manage milestone photos"
+    "media_desc": "Manage milestone photos",
+    "logs": "Logs",
+    "logs_desc": "Inspect backend logs, download, clear"
+  },
+  "logs": {
+    "title": "Backend logs",
+    "filter_level": "Level",
+    "all_levels": "All",
+    "refresh": "Refresh",
+    "auto_refresh": "Auto-refresh (5s)",
+    "download": "Download (NDJSON)",
+    "clear": "Clear",
+    "confirm_clear": "Really clear all logs? Backup files are kept.",
+    "cleared": "Logs cleared.",
+    "no_permission": "Only administrators can view logs.",
+    "summary": "{{total}} entries — file {{size}}",
+    "empty": "No logs found for the current selection.",
+    "no_file": "No log file yet. It is created on the first logging event.",
+    "prev": "Previous",
+    "next": "Next",
+    "page_of": "Page {{current}} of {{total}}"
   },
   "media": {
     "title": "Media management",

@@ -1,7 +1,7 @@
 /** Admin hub page — navigation tiles for management pages + Quick Actions config. */
 
 import { useState } from "react";
-import { AlertTriangle, Baby, ClipboardList, FileText, Image, KeyRound, Puzzle, Shield, Users, Zap } from "lucide-react";
+import { AlertTriangle, Baby, ClipboardList, FileText, Image, KeyRound, Puzzle, ScrollText, Shield, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Card } from "../components/Card";
@@ -27,6 +27,7 @@ const TILES: AdminTile[] = [
   { to: "/admin/users", icon: Users, labelKey: "tiles.users", descKey: "tiles.users_desc" },
   { to: "/admin/changelog", icon: FileText, labelKey: "tiles.changelog", descKey: "tiles.changelog_desc" },
   { to: "/admin/media", icon: Image, labelKey: "tiles.media", descKey: "tiles.media_desc" },
+  { to: "/admin/logs", icon: ScrollText, labelKey: "tiles.logs", descKey: "tiles.logs_desc" },
 ];
 
 export default function AdminPage() {

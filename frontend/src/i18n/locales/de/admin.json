@@ -18,7 +18,27 @@
     "changelog": "Changelog",
     "changelog_desc": "Release-Hinweise verwalten",
     "media": "Medien",
-    "media_desc": "Meilenstein-Fotos verwalten"
+    "media_desc": "Meilenstein-Fotos verwalten",
+    "logs": "Logs",
+    "logs_desc": "Backend-Logs einsehen, herunterladen, leeren"
+  },
+  "logs": {
+    "title": "Backend-Logs",
+    "filter_level": "Level",
+    "all_levels": "Alle",
+    "refresh": "Aktualisieren",
+    "auto_refresh": "Auto-Refresh (5s)",
+    "download": "Download (NDJSON)",
+    "clear": "Leeren",
+    "confirm_clear": "Alle Logs wirklich löschen? Backup-Dateien bleiben erhalten.",
+    "cleared": "Logs wurden geleert.",
+    "no_permission": "Nur Administratoren dürfen Logs einsehen.",
+    "summary": "{{total}} Einträge — Datei {{size}}",
+    "empty": "Keine Logs für die aktuelle Auswahl gefunden.",
+    "no_file": "Es liegt noch keine Log-Datei vor. Sie wird beim ersten Logging-Event angelegt.",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "page_of": "Seite {{current}} von {{total}}"
   },
   "media": {
     "title": "Medienverwaltung",

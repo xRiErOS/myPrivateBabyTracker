@@ -27,6 +27,10 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    # Pfad zur rotierenden Log-Datei (NDJSON). Leer-String = nur stdout.
+    log_file: str = Field(default="data/logs/app.ndjson")
+    log_file_max_bytes: int = Field(default=10 * 1024 * 1024, ge=0)
+    log_file_backups: int = Field(default=5, ge=0)
 
     # CORS
     cors_origins: list[str] = Field(default_factory=list)
