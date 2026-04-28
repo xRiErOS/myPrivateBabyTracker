@@ -91,3 +91,21 @@ export function isoToLocalInput(iso: string): string {
   const local = new Date(d.getTime() - offset * 60000);
   return local.toISOString().slice(0, 16);
 }
+
+/**
+ * Wenn das End-Datum chronologisch vor dem Start liegt, rolle es um einen Tag nach vorne.
+ * Schließt typische Cross-Midnight-Eingaben (datetime-local picker behält Default-Datum).
+ * Sicherheitsgrenze: nur rollen, wenn die resultierende Dauer 0–18h beträgt.
+ */
+export function rollEndIfCrossMidnight(startISO: string, endISO: string): string {
+  const start = new Date(startISO);
+  const end = new Date(endISO);
+  if (end > start) return endISO;
+  const rolled = new Date(end);
+  rolled.setDate(rolled.getDate() + 1);
+  const diffHours = (rolled.getTime() - start.getTime()) / 3_600_000;
+  if (diffHours > 0 && diffHours <= 18) {
+    return rolled.toISOString();
+  }
+  return endISO;
+}

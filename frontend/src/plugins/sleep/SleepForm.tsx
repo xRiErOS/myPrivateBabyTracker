@@ -8,7 +8,7 @@ import { Select } from "../../components/Select";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateSleep, useUpdateSleep } from "../../hooks/useSleep";
-import { formatDateTime, isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
+import { formatDateTime, isoToLocalInput, localInputToISO, nowISO, rollEndIfCrossMidnight } from "../../lib/dateUtils";
 import { ApiError } from "../../api/client";
 import { attachTag } from "../../api/tags";
 import type { SleepEntry, SleepType } from "../../api/types";
@@ -156,10 +156,13 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
     if (!activeChild) return;
     setError(null);
 
+    const startISO = localInputToISO(startTime);
+    const endISO = endTime ? rollEndIfCrossMidnight(startISO, localInputToISO(endTime)) : null;
+
     const payload = {
       child_id: activeChild.id,
-      start_time: localInputToISO(startTime),
-      end_time: endTime ? localInputToISO(endTime) : null,
+      start_time: startISO,
+      end_time: endISO,
       sleep_type: sleepType,
       location: location || null,
       notes: notes || null,
