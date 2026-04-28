@@ -50,7 +50,7 @@ function TargetBand({
       y={y1}
       width={width}
       height={y2 - y1}
-      fill="var(--ctp-green)"
+      fill="var(--color-green)"
       opacity={0.15}
     />
   );
@@ -85,7 +85,7 @@ function DataLine({
         <path
           d={buildPath(linePoints)}
           fill="none"
-          stroke="var(--ctp-peach)"
+          stroke="var(--color-peach)"
           strokeWidth={2.5}
         />
       )}
@@ -100,8 +100,8 @@ function DataLine({
               cx={p.x}
               cy={p.y}
               r={4}
-              fill={inRange ? "var(--ctp-peach)" : "var(--ctp-red)"}
-              stroke="var(--ctp-base)"
+              fill={inRange ? "var(--color-peach)" : "var(--color-red)"}
+              stroke="var(--color-base)"
               strokeWidth={1.5}
             />
           );
@@ -130,7 +130,7 @@ function XAxis({
         y1={PADDING.top + INNER_H}
         x2={PADDING.left + INNER_W}
         y2={PADDING.top + INNER_H}
-        stroke="var(--ctp-surface1)"
+        stroke="var(--color-surface1)"
         strokeWidth={1}
       />
       {ticks.map(({ i, label }) => {
@@ -142,7 +142,7 @@ function XAxis({
               y1={PADDING.top + INNER_H}
               x2={x}
               y2={PADDING.top + INNER_H + 5}
-              stroke="var(--ctp-surface1)"
+              stroke="var(--color-surface1)"
             />
             <text
               x={x}
@@ -168,7 +168,7 @@ function YAxis() {
         y1={PADDING.top}
         x2={PADDING.left}
         y2={PADDING.top + INNER_H}
-        stroke="var(--ctp-surface1)"
+        stroke="var(--color-surface1)"
         strokeWidth={1}
       />
       {ticks.map((h) => {
@@ -180,14 +180,14 @@ function YAxis() {
               y1={y}
               x2={PADDING.left}
               y2={y}
-              stroke="var(--ctp-surface1)"
+              stroke="var(--color-surface1)"
             />
             <line
               x1={PADDING.left}
               y1={y}
               x2={PADDING.left + INNER_W}
               y2={y}
-              stroke="var(--ctp-surface1)"
+              stroke="var(--color-surface1)"
               strokeWidth={0.3}
               opacity={0.5}
             />
@@ -243,10 +243,10 @@ export function SleepChart() {
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-4 px-4">
+      <div className="w-full">
         <svg
           viewBox={`0 0 ${CHART_W} ${CHART_H}`}
-          className="w-full min-w-[400px]"
+          className="w-full h-auto"
           preserveAspectRatio="xMidYMid meet"
         >
           <TargetBand

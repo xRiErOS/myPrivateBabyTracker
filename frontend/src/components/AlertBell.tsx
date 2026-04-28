@@ -83,7 +83,7 @@ export function AlertBell() {
       {open && (
         <div
           ref={panelRef}
-          className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] bg-surface0 border border-surface1 rounded-xl shadow-lg z-50 overflow-hidden"
+          className="fixed left-2 right-2 top-[60px] w-auto max-w-none md:absolute md:left-auto md:right-0 md:top-full md:mt-2 md:w-80 md:max-w-[calc(100vw-2rem)] bg-surface0 border border-surface1 rounded-xl shadow-lg z-50 overflow-hidden"
         >
           <div className="px-4 py-3 border-b border-surface1 flex items-center justify-between">
             <span className="text-sm font-semibold text-text">Warnungen</span>

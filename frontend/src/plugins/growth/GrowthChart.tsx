@@ -52,14 +52,14 @@ function PercentileCurves({ curves }: { curves: PercentilePoint[] }) {
   return (
     <g>
       {/* P3-P97 band (lightest) */}
-      <path d={buildArea(p97, p3)} fill="var(--ctp-lavender)" opacity={0.12} />
+      <path d={buildArea(p97, p3)} fill="var(--color-lavender)" opacity={0.12} />
       {/* P15-P85 band */}
-      <path d={buildArea(p85, p15)} fill="var(--ctp-lavender)" opacity={0.18} />
+      <path d={buildArea(p85, p15)} fill="var(--color-lavender)" opacity={0.18} />
       {/* P50 line (median) */}
-      <path d={buildPath(p50)} fill="none" stroke="var(--ctp-lavender)" strokeWidth={2.5} opacity={0.9} />
+      <path d={buildPath(p50)} fill="none" stroke="var(--color-lavender)" strokeWidth={2.5} opacity={0.9} />
       {/* P3 and P97 lines (thin) */}
-      <path d={buildPath(p3)} fill="none" stroke="var(--ctp-overlay0)" strokeWidth={0.8} opacity={0.5} />
-      <path d={buildPath(p97)} fill="none" stroke="var(--ctp-overlay0)" strokeWidth={0.8} opacity={0.5} />
+      <path d={buildPath(p3)} fill="none" stroke="var(--color-overlay0)" strokeWidth={0.8} opacity={0.5} />
+      <path d={buildPath(p97)} fill="none" stroke="var(--color-overlay0)" strokeWidth={0.8} opacity={0.5} />
       {/* Labels */}
       <text x={scaleX(MAX_WEEKS) + 4} y={scaleY(curves[curves.length - 1].p97) + 4} className="fill-overlay0 text-[9px]">P97</text>
       <text x={scaleX(MAX_WEEKS) + 4} y={scaleY(curves[curves.length - 1].p85) + 4} className="fill-overlay0 text-[9px]">P85</text>
@@ -81,11 +81,11 @@ function WeightLine({ measurements }: { measurements: WeightDataPoint[] }) {
     <g>
       {/* Line connecting measurements */}
       {points.length > 1 && (
-        <path d={buildPath(points)} fill="none" stroke="var(--ctp-peach)" strokeWidth={2.5} />
+        <path d={buildPath(points)} fill="none" stroke="var(--color-peach)" strokeWidth={2.5} />
       )}
       {/* Data points */}
       {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={4} fill="var(--ctp-peach)" stroke="var(--ctp-base)" strokeWidth={1.5} />
+        <circle key={i} cx={p.x} cy={p.y} r={4} fill="var(--color-peach)" stroke="var(--color-base)" strokeWidth={1.5} />
       ))}
     </g>
   );
@@ -95,12 +95,12 @@ function XAxis() {
   const months = [0, 3, 6, 9, 12, 15, 18, 21, 24];
   return (
     <g>
-      <line x1={PADDING.left} y1={PADDING.top + INNER_H} x2={PADDING.left + INNER_W} y2={PADDING.top + INNER_H} stroke="var(--ctp-surface1)" strokeWidth={1} />
+      <line x1={PADDING.left} y1={PADDING.top + INNER_H} x2={PADDING.left + INNER_W} y2={PADDING.top + INNER_H} stroke="var(--color-surface1)" strokeWidth={1} />
       {months.map((m) => {
         const x = scaleX(m * 4.345); // months to weeks
         return (
           <g key={m}>
-            <line x1={x} y1={PADDING.top + INNER_H} x2={x} y2={PADDING.top + INNER_H + 5} stroke="var(--ctp-surface1)" />
+            <line x1={x} y1={PADDING.top + INNER_H} x2={x} y2={PADDING.top + INNER_H + 5} stroke="var(--color-surface1)" />
             <text x={x} y={PADDING.top + INNER_H + 18} textAnchor="middle" className="fill-subtext0 text-[10px]">
               {m}
             </text>
@@ -118,13 +118,13 @@ function YAxis() {
   const ticks = [0, 2, 4, 6, 8, 10, 12, 14, 16];
   return (
     <g>
-      <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + INNER_H} stroke="var(--ctp-surface1)" strokeWidth={1} />
+      <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + INNER_H} stroke="var(--color-surface1)" strokeWidth={1} />
       {ticks.map((kg) => {
         const y = scaleY(kg);
         return (
           <g key={kg}>
-            <line x1={PADDING.left - 5} y1={y} x2={PADDING.left} y2={y} stroke="var(--ctp-surface1)" />
-            <line x1={PADDING.left} y1={y} x2={PADDING.left + INNER_W} y2={y} stroke="var(--ctp-surface1)" strokeWidth={0.3} opacity={0.5} />
+            <line x1={PADDING.left - 5} y1={y} x2={PADDING.left} y2={y} stroke="var(--color-surface1)" />
+            <line x1={PADDING.left} y1={y} x2={PADDING.left + INNER_W} y2={y} stroke="var(--color-surface1)" strokeWidth={0.3} opacity={0.5} />
             <text x={PADDING.left - 8} y={y + 4} textAnchor="end" className="fill-subtext0 text-[10px]">
               {kg}
             </text>
@@ -159,10 +159,10 @@ export function GrowthChart() {
         )}
       </div>
 
-      <div className="overflow-x-auto -mx-4 px-4">
+      <div className="w-full">
         <svg
           viewBox={`0 0 ${CHART_W} ${CHART_H}`}
-          className="w-full min-w-[400px]"
+          className="w-full h-auto"
           preserveAspectRatio="xMidYMid meet"
         >
           <XAxis />
