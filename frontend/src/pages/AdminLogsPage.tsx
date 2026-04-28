@@ -1,13 +1,12 @@
 /** Admin /logs page — list, filter, auto-refresh, download, clear. */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Download, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { PageHeader } from "../components/PageHeader";
-import { Select } from "../components/Select";
 import { useToast } from "../context/ToastContext";
 import { clearLogs, getDownloadUrl, listLogs, type LogEntry, type LogListResponse } from "../api/adminLogs";
 
@@ -26,6 +25,21 @@ function levelBadgeClass(level: string | null): string {
       return "bg-overlay0/20 text-subtext0";
     default:
       return "bg-surface2 text-subtext0";
+  }
+}
+
+function levelChipActiveClass(level: string): string {
+  switch (level.toLowerCase()) {
+    case "error":
+      return "bg-red text-ground border-red";
+    case "warning":
+      return "bg-peach text-ground border-peach";
+    case "info":
+      return "bg-sapphire text-ground border-sapphire";
+    case "debug":
+      return "bg-overlay0 text-ground border-overlay0";
+    default:
+      return "bg-mauve text-ground border-mauve";
   }
 }
 
@@ -66,6 +80,7 @@ export default function AdminLogsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [is404, setIs404] = useState(false);
   const [level, setLevel] = useState<string>("");
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -75,6 +90,7 @@ export default function AdminLogsPage() {
     if (showSpinner) setLoading(true);
     setRefreshing(true);
     setError(null);
+    setIs404(false);
     try {
       const resp = await listLogs({
         level: level || undefined,
@@ -85,7 +101,9 @@ export default function AdminLogsPage() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
-      if (msg.includes("403")) {
+      if (msg.includes("404")) {
+        setIs404(true);
+      } else if (msg.includes("403")) {
         showToast(t("logs.no_permission"), "error");
       }
     } finally {
@@ -133,15 +151,6 @@ export default function AdminLogsPage() {
     window.location.href = getDownloadUrl();
   }
 
-  const levelOptions = useMemo(
-    () =>
-      LEVEL_FILTERS.map((lvl) => ({
-        value: lvl,
-        label: lvl === "" ? t("logs.all_levels") : lvl,
-      })),
-    [t],
-  );
-
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_LIMIT)) : 1;
   const currentPage = Math.floor(offset / PAGE_LIMIT) + 1;
 
@@ -149,20 +158,48 @@ export default function AdminLogsPage() {
     <div className="space-y-4">
       <PageHeader title={t("logs.title")} />
 
+      {/* Filter-Bar — Level-Chips prominent */}
       <Card className="p-4 space-y-3">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-[160px]">
-            <Select
-              label={t("logs.filter_level")}
-              options={levelOptions}
-              value={level}
-              onChange={(e) => {
-                setLevel(e.target.value);
-                setOffset(0);
-              }}
-            />
-          </div>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <span className="font-label text-sm font-semibold text-text">
+            {t("logs.filter_level")}
+          </span>
+          {data && (
+            <span className="font-body text-xs text-subtext0">
+              {t("logs.summary", { total: data.total, size: formatBytes(data.file_size) })}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("logs.filter_level")}>
+          {LEVEL_FILTERS.map((lvl) => {
+            const isActive = level === lvl;
+            const labelText = lvl === "" ? t("logs.all_levels") : lvl;
+            return (
+              <button
+                key={lvl || "ALL"}
+                type="button"
+                role="radio"
+                aria-checked={isActive}
+                onClick={() => {
+                  setLevel(lvl);
+                  setOffset(0);
+                }}
+                className={`min-h-[44px] px-4 rounded-[8px] border-2 font-label text-sm font-semibold transition-colors ${
+                  isActive
+                    ? levelChipActiveClass(lvl)
+                    : "bg-surface0 text-subtext0 border-surface2 hover:border-overlay0 hover:text-text"
+                }`}
+              >
+                {labelText}
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
+      {/* Action-Toolbar */}
+      <Card className="p-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             variant="secondary"
@@ -173,15 +210,26 @@ export default function AdminLogsPage() {
             <span className="ml-2">{t("logs.refresh")}</span>
           </Button>
 
-          <label className="flex items-center gap-2 min-h-[44px] px-3 cursor-pointer select-none">
+          <label
+            className={`flex items-center gap-2 min-h-[44px] px-3 rounded-[8px] cursor-pointer select-none border-2 transition-colors ${
+              autoRefresh
+                ? "bg-green/15 text-green border-green"
+                : "bg-surface0 text-subtext0 border-surface2 hover:border-overlay0"
+            }`}
+          >
             <input
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="h-4 w-4"
+              className="sr-only"
             />
-            <span className="font-label text-sm">{t("logs.auto_refresh")}</span>
+            <span className="font-label text-sm font-semibold">{t("logs.auto_refresh")}</span>
+            {autoRefresh && (
+              <RefreshCw size={14} className="animate-spin" />
+            )}
           </label>
+
+          <div className="flex-1" />
 
           <Button type="button" variant="secondary" onClick={handleDownload}>
             <Download size={18} />
@@ -193,18 +241,9 @@ export default function AdminLogsPage() {
             <span className="ml-2">{t("logs.clear")}</span>
           </Button>
         </div>
-
-        {data && (
-          <div className="text-xs font-body text-subtext0">
-            {t("logs.summary", {
-              total: data.total,
-              size: formatBytes(data.file_size),
-            })}
-          </div>
-        )}
       </Card>
 
-      {error && (
+      {error && !is404 && (
         <div className="rounded-[8px] border border-red bg-red/10 p-3 text-sm text-red">
           {error}
         </div>
@@ -212,6 +251,15 @@ export default function AdminLogsPage() {
 
       {loading ? (
         <LoadingSpinner />
+      ) : is404 ? (
+        <Card className="p-6 text-center space-y-2">
+          <p className="font-body text-sm font-semibold text-peach">
+            {t("logs.endpoint_404_title")}
+          </p>
+          <p className="font-body text-sm text-subtext0">
+            {t("logs.endpoint_404_hint")}
+          </p>
+        </Card>
       ) : data && data.items.length > 0 ? (
         <>
           <div className="space-y-1.5">

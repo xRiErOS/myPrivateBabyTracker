@@ -36,6 +36,8 @@
     "summary": "{{total}} entries — file {{size}}",
     "empty": "No logs found for the current selection.",
     "no_file": "No log file yet. It is created on the first logging event.",
+    "endpoint_404_title": "Log endpoint not reachable",
+    "endpoint_404_hint": "The backend container may not yet run the latest version. Please redeploy on the NAS (Portainer → mybaby stack → Pull & Recreate).",
     "prev": "Previous",
     "next": "Next",
     "page_of": "Page {{current}} of {{total}}"

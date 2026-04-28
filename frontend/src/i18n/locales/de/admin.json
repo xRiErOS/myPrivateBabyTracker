@@ -36,6 +36,8 @@
     "summary": "{{total}} Einträge — Datei {{size}}",
     "empty": "Keine Logs für die aktuelle Auswahl gefunden.",
     "no_file": "Es liegt noch keine Log-Datei vor. Sie wird beim ersten Logging-Event angelegt.",
+    "endpoint_404_title": "Log-Endpoint nicht erreichbar",
+    "endpoint_404_hint": "Der Backend-Container scheint die neueste Version noch nicht zu nutzen. Bitte das Deployment auf der NAS aktualisieren (Portainer → Stack mybaby → Pull & Recreate).",
     "prev": "Zurück",
     "next": "Weiter",
     "page_of": "Seite {{current}} von {{total}}"
