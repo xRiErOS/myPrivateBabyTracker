@@ -1,7 +1,7 @@
 {
-  "title": "Dashboard",
+  "title": "Home",
   "no_child": "Kein Kind angelegt",
-  "no_child_hint": "Lege zuerst ein Kind an, um das Dashboard zu sehen.",
+  "no_child_hint": "Lege zuerst ein Kind an, um die Startseite zu sehen.",
   "go_to_children": "Kinder verwalten",
   "tab_today": "Heute",
   "tab_timeline": "Tagesverlauf",

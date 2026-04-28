@@ -41,7 +41,7 @@
   "no_child_selected_hint": "Please select a child first.",
   "error_boundary": {
     "title": "Something went wrong",
-    "go_to_dashboard": "Go to Dashboard"
+    "go_to_dashboard": "Go to Home"
   },
   "navigation": "Navigation",
   "confirm_delete_named": "Really delete \"{{name}}\"?",
@@ -52,7 +52,7 @@
   "no_tags": "No tags",
   "more_tags": "+{{count}} more",
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Home",
     "sleep": "Sleep",
     "feeding": "Feeding",
     "diaper": "Diapers",

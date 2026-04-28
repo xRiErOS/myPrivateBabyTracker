@@ -62,7 +62,7 @@ export default function PluginConfigPage() {
                           type="button"
                           role="switch"
                           aria-checked={dashboardVisible}
-                          aria-label={`ToDos auf Dashboard ${dashboardVisible ? "ausblenden" : "anzeigen"}`}
+                          aria-label={`ToDos auf Startseite ${dashboardVisible ? "ausblenden" : "anzeigen"}`}
                           disabled={!enabled}
                           onClick={() => handleDashboardToggle("todo")}
                           className={`relative inline-flex h-6 w-[40px] shrink-0 items-center rounded-full transition-colors ${
@@ -83,7 +83,7 @@ export default function PluginConfigPage() {
                           type="button"
                           role="switch"
                           aria-checked={isVisibleOnDashboard("habits")}
-                          aria-label={`Habits auf Dashboard ${isVisibleOnDashboard("habits") ? "ausblenden" : "anzeigen"}`}
+                          aria-label={`Habits auf Startseite ${isVisibleOnDashboard("habits") ? "ausblenden" : "anzeigen"}`}
                           disabled={!enabled}
                           onClick={() => handleDashboardToggle("habits")}
                           className={`relative inline-flex h-6 w-[40px] shrink-0 items-center rounded-full transition-colors ${
@@ -100,12 +100,12 @@ export default function PluginConfigPage() {
                     </>
                   ) : (
                   <div className="flex flex-col items-center gap-0.5">
-                    <span className="font-body text-[10px] text-subtext0">Dashboard</span>
+                    <span className="font-body text-[10px] text-subtext0">Home</span>
                     <button
                       type="button"
                       role="switch"
                       aria-checked={dashboardVisible}
-                      aria-label={`${plugin.label} auf Dashboard ${dashboardVisible ? "ausblenden" : "anzeigen"}`}
+                      aria-label={`${plugin.label} auf Startseite ${dashboardVisible ? "ausblenden" : "anzeigen"}`}
                       disabled={!enabled}
                       onClick={() => handleDashboardToggle(plugin.key)}
                       className={`relative inline-flex h-6 w-[40px] shrink-0 items-center rounded-full transition-colors ${
@@ -151,7 +151,7 @@ export default function PluginConfigPage() {
       {/* Widget order section */}
       <h3 className="font-headline text-base font-semibold mt-6">Widget-Reihenfolge</h3>
       <p className="font-body text-sm text-subtext0">
-        Reihenfolge der Widgets im Dashboard-Grid anpassen.
+        Reihenfolge der Widgets auf der Startseite anpassen.
       </p>
       <div className="space-y-1">
         {getWidgetOrder().map((key, idx, arr) => {

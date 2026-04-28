@@ -103,7 +103,7 @@
   "plugins": {
     "title": "Plugins",
     "active": "Plugin aktiv",
-    "show_dashboard": "Zeige auf Dashboard",
+    "show_dashboard": "Zeige auf Startseite",
     "base_plugin": "Basis-Plugin (immer aktiv)",
     "widget_order": "Widget-Reihenfolge"
   },
@@ -175,15 +175,15 @@
   },
   "quick_actions": {
     "title": "Quick Actions",
-    "description": "Konfiguriere die 3 Schnellzugriff-Buttons auf dem Dashboard.",
+    "description": "Konfiguriere die 3 Schnellzugriff-Buttons auf der Startseite.",
     "favorite": "Favorit {{number}}"
   },
   "breastfeeding": {
     "title": "Stillmodus",
-    "description": "Zeigt die zuletzt gestillte Seite auf dem Dashboard. Deaktiviere dies, wenn du nicht stillst.",
+    "description": "Zeigt die zuletzt gestillte Seite auf der Startseite. Deaktiviere dies, wenn du nicht stillst.",
     "enabled": "Stillen aktiv",
     "disabled": "Stillen deaktiviert",
     "hybrid": "Hybridmodus",
-    "hybrid_desc": "Zeigt Brust- und Flaschenkacheln gleichzeitig auf dem Dashboard."
+    "hybrid_desc": "Zeigt Brust- und Flaschenkacheln gleichzeitig auf der Startseite."
   }
 }

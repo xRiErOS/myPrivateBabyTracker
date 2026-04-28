@@ -1,10 +1,10 @@
-/** Mobile bottom navigation — Dashboard only.
+/** Mobile bottom navigation — Home only.
 
 All other navigation is handled by the burger menu in the Header.
 Touch targets: min 44px. Only visible on mobile (< md).
 */
 
-import { LayoutDashboard } from "lucide-react";
+import { Home } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export function BottomNav() {
@@ -23,8 +23,8 @@ export function BottomNav() {
             }`
           }
         >
-          <LayoutDashboard size={20} />
-          <span className="mt-0.5">Dashboard</span>
+          <Home size={20} />
+          <span className="mt-0.5">Home</span>
         </NavLink>
       </div>
     </nav>

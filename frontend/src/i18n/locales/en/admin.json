@@ -103,7 +103,7 @@
   "plugins": {
     "title": "Plugins",
     "active": "Plugin active",
-    "show_dashboard": "Show on dashboard",
+    "show_dashboard": "Show on home",
     "base_plugin": "Base plugin (always active)",
     "widget_order": "Widget order"
   },
@@ -175,15 +175,15 @@
   },
   "quick_actions": {
     "title": "Quick Actions",
-    "description": "Configure the 3 quick action buttons on the dashboard.",
+    "description": "Configure the 3 quick action buttons on the home page.",
     "favorite": "Favorite {{number}}"
   },
   "breastfeeding": {
     "title": "Breastfeeding mode",
-    "description": "Shows the last breastfeeding side on the dashboard. Disable if you are not breastfeeding.",
+    "description": "Shows the last breastfeeding side on the home page. Disable if you are not breastfeeding.",
     "enabled": "Breastfeeding active",
     "disabled": "Breastfeeding disabled",
     "hybrid": "Hybrid mode",
-    "hybrid_desc": "Shows breast and bottle tiles simultaneously on the dashboard."
+    "hybrid_desc": "Shows breast and bottle tiles simultaneously on the home page."
   }
 }

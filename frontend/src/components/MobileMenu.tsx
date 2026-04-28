@@ -11,7 +11,7 @@ import {
   ClipboardCheck,
   Droplets,
   FileText,
-  LayoutDashboard,
+  Home,
   Moon,
   Pill,
   Scale,
@@ -37,7 +37,7 @@ interface NavItem {
 }
 
 const ALL_ITEMS: NavItem[] = [
-  { to: "/", icon: LayoutDashboard, labelKey: "nav.dashboard" },
+  { to: "/", icon: Home, labelKey: "nav.dashboard" },
   { to: "/sleep", icon: Moon, labelKey: "nav.sleep", pluginKey: "sleep" },
   { to: "/feeding", icon: Utensils, labelKey: "nav.feeding", pluginKey: "feeding" },
   { to: "/diaper", icon: Droplets, labelKey: "nav.diaper", pluginKey: "diaper" },

@@ -41,7 +41,7 @@
   "no_child_selected_hint": "Waehle zuerst ein Kind aus.",
   "error_boundary": {
     "title": "Etwas ist schiefgelaufen",
-    "go_to_dashboard": "Zum Dashboard"
+    "go_to_dashboard": "Zur Startseite"
   },
   "navigation": "Navigation",
   "confirm_delete_named": "\"{{name}}\" wirklich loeschen?",
@@ -52,7 +52,7 @@
   "no_tags": "Keine Tags",
   "more_tags": "+{{count}} weitere",
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Home",
     "sleep": "Schlaf",
     "feeding": "Mahlzeiten",
     "diaper": "Windeln",

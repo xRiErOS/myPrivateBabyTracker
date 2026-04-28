@@ -1,7 +1,7 @@
 {
-  "title": "Dashboard",
+  "title": "Home",
   "no_child": "No child set up",
-  "no_child_hint": "Add a child first to see the dashboard.",
+  "no_child_hint": "Add a child first to see the home page.",
   "go_to_children": "Manage children",
   "tab_today": "Today",
   "tab_timeline": "Timeline",
