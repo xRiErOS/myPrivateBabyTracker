@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { rollEndIfCrossMidnight } from "../../lib/dateUtils";
+import { berlinHour, defaultSleepTypeForTime, rollEndIfCrossMidnight } from "../../lib/dateUtils";
 
 describe("rollEndIfCrossMidnight", () => {
   it("rollt Ende auf nächsten Tag, wenn Ende chronologisch vor Start liegt (Cross-Midnight)", () => {
@@ -45,5 +45,49 @@ describe("rollEndIfCrossMidnight", () => {
     expect(resultDate.getDate()).toBe(28);
     expect(resultDate.getHours()).toBe(1);
     expect(resultDate.getMinutes()).toBe(55);
+  });
+});
+
+describe("berlinHour", () => {
+  it("liefert 22 für 22:30 Berliner Sommerzeit (UTC 20:30 im Juli)", () => {
+    expect(berlinHour(new Date("2026-07-15T20:30:00Z"))).toBe(22);
+  });
+
+  it("liefert 03 für 03:15 Berliner Winterzeit (UTC 02:15 im Januar)", () => {
+    expect(berlinHour(new Date("2026-01-15T02:15:00Z"))).toBe(3);
+  });
+
+  it("liefert 14 mittags Berliner Zeit", () => {
+    expect(berlinHour(new Date("2026-04-28T12:00:00Z"))).toBe(14);
+  });
+});
+
+describe("defaultSleepTypeForTime", () => {
+  it("ist 'night' um 22:00 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T20:00:00Z"))).toBe("night");
+  });
+
+  it("ist 'night' um 23:30 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T21:30:00Z"))).toBe("night");
+  });
+
+  it("ist 'night' um 02:00 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T00:00:00Z"))).toBe("night");
+  });
+
+  it("ist 'night' um 05:59 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T03:59:00Z"))).toBe("night");
+  });
+
+  it("ist 'nap' um 06:00 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T04:00:00Z"))).toBe("nap");
+  });
+
+  it("ist 'nap' um 14:00 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T12:00:00Z"))).toBe("nap");
+  });
+
+  it("ist 'nap' um 21:59 Berlin", () => {
+    expect(defaultSleepTypeForTime(new Date("2026-04-28T19:59:00Z"))).toBe("nap");
   });
 });

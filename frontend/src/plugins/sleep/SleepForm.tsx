@@ -8,7 +8,7 @@ import { Select } from "../../components/Select";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateSleep, useUpdateSleep } from "../../hooks/useSleep";
-import { isoToLocalInput, localInputToISO, nowISO, rollEndIfCrossMidnight } from "../../lib/dateUtils";
+import { defaultSleepTypeForTime, isoToLocalInput, localInputToISO, nowISO, rollEndIfCrossMidnight } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { SleepEntry, SleepType } from "../../api/types";
@@ -47,7 +47,9 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
     { value: "other", label: t("location.other") },
   ];
 
-  const [sleepType, setSleepType] = useState<SleepType>(entry?.sleep_type ?? "nap");
+  const [sleepType, setSleepType] = useState<SleepType>(
+    entry?.sleep_type ?? defaultSleepTypeForTime(),
+  );
   const [startTime, setStartTime] = useState(
     entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
   );

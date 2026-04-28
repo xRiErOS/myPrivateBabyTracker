@@ -93,6 +93,29 @@ export function isoToLocalInput(iso: string): string {
 }
 
 /**
+ * Liefert die Stunde (0-23) in Berlin-Zeit für ein gegebenes Datum.
+ * Dadurch reagiert die Uhrzeit-Logik korrekt auf Sommer-/Winterzeit, auch
+ * wenn das Endgerät in einer anderen Zeitzone steht (z.B. PWA im Ausland).
+ */
+export function berlinHour(date: Date = new Date()): number {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Berlin",
+    hour: "2-digit",
+    hour12: false,
+  });
+  return Number(formatter.format(date));
+}
+
+/**
+ * Default-Schlafart basierend auf Berlin-Uhrzeit.
+ * 22:00 ≤ Stunde oder Stunde < 06:00 → "night", sonst "nap".
+ */
+export function defaultSleepTypeForTime(date: Date = new Date()): "nap" | "night" {
+  const hour = berlinHour(date);
+  return hour >= 22 || hour < 6 ? "night" : "nap";
+}
+
+/**
  * Wenn das End-Datum chronologisch vor dem Start liegt, rolle es um einen Tag nach vorne.
  * Schließt typische Cross-Midnight-Eingaben (datetime-local picker behält Default-Datum).
  * Sicherheitsgrenze: nur rollen, wenn die resultierende Dauer 0–18h beträgt.
