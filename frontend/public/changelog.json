@@ -1,5 +1,23 @@
 [
   {
+    "version": "0.8.1",
+    "date": "2026-04-28",
+    "title": "Sprint 25 — Mobile UX-Fixes & Julia-Feedback",
+    "variant": "update",
+    "entries": [
+      "Schlaf über Mitternacht: Einträge mit Beginn am Vortag und Ende am Folgetag werden korrekt akzeptiert (Auto-Roll auf den nächsten Tag)",
+      "Schlaf-Übersicht: Tageswechsel-Bug behoben — keine fälschlichen 'end_time must be after start_time'-Fehler mehr",
+      "Schlaf-Diagramm & Wachstumskurven: Punkte und Linien rendern wieder farbig (Peach/Lavender) — vorher unsichtbar/schwarz",
+      "Schlaf-Diagramm: Skaliert sich jetzt auch auf schmalen Mobile-Screens (< 400px) sauber",
+      "BottomNav: Auf iOS Safari zuverlässig fixiert am Bildschirmrand beim Scrollen (Hardware-Compositor-Layer)",
+      "Notifications-Panel: Auf Mobile vollständig im Viewport sichtbar (vorher links abgeschnitten)",
+      "Fehlermeldungen: Form-Fehler werden lesbar angezeigt — kein roher JSON-Dump mehr",
+      "Schlaf-Liste: Datums- und Typ-Filter sind auch ohne Einträge sichtbar — keine Sackgasse mehr beim Klick aus dem Dashboard",
+      "Windel: Eingabe und Dashboard verwenden jetzt einheitlich \u201eDreckig\u201c (vorher \u201eStuhl\u201c vs \u201edreckig\u201c)",
+      "Profil auf Mobile: Verschoben aus dem Header in das Burger-Menü — Header ist entschlackt"
+    ]
+  },
+  {
     "version": "0.7.0",
     "date": "2026-04-24",
     "title": "Sprint 16+17 — Neue Plugins, Habits & UX-Verbesserungen",

@@ -17,7 +17,7 @@ async def health():
     plugins = plugin_registry.get_all()
     return JSONResponse({
         "status": "ok",
-        "version": "0.7.0",
+        "version": "0.8.1",
         "plugins": [
             {"name": p.name, "version": p.version}
             for p in plugins
