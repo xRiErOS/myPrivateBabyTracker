@@ -47,7 +47,7 @@ export function useDeleteTag() {
     mutationFn: (id: number) => deleteTag(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TAG_KEY });
-      showToast("Tag geloescht");
+      showToast("Tag gelöscht");
     },
   });
 }

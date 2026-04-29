@@ -203,7 +203,7 @@ export default function UserManagementPage() {
                 <button onClick={() => handleToggleActive(u)} className="p-2 text-subtext0" title={u.is_active ? "Deaktivieren" : "Aktivieren"}>
                   {u.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                 </button>
-                <button onClick={() => handleDelete(u)} className="p-2 text-red" title="Loeschen">
+                <button onClick={() => handleDelete(u)} className="p-2 text-red" title="Löschen">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

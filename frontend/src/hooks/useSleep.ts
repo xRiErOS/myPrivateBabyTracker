@@ -54,7 +54,7 @@ export function useDeleteSleep() {
     mutationFn: (id: number) => deleteSleep(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: SLEEP_KEY });
-      showToast("Schlaf geloescht");
+      showToast("Schlaf gelöscht");
     },
   });
 }

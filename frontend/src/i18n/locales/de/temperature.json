@@ -1,19 +1,19 @@
 {
   "title": "Temperatur",
-  "list_title": "Temperatur-Eintraege",
+  "list_title": "Temperatur-Einträge",
   "label_temperature": "Temperatur (°C)",
   "label_time": "Zeitpunkt",
-  "empty": "Noch keine Temperatur-Eintraege",
+  "empty": "Noch keine Temperatur-Einträge",
   "widget_title": "Temperatur",
   "status": {
     "fever": "Fieber",
-    "elevated": "Erhoehte Temp.",
-    "hypothermia": "Unterkuehlung",
+    "elevated": "Erhöhte Temp.",
+    "hypothermia": "Unterkühlung",
     "normal": "Normal"
   },
   "unit": "°C",
   "no_measurement": "Keine Messung",
-  "confirm_delete": "Eintrag loeschen?",
+  "confirm_delete": "Eintrag löschen?",
   "validation": {
     "range": "Temperatur muss zwischen 34.0 und 43.0 °C liegen"
   },

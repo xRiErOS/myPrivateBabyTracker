@@ -132,7 +132,7 @@ async def delete_user(
     if user.id == user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Eigenen Account kann nicht geloescht werden",
+            detail="Eigenen Account kann nicht gelöscht werden",
         )
 
     result = await db.execute(select(User).where(User.id == user_id))

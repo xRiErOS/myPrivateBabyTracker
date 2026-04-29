@@ -15,7 +15,7 @@ import {
 } from "../hooks/useMedicationMasters";
 import type { MedicationMaster, MedicationMasterCreate } from "../api/types";
 
-const UNIT_PRESETS = ["Tablette", "ml", "Tropfen", "mg", "Stueck", "Beutel"];
+const UNIT_PRESETS = ["Tablette", "ml", "Tropfen", "mg", "Stück", "Beutel"];
 
 function MasterForm({
   master,

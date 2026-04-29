@@ -81,7 +81,7 @@ export function AlertBanner() {
                 setTick((t) => t + 1);
               }}
               className="shrink-0 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-lg hover:bg-black/10 transition-colors"
-              aria-label="Warnung fuer 6 Stunden ausblenden"
+              aria-label="Warnung für 6 Stunden ausblenden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -108,7 +108,7 @@ const RULE_LABELS: RuleLabel[] = [
   { ruleKey: "no_stool_hours", enabledKey: "no_stool_enabled", thresholdKey: "no_stool_hours", title: "Kein Stuhlgang", unit: "h" },
   { ruleKey: "low_feeding_ml", enabledKey: "low_feeding_enabled", thresholdKey: "low_feeding_ml", title: "Trinkmenge", unit: "ml" },
   { ruleKey: "fever_threshold", enabledKey: "fever_enabled", thresholdKey: "fever_threshold", title: "Fieber", unit: "°C" },
-  { ruleKey: "feeding_interval_hours", enabledKey: "feeding_interval_enabled", thresholdKey: "feeding_interval_hours", title: "Fuetterungsintervall", unit: "h" },
+  { ruleKey: "feeding_interval_hours", enabledKey: "feeding_interval_enabled", thresholdKey: "feeding_interval_hours", title: "Fütterungsintervall", unit: "h" },
 ];
 
 function isPermanentlyDismissed(key: string): boolean {
@@ -192,7 +192,7 @@ export function ReferenceDeviationBanner() {
     const unitStr = rule.unit ? ` ${rule.unit}` : "";
     deviations.push({
       key: dismissKey,
-      message: `Der Warnwert fuer "${rule.title}" weicht von der Empfehlung ab (empfohlen: ${ref.recommended}${unitStr}, eingestellt: ${current}${unitStr})`,
+      message: `Der Warnwert für "${rule.title}" weicht von der Empfehlung ab (empfohlen: ${ref.recommended}${unitStr}, eingestellt: ${current}${unitStr})`,
     });
   }
 

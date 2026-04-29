@@ -1,16 +1,16 @@
 {
   "title": "Gewicht",
-  "list_title": "Gewicht-Eintraege",
+  "list_title": "Gewicht-Einträge",
   "label_weight": "Gewicht (kg)",
   "label_time": "Zeitpunkt",
-  "empty": "Noch keine Gewichts-Eintraege",
+  "empty": "Noch keine Gewichts-Einträge",
   "widget_title": "Gewicht",
   "trend_up": "+{{diff}} kg",
   "trend_down": "{{diff}} kg",
   "unit_kg": "kg",
   "unit_g": "g",
   "no_measurement": "Keine Messung",
-  "confirm_delete": "Eintrag loeschen?",
+  "confirm_delete": "Eintrag löschen?",
   "validation": {
     "range": "Gewicht muss zwischen 0.50 und 30.00 kg liegen"
   },
@@ -23,10 +23,10 @@
   "growth_chart": {
     "title": "WHO Wachstumskurve",
     "corrected_age": "Korrigiertes Alter",
-    "tab_list": "Eintraege",
+    "tab_list": "Einträge",
     "tab_chart": "Wachstumskurve",
     "weight": "Gewicht",
-    "length": "Laenge",
+    "length": "Länge",
     "error": "Wachstumsdiagramm konnte nicht geladen werden."
   }
 }

@@ -20,7 +20,7 @@ const WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 function weekdayLabel(days: number[] | null): string {
   if (!days || days.length === 0) return "";
-  if (days.length === 7) return "Taeglich";
+  if (days.length === 7) return "Täglich";
   return days.map((d) => WEEKDAY_LABELS[d]).join(", ");
 }
 
@@ -62,7 +62,7 @@ function HabitCard({ habit, onEdit, onDetailsChange }: HabitCardProps) {
           {habit.title}
         </p>
         <p className="font-body text-xs text-subtext0 mt-0.5">
-          {habit.recurrence === "weekly" ? weekdayLabel(habit.weekdays) : "Taeglich"}
+          {habit.recurrence === "weekly" ? weekdayLabel(habit.weekdays) : "Täglich"}
         </p>
         {habit.details && (
           <div className="mt-1 text-xs text-subtext0">
@@ -91,12 +91,12 @@ function HabitCard({ habit, onEdit, onDetailsChange }: HabitCardProps) {
         </button>
         <button
           onClick={() => {
-            if (confirm(`Habit "${habit.title}" loeschen?`)) {
+            if (confirm(`Habit "${habit.title}" löschen?`)) {
               deleteMut.mutate(habit.id);
             }
           }}
           className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-red/10 transition-colors"
-          aria-label="Habit loeschen"
+          aria-label="Habit löschen"
         >
           <Trash2 className="h-4 w-4 text-red" />
         </button>

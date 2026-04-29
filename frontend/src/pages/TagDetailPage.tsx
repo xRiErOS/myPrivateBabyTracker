@@ -237,7 +237,7 @@ export default function TagDetailPage() {
       <EmptyState
         icon={Tags}
         title="Tag nicht gefunden"
-        description="Der Tag existiert nicht oder wurde geloescht."
+        description="Der Tag existiert nicht oder wurde gelöscht."
       />
     );
   }
@@ -261,7 +261,7 @@ export default function TagDetailPage() {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Eintraege durchsuchen..."
+          placeholder="Einträge durchsuchen..."
           className="w-full min-h-[44px] pl-10 pr-3 py-2 rounded-card bg-surface0 border border-surface1 font-body text-sm text-text placeholder:text-overlay0 focus:outline-none focus:border-mauve"
         />
       </div>

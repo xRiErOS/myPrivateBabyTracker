@@ -151,7 +151,7 @@ async def totp_verify(
 
     totp = pyotp.TOTP(secret.secret)
     if not totp.verify(data.code, valid_window=1):
-        raise HTTPException(status_code=401, detail="Ungueltiger Code")
+        raise HTTPException(status_code=401, detail="Ungültiger Code")
 
     secret.is_verified = True
     u.totp_enabled = True
@@ -181,7 +181,7 @@ async def totp_disable(
 
     totp = pyotp.TOTP(secret.secret)
     if not totp.verify(data.code, valid_window=1):
-        raise HTTPException(status_code=401, detail="Ungueltiger Code")
+        raise HTTPException(status_code=401, detail="Ungültiger Code")
 
     await db.delete(secret)
     u.totp_enabled = False
@@ -211,7 +211,7 @@ async def totp_validate(
 
     totp = pyotp.TOTP(secret.secret)
     if not totp.verify(data.code, valid_window=1):
-        raise HTTPException(status_code=401, detail="Ungueltiger 2FA-Code")
+        raise HTTPException(status_code=401, detail="Ungültiger 2FA-Code")
 
 
 @router.post("/backup-verify", status_code=204)
@@ -237,7 +237,7 @@ async def backup_code_verify(
     code_hash = _hash_code(data.code.upper())
 
     if code_hash not in codes:
-        raise HTTPException(status_code=401, detail="Ungueltiger Backup-Code")
+        raise HTTPException(status_code=401, detail="Ungültiger Backup-Code")
 
     # Remove used code
     codes.remove(code_hash)

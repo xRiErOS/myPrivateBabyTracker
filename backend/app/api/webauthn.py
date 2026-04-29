@@ -220,7 +220,7 @@ async def login_finish(
     try:
         cred_id_bytes = urlsafe_b64decode(raw_id + "==")
     except Exception:
-        raise HTTPException(status_code=400, detail="Ungueltige Credential-ID")
+        raise HTTPException(status_code=400, detail="Ungültige Credential-ID")
 
     result = await db.execute(
         select(WebAuthnCredential).where(WebAuthnCredential.credential_id == cred_id_bytes)

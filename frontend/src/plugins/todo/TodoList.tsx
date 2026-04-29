@@ -197,7 +197,7 @@ export function TodoList() {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm("ToDo loeschen?")) deleteMut.mutate(entry.id);
+                      if (confirm("ToDo löschen?")) deleteMut.mutate(entry.id);
                     }}
                     className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
                   >

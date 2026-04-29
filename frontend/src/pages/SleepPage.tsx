@@ -1,5 +1,5 @@
 /** Sleep page — new entry form + list with inline edit, auto-opens running sleep.
- *  Tab navigation: "Eintraege" | "Schlafuebersicht" (chart).
+ *  Tab navigation: "Einträge" | "Schlafübersicht" (chart).
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -56,7 +56,7 @@ export default function SleepPage() {
     }
   }, [searchParams, setSearchParams]);
 
-  // Tutorial-Resume aus sleep_tabs-Schritt: Tab zurueck auf "Eintraege"
+  // Tutorial-Resume aus sleep_tabs-Schritt: Tab zurueck auf "Einträge"
   // setzen, damit nachfolgende Steps (Filter, Stats) ihre Selektoren finden.
   useEffect(() => {
     const handler = () => {

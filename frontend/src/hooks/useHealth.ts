@@ -53,7 +53,7 @@ export function useDeleteHealth() {
     mutationFn: (id: number) => deleteHealth(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: HEALTH_KEY });
-      showToast("Eintrag geloescht");
+      showToast("Eintrag gelöscht");
     },
   });
 }

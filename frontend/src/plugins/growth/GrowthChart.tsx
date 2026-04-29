@@ -313,7 +313,7 @@ export function GrowthChart() {
                   : "text-subtext0 hover:text-text"
               }`}
             >
-              {t("growth_chart.length", { defaultValue: "Laenge" })}
+              {t("growth_chart.length", { defaultValue: "Länge" })}
             </button>
           </div>
         </div>

@@ -137,7 +137,7 @@ export default function Dashboard() {
             ? leapIndicator.label
             : activeChild.name}
           {isVisibleOnDashboard("milestones") && (
-            <button onClick={() => setShowLeapPopup(true)} className="flex items-center min-h-[44px] min-w-[44px] justify-center" aria-label="Spruenge">
+            <button onClick={() => setShowLeapPopup(true)} className="flex items-center min-h-[44px] min-w-[44px] justify-center" aria-label="Sprünge">
               <leapIndicator.icon className={`h-4 w-4 ${leapIndicator.color}`} />
             </button>
           )}
@@ -254,7 +254,7 @@ function QuickActionsBar({ navigate }: { navigate: (path: string) => void }) {
               <button
                 onClick={closeMenu}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-surface1 text-subtext0"
-                aria-label="Schliessen"
+                aria-label="Schließen"
               >
                 <X className="h-5 w-5" />
               </button>

@@ -49,7 +49,7 @@ export function useDeleteTodo() {
     mutationFn: (id: number) => deleteTodo(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TODO_KEY });
-      showToast("ToDo geloescht");
+      showToast("ToDo gelöscht");
     },
   });
 }
@@ -93,7 +93,7 @@ export function useDeleteTemplate() {
     mutationFn: (id: number) => deleteTemplate(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TEMPLATE_KEY });
-      showToast("Vorlage geloescht");
+      showToast("Vorlage gelöscht");
     },
   });
 }
@@ -151,7 +151,7 @@ export function useDeleteHabit() {
     mutationFn: (id: number) => deleteHabit(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: HABIT_KEY });
-      showToast("Habit geloescht");
+      showToast("Habit gelöscht");
     },
   });
 }

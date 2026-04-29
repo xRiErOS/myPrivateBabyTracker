@@ -78,7 +78,7 @@ export function useDeleteCategory() {
     mutationFn: (id: number) => deleteCategory(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CATEGORIES_KEY });
-      showToast("Kategorie geloescht");
+      showToast("Kategorie gelöscht");
     },
   });
 }
@@ -142,7 +142,7 @@ export function useDeleteMilestone() {
     mutationFn: (id: number) => deleteMilestone(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MILESTONES_KEY });
-      showToast("Meilenstein geloescht");
+      showToast("Meilenstein gelöscht");
     },
   });
 }
@@ -183,7 +183,7 @@ export function useDeletePhoto() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MILESTONES_KEY });
       qc.invalidateQueries({ queryKey: MEDIA_KEY });
-      showToast("Foto geloescht");
+      showToast("Foto gelöscht");
     },
   });
 }
@@ -229,7 +229,7 @@ export function useDeleteMediaPhoto() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MILESTONES_KEY });
       qc.invalidateQueries({ queryKey: MEDIA_KEY });
-      showToast("Foto geloescht");
+      showToast("Foto gelöscht");
     },
   });
 }

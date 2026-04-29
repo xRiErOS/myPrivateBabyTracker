@@ -94,7 +94,7 @@ export default function MediaAdminPage() {
   const handleBulkDelete = useCallback(() => {
     if (!selectedIds.size) return;
     const count = selectedIds.size;
-    if (!confirm(`${count} ${count === 1 ? "Foto" : "Fotos"} endgueltig loeschen?\n\nDieser Vorgang kann nicht rueckgaengig gemacht werden.`)) return;
+    if (!confirm(`${count} ${count === 1 ? "Foto" : "Fotos"} endgültig löschen?\n\nDieser Vorgang kann nicht rückgängig gemacht werden.`)) return;
     for (const id of selectedIds) {
       deleteMut.mutate(id);
     }
@@ -104,7 +104,7 @@ export default function MediaAdminPage() {
   // Single delete
   const handleDelete = useCallback(
     (photo: MediaPhoto) => {
-      if (!confirm(t("media.confirm_delete", { defaultValue: "Foto loeschen?" }))) return;
+      if (!confirm(t("media.confirm_delete", { defaultValue: "Foto löschen?" }))) return;
       deleteMut.mutate(photo.id);
       setSelectedIds((prev) => {
         const next = new Set(prev);
@@ -155,7 +155,7 @@ export default function MediaAdminPage() {
       <div className="space-y-4">
         <PageHeader title={t("media.title", { defaultValue: "Medienverwaltung" })} />
         <p className="font-body text-sm text-overlay0">
-          {t("media.no_child", { defaultValue: "Bitte waehle zuerst ein Kind aus." })}
+          {t("media.no_child", { defaultValue: "Bitte wähle zuerst ein Kind aus." })}
         </p>
       </div>
     );
@@ -187,7 +187,7 @@ export default function MediaAdminPage() {
               variant="danger"
               className="flex items-center gap-1.5"
               onClick={() => {
-                if (!confirm(`Alle ${storageInfo.total_photos} Fotos endgueltig loeschen?\n\nDieser Vorgang kann nicht rueckgaengig gemacht werden.\nAlle Meilenstein-Fotos werden unwiderruflich entfernt.`)) return;
+                if (!confirm(`Alle ${storageInfo.total_photos} Fotos endgültig löschen?\n\nDieser Vorgang kann nicht rückgängig gemacht werden.\nAlle Meilenstein-Fotos werden unwiderruflich entfernt.`)) return;
                 // Select all and delete
                 for (const photo of photos) {
                   deleteMut.mutate(photo.id);

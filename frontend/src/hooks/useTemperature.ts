@@ -53,7 +53,7 @@ export function useDeleteTemperature() {
     mutationFn: (id: number) => deleteTemperature(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TEMPERATURE_KEY });
-      showToast("Temperatur geloescht");
+      showToast("Temperatur gelöscht");
     },
   });
 }

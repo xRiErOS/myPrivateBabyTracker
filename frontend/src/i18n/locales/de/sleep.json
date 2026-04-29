@@ -1,6 +1,6 @@
 {
   "title": "Schlaf",
-  "list_title": "Schlaf-Eintraege",
+  "list_title": "Schlaf-Einträge",
   "type": {
     "nap": "Nickerchen",
     "night": "Nachtschlaf"
@@ -11,23 +11,23 @@
   "label_type": "Schlaftyp",
   "label_start": "Beginn",
   "label_end": "Ende",
-  "timer_running": "Laeuft seit",
+  "timer_running": "Läuft seit",
   "start_now": "Jetzt starten",
   "starting": "Starte...",
   "stop_now": "Jetzt stoppen",
   "stopping": "Stoppe...",
   "duration": "Dauer: {{duration}}",
-  "empty": "Noch keine Schlaf-Eintraege",
+  "empty": "Noch keine Schlaf-Einträge",
   "total_today": "Gesamt heute",
   "entries_count": "{{count}} Eintrag",
-  "entries_count_other": "{{count}} Eintraege",
+  "entries_count_other": "{{count}} Einträge",
   "last_sleep": "Letzter Schlaf",
   "sleep_timer": "Schlaf-Timer",
   "summary_sleep": "Schlaf",
   "summary_total": "Gesamt heute",
   "summary": {
     "total": "Gesamt",
-    "sessions": "Eintraege",
+    "sessions": "Einträge",
     "night": "Nachtschlaf",
     "last_sleep": "Zuletzt"
   },
@@ -48,9 +48,9 @@
     "other": "Andere"
   },
   "chart": {
-    "title": "Schlafuebersicht",
-    "tab_list": "Eintraege",
-    "tab_chart": "Schlafuebersicht",
+    "title": "Schlafübersicht",
+    "tab_list": "Einträge",
+    "tab_chart": "Schlafübersicht",
     "target_range": "Ziel: {{min}}-{{max}}h",
     "outside_range": "Ausserhalb Zielbereich",
     "corrected_age": "Korrigiertes Alter"

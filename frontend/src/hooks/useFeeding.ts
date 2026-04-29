@@ -53,7 +53,7 @@ export function useDeleteFeeding() {
     mutationFn: (id: number) => deleteFeeding(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: FEEDING_KEY });
-      showToast("Mahlzeit geloescht");
+      showToast("Mahlzeit gelöscht");
     },
   });
 }

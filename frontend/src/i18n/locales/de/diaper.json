@@ -1,6 +1,6 @@
 {
   "title": "Windeln",
-  "list_title": "Windel-Eintraege",
+  "list_title": "Windel-Einträge",
   "type": {
     "wet": "Nass",
     "dirty": "Dreckig",
@@ -18,12 +18,12 @@
   },
   "label_type": "Windeltyp",
   "label_time": "Zeitpunkt",
-  "empty": "Noch keine Windel-Eintraege",
+  "empty": "Noch keine Windel-Einträge",
   "last_diaper": "Letzte Windel",
   "today_count": "Windeln heute",
   "today_summary": "{{wet}}x nass, {{dirty}}x dreckig",
   "entries_count": "{{count}} Eintrag",
-  "entries_count_other": "{{count}} Eintraege",
+  "entries_count_other": "{{count}} Einträge",
   "summary_wet": "nass",
   "summary_dirty": "dreckig",
   "summary_dry": "trocken",

@@ -434,7 +434,7 @@ export function MilestonesList() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm("Meilenstein loeschen?")) deleteMut.mutate(entry.id);
+                    if (confirm("Meilenstein löschen?")) deleteMut.mutate(entry.id);
                   }}
                   className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
                 >

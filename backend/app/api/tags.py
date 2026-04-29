@@ -166,7 +166,7 @@ async def create_tag(
         select(Tag).where(Tag.child_id == data.child_id, Tag.name == data.name)
     )
     if existing.scalar_one_or_none() is not None:
-        raise ValidationError(f"Tag '{data.name}' existiert bereits fuer dieses Kind")
+        raise ValidationError(f"Tag '{data.name}' existiert bereits für dieses Kind")
 
     tag = Tag(child_id=data.child_id, name=data.name, color=data.color)
     db.add(tag)
@@ -229,7 +229,7 @@ async def update_tag(
             )
         )
         if existing.scalar_one_or_none() is not None:
-            raise ValidationError(f"Tag '{update_data['name']}' existiert bereits fuer dieses Kind")
+            raise ValidationError(f"Tag '{update_data['name']}' existiert bereits für dieses Kind")
 
     for field, value in update_data.items():
         setattr(tag, field, value)
@@ -268,7 +268,7 @@ async def attach_tag(
 ):
     """Attach a tag to an entry."""
     if data.entry_type not in VALID_ENTRY_TYPES:
-        raise ValidationError(f"Ungueltiger entry_type: {data.entry_type}")
+        raise ValidationError(f"Ungültiger entry_type: {data.entry_type}")
 
     # Verify tag exists
     tag_result = await db.execute(select(Tag).where(Tag.id == data.tag_id))

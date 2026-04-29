@@ -43,7 +43,7 @@ const RULES: AlertRule[] = [
     thresholdKey: "no_stool_hours",
     referenceKey: "no_stool_hours",
     title: "Kein Stuhlgang",
-    description: "Warnung wenn laenger als X Stunden kein Stuhlgang",
+    description: "Warnung wenn länger als X Stunden kein Stuhlgang",
     thresholdLabel: "Stunden",
     unit: "h",
     step: 1,
@@ -75,8 +75,8 @@ const RULES: AlertRule[] = [
     enabledKey: "feeding_interval_enabled",
     thresholdKey: "feeding_interval_hours",
     referenceKey: "feeding_interval_hours",
-    title: "Fuetterungsintervall",
-    description: "Warnung wenn laenger als X Stunden seit letzter Mahlzeit",
+    title: "Fütterungsintervall",
+    description: "Warnung wenn länger als X Stunden seit letzter Mahlzeit",
     thresholdLabel: "Stunden",
     unit: "h",
     step: 0.5,
@@ -132,7 +132,7 @@ function ReferenceModal({
           <button
             onClick={onClose}
             className="min-h-[32px] min-w-[32px] flex items-center justify-center rounded-lg hover:bg-surface1 transition-colors"
-            aria-label="Schliessen"
+            aria-label="Schließen"
           >
             <X className="h-4 w-4 text-subtext0" />
           </button>
@@ -236,7 +236,7 @@ export default function AlertConfigPage() {
                   <button
                     onClick={() => setOpenRef(rule.referenceKey)}
                     className="min-h-[28px] min-w-[28px] flex items-center justify-center rounded-lg hover:bg-surface1 transition-colors"
-                    aria-label={`Referenzwerte fuer ${rule.title}`}
+                    aria-label={`Referenzwerte für ${rule.title}`}
                   >
                     <Info className="h-4 w-4 text-sapphire" />
                   </button>

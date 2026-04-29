@@ -516,7 +516,7 @@ export default function ChildrenPage() {
                     onClick={() => setPurgeChild(child)}
                   >
                     <Trash2 size={16} />
-                    {t("children.purge_title", { defaultValue: "Alle Daten loeschen" })}
+                    {t("children.purge_title", { defaultValue: "Alle Daten löschen" })}
                   </Button>
                 </div>
               )}

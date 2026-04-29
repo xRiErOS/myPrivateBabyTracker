@@ -51,7 +51,7 @@ export function useDeleteMedicationMaster() {
     mutationFn: (id: number) => deleteMedicationMaster(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MED_MASTER_KEY });
-      showToast("Medikament geloescht");
+      showToast("Medikament gelöscht");
     },
   });
 }

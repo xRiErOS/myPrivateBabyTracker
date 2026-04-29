@@ -43,7 +43,7 @@ export function useDeleteNote() {
     mutationFn: (id: number) => deleteNote(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: NOTES_KEY });
-      showToast("Notiz geloescht");
+      showToast("Notiz gelöscht");
     },
   });
 }

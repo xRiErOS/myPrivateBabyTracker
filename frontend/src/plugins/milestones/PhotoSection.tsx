@@ -46,7 +46,7 @@ export function PhotoSection({ entryId, photos }: PhotoSectionProps) {
   }
 
   function handleDelete(photo: MilestonePhoto) {
-    if (!confirm(t("photo_delete_confirm", { defaultValue: "Foto loeschen?" }))) return;
+    if (!confirm(t("photo_delete_confirm", { defaultValue: "Foto löschen?" }))) return;
     deleteMut.mutate({ milestoneId: entryId, photoId: photo.id });
   }
 

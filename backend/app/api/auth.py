@@ -121,7 +121,7 @@ async def login(
         import pyotp
         totp = pyotp.TOTP(totp_secret.secret)
         if not totp.verify(data.totp_code, valid_window=1):
-            raise HTTPException(status_code=401, detail="Ungueltiger 2FA-Code")
+            raise HTTPException(status_code=401, detail="Ungültiger 2FA-Code")
 
     token = _create_token(user.id, settings.secret_key)
     _set_session_cookie(response, token)
@@ -185,7 +185,7 @@ async def change_password(
     if user.auth_type != "local":
         raise HTTPException(
             status_code=400,
-            detail="Passwort-Aenderung nur fuer lokale Benutzer",
+            detail="Passwort-Änderung nur für lokale Benutzer",
         )
 
     if not user.password_hash or not verify_password(

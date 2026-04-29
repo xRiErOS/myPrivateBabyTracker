@@ -53,7 +53,7 @@ export function useDeleteTummyTime() {
     mutationFn: (id: number) => deleteTummyTime(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TUMMY_TIME_KEY });
-      showToast("Bauchlage geloescht");
+      showToast("Bauchlage gelöscht");
     },
   });
 }

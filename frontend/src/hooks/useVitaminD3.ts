@@ -39,7 +39,7 @@ export function useDeleteVitaminD3() {
     mutationFn: (id: number) => deleteVitaminD3(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: D3_KEY });
-      showToast("Vitamin D3 Eintrag geloescht");
+      showToast("Vitamin D3 Eintrag gelöscht");
     },
   });
 }

@@ -87,7 +87,7 @@ export function FAB() {
               <button
                 onClick={handleClose}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-surface1 text-subtext0"
-                aria-label="Schliessen"
+                aria-label="Schließen"
               >
                 <X className="h-5 w-5" />
               </button>

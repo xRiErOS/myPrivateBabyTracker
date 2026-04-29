@@ -53,7 +53,7 @@ export function useDeleteWeight() {
     mutationFn: (id: number) => deleteWeight(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WEIGHT_KEY });
-      showToast("Gewicht geloescht");
+      showToast("Gewicht gelöscht");
     },
   });
 }

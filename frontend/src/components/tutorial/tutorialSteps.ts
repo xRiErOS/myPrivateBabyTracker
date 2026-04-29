@@ -217,7 +217,7 @@ export const ALL_TUTORIAL_STEPS: TutorialStep[] = [
   },
   // 10 — sleep_tabs: pauseOnTargetClick → Klick auf einen Tab pausiert.
   // resumeEvent: SleepPage hoert auf das Event und wechselt den Tab zurueck
-  // auf "Eintraege", damit die nachfolgenden Steps (Filter/Stats) ihre
+  // auf "Einträge", damit die nachfolgenden Steps (Filter/Stats) ihre
   // Selektoren wiederfinden.
   {
     id: "sleep_tabs",

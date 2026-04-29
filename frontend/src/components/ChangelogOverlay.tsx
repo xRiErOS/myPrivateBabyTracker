@@ -174,7 +174,7 @@ export function ChangelogModal({
           <button
             onClick={onDismiss}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-surface1 transition-colors"
-            aria-label="Schliessen"
+            aria-label="Schließen"
           >
             <X className="h-5 w-5 text-subtext0" />
           </button>

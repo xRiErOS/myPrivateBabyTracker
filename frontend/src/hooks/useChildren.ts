@@ -51,7 +51,7 @@ export function useDeleteChild() {
     mutationFn: (id: number) => deleteChild(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHILDREN_KEY });
-      showToast("Kind geloescht");
+      showToast("Kind gelöscht");
     },
   });
 }

@@ -70,7 +70,7 @@ export function useDeleteCheckup() {
     mutationFn: (id: number) => deleteCheckup(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CHECKUP_KEY });
-      showToast("U-Untersuchung geloescht");
+      showToast("U-Untersuchung gelöscht");
     },
   });
 }

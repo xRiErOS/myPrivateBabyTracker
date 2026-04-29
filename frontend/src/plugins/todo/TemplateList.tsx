@@ -181,7 +181,7 @@ export function TemplateList() {
                   <button
                     onClick={() => cloneMut.mutate(tpl.id)}
                     disabled={cloneMut.isPending || !tpl.is_active}
-                    title="Als ToDo fuer heute erstellen"
+                    title="Als ToDo für heute erstellen"
                     className="min-h-[44px] min-w-[44px] flex items-center justify-center text-green hover:text-green/80 transition-colors disabled:opacity-40"
                   >
                     <Copy className="h-5 w-5" />
@@ -194,7 +194,7 @@ export function TemplateList() {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm("Vorlage loeschen?")) deleteMut.mutate(tpl.id);
+                      if (confirm("Vorlage löschen?")) deleteMut.mutate(tpl.id);
                     }}
                     className="min-h-[44px] min-w-[44px] flex items-center justify-center text-subtext0 hover:text-red transition-colors"
                   >

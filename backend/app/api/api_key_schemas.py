@@ -21,7 +21,7 @@ class ApiKeyCreate(BaseModel):
     def validate_scopes(cls, v: list[str]) -> list[str]:
         invalid = set(v) - VALID_SCOPES
         if invalid:
-            raise ValueError(f"Ungueltige Scopes: {', '.join(sorted(invalid))}. Erlaubt: {', '.join(sorted(VALID_SCOPES))}")
+            raise ValueError(f"Ungültige Scopes: {', '.join(sorted(invalid))}. Erlaubt: {', '.join(sorted(VALID_SCOPES))}")
         if not v:
             raise ValueError("Mindestens ein Scope erforderlich")
         return v
@@ -61,7 +61,7 @@ class ApiKeyUpdate(BaseModel):
             return v
         invalid = set(v) - VALID_SCOPES
         if invalid:
-            raise ValueError(f"Ungueltige Scopes: {', '.join(sorted(invalid))}. Erlaubt: {', '.join(sorted(VALID_SCOPES))}")
+            raise ValueError(f"Ungültige Scopes: {', '.join(sorted(invalid))}. Erlaubt: {', '.join(sorted(VALID_SCOPES))}")
         if not v:
             raise ValueError("Mindestens ein Scope erforderlich")
         return v

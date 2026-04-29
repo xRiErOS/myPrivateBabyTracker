@@ -627,7 +627,7 @@ export function TutorialOverlay() {
   if (isPausedView) {
     const handleResume = () => {
       // Step kann ein Custom-Event definieren, das beim Resume gedispatcht
-      // wird (z.B. sleep_tabs setzt den Tab zurueck auf "Eintraege").
+      // wird (z.B. sleep_tabs setzt den Tab zurueck auf "Einträge").
       if (step.resumeEvent) {
         window.dispatchEvent(new CustomEvent(step.resumeEvent));
       }

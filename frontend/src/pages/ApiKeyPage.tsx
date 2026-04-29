@@ -230,7 +230,7 @@ export default function ApiKeyPage() {
                   <button
                     onClick={() => setDeleteConfirmId(k.id)}
                     className="p-2 rounded-lg active:bg-surface1"
-                    aria-label={`Key ${k.name} loeschen`}
+                    aria-label={`Key ${k.name} löschen`}
                   >
                     <Trash2 className="h-4 w-4 text-subtext0" />
                   </button>

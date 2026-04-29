@@ -80,7 +80,7 @@ export function HabitForm({ childId, initial, onSubmit, onCancel, isLoading }: H
                   : "bg-surface1 text-subtext0 hover:bg-surface2"
               }`}
             >
-              {r === "daily" ? "Taeglich" : "Bestimmte Tage"}
+              {r === "daily" ? "Täglich" : "Bestimmte Tage"}
             </button>
           ))}
         </div>

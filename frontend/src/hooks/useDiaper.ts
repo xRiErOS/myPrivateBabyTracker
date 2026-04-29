@@ -53,7 +53,7 @@ export function useDeleteDiaper() {
     mutationFn: (id: number) => deleteDiaper(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: DIAPER_KEY });
-      showToast("Windel geloescht");
+      showToast("Windel gelöscht");
     },
   });
 }

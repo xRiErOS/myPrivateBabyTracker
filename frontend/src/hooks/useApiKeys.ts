@@ -45,7 +45,7 @@ export function useDeleteApiKey() {
     mutationFn: (id: number) => deleteApiKey(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: API_KEY_KEY });
-      showToast("API-Key geloescht");
+      showToast("API-Key gelöscht");
     },
   });
 }

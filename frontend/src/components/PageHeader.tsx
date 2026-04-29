@@ -18,7 +18,7 @@ export function PageHeader({ title, children }: PageHeaderProps) {
         <button
           onClick={() => navigate(-1)}
           className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card text-subtext0 hover:text-text transition-colors"
-          aria-label="Zurueck"
+          aria-label="Zurück"
         >
           <ArrowLeft size={20} />
         </button>
