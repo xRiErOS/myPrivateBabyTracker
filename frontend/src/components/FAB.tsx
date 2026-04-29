@@ -2,7 +2,12 @@
 
 Position: fixed bottom-right, above BottomNav.
 Only visible on mobile (< md breakpoint).
-Animation: scale-up beim Öffnen des Menüs.
+
+MBT-182: Radial-Menü mit bis zu 4 konfigurierbaren Slots.
+- Items werden im Quarter-Circle (270°-360°, also oben links vom FAB) angeordnet.
+- Slot 4 darf leer sein → dann werden nur 3 Items gerendert.
+- Animation: Stagger 35ms, max 240ms total, ease-out, 60fps tauglich
+  (transform/opacity only, kein Layout-Shift).
 */
 
 import { useState } from "react";
@@ -34,6 +39,39 @@ const ALL_ACTIONS: ActionDef[] = [
   { key: "tummytime", label: "Bauchlage", icon: Timer, route: "/tummy-time?new=1" },
 ];
 
+// Radius des Bogens in Pixel — 90px ergibt komfortable 44px-Touch-Targets
+// ohne Überlappung bei 4 Slots im Quarter-Circle.
+const RADIAL_RADIUS = 96;
+
+/**
+ * Bestimmt für n Items (1–4) die Winkel (in Grad) auf einem Quarter-Circle.
+ * Der FAB sitzt unten rechts — Items werden oben links davon platziert.
+ * 180° = links, 270° = oben (CSS-Koordinaten: x = cos(angle)·r, y = sin(angle)·r,
+ * y wird negiert, da Bildschirm-Y nach unten zeigt).
+ *
+ * - 1 Item:  225° (diagonal oben-links)
+ * - 2 Items: 200°, 250°
+ * - 3 Items: 190°, 225°, 260°
+ * - 4 Items: 185°, 215°, 245°, 275°  (gleichmäßig zwischen 180° und 280°)
+ */
+function getRadialAngles(count: number): number[] {
+  if (count <= 0) return [];
+  if (count === 1) return [225];
+  if (count === 2) return [200, 250];
+  if (count === 3) return [190, 225, 260];
+  // 4 Items
+  return [185, 215, 245, 275];
+}
+
+function polarToCartesian(angleDeg: number, radius: number): { x: number; y: number } {
+  const rad = (angleDeg * Math.PI) / 180;
+  // CSS: y wächst nach unten. Polar mit 0° = rechts, 90° = oben → y negieren.
+  return {
+    x: Math.cos(rad) * radius,
+    y: Math.sin(rad) * radius,
+  };
+}
+
 export function FAB() {
   const [open, setOpen] = useState(false);
   const [allPluginsOpen, setAllPluginsOpen] = useState(false);
@@ -43,6 +81,14 @@ export function FAB() {
   const actions = quickActionKeys
     .map((key) => ALL_ACTIONS.find((a) => a.key === key))
     .filter(Boolean) as ActionDef[];
+
+  // "Weitere"-Button zählt als zusätzlicher Slot im Radial-Menü.
+  // Maximal 4 Quick-Actions + "Weitere" = 5 Items im Bogen.
+  const radialItemCount = actions.length + 1; // +1 für "Weitere"
+  const angles = getRadialAngles(Math.min(radialItemCount, 4));
+  // Falls 5 Items (4 Actions + Weitere): nutze einen breiteren Bogen.
+  const fiveAngles = [180, 205, 230, 255, 280];
+  const finalAngles = radialItemCount === 5 ? fiveAngles : angles;
 
   // All enabled plugins with a route (for the "Weitere" modal)
   const allPlugins = PLUGINS.filter((p) => p.route && isPluginEnabled(p.key));
@@ -58,12 +104,41 @@ export function FAB() {
     setAllPluginsOpen(false);
   }
 
+  // Item-Liste in Render-Reihenfolge: erst Quick-Actions, dann "Weitere".
+  const radialItems: Array<{
+    key: string;
+    label: string;
+    icon: LucideIcon;
+    onClick: () => void;
+    variant: "primary" | "secondary";
+  }> = [
+    ...actions.map((a) => ({
+      key: a.key,
+      label: a.label,
+      icon: a.icon,
+      onClick: () => handleAction(a.route),
+      variant: "primary" as const,
+    })),
+    {
+      key: "__more__",
+      label: "Weitere",
+      icon: Grid2X2,
+      onClick: () => {
+        setOpen(false);
+        setAllPluginsOpen(true);
+      },
+      variant: "secondary" as const,
+    },
+  ];
+
   return (
     <>
       {/* Backdrop — close on click outside */}
       {(open || allPluginsOpen) && (
         <div
-          className="fixed inset-0 z-40 md:hidden"
+          className={`fixed inset-0 z-40 md:hidden transition-opacity duration-150 ${
+            open ? "bg-ground/30" : ""
+          }`}
           onClick={handleClose}
           aria-hidden="true"
         />
@@ -111,41 +186,49 @@ export function FAB() {
       )}
 
       {/* FAB container — fixed bottom-right, above BottomNav */}
-      <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-50 flex flex-col items-end gap-3 md:hidden">
-        {/* Quick action items (animate in when open) */}
+      <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-50 md:hidden">
+        {/* Radial menu items — absolut positioniert relativ zum FAB-Mittelpunkt */}
         {open && (
           <div
-            className="flex flex-col items-end gap-2 origin-bottom-right"
-            style={{ animation: "fabMenuIn 150ms ease-out" }}
+            className="absolute bottom-0 right-0 w-14 h-14 pointer-events-none"
+            role="menu"
+            aria-label="Quick Actions"
           >
-            {/* "Weitere" button — top position, opens full plugin modal */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen(false);
-                setAllPluginsOpen(true);
-              }}
-              className="flex items-center gap-3 rounded-full bg-surface1 shadow-lg border border-surface2 px-4 py-2.5 min-h-[44px] text-sm font-medium text-subtext0 hover:bg-surface2 transition-colors"
-            >
-              <span className="font-label">Weitere</span>
-              <div className="h-9 w-9 rounded-full bg-overlay0/20 flex items-center justify-center">
-                <Grid2X2 className="h-5 w-5 text-overlay0" />
-              </div>
-            </button>
-
-            {actions.map((action) => {
-              const Icon = action.icon;
+            {radialItems.map((item, idx) => {
+              const angle = finalAngles[idx];
+              if (angle === undefined) return null;
+              const { x, y } = polarToCartesian(angle, RADIAL_RADIUS);
+              const Icon = item.icon;
+              const delayMs = idx * 35;
+              // Kreisförmige Buttons (h-12 w-12 = 48px ≥ 44px Touch-Target).
+              const isPrimary = item.variant === "primary";
               return (
                 <button
-                  key={action.key}
-                  onClick={() => handleAction(action.route)}
-                  disabled={!activeChild}
-                  className="flex items-center gap-3 rounded-full bg-surface0 shadow-lg border border-surface1 px-4 py-2.5 min-h-[44px] text-sm font-medium text-text hover:bg-surface1 transition-colors disabled:opacity-50"
+                  key={item.key}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    item.onClick();
+                  }}
+                  disabled={!activeChild && isPrimary}
+                  className={`pointer-events-auto absolute h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition-colors disabled:opacity-50 ${
+                    isPrimary
+                      ? "bg-surface0 border border-surface1 text-peach hover:bg-surface1"
+                      : "bg-surface1 border border-surface2 text-overlay0 hover:bg-surface2"
+                  }`}
+                  style={{
+                    // Mittelpunkt des FAB ist die Origin: 28px (FAB ist 56px = h-14).
+                    // Wir verschieben das Item-Zentrum (24px = h-12 / 2) so, dass das
+                    // Item-Zentrum bei (FAB-Center + (x, -y)) liegt.
+                    left: `calc(50% - 24px + ${x}px)`,
+                    top: `calc(50% - 24px - ${y}px)`,
+                    animation: `fabRadialIn 220ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms both`,
+                    willChange: "transform, opacity",
+                  }}
+                  aria-label={item.label}
+                  title={item.label}
+                  role="menuitem"
                 >
-                  <span className="font-label">{action.label}</span>
-                  <div className="h-9 w-9 rounded-full bg-peach/15 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-peach" />
-                  </div>
+                  <Icon className="h-5 w-5" />
                 </button>
               );
             })}
@@ -159,7 +242,7 @@ export function FAB() {
             setAllPluginsOpen(false);
             setOpen(!open);
           }}
-          className={`h-14 w-14 rounded-full bg-peach shadow-lg flex items-center justify-center text-ground transition-transform active:scale-95 ${open ? "rotate-45" : ""}`}
+          className={`relative h-14 w-14 rounded-full bg-peach shadow-lg flex items-center justify-center text-ground transition-transform active:scale-95 ${open ? "rotate-45" : ""}`}
           style={{ transition: "transform 200ms ease" }}
           aria-label={open ? "Menü schließen" : "Neue Eingabe"}
           aria-expanded={open}
@@ -169,9 +252,15 @@ export function FAB() {
       </div>
 
       <style>{`
-        @keyframes fabMenuIn {
-          from { opacity: 0; transform: scale(0.85) translateY(8px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
+        @keyframes fabRadialIn {
+          from {
+            opacity: 0;
+            transform: scale(0.4) translate(20px, 20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translate(0, 0);
+          }
         }
       `}</style>
     </>

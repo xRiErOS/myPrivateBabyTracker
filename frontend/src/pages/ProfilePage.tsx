@@ -87,6 +87,7 @@ export default function ProfilePage() {
   if (!prefs) return null;
 
   const quickActions = prefs.quick_actions || ["sleep", "feeding", "diaper"];
+  const NONE_VALUE = "__none__";
 
   return (
     <div className="space-y-4">
@@ -199,27 +200,50 @@ export default function ProfilePage() {
           {t("profile.quick_actions_hint")}
         </p>
         <div className="space-y-2">
-          {[1, 2, 3].map((num, idx) => (
-            <div key={idx} className="flex items-center gap-3">
-              <label className="font-label text-sm text-subtext0 w-20 shrink-0">
-                {t("profile.favorite", { number: num })}
-              </label>
-              <select
-                value={quickActions[idx] || "sleep"}
-                onChange={(e) => {
-                  const next = [...quickActions];
-                  next[idx] = e.target.value;
-                  save({ quick_actions: next });
-                }}
-                disabled={saving}
-                className="flex-1 min-h-[44px] px-3 rounded-[8px] bg-ground text-text font-body text-base border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
-              >
-                {PLUGINS.map((p) => (
-                  <option key={p.key} value={p.key}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-          ))}
+          {[1, 2, 3, 4].map((num, idx) => {
+            // Slot 4 (idx 3) ist optional — "Kein Eintrag" zulässig.
+            const isOptional = idx === 3;
+            const currentValue = quickActions[idx];
+            const selectValue = currentValue || (isOptional ? NONE_VALUE : "sleep");
+            return (
+              <div key={idx} className="flex items-center gap-3">
+                <label className="font-label text-sm text-subtext0 w-20 shrink-0">
+                  {t("profile.favorite", { number: num })}
+                </label>
+                <select
+                  value={selectValue}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    let next: string[];
+                    if (value === NONE_VALUE) {
+                      // Slot 4 leeren → Array auf max idx kürzen.
+                      next = quickActions.slice(0, idx);
+                    } else {
+                      next = [...quickActions];
+                      // Lücken auffüllen, falls Slot 4 ohne Slot 3 gesetzt würde.
+                      while (next.length < idx) {
+                        next.push("sleep");
+                      }
+                      next[idx] = value;
+                    }
+                    // Defensive: immer mind. 1 Eintrag, max 4.
+                    if (next.length === 0) next = ["sleep"];
+                    if (next.length > 4) next = next.slice(0, 4);
+                    save({ quick_actions: next });
+                  }}
+                  disabled={saving}
+                  className="flex-1 min-h-[44px] px-3 rounded-[8px] bg-ground text-text font-body text-base border border-surface1 focus:outline-none focus:ring-2 focus:ring-peach"
+                >
+                  {isOptional && (
+                    <option value={NONE_VALUE}>{t("profile.favorite_none")}</option>
+                  )}
+                  {PLUGINS.map((p) => (
+                    <option key={p.key} value={p.key}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          })}
         </div>
       </Card>
 

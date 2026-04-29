@@ -158,3 +158,39 @@ class TestPreferencesLocale:
             json={"locale": "x" * 50},
         )
         assert resp.status_code == 422, resp.text
+
+    async def test_patch_quick_actions_accepts_four_items(self, prefs_app):
+        """MBT-182: bis zu 4 Quick-Actions sind erlaubt."""
+        _, client = prefs_app
+        await client.get(
+            "/api/v1/preferences/", headers={"Remote-User": "erik"}
+        )
+        resp = await client.patch(
+            "/api/v1/preferences/",
+            headers={"Remote-User": "erik"},
+            json={"quick_actions": ["sleep", "feeding", "diaper", "weight"]},
+        )
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["quick_actions"] == ["sleep", "feeding", "diaper", "weight"]
+
+    async def test_patch_quick_actions_rejects_five_items(self, prefs_app):
+        """MBT-182: mehr als 4 Quick-Actions führen zu 422."""
+        _, client = prefs_app
+        await client.get(
+            "/api/v1/preferences/", headers={"Remote-User": "erik"}
+        )
+        resp = await client.patch(
+            "/api/v1/preferences/",
+            headers={"Remote-User": "erik"},
+            json={
+                "quick_actions": [
+                    "sleep",
+                    "feeding",
+                    "diaper",
+                    "weight",
+                    "temperature",
+                ]
+            },
+        )
+        assert resp.status_code == 422, resp.text
