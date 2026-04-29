@@ -1,11 +1,16 @@
 /** TypeScript interfaces matching backend Pydantic schemas. */
 
+export type Gender = "male" | "female" | "other";
+
 export interface Child {
   id: number;
   name: string;
   birth_date: string;
   estimated_birth_date: string | null;
   is_preterm: boolean;
+  gender: Gender | null;
+  birth_weight_g: number | null;
+  birth_length_cm: number | string | null;
   notes: string | null;
   is_active: boolean;
   created_at: string;
@@ -16,6 +21,9 @@ export interface ChildCreate {
   birth_date: string;
   estimated_birth_date?: string | null;
   is_preterm?: boolean;
+  gender?: Gender | null;
+  birth_weight_g?: number | null;
+  birth_length_cm?: number | string | null;
   notes?: string | null;
 }
 
@@ -24,6 +32,9 @@ export interface ChildUpdate {
   birth_date?: string;
   estimated_birth_date?: string | null;
   is_preterm?: boolean;
+  gender?: Gender | null;
+  birth_weight_g?: number | null;
+  birth_length_cm?: number | string | null;
   notes?: string | null;
   is_active?: boolean;
 }

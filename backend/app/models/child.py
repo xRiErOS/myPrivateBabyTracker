@@ -2,7 +2,9 @@
 
 from datetime import date
 
-from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Text
+from decimal import Decimal
+
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -19,6 +21,8 @@ class Child(TimestampMixin, Base):
     estimated_birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     is_preterm: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     gender: Mapped[str | None] = mapped_column(String(20))
+    birth_weight_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    birth_length_cm: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 

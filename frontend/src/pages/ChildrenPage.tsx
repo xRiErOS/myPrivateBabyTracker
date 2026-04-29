@@ -17,7 +17,7 @@ import {
 } from "../hooks/useChildren";
 import { getPurgePreview, purgeChildData, type PurgePreview } from "../api/children";
 import { useToast } from "../context/ToastContext";
-import type { Child } from "../api/types";
+import type { Child, Gender } from "../api/types";
 
 // ---------------------------------------------------------------------------
 // Purge Modal
@@ -173,18 +173,27 @@ export default function ChildrenPage() {
   const [birthDate, setBirthDate] = useState("");
   const [isPreterm, setIsPreterm] = useState(false);
   const [estimatedBirthDate, setEstimatedBirthDate] = useState("");
+  const [gender, setGender] = useState<Gender | "">("");
+  const [birthWeight, setBirthWeight] = useState("");
+  const [birthLength, setBirthLength] = useState("");
 
   // Edit form state
   const [editName, setEditName] = useState("");
   const [editBirthDate, setEditBirthDate] = useState("");
   const [editIsPreterm, setEditIsPreterm] = useState(false);
   const [editEstimatedBirthDate, setEditEstimatedBirthDate] = useState("");
+  const [editGender, setEditGender] = useState<Gender | "">("");
+  const [editBirthWeight, setEditBirthWeight] = useState("");
+  const [editBirthLength, setEditBirthLength] = useState("");
 
   const resetCreateForm = () => {
     setName("");
     setBirthDate("");
     setIsPreterm(false);
     setEstimatedBirthDate("");
+    setGender("");
+    setBirthWeight("");
+    setBirthLength("");
     setShowForm(false);
   };
 
@@ -194,6 +203,11 @@ export default function ChildrenPage() {
     setEditBirthDate(child.birth_date);
     setEditIsPreterm(child.is_preterm);
     setEditEstimatedBirthDate(child.estimated_birth_date ?? "");
+    setEditGender(child.gender ?? "");
+    setEditBirthWeight(child.birth_weight_g != null ? String(child.birth_weight_g) : "");
+    setEditBirthLength(
+      child.birth_length_cm != null ? String(child.birth_length_cm) : ""
+    );
   };
 
   const cancelEdit = () => {
@@ -209,6 +223,9 @@ export default function ChildrenPage() {
       birth_date: birthDate,
       is_preterm: isPreterm,
       estimated_birth_date: estimatedBirthDate || null,
+      gender: gender || null,
+      birth_weight_g: birthWeight ? Number(birthWeight) : null,
+      birth_length_cm: birthLength ? birthLength : null,
     });
 
     resetCreateForm();
@@ -225,6 +242,9 @@ export default function ChildrenPage() {
         birth_date: editBirthDate,
         is_preterm: editIsPreterm,
         estimated_birth_date: editEstimatedBirthDate || null,
+        gender: editGender || null,
+        birth_weight_g: editBirthWeight ? Number(editBirthWeight) : null,
+        birth_length_cm: editBirthLength ? editBirthLength : null,
       },
     });
 
@@ -278,6 +298,45 @@ export default function ChildrenPage() {
             <p className="font-body text-xs text-subtext0 -mt-2">
               {t("children.estimated_birth_date_hint")}
             </p>
+
+            <div className="space-y-1">
+              <label className="font-label text-xs font-semibold text-subtext0">
+                {t("children.gender")}
+              </label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value as Gender | "")}
+                className="w-full min-h-[44px] px-3 rounded-[8px] bg-surface0 border border-surface1 text-text font-body text-base focus:outline-none focus:border-mauve"
+              >
+                <option value="">{t("children.gender_unspecified")}</option>
+                <option value="female">{t("children.gender_female")}</option>
+                <option value="male">{t("children.gender_male")}</option>
+                <option value="other">{t("children.gender_other")}</option>
+              </select>
+            </div>
+
+            <Input
+              label={t("children.birth_weight_g")}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={10000}
+              step={1}
+              value={birthWeight}
+              onChange={(e) => setBirthWeight(e.target.value)}
+              placeholder={t("children.birth_weight_placeholder")}
+            />
+            <Input
+              label={t("children.birth_length_cm")}
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={100}
+              step={0.1}
+              value={birthLength}
+              onChange={(e) => setBirthLength(e.target.value)}
+              placeholder={t("children.birth_length_placeholder")}
+            />
 
             <div className="flex gap-2">
               <Button type="submit" disabled={createChild.isPending}>
@@ -368,6 +427,47 @@ export default function ChildrenPage() {
                     <p className="font-body text-xs text-subtext0 -mt-2">
                       {t("children.estimated_birth_date_hint")}
                     </p>
+
+                    <div className="space-y-1">
+                      <label className="font-label text-xs font-semibold text-subtext0">
+                        {t("children.gender")}
+                      </label>
+                      <select
+                        value={editGender}
+                        onChange={(e) =>
+                          setEditGender(e.target.value as Gender | "")
+                        }
+                        className="w-full min-h-[44px] px-3 rounded-[8px] bg-surface0 border border-surface1 text-text font-body text-base focus:outline-none focus:border-mauve"
+                      >
+                        <option value="">{t("children.gender_unspecified")}</option>
+                        <option value="female">{t("children.gender_female")}</option>
+                        <option value="male">{t("children.gender_male")}</option>
+                        <option value="other">{t("children.gender_other")}</option>
+                      </select>
+                    </div>
+
+                    <Input
+                      label={t("children.birth_weight_g")}
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={10000}
+                      step={1}
+                      value={editBirthWeight}
+                      onChange={(e) => setEditBirthWeight(e.target.value)}
+                      placeholder={t("children.birth_weight_placeholder")}
+                    />
+                    <Input
+                      label={t("children.birth_length_cm")}
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      value={editBirthLength}
+                      onChange={(e) => setEditBirthLength(e.target.value)}
+                      placeholder={t("children.birth_length_placeholder")}
+                    />
 
                     <div className="flex gap-2">
                       <Button type="submit" disabled={updateChild.isPending}>

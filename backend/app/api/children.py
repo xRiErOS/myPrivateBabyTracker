@@ -147,11 +147,7 @@ async def create_child(
     db: AsyncSession = Depends(get_session),
 ):
     """Create a new child."""
-    child = Child(
-        name=data.name,
-        birth_date=data.birth_date,
-        notes=data.notes,
-    )
+    child = Child(**data.model_dump())
     db.add(child)
     await db.commit()
     await db.refresh(child)

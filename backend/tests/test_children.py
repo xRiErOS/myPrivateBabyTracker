@@ -158,6 +158,82 @@ async def test_create_child_empty_name_rejected(async_client: AsyncClient):
 
 
 @pytest.mark.anyio
+async def test_create_child_with_birth_data(async_client: AsyncClient):
+    """MBT-206: gender, birth_weight_g, birth_length_cm round-trip via POST + GET."""
+    response = await async_client.post(
+        "/api/v1/children/",
+        json={
+            "name": "Anna",
+            "birth_date": "2025-09-15",
+            "estimated_birth_date": "2025-09-20",
+            "is_preterm": True,
+            "gender": "female",
+            "birth_weight_g": 2890,
+            "birth_length_cm": "48.50",
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["gender"] == "female"
+    assert data["birth_weight_g"] == 2890
+    assert data["birth_length_cm"] == "48.50"
+    assert data["estimated_birth_date"] == "2025-09-20"
+    assert data["is_preterm"] is True
+
+
+@pytest.mark.anyio
+async def test_update_child_birth_data(async_client: AsyncClient):
+    """MBT-206: PATCH updates gender + birth measurements."""
+    create = await async_client.post(
+        "/api/v1/children/",
+        json={"name": "Liam", "birth_date": "2025-08-01"},
+    )
+    child_id = create.json()["id"]
+
+    response = await async_client.patch(
+        f"/api/v1/children/{child_id}",
+        json={
+            "gender": "male",
+            "birth_weight_g": 3520,
+            "birth_length_cm": "52.00",
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["gender"] == "male"
+    assert data["birth_weight_g"] == 3520
+    assert data["birth_length_cm"] == "52.00"
+
+
+@pytest.mark.anyio
+async def test_create_child_invalid_gender(async_client: AsyncClient):
+    """MBT-206: invalid gender literal rejected with 422."""
+    response = await async_client.post(
+        "/api/v1/children/",
+        json={
+            "name": "Test",
+            "birth_date": "2025-01-01",
+            "gender": "diverse",
+        },
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_create_child_birth_weight_out_of_range(async_client: AsyncClient):
+    """MBT-206: birth_weight_g > 10000 rejected (sanity check)."""
+    response = await async_client.post(
+        "/api/v1/children/",
+        json={
+            "name": "Test",
+            "birth_date": "2025-01-01",
+            "birth_weight_g": 15000,
+        },
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.anyio
 async def test_auth_required_with_forward_auth():
     """When auth_mode is 'forward', endpoints require auth headers."""
     import os
