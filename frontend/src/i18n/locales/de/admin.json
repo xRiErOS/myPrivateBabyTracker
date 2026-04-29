@@ -155,6 +155,7 @@
       "growth": "WHO-Wachstumskurven (Gewicht und Länge) mit Perzentilen P3/P15/P50/P85/P97. Frühgeborenen-Modus mit korrigiertem Alter.",
       "checkup": "U-Untersuchungen U1 bis U9 mit empfohlenen Zeitfenstern und Datumsbereich-Anzeige. Wichtig für Vorsorgenachweis.",
       "notes": "Geteilte Notizen für Eltern und Pflegende. Mit Suche, Pin-Funktion und Markdown-Editor für schnelle Einträge.",
+      "motherhealth": "Notizen für die Hebamme — Wochenbett, Stilltagebuch, eigenes Wohlbefinden. Privacy-first, kein Dashboard-Widget. Standardmäßig deaktiviert.",
       "tags": "Polymorphe Verschlagwortung von Einträgen (z.B. Krankheit, Reise, Zähnen). Zeigt verbundene Einträge auf Tag-Detail-Seite."
     }
   },

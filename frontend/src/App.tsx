@@ -34,6 +34,7 @@ const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const CheckupPage = lazy(() => import("./pages/CheckupPage"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
+const MotherHealthPage = lazy(() => import("./pages/MotherHealthPage"));
 const ChangelogAdminPage = lazy(() => import("./pages/ChangelogAdminPage"));
 const MediaAdminPage = lazy(() => import("./pages/MediaAdminPage"));
 const AdminLogsPage = lazy(() => import("./pages/AdminLogsPage"));
@@ -89,6 +90,7 @@ function AppRoutes() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/checkup" element={<CheckupPage />} />
               <Route path="/notes" element={<NotesPage />} />
+              <Route path="/motherhealth" element={<MotherHealthPage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

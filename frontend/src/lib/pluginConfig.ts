@@ -9,21 +9,31 @@ import { PLUGINS, OPTIONAL_PLUGINS } from "./pluginRegistry";
 const STORAGE_KEY = "mybaby_enabled_plugins";
 const DASHBOARD_KEY = "mybaby_dashboard_visible";
 
-/** All optional plugin keys — used as default when no config exists. */
+/** Optional plugin keys enabled by default (excludes privacy-sensitive plugins
+ *  marked with `defaultDisabled: true`, e.g. motherhealth, MBT-109). */
+const DEFAULT_ENABLED_OPTIONAL_KEYS = OPTIONAL_PLUGINS.filter(
+  (p) => !p.defaultDisabled,
+).map((p) => p.key);
+
+/** All optional plugin keys — set of valid keys for filtering stored configs. */
 const ALL_OPTIONAL_KEYS = OPTIONAL_PLUGINS.map((p) => p.key);
 
-/** Read enabled optional plugin keys from localStorage. */
+/** Read enabled optional plugin keys from localStorage.
+ *
+ *  No saved config → all optional plugins EXCEPT those marked
+ *  `defaultDisabled: true` (privacy-sensitive — e.g. motherhealth, MBT-109).
+ */
 export function getEnabledPlugins(): string[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return ALL_OPTIONAL_KEYS;
+    if (!raw) return DEFAULT_ENABLED_OPTIONAL_KEYS;
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return ALL_OPTIONAL_KEYS;
+    if (!Array.isArray(parsed)) return DEFAULT_ENABLED_OPTIONAL_KEYS;
     // Only keep keys that actually exist as optional plugins
     const validKeys = new Set(ALL_OPTIONAL_KEYS);
     return parsed.filter((k): k is string => typeof k === "string" && validKeys.has(k));
   } catch {
-    return ALL_OPTIONAL_KEYS;
+    return DEFAULT_ENABLED_OPTIONAL_KEYS;
   }
 }
 

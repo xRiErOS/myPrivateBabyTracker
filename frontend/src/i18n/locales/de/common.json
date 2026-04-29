@@ -79,7 +79,8 @@
     "profile": "Mein Profil",
     "tags": "Tags",
     "checkup": "U-Untersuchungen",
-    "notes": "Notizen"
+    "notes": "Notizen",
+    "motherhealth": "Muttergesundheit"
   },
   "errors": {
     "unknown": "Unbekannter Fehler",

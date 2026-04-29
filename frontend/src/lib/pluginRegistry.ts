@@ -1,6 +1,6 @@
 /** Central plugin registry — single source of truth for plugin metadata. */
 
-import { Activity, CheckSquare, ClipboardCheck, Droplets, FileText, Moon, Pill, Scale, Star, Sun, Tags, Thermometer, Timer, Utensils } from "lucide-react";
+import { Activity, CheckSquare, ClipboardCheck, Droplets, FileText, HeartPulse, Moon, Pill, Scale, Star, Sun, Tags, Thermometer, Timer, Utensils } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import i18n from "../i18n";
 
@@ -15,6 +15,8 @@ export interface PluginDef {
   isBase: boolean;
   /** Thematic group for navigation. (MBT-181) */
   category: PluginCategory;
+  /** Optional plugins that should be DISABLED by default (privacy-sensitive). */
+  defaultDisabled?: boolean;
 }
 
 export const PLUGINS: PluginDef[] = [
@@ -36,6 +38,7 @@ export const PLUGINS: PluginDef[] = [
   // Organization — Tasks, Notizen, Tags
   { key: "todo", label: "Tasks & Habits", icon: CheckSquare, route: "/todo", isBase: false, category: "organization" },
   { key: "notes", label: "Notizen", icon: FileText, route: "/notes", isBase: false, category: "organization" },
+  { key: "motherhealth", label: "Muttergesundheit", icon: HeartPulse, route: "/motherhealth", isBase: false, category: "organization", defaultDisabled: true },
   { key: "tags", label: "Tags", icon: Tags, route: "/tags", isBase: false, category: "organization" },
 ];
 

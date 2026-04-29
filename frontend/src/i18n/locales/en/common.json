@@ -79,7 +79,8 @@
     "profile": "My Profile",
     "tags": "Tags",
     "checkup": "Checkups",
-    "notes": "Notes"
+    "notes": "Notes",
+    "motherhealth": "Mother's Health"
   },
   "errors": {
     "unknown": "Unknown error",

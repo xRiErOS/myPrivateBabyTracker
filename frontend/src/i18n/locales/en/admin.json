@@ -155,6 +155,7 @@
       "growth": "WHO growth curves (weight and length) with P3/P15/P50/P85/P97 percentiles. Preterm mode uses corrected age.",
       "checkup": "Well-child visits U1 to U9 with recommended time windows. Useful for vaccination/preventive care record.",
       "notes": "Shared notes for parents and caregivers. With search, pin and Markdown editor for quick entries.",
+      "motherhealth": "Notes for the midwife — postpartum, breastfeeding journal, personal well-being. Privacy-first, no dashboard widget. Disabled by default.",
       "tags": "Polymorphic tagging of entries (e.g. illness, travel, teething). Shows linked entries on tag detail page."
     }
   },

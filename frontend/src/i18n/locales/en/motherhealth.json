@@ -1,0 +1,8 @@
+{
+  "title": "Mother's Health",
+  "label_content": "Note",
+  "content_placeholder": "Note for the midwife or about your own well-being...",
+  "empty": "No entries yet.",
+  "confirm_delete": "Delete entry?",
+  "privacy_hint": "Sensitive content. Only you can see these notes."
+}
