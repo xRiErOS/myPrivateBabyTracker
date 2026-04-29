@@ -48,11 +48,20 @@
   "error_loading": "Error loading",
   "error_saving": "Error saving",
   "saved": "Saved",
+  "entry_saved": "Entry saved",
+  "entry_updated": "Entry updated",
+  "entry_save_failed": "Could not save entry",
   "or": "or",
   "no_tags": "No tags",
   "more_tags": "+{{count}} more",
   "nav": {
     "dashboard": "Home",
+    "group": {
+      "tracking": "Tracking",
+      "development": "Development",
+      "organization": "Organization",
+      "admin": "Settings"
+    },
     "sleep": "Sleep",
     "feeding": "Feeding",
     "diaper": "Diapers",

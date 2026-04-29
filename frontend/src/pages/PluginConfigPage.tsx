@@ -1,7 +1,8 @@
 /** Plugin management page — toggle optional plugins on/off. */
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Repeat } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Repeat } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { PLUGINS } from "../lib/pluginRegistry";
@@ -10,6 +11,8 @@ import { isPluginEnabled, togglePlugin, isVisibleOnDashboard, toggleDashboardVis
 export default function PluginConfigPage() {
   // Force re-render after toggle
   const [, setTick] = useState(0);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const { t: ta } = useTranslation("admin");
 
   function handleToggle(key: string) {
     togglePlugin(key);
@@ -19,6 +22,10 @@ export default function PluginConfigPage() {
   function handleDashboardToggle(key: string) {
     toggleDashboardVisibility(key);
     setTick((t) => t + 1);
+  }
+
+  function toggleExpand(key: string) {
+    setExpandedKey((prev) => (prev === key ? null : key));
   }
 
   return (
@@ -35,6 +42,8 @@ export default function PluginConfigPage() {
           const enabled = isPluginEnabled(plugin.key);
           const dashboardVisible = isVisibleOnDashboard(plugin.key);
 
+          const isExpanded = expandedKey === plugin.key;
+
           return (
             <Card key={plugin.key} className="p-4">
               <div className="flex items-center justify-between gap-3">
@@ -50,6 +59,15 @@ export default function PluginConfigPage() {
                       </span>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(plugin.key)}
+                    aria-expanded={isExpanded}
+                    aria-label={ta("plugins.show_description", { defaultValue: "Beschreibung anzeigen" })}
+                    className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-full text-subtext0 hover:text-mauve hover:bg-surface1 transition-colors shrink-0"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {/* Dashboard visibility toggle(s) */}
@@ -143,6 +161,13 @@ export default function PluginConfigPage() {
                   </div>
                 </div>
               </div>
+              {isExpanded && (
+                <p className="font-body text-xs text-subtext0 mt-3 pt-3 border-t border-surface1 leading-relaxed">
+                  {ta(`plugins.descriptions.${plugin.key}`, {
+                    defaultValue: "",
+                  })}
+                </p>
+              )}
             </Card>
           );
         })}

@@ -14,7 +14,7 @@ interface ToastContextValue {
   showToast: (message: string, type?: ToastType) => void;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+export const ToastContext = createContext<ToastContextValue | null>(null);
 
 let nextId = 0;
 

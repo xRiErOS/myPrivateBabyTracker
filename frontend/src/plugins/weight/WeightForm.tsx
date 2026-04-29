@@ -7,6 +7,7 @@ import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateWeight, useUpdateWeight } from "../../hooks/useWeight";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
@@ -32,6 +33,7 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateWeight();
   const updateMut = useUpdateWeight();
+  const toast = useEntryToast();
 
   const [measuredAt, setMeasuredAt] = useState(
     entry?.measured_at ? isoToLocalInput(entry.measured_at) : isoToLocalInput(nowISO()),
@@ -66,6 +68,7 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
             notes: notes || null,
           },
         });
+        toast.saved();
         onDone?.();
       } else {
         const result = await createMut.mutateAsync({
@@ -79,6 +82,7 @@ export function WeightForm({ entry, onDone, onCancel }: WeightFormProps) {
             attachTag({ tag_id: tagId, entry_type: "weight", entry_id: result.id })
           ));
         }
+        toast.saved();
         onDone?.();
       }
     } catch (err) {

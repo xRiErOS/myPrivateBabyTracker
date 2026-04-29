@@ -8,6 +8,7 @@ import { Select } from "../../components/Select";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateDiaper, useUpdateDiaper } from "../../hooks/useDiaper";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { attachTag } from "../../api/tags";
 import type { DiaperEntry, DiaperType } from "../../api/types";
@@ -31,6 +32,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
   ];
   const createMut = useCreateDiaper();
   const updateMut = useUpdateDiaper();
+  const toast = useEntryToast();
 
   const [diaperType, setDiaperType] = useState<DiaperType>(entry?.diaper_type ?? "wet");
   const [time, setTime] = useState(
@@ -58,6 +60,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
     if (entry) {
       const { child_id: _, ...updateData } = payload;
       await updateMut.mutateAsync({ id: entry.id, data: updateData });
+      toast.saved();
       onDone?.();
     } else {
       const result = await createMut.mutateAsync(payload);
@@ -66,6 +69,7 @@ export function DiaperForm({ entry, onDone, onCancel }: DiaperFormProps) {
           attachTag({ tag_id: tagId, entry_type: "diaper", entry_id: result.id })
         ));
       }
+      toast.saved();
       onDone?.();
     }
   }

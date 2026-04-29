@@ -6,6 +6,7 @@ import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCheckupTypes, useCreateCheckup, useUpdateCheckup } from "../../hooks/useCheckup";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { formatApiError } from "../../lib/errorMessages";
 import type { CheckupEntry } from "../../api/checkup";
 
@@ -22,6 +23,7 @@ export function CheckupForm({ entry, onDone, onCancel }: CheckupFormProps) {
   const { data: types = [] } = useCheckupTypes();
   const createMut = useCreateCheckup();
   const updateMut = useUpdateCheckup();
+  const toast = useEntryToast();
 
   const [checkupTypeId, setCheckupTypeId] = useState(entry?.checkup_type_id?.toString() ?? "");
   const [date, setDate] = useState(entry?.date ?? new Date().toISOString().slice(0, 10));
@@ -66,6 +68,7 @@ export function CheckupForm({ entry, onDone, onCancel }: CheckupFormProps) {
           notes: notes || null,
         });
       }
+      toast.saved();
       onDone?.();
     } catch (err) {
       setError(formatApiError(err));

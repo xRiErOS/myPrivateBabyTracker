@@ -9,6 +9,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateMedication, useUpdateMedication } from "../../hooks/useMedication";
 import { useMedicationMasters } from "../../hooks/useMedicationMasters";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
@@ -27,6 +28,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
   const { activeChild } = useActiveChild();
   const createMut = useCreateMedication();
   const updateMut = useUpdateMedication();
+  const toast = useEntryToast();
   const { data: masters = [] } = useMedicationMasters();
 
   const [givenAt, setGivenAt] = useState(
@@ -87,6 +89,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
             notes: notes || null,
           },
         });
+        toast.saved();
         onDone?.();
       } else {
         const result = await createMut.mutateAsync({
@@ -102,6 +105,7 @@ export function MedicationForm({ entry, onDone, onCancel }: MedicationFormProps)
             attachTag({ tag_id: tagId, entry_type: "medication", entry_id: result.id })
           ));
         }
+        toast.saved();
         onDone?.();
       }
     } catch (err) {

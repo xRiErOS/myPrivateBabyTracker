@@ -1,6 +1,7 @@
 /** Notes page — shared notes for parents. */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FileText, Plus } from "lucide-react";
 import { Button } from "../components/Button";
@@ -15,10 +16,30 @@ export default function NotesPage() {
   const { t } = useTranslation("notes");
   const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const cameFromDashboard = useRef(false);
 
-  const handleDone = useCallback(() => setShowForm(false), []);
-  const handleCancel = useCallback(() => setShowForm(false), []);
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setShowForm(true);
+      cameFromDashboard.current = true;
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleDone = useCallback(() => {
+    setShowForm(false);
+    cameFromDashboard.current = false;
+  }, []);
+  const handleCancel = useCallback(() => {
+    setShowForm(false);
+    if (cameFromDashboard.current) {
+      cameFromDashboard.current = false;
+      navigate("/");
+    }
+  }, [navigate]);
 
   if (!activeChild) {
     return (

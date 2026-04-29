@@ -8,6 +8,7 @@ import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateHealth, useUpdateHealth } from "../../hooks/useHealth";
 import { useFeedingEntries } from "../../hooks/useFeeding";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { formatTime, isoToLocalInput, localInputToISO, nowISO, startOfTodayISO } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
@@ -27,6 +28,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
   const { activeChild } = useActiveChild();
   const createMut = useCreateHealth();
   const updateMut = useUpdateHealth();
+  const toast = useEntryToast();
 
   const ENTRY_TYPES: { value: HealthEntryType; label: string }[] = [
     { value: "spit_up", label: t("entry_type.spit_up") },
@@ -113,6 +115,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
       if (entry) {
         const { child_id: _, ...updateData } = payload;
         await updateMut.mutateAsync({ id: entry.id, data: updateData });
+        toast.saved();
         onDone?.();
       } else {
         const result = await createMut.mutateAsync(payload);
@@ -121,6 +124,7 @@ export function HealthForm({ entry, defaultFeedingId, onDone, onCancel }: Health
             attachTag({ tag_id: tagId, entry_type: "health", entry_id: result.id })
           ));
         }
+        toast.saved();
         onDone?.();
       }
     } catch (err) {

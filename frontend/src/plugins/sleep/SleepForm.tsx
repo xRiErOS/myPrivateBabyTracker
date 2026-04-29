@@ -8,6 +8,7 @@ import { Select } from "../../components/Select";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateSleep, useUpdateSleep } from "../../hooks/useSleep";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { defaultSleepTypeForTime, isoToLocalInput, localInputToISO, nowISO, rollEndIfCrossMidnight } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
@@ -33,6 +34,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateSleep();
   const updateMut = useUpdateSleep();
+  const toast = useEntryToast();
 
   const SLEEP_TYPE_OPTIONS = [
     { value: "nap", label: t("type.nap") },
@@ -102,6 +104,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
           attachTag({ tag_id: tagId, entry_type: "sleep", entry_id: result.id })
         ));
       }
+      toast.saved();
       onDone?.();
     } catch (err) {
       handleApiError(err);
@@ -117,6 +120,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
         id: entry.id,
         data: { end_time: nowISO() },
       });
+      toast.updated();
       onDone?.();
     } catch (err) {
       handleApiError(err);
@@ -149,6 +153,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
       if (entry) {
         const { child_id: _, ...updateData } = payload;
         await updateMut.mutateAsync({ id: entry.id, data: updateData });
+        toast.updated();
         onDone?.();
       } else {
         const result = await createMut.mutateAsync(payload);
@@ -157,6 +162,7 @@ export function SleepForm({ entry, onDone, onCancel }: SleepFormProps) {
             attachTag({ tag_id: tagId, entry_type: "sleep", entry_id: result.id })
           ));
         }
+        toast.saved();
         onDone?.();
       }
     } catch (err) {

@@ -136,7 +136,25 @@
     "active": "Plugin active",
     "show_dashboard": "Show on home",
     "base_plugin": "Base plugin (always active)",
-    "widget_order": "Widget order"
+    "widget_order": "Widget order",
+    "show_description": "Show description",
+    "descriptions": {
+      "sleep": "Sleep sessions with start/end time, timer mode for ongoing sessions. Helps spot sleep patterns and daily rhythm.",
+      "feeding": "Track breastfeeding, bottle volume and solids. Shows daily totals and average intervals.",
+      "diaper": "Diaper changes by type (wet, dirty, both). Trends across days for care and health monitoring.",
+      "temperature": "Body temperature in Celsius with colour-coded ranges (low / normal / fever). Useful when ill.",
+      "weight": "Weight history in grams with trend and WHO growth curves (P3-P97). Plots percentiles and birth weight.",
+      "medication": "Medication doses with time and amount. Master-data dropdown reduces typos. Critical for ongoing treatment.",
+      "vitamind3": "Daily vitamin D3 dose as a quick action with status (given / pending). Recommended from birth to ~18 months.",
+      "health": "Child well-being — spit-up, tummy ache, crying with intensity, soothing method and duration.",
+      "tummytime": "Tummy-time sessions with timer for motor development and to prevent flat-head. Recommended from birth.",
+      "todo": "Tasks and recurring habits for parents. Includes progress tracking, templates, daily/weekly recurrence.",
+      "milestones": "Developmental milestones (smile, crawl, first words) with photo upload, age-based suggestions and leap calendar.",
+      "growth": "WHO growth curves (weight and length) with P3/P15/P50/P85/P97 percentiles. Preterm mode uses corrected age.",
+      "checkup": "Well-child visits U1 to U9 with recommended time windows. Useful for vaccination/preventive care record.",
+      "notes": "Shared notes for parents and caregivers. With search, pin and Markdown editor for quick entries.",
+      "tags": "Polymorphic tagging of entries (e.g. illness, travel, teething). Shows linked entries on tag detail page."
+    }
   },
   "api_keys": {
     "title": "API keys",

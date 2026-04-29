@@ -7,6 +7,7 @@ import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTemperature, useUpdateTemperature } from "../../hooks/useTemperature";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
@@ -24,6 +25,7 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
   const { activeChild } = useActiveChild();
   const createMut = useCreateTemperature();
   const updateMut = useUpdateTemperature();
+  const toast = useEntryToast();
 
   const [measuredAt, setMeasuredAt] = useState(
     entry?.measured_at ? isoToLocalInput(entry.measured_at) : isoToLocalInput(nowISO()),
@@ -58,6 +60,7 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
             notes: notes || null,
           },
         });
+        toast.saved();
         onDone?.();
       } else {
         const result = await createMut.mutateAsync({
@@ -71,6 +74,7 @@ export function TemperatureForm({ entry, onDone, onCancel }: TemperatureFormProp
             attachTag({ tag_id: tagId, entry_type: "temperature", entry_id: result.id })
           ));
         }
+        toast.saved();
         onDone?.();
       }
     } catch (err) {

@@ -7,6 +7,7 @@ import { Input } from "../../components/Input";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTummyTime, useUpdateTummyTime } from "../../hooks/useTummyTime";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
@@ -32,6 +33,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateTummyTime();
   const updateMut = useUpdateTummyTime();
+  const toast = useEntryToast();
 
   const [startTime, setStartTime] = useState(
     entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
@@ -81,6 +83,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
           attachTag({ tag_id: tagId, entry_type: "tummytime", entry_id: result.id })
         ));
       }
+      toast.saved();
       onDone?.();
     } catch (err) {
       handleApiError(err);
@@ -96,6 +99,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
         id: entry.id,
         data: { end_time: nowISO() },
       });
+      toast.saved();
       onDone?.();
     } catch (err) {
       handleApiError(err);
@@ -123,6 +127,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
       if (entry) {
         const { child_id: _, ...updateData } = payload;
         await updateMut.mutateAsync({ id: entry.id, data: updateData });
+        toast.saved();
         onDone?.();
       } else {
         const result = await createMut.mutateAsync(payload);
@@ -131,6 +136,7 @@ export function TummyTimeForm({ entry, onDone, onCancel }: TummyTimeFormProps) {
             attachTag({ tag_id: tagId, entry_type: "tummytime", entry_id: result.id })
           ));
         }
+        toast.saved();
         onDone?.();
       }
     } catch (err) {

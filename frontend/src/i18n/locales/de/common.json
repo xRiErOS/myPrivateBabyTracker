@@ -48,11 +48,20 @@
   "error_loading": "Fehler beim Laden",
   "error_saving": "Fehler beim Speichern",
   "saved": "Gespeichert",
+  "entry_saved": "Eintrag gespeichert",
+  "entry_updated": "Eintrag aktualisiert",
+  "entry_save_failed": "Eintrag konnte nicht gespeichert werden",
   "or": "oder",
   "no_tags": "Keine Tags",
   "more_tags": "+{{count}} weitere",
   "nav": {
     "dashboard": "Home",
+    "group": {
+      "tracking": "Tracking",
+      "development": "Entwicklung",
+      "organization": "Organisation",
+      "admin": "Verwaltung"
+    },
     "sleep": "Schlaf",
     "feeding": "Mahlzeiten",
     "diaper": "Windeln",

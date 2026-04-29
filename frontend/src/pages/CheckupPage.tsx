@@ -1,6 +1,7 @@
 /** Checkup page — U-Untersuchungen tracking. */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ClipboardCheck, Plus } from "lucide-react";
 import { Button } from "../components/Button";
@@ -15,10 +16,30 @@ export default function CheckupPage() {
   const { t } = useTranslation("checkup");
   const { t: tc } = useTranslation("common");
   const { activeChild } = useActiveChild();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const cameFromDashboard = useRef(false);
 
-  const handleDone = useCallback(() => setShowForm(false), []);
-  const handleCancel = useCallback(() => setShowForm(false), []);
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setShowForm(true);
+      cameFromDashboard.current = true;
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleDone = useCallback(() => {
+    setShowForm(false);
+    cameFromDashboard.current = false;
+  }, []);
+  const handleCancel = useCallback(() => {
+    setShowForm(false);
+    if (cameFromDashboard.current) {
+      cameFromDashboard.current = false;
+      navigate("/");
+    }
+  }, [navigate]);
 
   if (!activeChild) {
     return (

@@ -8,6 +8,7 @@ import { Select } from "../../components/Select";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateFeeding, useFeedingEntries, useUpdateFeeding } from "../../hooks/useFeeding";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { attachTag } from "../../api/tags";
 import type { FeedingEntry, FeedingType } from "../../api/types";
@@ -32,6 +33,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   ];
   const createMut = useCreateFeeding();
   const updateMut = useUpdateFeeding();
+  const toast = useEntryToast();
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
 
   const { data: recentEntries = [] } = useFeedingEntries({
@@ -99,6 +101,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
         ));
       }
     }
+    toast.saved();
     onDone?.();
   }
 

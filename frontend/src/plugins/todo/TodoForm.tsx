@@ -7,6 +7,7 @@ import { MarkdownEditor } from "../../components/MarkdownEditor";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateTodo, useUpdateTodo } from "../../hooks/useTodos";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { attachTag } from "../../api/tags";
 import type { TodoEntry } from "../../api/types";
 
@@ -20,6 +21,7 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateTodo();
   const updateMut = useUpdateTodo();
+  const toast = useEntryToast();
 
   const [title, setTitle] = useState(entry?.title ?? "");
   const [details, setDetails] = useState(entry?.details ?? "");
@@ -71,6 +73,7 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
           due_date: buildDueDate(),
         },
       });
+      toast.updated();
       onDone();
     } else {
       const result = await createMut.mutateAsync({
@@ -84,6 +87,7 @@ export function TodoForm({ entry, onDone, onCancel }: TodoFormProps) {
           attachTag({ tag_id: tagId, entry_type: "todo", entry_id: result.id })
         ));
       }
+      toast.saved();
       onDone(result.id);
     }
   }

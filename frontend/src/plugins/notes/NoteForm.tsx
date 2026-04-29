@@ -8,6 +8,7 @@ import { MarkdownEditor } from "../../components/MarkdownEditor";
 import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import { useCreateNote, useUpdateNote } from "../../hooks/useNotes";
+import { useEntryToast } from "../../hooks/useEntryToast";
 import { formatApiError } from "../../lib/errorMessages";
 import { attachTag } from "../../api/tags";
 import type { SharedNote } from "../../api/notes";
@@ -24,6 +25,7 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
   const { activeChild } = useActiveChild();
   const createMut = useCreateNote();
   const updateMut = useUpdateNote();
+  const toast = useEntryToast();
 
   const [title, setTitle] = useState(entry?.title ?? "");
   const [content, setContent] = useState(entry?.content ?? "");
@@ -57,6 +59,7 @@ export function NoteForm({ entry, onDone, onCancel }: NoteFormProps) {
           );
         }
       }
+      toast.saved();
       onDone?.();
     } catch (err) {
       setError(formatApiError(err));
