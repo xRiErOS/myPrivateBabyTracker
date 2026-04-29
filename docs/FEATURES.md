@@ -1,6 +1,6 @@
 # MyBaby — Feature-Inventar
 
-Stand: 2026-04-28 · Version: 0.8.0+ · Sprint 25 (Dokumentation der App)
+Stand: 2026-04-29 · Version: 0.9.0 · Sprint 55 (Improvements & Tutorial)
 
 Dieses Dokument ist das Source-of-Truth für alle Features der App. Es erfüllt zwei Zwecke:
 
@@ -25,6 +25,7 @@ Verwandte Dokumente:
 | v0.7    | Plugin "Wohlbefinden" (Rename), growth (WHO-Kurven), checkup (U-Untersuchungen), notes |
 | v0.8    | Foto-System (Pillow + Thumbnails), Medienverwaltung (/admin/media), Markdown-Editor |
 | v0.8+   | Sprint 26: Dashboard→Home, Auto-Nachtschlaf 22–06, /admin/logs |
+| v0.9    | Sprint 55: In-App-Tutorial mit Pause-Modus, Sidebar-Gruppierung (thematisch), Plugin-Beschreibungen, WHO-Length-Kurven, Stammdaten-Erweiterung (Geschlecht, Geburtsgewicht/-länge), Toast-Feedback nach Submit |
 
 ## 1. Plugins (14)
 
@@ -89,8 +90,8 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 | Passkeys (WebAuthn) | `app/api/webauthn.py` | `app/models/webauthn.py` | py_webauthn. Register/Login Begin+Finish. Credentials pro User verwaltbar. |
 | API-Keys (M2M) | `app/api/api_keys.py`, `app/middleware/api_key_auth.py` | `app/models/api_key.py` | Argon2-Hash, Prefix-Matching (8 Zeichen), Scopes: read/write/admin. Schlüssel nur einmal sichtbar. |
 | User-Verwaltung | `app/api/users.py` | `app/models/user.py` | Admin-only CRUD. Rollen: admin/caregiver. Set-Password-Endpoint. Zeitzone pro User. |
-| User-Preferences | `app/api/preferences.py` | `app/models/user_preferences.py` | Serverseitig: breastfeeding_enabled, quick_actions, widget_order, track_visibility. Auto-Create bei erstem Zugriff. |
-| Children-Management | `app/api/children.py` | `app/models/child.py` | Mehrere Kinder pro Account, aktives Kind via Selector. `is_preterm` + `estimated_birth_date`. |
+| User-Preferences | `app/api/preferences.py` | `app/models/user_preferences.py` | Serverseitig: breastfeeding_enabled, quick_actions, widget_order, track_visibility, tutorial_completed, tutorial_step. Auto-Create bei erstem Zugriff. |
+| Children-Management | `app/api/children.py` | `app/models/child.py` | Mehrere Kinder pro Account, aktives Kind via Selector. Stammdaten: `is_preterm` + `estimated_birth_date` (Frühgeborenenmodus), `sex` (male/female/unknown — WHO-Kurven), `birth_weight_g` + `birth_length_cm` (Geburtsmaße). |
 | Tag-System (polymorph) | `app/api/tags.py` | `app/models/tag.py` (Tag, EntryTag) | EntryTag verbindet `entry_type + entry_id` (kein FK, polymorph). Felder: `is_archived`, `notes`, `created_at`. |
 | Warnhinweise (Alerts) | `app/api/alerts.py`, `app/services/alert_service.py` | `app/models/alert_config.py` | Pro Kind konfigurierbar. 6 Regeln (Fütterung, Temp hoch/niedrig, Windel, Schlaf, Sturmphase). Altersfilter `min_age_weeks/max_age_weeks`. |
 | Medikamenten-Stammdaten | `app/api/medication_masters.py` | `app/models/medication_master.py` | Master-Liste für Dropdown im MedicationForm. Felder: name, active_ingredient, default_unit. |
@@ -109,14 +110,14 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 |---------|--------------|-----------|-------------|
 | App-Routing | `frontend/src/App.tsx` | – | React-Router. Lazy-Imports pro Page. AuthGuard wrapped Layout. |
 | Auth-Guard | `frontend/src/App.tsx:AuthGuard` | `frontend/src/hooks/useAuth.ts` | Reagiert auf authMode: disabled/forward → pass-through; local/both → LoginPage wenn !user. 401-Handler via `set401Handler` in `api/client.ts`. |
-| Layout / Navigation | `frontend/src/components/Layout.tsx` | `Header.tsx`, `Sidebar.tsx`, `BottomNav.tsx`, `MobileMenu.tsx`, `FAB.tsx` | Sidebar fixed Desktop, BottomNav 4 fixe Items + Burger Mobile, FAB für Quick-Actions. |
+| Layout / Navigation | `frontend/src/components/Layout.tsx` | `Header.tsx`, `Sidebar.tsx`, `BottomNav.tsx`, `MobileMenu.tsx`, `FAB.tsx` | Sidebar fixed Desktop, BottomNav 4 fixe Items + Burger Mobile, FAB für Quick-Actions. Sidebar + MobileMenu thematisch gruppiert (tracking / development / productivity) gemäß `pluginRegistry.category`. |
 | Dashboard | `frontend/src/pages/Dashboard.tsx` | `components/dashboard/BabySummary.tsx`, `DayTimeline.tsx`, `PatternChart.tsx`, `WeeklyReport.tsx` | Tab-Range (Heute/7T/14T) mit useSwipe. Widget-Grid dynamisch nach Plugin-Order. Tagesverlauf-Sichtbarkeit konfigurierbar (Zahnrad). |
 | Plugin Registry | `frontend/src/lib/pluginRegistry.ts` | – | 14 Plugin-Definitionen (key, label, icon, route, isBase). |
-| Plugin Config | `frontend/src/lib/pluginConfig.ts` | `pages/PluginConfigPage.tsx` | localStorage: aktive Plugins, Dashboard-Visibility, Widget-Order. Nav + Dashboard reagieren dynamisch. |
+| Plugin Config | `frontend/src/lib/pluginConfig.ts` | `pages/PluginConfigPage.tsx` | localStorage: aktive Plugins, Dashboard-Visibility, Widget-Order. Nav + Dashboard reagieren dynamisch. Info-Icon pro Plugin zeigt Beschreibung als Toggle-Box (i18n-Keys `plugin_descriptions.<key>` in `admin.json`). |
 | Quick Actions | `frontend/src/lib/quickActions.ts` | `pages/AdminPage.tsx` | 3 konfigurierbare Favoriten (User-Preference). |
 | Stillmodus | `frontend/src/lib/breastfeedingMode.ts` | – | localStorage Toggle. Bei off: "Letzte Flasche"-Tile + bottle Preset. Hybridmodus: beides parallel. |
 | Children-Context | `frontend/src/context/ChildContext.tsx` | `hooks/useChildren.ts` | Globaler aktiver Kind-State. Persistenz via localStorage + Server-Preference. |
-| ToastContext | `frontend/src/context/ToastContext.tsx` | `hooks/useToast` | Globale Toast-Notifications. |
+| ToastContext | `frontend/src/context/ToastContext.tsx` | `hooks/useToast`, `hooks/useEntryToast.ts` | Globale Toast-Notifications. `useEntryToast` zeigt Erfolgs-Toast nach Plugin-Form-Submits und kontrolliert Auto-Navigate-Zurück (MBT-187). |
 | ErrorBoundary | `frontend/src/components/ErrorBoundary.tsx` | – | Globaler React-Error-Catch. Verhindert schwarze Screens bei Runtime-Fehlern. |
 | Tag-System | `frontend/src/components/TagSelector.tsx`, `TagBadges.tsx` | `pages/TagsPage.tsx`, `TagDetailPage.tsx` | Bound (Edit) + pending (Create) Modus. Swipe auf TagDetailPage: links=archivieren, rechts=Tag entfernen. Suche durchsucht summary + notes. |
 | Alerts (UI) | `frontend/src/components/AlertBanner.tsx`, `AlertBell.tsx` | `lib/alertDismiss.ts`, `hooks/useAlerts.ts` | Banner mit X-Button. 6h Dismiss via localStorage. Bell im Header zeigt Anzahl. |
@@ -127,6 +128,7 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 | Theme | `frontend/src/components/ThemeToggle.tsx` | `index.css` | Catppuccin Latte (Light) / Macchiato (Dark) via CSS-Variablen. `--ground` statt `--base` (Tailwind-Konflikt). |
 | Swipe-Gesten | `frontend/src/hooks/useSwipe.ts` | – | Threshold 50 px. Verwendet auf Dashboard-Tabs, Milestones-Tabs, TagDetailPage. |
 | ChangelogOverlay | `frontend/src/components/ChangelogOverlay.tsx` | – | Modal beim App-Start, wenn Version > letzter im localStorage. |
+| Tutorial / Onboarding | `frontend/src/context/TutorialContext.tsx`, `components/tutorial/TutorialOverlay.tsx` | `components/tutorial/tutorialSteps.ts`, `i18n/locales/{de,en}/tutorial.json` | Spotlight-Overlay mit Step-Sequenz (Mobile-/Desktop-gefiltert via `getStepsForDevice`). Persistenz über `UserPreferences.tutorial_completed/_step` + localStorage-Fallback. Pause-Modus (Off-Path & manuell via X→"Hier umsehen"), `actionPromptKey` (mauve fett), `pauseOnTargetClick`, `resumeEvent` (Tab-Reset auf SleepPage), Burger-Auto-Close, scroll-once. data-tutorial-Marker auf Header, Sidebar, MobileMenu, BabySummary, ViewTabs, FAB, AdminPage-Tile, Plugin-Pages. Auto-Start auf Dashboard wenn `!tutorial_completed`. |
 | PWA | `frontend/public/manifest.json` | `frontend/public/icons/` | iOS-kompatibel (apple-touch-icon, standalone). 180/192/512 px PNG. |
 
 ## 4. Schlüsselverzeichnisse

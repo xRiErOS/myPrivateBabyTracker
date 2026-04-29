@@ -1,6 +1,6 @@
 # MyBaby — Feature-Abhängigkeiten
 
-Stand: 2026-04-28 · ergänzt `docs/FEATURES.md`.
+Stand: 2026-04-29 · ergänzt `docs/FEATURES.md`.
 
 Dieser Graph zeigt, welche Features auf andere angewiesen sind. Pflicht-Lektüre vor jedem Refactor — er beantwortet die Frage: "Was bricht, wenn ich X anfasse?"
 
@@ -32,6 +32,7 @@ graph TD
         TOTP[2FA TOTP]
         Passkeys[Passkeys WebAuthn]
         Logging[Logging / Admin-Logs]
+        Tutorial[Tutorial / Onboarding]
         i18n[i18n]
         Theme[Catppuccin Theme]
     end
@@ -139,6 +140,12 @@ graph TD
     UserPrefs --> Dashboard
     UserPrefs --> Layout
     UserPrefs --> Feeding
+    UserPrefs --> Tutorial
+
+    Tutorial --> Layout
+    Tutorial -. data-tutorial markers .-> Dashboard
+    Tutorial -. data-tutorial markers .-> Forms
+    i18n --> Tutorial
 
     AdminHub --> Plugins
     AdminHub --> ApiKeys
@@ -183,6 +190,7 @@ Features, die mehrere Plugins berühren.
 | 2FA TOTP | DB, Auth | – | – |
 | Passkeys WebAuthn | DB, Auth | – | – |
 | Admin-Logs | DB, Auth | – | – |
+| Tutorial / Onboarding | UserPrefs (Persistenz), i18n, Layout (data-tutorial-Marker), React-Router (navigate für Off-Path-Resume) | Header, Sidebar, MobileMenu, Dashboard (BabySummary), ViewTabs, FAB, AdminPage, PluginConfigPage, SleepPage, ChildrenPage | – |
 
 ### Layer 2 — Tracking Plugins (parallel, austauschbar)
 
@@ -221,6 +229,7 @@ Plugins, die andere Daten konsumieren oder das Children-Modell erweitern.
 | Dashboard | Layout, alle aktivierten Plugins (für Widgets), User-Preferences (für Widget-Order) |
 | ErrorBoundary | – (top-level) |
 | ChangelogOverlay | – (liest localStorage + `/api/v1/changelog`) |
+| TutorialOverlay | UserPreferences, i18n, React-Router. Lauscht auf `mybaby:tutorial:child-created` (ChildrenPage), dispatched `mybaby:tutorial:open/close-mobile-menu` (Header) und `mybaby:tutorial:sleep-tab-list` (SleepPage). |
 
 ## Kritische Pfade (Refactor-Risiko)
 
@@ -234,6 +243,7 @@ Diese Pfade sind besonders sensibel — Änderungen hier brechen viele Konsument
 6. **`backend/app/models/child.py`** — Child-Schema-Änderung bricht alle Plugin-Models (FK).
 7. **`backend/app/services/alert_service.py`** — Alert-Logik nutzt Plugin-Daten direkt (kein Plugin-Hook).
 8. **`backend/alembic/env.py`** — Plugin-Discovery für Migrations. Falsche Reihenfolge → Migrations-Fail.
+9. **`frontend/src/components/tutorial/tutorialSteps.ts`** — Step-Definitionen mit CSS-Selektoren (`data-tutorial="..."`). Entfernen oder Umbenennen eines Markers in einer Layout/Page-Komponente bricht den entsprechenden Step still (Spotlight findet nichts → fällt auf Full-Backdrop zurück, wirkt visuell leer).
 
 ## Wartung
 
