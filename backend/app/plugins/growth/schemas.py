@@ -1,6 +1,11 @@
 """Pydantic schemas for Growth plugin API responses."""
 
+from typing import Literal
+
 from pydantic import BaseModel
+
+
+Metric = Literal["weight", "length"]
 
 
 class PercentilePoint(BaseModel):
@@ -15,10 +20,10 @@ class PercentilePoint(BaseModel):
 
 
 class WeightDataPoint(BaseModel):
-    """A child's actual weight measurement mapped to age."""
+    """A measurement mapped to age. `value` unit depends on metric (kg | cm)."""
 
     age_weeks: float
-    weight_kg: float
+    value: float
     measured_at: str
 
 
@@ -29,5 +34,6 @@ class GrowthChartResponse(BaseModel):
     gender: str | None
     is_preterm: bool
     corrected_age_offset_weeks: float
+    metric: Metric
     percentile_curves: list[PercentilePoint]
     measurements: list[WeightDataPoint]

@@ -2,6 +2,8 @@
 
 import { apiFetch } from "./client";
 
+export type GrowthMetric = "weight" | "length";
+
 export interface PercentilePoint {
   age_weeks: number;
   p3: number;
@@ -11,9 +13,9 @@ export interface PercentilePoint {
   p97: number;
 }
 
-export interface WeightDataPoint {
+export interface MeasurementPoint {
   age_weeks: number;
-  weight_kg: number;
+  value: number;
   measured_at: string;
 }
 
@@ -22,10 +24,17 @@ export interface GrowthChartData {
   gender: string | null;
   is_preterm: boolean;
   corrected_age_offset_weeks: number;
+  metric: GrowthMetric;
   percentile_curves: PercentilePoint[];
-  measurements: WeightDataPoint[];
+  measurements: MeasurementPoint[];
 }
 
-export async function getGrowthChart(childId: number): Promise<GrowthChartData> {
-  return apiFetch<GrowthChartData>(`/v1/growth/chart/${childId}`);
+export async function getGrowthChart(
+  childId: number,
+  metric: GrowthMetric = "weight"
+): Promise<GrowthChartData> {
+  return apiFetch<GrowthChartData>(`/v1/growth/chart/${childId}?metric=${metric}`);
 }
+
+// Backwards-compat type alias for older imports
+export type WeightDataPoint = MeasurementPoint;

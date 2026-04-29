@@ -24,6 +24,9 @@
     "title": "WHO Growth Chart",
     "corrected_age": "Corrected age",
     "tab_list": "Entries",
-    "tab_chart": "Growth chart"
+    "tab_chart": "Growth chart",
+    "weight": "Weight",
+    "length": "Length",
+    "error": "Growth chart could not be loaded."
   }
 }

@@ -24,6 +24,9 @@
     "title": "WHO Wachstumskurve",
     "corrected_age": "Korrigiertes Alter",
     "tab_list": "Eintraege",
-    "tab_chart": "Wachstumskurve"
+    "tab_chart": "Wachstumskurve",
+    "weight": "Gewicht",
+    "length": "Laenge",
+    "error": "Wachstumsdiagramm konnte nicht geladen werden."
   }
 }
