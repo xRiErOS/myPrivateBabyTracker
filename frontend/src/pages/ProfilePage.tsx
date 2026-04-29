@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Baby, Globe, RefreshCw, Sparkles, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Clock, Baby, GraduationCap, Globe, RefreshCw, Sparkles, Zap } from "lucide-react";
+import { useTutorialOptional } from "../context/TutorialContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "../components/Card";
 import { ChangelogModal, useShowChangelog } from "../components/ChangelogOverlay";
@@ -45,6 +47,9 @@ export default function ProfilePage() {
   const [clearing, setClearing] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const changelogHook = useShowChangelog();
+  const tutorial = useTutorialOptional();
+  const navigate = useNavigate();
+  const { t: ttut } = useTranslation("tutorial");
 
   useEffect(() => {
     getPreferences()
@@ -218,6 +223,27 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
+      </Card>
+
+      {/* Tutorial Reset (MBT-170) */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-4 w-4 text-mauve" />
+          <h3 className="font-headline text-base font-semibold text-text">{ttut("reset")}</h3>
+        </div>
+        <p className="text-xs text-subtext0">{ttut("reset_description")}</p>
+        <button
+          type="button"
+          onClick={() => {
+            tutorial?.reset();
+            navigate("/");
+          }}
+          disabled={!tutorial}
+          className="w-full py-2.5 rounded-lg bg-surface1 text-text font-label text-sm font-semibold hover:bg-surface2 active:bg-surface2 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          <GraduationCap className="h-4 w-4" />
+          {ttut("reset")}
+        </button>
       </Card>
 
       {/* Release Notes */}

@@ -13,6 +13,8 @@ class PreferencesResponse(BaseModel):
     track_visibility: dict[str, bool] | None = None
     timezone: str = "Europe/Berlin"
     locale: str = "de"
+    tutorial_completed: bool = False
+    tutorial_step: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -27,3 +29,5 @@ class PreferencesUpdate(BaseModel):
     track_visibility: dict[str, bool] | None = None
     timezone: str | None = Field(default=None, max_length=50)
     locale: str | None = Field(default=None, max_length=10)
+    tutorial_completed: bool | None = None
+    tutorial_step: int | None = Field(default=None, ge=0, le=100)

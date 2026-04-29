@@ -1,0 +1,34 @@
+{
+  "next": "Weiter",
+  "prev": "Zurueck",
+  "skip": "Tutorial ueberspringen",
+  "done": "Fertig",
+  "reset": "Tutorial neu starten",
+  "reset_description": "Setzt das Tutorial zurueck und zeigt es beim naechsten Start des Dashboards erneut.",
+  "step": {
+    "welcome": {
+      "title": "Willkommen bei myBaby",
+      "description": "Lass uns dir die wichtigsten Funktionen zeigen — in unter zwei Minuten."
+    },
+    "fab": {
+      "title": "Schnellerfassung",
+      "description": "Tippe auf den schwebenden Plus-Button, um schnell einen neuen Eintrag (Schlaf, Mahlzeit, Windel ...) zu erfassen."
+    },
+    "create_entry": {
+      "title": "Eintrag erfassen",
+      "description": "Fuelle das Formular aus und speichere. Du wirst gleich auf der Plugin-Seite landen mit deinem neuen Eintrag oben."
+    },
+    "switch_tab": {
+      "title": "Tagesverlauf wechseln",
+      "description": "Auf dem Dashboard kannst du oben zwischen Heute / 7 / 14 / 30 Tagen wechseln, um Trends zu erkennen."
+    },
+    "plugin_admin": {
+      "title": "Plugins verwalten",
+      "description": "Unter Verwaltung kannst du optionale Plugins aktivieren oder deaktivieren — z.B. Bauchlage, Wachstumskurven oder U-Untersuchungen."
+    },
+    "done": {
+      "title": "Fertig!",
+      "description": "Das war's. Du kannst das Tutorial jederzeit unter Profil > Tutorial neu starten erneut aufrufen."
+    }
+  }
+}

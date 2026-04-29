@@ -4,6 +4,8 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChildProvider } from "./context/ChildContext";
 import { ToastProvider } from "./context/ToastContext";
+import { TutorialProvider } from "./context/TutorialContext";
+import { TUTORIAL_STEPS } from "./components/tutorial/tutorialSteps";
 import App from "./App";
 import "./i18n";
 import "./index.css";
@@ -23,7 +25,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <ChildProvider>
           <ToastProvider>
-            <App />
+            <TutorialProvider totalSteps={TUTORIAL_STEPS.length}>
+              <App />
+            </TutorialProvider>
           </ToastProvider>
         </ChildProvider>
       </BrowserRouter>

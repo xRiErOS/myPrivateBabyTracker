@@ -19,6 +19,7 @@ import de_admin from "./locales/de/admin.json";
 import de_auth from "./locales/de/auth.json";
 import de_checkup from "./locales/de/checkup.json";
 import de_notes from "./locales/de/notes.json";
+import de_tutorial from "./locales/de/tutorial.json";
 
 import en_common from "./locales/en/common.json";
 import en_sleep from "./locales/en/sleep.json";
@@ -37,6 +38,7 @@ import en_admin from "./locales/en/admin.json";
 import en_auth from "./locales/en/auth.json";
 import en_checkup from "./locales/en/checkup.json";
 import en_notes from "./locales/en/notes.json";
+import en_tutorial from "./locales/en/tutorial.json";
 
 i18n
   .use(LanguageDetector)
@@ -63,6 +65,7 @@ i18n
       "auth",
       "checkup",
       "notes",
+      "tutorial",
     ],
     resources: {
       de: {
@@ -83,6 +86,7 @@ i18n
         auth: de_auth,
         checkup: de_checkup,
         notes: de_notes,
+        tutorial: de_tutorial,
       },
       en: {
         common: en_common,
@@ -102,6 +106,7 @@ i18n
         auth: en_auth,
         checkup: en_checkup,
         notes: en_notes,
+        tutorial: en_tutorial,
       },
     },
     detection: {

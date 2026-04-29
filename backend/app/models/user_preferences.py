@@ -20,3 +20,6 @@ class UserPreferences(TimestampMixin, Base):
     quick_actions: Mapped[str | None] = mapped_column(Text)  # JSON array of plugin keys
     widget_order: Mapped[str | None] = mapped_column(Text)  # JSON array of widget keys
     track_visibility: Mapped[str | None] = mapped_column(Text)  # JSON object {sleep: true, ...}
+    # MBT-170: Tutorial state
+    tutorial_completed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    tutorial_step: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

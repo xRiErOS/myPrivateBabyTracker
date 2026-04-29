@@ -6,6 +6,7 @@ import { BottomNav } from "./BottomNav";
 import { FAB } from "./FAB";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
+import { TutorialOverlay } from "./tutorial/TutorialOverlay";
 
 interface LayoutProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ export function Layout({ children }: LayoutProps) {
       </div>
       <BottomNav />
       <FAB />
+      <TutorialOverlay />
     </div>
   );
 }

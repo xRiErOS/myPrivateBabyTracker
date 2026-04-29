@@ -28,6 +28,8 @@ def _to_response(prefs: UserPreferences, user: User) -> PreferencesResponse:
         track_visibility=json.loads(prefs.track_visibility) if prefs.track_visibility else None,
         timezone=user.timezone or "Europe/Berlin",
         locale=user.locale or "de",
+        tutorial_completed=prefs.tutorial_completed,
+        tutorial_step=prefs.tutorial_step,
     )
 
 

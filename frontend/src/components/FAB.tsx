@@ -154,6 +154,7 @@ export function FAB() {
 
         {/* Main FAB button */}
         <button
+          data-tutorial="fab"
           onClick={() => {
             setAllPluginsOpen(false);
             setOpen(!open);

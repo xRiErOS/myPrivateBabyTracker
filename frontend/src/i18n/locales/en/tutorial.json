@@ -1,0 +1,34 @@
+{
+  "next": "Next",
+  "prev": "Back",
+  "skip": "Skip tutorial",
+  "done": "Done",
+  "reset": "Restart tutorial",
+  "reset_description": "Resets the tutorial and shows it again the next time you open the dashboard.",
+  "step": {
+    "welcome": {
+      "title": "Welcome to myBaby",
+      "description": "Let us show you the key features — in under two minutes."
+    },
+    "fab": {
+      "title": "Quick capture",
+      "description": "Tap the floating plus button to quickly capture a new entry (sleep, feeding, diaper ...)."
+    },
+    "create_entry": {
+      "title": "Capture an entry",
+      "description": "Fill in the form and save. You will land on the plugin page with your new entry on top."
+    },
+    "switch_tab": {
+      "title": "Switch range",
+      "description": "On the dashboard you can switch between Today / 7 / 14 / 30 days to spot trends."
+    },
+    "plugin_admin": {
+      "title": "Manage plugins",
+      "description": "Under Settings you can enable or disable optional plugins — like tummy time, growth curves or well-child visits."
+    },
+    "done": {
+      "title": "Done!",
+      "description": "That's it. You can replay the tutorial anytime via Profile > Restart tutorial."
+    }
+  }
+}

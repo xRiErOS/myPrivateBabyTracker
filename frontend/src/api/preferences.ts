@@ -10,6 +10,8 @@ export interface UserPreferences {
   track_visibility: Record<string, boolean> | null;
   timezone: string;
   locale: string;
+  tutorial_completed: boolean;
+  tutorial_step: number;
 }
 
 export async function getPreferences(): Promise<UserPreferences> {
