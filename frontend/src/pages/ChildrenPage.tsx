@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Baby, Download, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "../components/Button";
 import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/Card";
@@ -58,7 +59,10 @@ function PurgeModal({ child, onClose, onPurged }: PurgeModalProps) {
     setNameError(false);
     setIsPurging(true);
     try {
-      await purgeChildData(child.id, false);
+      // MBT-207: hard-delete the child record itself (delete_child=true).
+      // Without this the row stayed in the DB with is_active=true, so the
+      // entry kept reappearing after a hard reload.
+      await purgeChildData(child.id, true);
       showToast(t("children.purge_success", { name: child.name }));
       onPurged();
       onClose();
@@ -160,7 +164,8 @@ function PurgeModal({ child, onClose, onPurged }: PurgeModalProps) {
 export default function ChildrenPage() {
   const { t } = useTranslation("admin");
   const { t: tc } = useTranslation("common");
-  const { data: children = [], isLoading, refetch } = useChildren();
+  const queryClient = useQueryClient();
+  const { data: children = [], isLoading } = useChildren();
   const createChild = useCreateChild();
   const updateChild = useUpdateChild();
 
@@ -531,7 +536,10 @@ export default function ChildrenPage() {
           child={purgeChild}
           onClose={() => setPurgeChild(null)}
           onPurged={() => {
-            void refetch();
+            // MBT-207: invalidate every cache that referenced this child so
+            // dashboards, lists and ChildContext refresh without a manual reload.
+            void queryClient.invalidateQueries({ queryKey: ["children"] });
+            void queryClient.invalidateQueries();
           }}
         />
       )}

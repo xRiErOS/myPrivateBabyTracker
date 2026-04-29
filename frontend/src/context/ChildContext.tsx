@@ -31,9 +31,17 @@ export function ChildProvider({ children: reactChildren }: { children: ReactNode
   const { data: childList = [], isLoading } = useChildren();
   const [activeChild, setActiveChildState] = useState<Child | null>(null);
 
-  // Restore active child from localStorage or pick first
+  // Restore active child from localStorage or pick first.
+  // MBT-207: also recover when the currently active child was deleted —
+  // fall back to the first remaining child or null if none are left.
   useEffect(() => {
-    if (childList.length === 0) return;
+    if (childList.length === 0) {
+      if (activeChild !== null) {
+        setActiveChildState(null);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+      return;
+    }
 
     const storedId = localStorage.getItem(STORAGE_KEY);
     const stored = storedId
@@ -41,11 +49,18 @@ export function ChildProvider({ children: reactChildren }: { children: ReactNode
       : null;
 
     if (stored) {
-      setActiveChildState(stored);
-    } else {
-      setActiveChildState(childList[0]);
+      // Keep state in sync with refreshed list (e.g. updated name)
+      if (!activeChild || activeChild.id !== stored.id || activeChild !== stored) {
+        setActiveChildState(stored);
+      }
+      return;
     }
-  }, [childList]);
+
+    // Stored child no longer exists (deleted) → switch to first available
+    const fallback = childList[0];
+    setActiveChildState(fallback);
+    localStorage.setItem(STORAGE_KEY, String(fallback.id));
+  }, [childList, activeChild]);
 
   const setActiveChild = useCallback((child: Child) => {
     setActiveChildState(child);

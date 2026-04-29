@@ -121,6 +121,28 @@ async def test_delete_child_soft_delete(async_client: AsyncClient):
 
 
 @pytest.mark.anyio
+async def test_get_deleted_child_returns_404(async_client: AsyncClient):
+    """MBT-207: GET on a soft-deleted child must return 404 (not the inactive record)."""
+    create = await async_client.post(
+        "/api/v1/children/",
+        json={"name": "Frida", "birth_date": "2025-08-01"},
+    )
+    child_id = create.json()["id"]
+
+    # Sanity check: GET works before delete
+    pre = await async_client.get(f"/api/v1/children/{child_id}")
+    assert pre.status_code == 200
+
+    # Soft-delete
+    delete_resp = await async_client.delete(f"/api/v1/children/{child_id}")
+    assert delete_resp.status_code == 204
+
+    # Acceptance #2: GET after DELETE must return 404
+    post = await async_client.get(f"/api/v1/children/{child_id}")
+    assert post.status_code == 404
+
+
+@pytest.mark.anyio
 async def test_delete_child_not_found(async_client: AsyncClient):
     """DELETE non-existent child returns 404."""
     response = await async_client.delete("/api/v1/children/99999")

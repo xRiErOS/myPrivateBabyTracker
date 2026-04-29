@@ -161,8 +161,10 @@ async def get_child(
     user: User | None = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """Get a child by ID."""
-    result = await db.execute(select(Child).where(Child.id == child_id))
+    """Get a child by ID. Soft-deleted children (is_active=False) return 404."""
+    result = await db.execute(
+        select(Child).where(Child.id == child_id, Child.is_active.is_(True))
+    )
     child = result.scalar_one_or_none()
     if child is None:
         raise NotFoundError(f"Child with id {child_id} not found")
