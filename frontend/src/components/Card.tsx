@@ -10,9 +10,19 @@ interface CardProps {
   onTouchStart?: TouchEventHandler;
   onTouchMove?: TouchEventHandler;
   onTouchEnd?: TouchEventHandler;
+  "data-tutorial"?: string;
 }
 
-export function Card({ children, className = "", style, onClick, onTouchStart, onTouchMove, onTouchEnd }: CardProps) {
+export function Card({
+  children,
+  className = "",
+  style,
+  onClick,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  "data-tutorial": dataTutorial,
+}: CardProps) {
   return (
     <div
       className={`bg-surface0 rounded-card p-4 ${className}`.trim()}
@@ -21,6 +31,7 @@ export function Card({ children, className = "", style, onClick, onTouchStart, o
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      data-tutorial={dataTutorial}
       role={onClick ? "button" : undefined}
     >
       {children}

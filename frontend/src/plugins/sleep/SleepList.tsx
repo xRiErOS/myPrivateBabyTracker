@@ -62,12 +62,14 @@ export function SleepList() {
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
-      <Select
-        label="Filter"
-        options={TYPE_OPTIONS}
-        value={typeFilter}
-        onChange={(e) => setTypeFilter(e.target.value)}
-      />
+      <div data-tutorial="sleep-filter">
+        <Select
+          label="Filter"
+          options={TYPE_OPTIONS}
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+        />
+      </div>
 
       {entries.length === 0 && (
         <div className="flex flex-col items-center gap-2 py-8 text-overlay0">
@@ -127,7 +129,7 @@ export function SleepList() {
         }
 
         return (
-          <ListSummaryBar>
+          <ListSummaryBar data-tutorial="sleep-stats">
             <div className="flex gap-1.5">
               {avgTotalMin != null && <MetricPill label={t("avg.hours")} value={fmtMinutes(avgTotalMin)} />}
               {avgNightMin != null && <MetricPill label={t("avg.night")} value={fmtMinutes(avgNightMin)} />}
@@ -143,7 +145,7 @@ export function SleepList() {
         );
       })()}
 
-      {entries.map((entry) => (
+      {entries.map((entry, idx) => (
         <Card key={entry.id} className={`flex flex-col gap-1 p-3${editingId === entry.id ? " overflow-hidden" : ""}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -152,7 +154,7 @@ export function SleepList() {
                 {entry.sleep_type === "nap" ? t("type.nap") : t("type.night")}
               </span>
             </div>
-            <div className="flex gap-1">
+            <div data-tutorial={idx === 0 ? "sleep-actions" : undefined} className="flex gap-1">
               <button
                 onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
                 className={`min-h-[44px] min-w-[44px] flex items-center justify-center ${editingId === entry.id ? "text-peach" : "text-subtext0 hover:text-text"} transition-colors`}

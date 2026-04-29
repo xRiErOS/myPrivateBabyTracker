@@ -3,32 +3,110 @@
   "prev": "Zurueck",
   "skip": "Tutorial ueberspringen",
   "done": "Fertig",
+  "restart": "Neu starten",
+  "end_tutorial": "Einfuehrung beenden",
+  "go_to_children": "Gehe zu Kinder",
+  "go_to_sleep": "Gehe zu Schlaf",
+  "resume": "Fortsetzen",
+  "paused": "Tutorial pausiert",
   "reset": "Tutorial neu starten",
   "reset_description": "Setzt das Tutorial zurueck und zeigt es beim naechsten Start des Dashboards erneut.",
+  "dont_show_again": "Tutorial beim naechsten Start nicht erneut anzeigen",
+  "confirm_close": {
+    "title": "Tutorial beenden?",
+    "body": "Moechtest du das Tutorial komplett beenden oder dich umsehen?",
+    "minimize": "Hier umsehen",
+    "abort": "Tutorial abbrechen"
+  },
   "step": {
     "welcome": {
-      "title": "Willkommen bei myBaby",
-      "description": "Lass uns dir die wichtigsten Funktionen zeigen — in unter zwei Minuten."
+      "title": "Willkommen bei MyBaby",
+      "description": "Mach dich in unter 2 Minuten mit der App vertraut. Du kannst das Tutorial jederzeit ueber dein Profil erneut starten."
+    },
+    "dashboard_tiles": {
+      "title": "Tagesueberblick deines Babys",
+      "description": "Die Kacheln zeigen dir alle wichtigen Werte auf einen Blick — letzte Mahlzeit, Schlaf, Windel und mehr. Tippe auf eine Kachel, um in die Detailansicht zu springen."
+    },
+    "range_tabs": {
+      "title": "Zeitraum waehlen",
+      "description": "Wechsle zwischen Heute / 7 Tagen / 14 Tagen / Alle, um Trends zu erkennen. Im Zeitraum wird dann die Aufschluesselung angezeigt."
+    },
+    "burger_intro": {
+      "title": "Mobile-Navigation",
+      "description": "Auf dem Smartphone erreichst du dein Profil ueber das Menue oben rechts.",
+      "description_admin": "Auf dem Smartphone erreichst du die Verwaltung ueber das Menue oben rechts.",
+      "description_sleep": "Auf dem Smartphone erreichst du das Schlaf-Plug-In ueber das Menue oben rechts.",
+      "action": "Tippe auf das Menue oder auf 'Weiter'."
+    },
+    "profile": {
+      "title": "Dein Profil",
+      "description_desktop": "Hier findest du dein Profil — Zeitzone, Sprache, Quick-Actions und das Tutorial. Du kannst das Tutorial jederzeit erneut starten ueber Profil > Tutorial neu starten.",
+      "description_mobile": "Hier findest du im Menue dein Profil — Zeitzone, Sprache, Quick-Actions und das Tutorial.",
+      "action_mobile": "Du kannst jetzt dein Profil aufrufen und das Tutorial danach fortsetzen."
+    },
+    "admin": {
+      "title": "Die Verwaltung",
+      "description_desktop": "Hier findest du Verwaltungsfunktionen: Kind oder Kinder anlegen, Plug-Ins aktivieren und einstellen, Warnhinweise konfigurieren.",
+      "description_mobile": "Hier findest du Verwaltungsfunktionen: Kind oder Kinder anlegen, Plug-Ins aktivieren und einstellen, Warnhinweise konfigurieren.",
+      "action_desktop": "Klicke in der Seitenleiste auf Verwaltung.",
+      "action_mobile": "Tippe im Menue auf Verwaltung."
+    },
+    "admin_overview": {
+      "title": "Die Verwaltung der App",
+      "description": "Du kannst in der Verwaltung wichtige Einstellungen machen: Kind oder Kinder anlegen, Medikamente zentral erfassen, Warnhinweise konfigurieren oder deine gespeicherten Medien verwalten.",
+      "action": "Tippe auf Plug-Ins, um die Funktionen der App zu konfigurieren."
+    },
+    "plugins_intro": {
+      "title": "Die Plug-Ins",
+      "description": "Die App unterstuetzt dich so, wie du es willst. Du kannst auf dieser Seite die Funktionen aktivieren, die du nutzen moechtest, und bestimmen, was auf dem Home-Dashboard angezeigt wird.\n\nDer Toggle 'Home' steuert, ob ein Widget zur Funktion auf dem Dashboard erscheint. Der Toggle 'Aktiv' steuert, ob das Feature insgesamt aktiviert ist."
+    },
+    "plugins_explore": {
+      "title": "Plug-Ins erkunden",
+      "description": "Hier kannst du die Plug-In-Verwaltung in Ruhe entdecken.",
+      "action": "Um dich umzusehen, schliesse mit dem X das Fenster. Du kannst anschliessend fortsetzen."
+    },
+    "sleep_link": {
+      "title": "Weiter zum Schlaf",
+      "description_desktop": "Als Naechstes schauen wir uns ein Plug-In im Detail an — den Schlaf.",
+      "description_mobile": "Als Naechstes schauen wir uns ein Plug-In im Detail an — den Schlaf.",
+      "action_desktop": "Klicke in der Seitenleiste auf Schlaf.",
+      "action_mobile": "Tippe im Menue auf Schlaf."
+    },
+    "sleep_new_btn": {
+      "title": "Schlaf erfassen",
+      "description": "Du kannst mit dem Button 'Neu' einen neuen Schlaf-Eintrag erfassen oder einen Timer starten.",
+      "action": "Tippe auf 'Neu', um einen Eintrag zu erfassen."
+    },
+    "sleep_tabs": {
+      "title": "Eintraege und Uebersicht",
+      "description": "Im Reiter 'Eintraege' werden dir fuer Heute, 7 Tage, 14 Tage oder Alle deine entsprechenden Eintraege angezeigt. Fuer viele Funktionen gibt es 'Uebersichten' mit Empfehlungen und offiziellen Werten.",
+      "action": "Tippe auf einen Tab, um ihn auszuprobieren."
+    },
+    "sleep_filter": {
+      "title": "Eintraege filtern",
+      "description": "Viele Funktionen erfassen Eintraege mit bestimmten Kriterien. Diese kannst du mit dem Menue filtern."
+    },
+    "sleep_stats": {
+      "title": "Nuetzliche Durchschnittswerte",
+      "description": "Damit du gut informiert bist, geben dir die Durchschnittswerte deines Trackings ein Gefuehl dafuer, wie sich dein Baby entwickelt und worauf du achten kannst."
+    },
+    "sleep_edit": {
+      "title": "Eintraege bearbeiten",
+      "description": "Du kannst erfasste Eintraege jederzeit mit dem Stift bearbeiten oder mit dem Eimer loeschen.",
+      "action": "Du hast die wichtigen Funktionen kennengelernt. Nun lass uns dein Kind hinzufuegen."
+    },
+    "add_child": {
+      "title": "Kind hinzufuegen",
+      "description": "Lege dein erstes Kind an, um mit dem Erfassen zu beginnen. Das Tutorial pausiert, waehrend du das Formular ausfuellst — beim Speichern geht es automatisch weiter.",
+      "action": "Tippe '+ Hinzufuegen', um zu starten."
+    },
+    "success": {
+      "title": "Herzlichen Glueckwunsch — es kann losgehen 🎉",
+      "description": "Du hast erfolgreich dein Kind angelegt und kannst mit dem Erfassen beginnen.\n\nWenn du Fragen oder Feedback hast, wende dich gerne an uns."
     },
     "fab": {
       "title": "Schnellerfassung",
-      "description": "Tippe auf den schwebenden Plus-Button, um schnell einen neuen Eintrag (Schlaf, Mahlzeit, Windel ...) zu erfassen."
-    },
-    "create_entry": {
-      "title": "Eintrag erfassen",
-      "description": "Fuelle das Formular aus und speichere. Du wirst gleich auf der Plugin-Seite landen mit deinem neuen Eintrag oben."
-    },
-    "switch_tab": {
-      "title": "Tagesverlauf wechseln",
-      "description": "Auf dem Dashboard kannst du oben zwischen Heute / 7 / 14 / 30 Tagen wechseln, um Trends zu erkennen."
-    },
-    "plugin_admin": {
-      "title": "Plugins verwalten",
-      "description": "Unter Verwaltung kannst du optionale Plugins aktivieren oder deaktivieren — z.B. Bauchlage, Wachstumskurven oder U-Untersuchungen."
-    },
-    "done": {
-      "title": "Fertig!",
-      "description": "Das war's. Du kannst das Tutorial jederzeit unter Profil > Tutorial neu starten erneut aufrufen."
+      "description": "Tippe auf den schwebenden Plus-Button, um schnell einen neuen Eintrag zu erfassen."
     }
   }
 }

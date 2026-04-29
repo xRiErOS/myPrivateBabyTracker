@@ -303,12 +303,14 @@ function TodayView({
 
   return (
     <div className="space-y-4">
-      <BabySummary
-        feedings={data.feedings}
-        diapers={data.diapers}
-        childId={childId}
-        onTileClick={onTileClick}
-      />
+      <div data-tutorial="baby-summary">
+        <BabySummary
+          feedings={data.feedings}
+          diapers={data.diapers}
+          childId={childId}
+          onTileClick={onTileClick}
+        />
+      </div>
       <DayTimeline
         feedings={todayFeedings}
         diapers={todayDiapers}

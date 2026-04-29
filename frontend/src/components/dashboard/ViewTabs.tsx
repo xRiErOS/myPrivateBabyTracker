@@ -15,7 +15,7 @@ const TABS: { key: DashboardView; label: string }[] = [
 
 export function ViewTabs({ active, onChange }: ViewTabsProps) {
   return (
-    <div className="flex bg-surface0 rounded-card p-1 gap-1">
+    <div data-tutorial="range-tabs" className="flex bg-surface0 rounded-card p-1 gap-1">
       {TABS.map(({ key, label }) => (
         <button
           key={key}

@@ -98,6 +98,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                   <NavLink
                     key={key}
                     to={route}
+                    data-tutorial={`menu-${key}`}
                     className={({ isActive }) => tileClass(isActive)}
                   >
                     <Icon size={22} />
@@ -115,11 +116,19 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
             {tc("nav.group.admin")}
           </p>
           <div className="grid grid-cols-3 gap-2">
-            <NavLink to="/profile" className={({ isActive }) => tileClass(isActive)}>
+            <NavLink
+              to="/profile"
+              data-tutorial="menu-profile"
+              className={({ isActive }) => tileClass(isActive)}
+            >
               <User size={22} />
               <span className="mt-1">{tc("nav.profile")}</span>
             </NavLink>
-            <NavLink to="/admin" className={({ isActive }) => tileClass(isActive)}>
+            <NavLink
+              to="/admin"
+              data-tutorial="menu-admin"
+              className={({ isActive }) => tileClass(isActive)}
+            >
               <Settings size={22} />
               <span className="mt-1">{tc("nav.admin")}</span>
             </NavLink>

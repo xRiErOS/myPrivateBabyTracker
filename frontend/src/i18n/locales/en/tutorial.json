@@ -3,32 +3,110 @@
   "prev": "Back",
   "skip": "Skip tutorial",
   "done": "Done",
+  "restart": "Restart",
+  "end_tutorial": "End tutorial",
+  "go_to_children": "Go to Children",
+  "go_to_sleep": "Go to Sleep",
+  "resume": "Resume",
+  "paused": "Tutorial paused",
   "reset": "Restart tutorial",
   "reset_description": "Resets the tutorial and shows it again the next time you open the dashboard.",
+  "dont_show_again": "Don't show this tutorial again on next start",
+  "confirm_close": {
+    "title": "End tutorial?",
+    "body": "Do you want to end the tutorial completely or just look around?",
+    "minimize": "Look around",
+    "abort": "End tutorial"
+  },
   "step": {
     "welcome": {
-      "title": "Welcome to myBaby",
-      "description": "Let us show you the key features — in under two minutes."
+      "title": "Welcome to MyBaby",
+      "description": "Get familiar with the app in under 2 minutes. You can replay this tutorial anytime via your profile."
+    },
+    "dashboard_tiles": {
+      "title": "Your baby's daily overview",
+      "description": "The tiles show your key data at a glance — last feeding, sleep, diaper and more. Tap a tile to jump into the detail view."
+    },
+    "range_tabs": {
+      "title": "Pick a time range",
+      "description": "Switch between Today / 7 days / 14 days / All to spot trends. Each range shows a different breakdown of your data."
+    },
+    "burger_intro": {
+      "title": "Mobile navigation",
+      "description": "On mobile you reach your profile through the menu at the top right.",
+      "description_admin": "On mobile you reach Settings through the menu at the top right.",
+      "description_sleep": "On mobile you reach the Sleep plug-in through the menu at the top right.",
+      "action": "Tap the menu or 'Next'."
+    },
+    "profile": {
+      "title": "Your profile",
+      "description_desktop": "Your profile lives here — timezone, language, quick actions, tutorial. You can replay this tutorial anytime via Profile > Restart tutorial.",
+      "description_mobile": "Your profile lives here in the menu — timezone, language, quick actions, tutorial.",
+      "action_mobile": "You can open your profile now and resume the tutorial afterwards."
+    },
+    "admin": {
+      "title": "Settings",
+      "description_desktop": "All admin functions live here: add children, enable plug-ins, configure alerts.",
+      "description_mobile": "All admin functions live here: add children, enable plug-ins, configure alerts.",
+      "action_desktop": "Click Settings in the sidebar.",
+      "action_mobile": "Tap Settings in the menu."
+    },
+    "admin_overview": {
+      "title": "Settings overview",
+      "description": "From here you can manage your child(ren), maintain a central medication list, configure alerts or manage stored media.",
+      "action": "Tap Plug-ins to configure the app's features."
+    },
+    "plugins_intro": {
+      "title": "Plug-ins",
+      "description": "The app adapts to you. On this page you can enable the features you want and decide what appears on the home dashboard.\n\n'Home' toggle = widget visibility on dashboard. 'Active' toggle = feature on/off."
+    },
+    "plugins_explore": {
+      "title": "Explore plug-ins",
+      "description": "Take a moment to explore the plug-in admin page.",
+      "action": "To look around, close this window with the X. You can resume afterwards."
+    },
+    "sleep_link": {
+      "title": "Continue to Sleep",
+      "description_desktop": "Next we'll look at one plug-in in detail — Sleep.",
+      "description_mobile": "Next we'll look at one plug-in in detail — Sleep.",
+      "action_desktop": "Click Sleep in the sidebar.",
+      "action_mobile": "Tap Sleep in the menu."
+    },
+    "sleep_new_btn": {
+      "title": "Capture a sleep entry",
+      "description": "Use the 'New' button to capture a sleep entry or start a timer.",
+      "action": "Tap 'New' to capture an entry."
+    },
+    "sleep_tabs": {
+      "title": "Entries and Overview",
+      "description": "The 'Entries' tab shows entries for Today, 7 days, 14 days or All. Many features also have an 'Overview' tab with recommendations and reference values.",
+      "action": "Tap a tab to try it out."
+    },
+    "sleep_filter": {
+      "title": "Filter entries",
+      "description": "Many features capture entries with specific attributes. Use the menu to filter them."
+    },
+    "sleep_stats": {
+      "title": "Useful averages",
+      "description": "Averages from your tracked data give you a sense of how your baby is developing and what to watch."
+    },
+    "sleep_edit": {
+      "title": "Edit entries",
+      "description": "You can edit any entry with the pencil or delete it with the trash icon.",
+      "action": "You've learned the key features. Now let's add your child."
+    },
+    "add_child": {
+      "title": "Add a child",
+      "description": "Add your first child to start capturing data. The tutorial pauses while you fill in the form — once you save, it continues automatically.",
+      "action": "Tap '+ Add' to begin."
+    },
+    "success": {
+      "title": "Congratulations — you're ready 🎉",
+      "description": "You've successfully added your child and can start capturing data.\n\nIf you have questions or feedback, please reach out."
     },
     "fab": {
       "title": "Quick capture",
-      "description": "Tap the floating plus button to quickly capture a new entry (sleep, feeding, diaper ...)."
-    },
-    "create_entry": {
-      "title": "Capture an entry",
-      "description": "Fill in the form and save. You will land on the plugin page with your new entry on top."
-    },
-    "switch_tab": {
-      "title": "Switch range",
-      "description": "On the dashboard you can switch between Today / 7 / 14 / 30 days to spot trends."
-    },
-    "plugin_admin": {
-      "title": "Manage plugins",
-      "description": "Under Settings you can enable or disable optional plugins — like tummy time, growth curves or well-child visits."
-    },
-    "done": {
-      "title": "Done!",
-      "description": "That's it. You can replay the tutorial anytime via Profile > Restart tutorial."
+      "description": "Tap the floating plus button to quickly capture a new entry."
     }
   }
 }

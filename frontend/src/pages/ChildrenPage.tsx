@@ -228,6 +228,9 @@ export default function ChildrenPage() {
       birth_length_cm: birthLength ? birthLength : null,
     });
 
+    // Tutorial-Hook: signalisiert Erfolgs-Schritt
+    window.dispatchEvent(new CustomEvent("mybaby:tutorial:child-created"));
+
     resetCreateForm();
   };
 
@@ -263,6 +266,7 @@ export default function ChildrenPage() {
         <Button
           variant="primary"
           onClick={() => setShowForm(!showForm)}
+          data-tutorial="children-add"
           className="flex items-center gap-2"
         >
           <Plus size={16} />

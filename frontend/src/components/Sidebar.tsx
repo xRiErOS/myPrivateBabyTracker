@@ -64,6 +64,7 @@ export function Sidebar() {
                 <NavLink
                   key={key}
                   to={route}
+                  data-tutorial={`sidebar-${key}`}
                   className={({ isActive }) => linkClass(isActive)}
                 >
                   <Icon size={20} />
@@ -79,7 +80,11 @@ export function Sidebar() {
           <p className="px-3 pt-2 pb-1 font-label text-[10px] font-semibold text-subtext0 uppercase tracking-wide border-t border-surface1">
             {tc("nav.group.admin")}
           </p>
-          <NavLink to="/admin" className={({ isActive }) => linkClass(isActive)}>
+          <NavLink
+            to="/admin"
+            data-tutorial="sidebar-admin"
+            className={({ isActive }) => linkClass(isActive)}
+          >
             <Settings size={20} />
             <span>{tc("nav.admin")}</span>
           </NavLink>

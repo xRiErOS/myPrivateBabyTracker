@@ -56,6 +56,17 @@ export default function SleepPage() {
     }
   }, [searchParams, setSearchParams]);
 
+  // Tutorial-Resume aus sleep_tabs-Schritt: Tab zurueck auf "Eintraege"
+  // setzen, damit nachfolgende Steps (Filter, Stats) ihre Selektoren finden.
+  useEffect(() => {
+    const handler = () => {
+      setTab("list");
+      setShowForm(false);
+    };
+    window.addEventListener("mybaby:tutorial:sleep-tab-list", handler);
+    return () => window.removeEventListener("mybaby:tutorial:sleep-tab-list", handler);
+  }, []);
+
   const handleDone = useCallback(() => {
     stoppingTimer.current = true;
     setShowForm(false);
@@ -87,6 +98,7 @@ export default function SleepPage() {
           <Button
             variant={showForm && !runningEntry ? "danger" : "primary"}
             onClick={() => showForm ? handleCancel() : setShowForm(true)}
+            data-tutorial="sleep-new-btn"
             className="flex items-center gap-2"
           >
             {showForm && !runningEntry ? tc("cancel") : <><Plus className="h-4 w-4" /> {tc("new")}</>}
@@ -95,7 +107,7 @@ export default function SleepPage() {
       </PageHeader>
 
       {/* Tab bar */}
-      <div className="flex gap-1 rounded-lg bg-surface0 p-1">
+      <div data-tutorial="sleep-tabs" className="flex gap-1 rounded-lg bg-surface0 p-1">
         <button
           onClick={() => { setTab("list"); setShowForm(false); }}
           className={`flex-1 rounded-md px-3 py-2 font-label text-sm transition-colors ${

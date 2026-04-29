@@ -64,6 +64,7 @@ export default function PluginConfigPage() {
                     onClick={() => toggleExpand(plugin.key)}
                     aria-expanded={isExpanded}
                     aria-label={ta("plugins.show_description", { defaultValue: "Beschreibung anzeigen" })}
+                    data-tutorial="plugin-info"
                     className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-full text-subtext0 hover:text-mauve hover:bg-surface1 transition-colors shrink-0"
                   >
                     <Info className="h-4 w-4" />

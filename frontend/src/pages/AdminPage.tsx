@@ -54,10 +54,11 @@ export default function AdminPage() {
     <div className="space-y-4">
       <PageHeader title={t("title")} />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div data-tutorial="admin-grid" className="grid grid-cols-2 gap-3">
         {TILES.map(({ to, icon: Icon, labelKey, descKey }) => (
           <Card
             key={to}
+            data-tutorial={to === "/admin/plugins" ? "admin-plugins-tile" : undefined}
             className="flex flex-col items-center gap-2 p-4 cursor-pointer active:bg-surface1 transition-colors"
             onClick={() => navigate(to)}
           >

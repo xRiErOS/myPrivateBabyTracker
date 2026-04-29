@@ -1,7 +1,10 @@
-/** Tutorial context — manages onboarding step sequence (MBT-167/168/170).
+/** Tutorial context — manages onboarding step sequence (MBT-167/168/170 Round 2).
  *
  * State persists in UserPreferences (Backend) once user is authenticated.
- * Falls back to localStorage for unauthenticated cases (e.g. before login resolved).
+ * Falls back to localStorage for unauthenticated cases.
+ *
+ * Steps are filtered by device at provider mount; resize listener keeps the
+ * list in sync if the user rotates / resizes between mobile/desktop ranges.
  */
 
 import {
@@ -14,6 +17,7 @@ import {
   type ReactNode,
 } from "react";
 import { getPreferences, updatePreferences } from "../api/preferences";
+import { getStepsForDevice, type TutorialStep } from "../components/tutorial/tutorialSteps";
 
 const LOCAL_KEY_COMPLETED = "tutorial_completed";
 const LOCAL_KEY_STEP = "tutorial_step";
@@ -22,6 +26,10 @@ export interface TutorialState {
   active: boolean;
   step: number;
   completed: boolean;
+  steps: TutorialStep[];
+  dontShowAgain: boolean;
+  /** Manuell pausiert (User hat "Hier umsehen" gewaehlt). */
+  paused: boolean;
 }
 
 interface TutorialContextValue extends TutorialState {
@@ -31,27 +39,38 @@ interface TutorialContextValue extends TutorialState {
   skip: () => void;
   reset: () => void;
   goTo: (step: number) => void;
+  setDontShowAgain: (v: boolean) => void;
+  setPaused: (v: boolean) => void;
 }
 
 const TutorialContext = createContext<TutorialContextValue | null>(null);
 
 interface TutorialProviderProps {
   children: ReactNode;
-  totalSteps: number;
 }
 
-export function TutorialProvider({ children, totalSteps }: TutorialProviderProps) {
-  const [completed, setCompleted] = useState<boolean>(() => {
-    return localStorage.getItem(LOCAL_KEY_COMPLETED) === "true";
-  });
+export function TutorialProvider({ children }: TutorialProviderProps) {
+  const [completed, setCompleted] = useState<boolean>(() =>
+    localStorage.getItem(LOCAL_KEY_COMPLETED) === "true",
+  );
   const [step, setStep] = useState<number>(() => {
     const raw = localStorage.getItem(LOCAL_KEY_STEP);
     return raw ? Math.max(0, parseInt(raw, 10) || 0) : 0;
   });
   const [active, setActive] = useState<boolean>(false);
   const [hydrated, setHydrated] = useState<boolean>(false);
+  const [steps, setSteps] = useState<TutorialStep[]>(() => getStepsForDevice());
+  const [dontShowAgain, setDontShowAgain] = useState<boolean>(true);
+  const [paused, setPaused] = useState<boolean>(false);
 
-  // Hydrate from server preferences once
+  // Recompute steps on resize (mobile↔desktop transition)
+  useEffect(() => {
+    const handler = () => setSteps(getStepsForDevice());
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  // Hydrate from server preferences
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -73,7 +92,7 @@ export function TutorialProvider({ children, totalSteps }: TutorialProviderProps
     };
   }, []);
 
-  // Auto-start when first reaching dashboard after hydration if not completed
+  // Auto-start on dashboard if not completed
   useEffect(() => {
     if (!hydrated) return;
     if (completed) return;
@@ -94,32 +113,44 @@ export function TutorialProvider({ children, totalSteps }: TutorialProviderProps
       try {
         await updatePreferences(partial);
       } catch {
-        // unauthenticated — localStorage already updated, ignore
+        /* unauthenticated — localStorage already updated */
       }
     },
     [],
   );
 
+  const total = steps.length;
+
   const start = useCallback(() => {
     setActive(true);
     setStep(0);
+    setDontShowAgain(true);
+    setPaused(false);
   }, []);
 
   const next = useCallback(() => {
+    setPaused(false);
     setStep((prev) => {
       const newStep = prev + 1;
-      if (newStep >= totalSteps) {
+      if (newStep >= total) {
         setActive(false);
-        setCompleted(true);
-        void persist({ tutorial_completed: true, tutorial_step: totalSteps });
-        return totalSteps;
+        if (dontShowAgain) {
+          setCompleted(true);
+          void persist({ tutorial_completed: true, tutorial_step: total });
+        } else {
+          // User wants to see it again — reset to step 0 and leave completed=false
+          void persist({ tutorial_completed: false, tutorial_step: 0 });
+          return 0;
+        }
+        return total;
       }
       void persist({ tutorial_step: newStep });
       return newStep;
     });
-  }, [persist, totalSteps]);
+  }, [persist, total, dontShowAgain]);
 
   const prev = useCallback(() => {
+    setPaused(false);
     setStep((s) => {
       const newStep = Math.max(0, s - 1);
       void persist({ tutorial_step: newStep });
@@ -129,29 +160,53 @@ export function TutorialProvider({ children, totalSteps }: TutorialProviderProps
 
   const skip = useCallback(() => {
     setActive(false);
-    setCompleted(true);
-    void persist({ tutorial_completed: true });
-  }, [persist]);
+    setPaused(false);
+    if (dontShowAgain) {
+      setCompleted(true);
+      void persist({ tutorial_completed: true });
+    } else {
+      // User explicitly unchecked "don't show again" — keep tutorial available
+      void persist({ tutorial_step: 0 });
+    }
+  }, [persist, dontShowAgain]);
 
   const reset = useCallback(() => {
     setStep(0);
     setCompleted(false);
     setActive(true);
+    setDontShowAgain(true);
+    setPaused(false);
     void persist({ tutorial_completed: false, tutorial_step: 0 });
   }, [persist]);
 
   const goTo = useCallback(
     (target: number) => {
-      const clamped = Math.max(0, Math.min(totalSteps - 1, target));
+      setPaused(false);
+      const clamped = Math.max(0, Math.min(total - 1, target));
       setStep(clamped);
       void persist({ tutorial_step: clamped });
     },
-    [persist, totalSteps],
+    [persist, total],
   );
 
   const value = useMemo<TutorialContextValue>(
-    () => ({ active, step, completed, start, next, prev, skip, reset, goTo }),
-    [active, step, completed, start, next, prev, skip, reset, goTo],
+    () => ({
+      active,
+      step,
+      completed,
+      steps,
+      dontShowAgain,
+      paused,
+      start,
+      next,
+      prev,
+      skip,
+      reset,
+      goTo,
+      setDontShowAgain,
+      setPaused,
+    }),
+    [active, step, completed, steps, dontShowAgain, paused, start, next, prev, skip, reset, goTo],
   );
 
   return (
@@ -165,7 +220,6 @@ export function useTutorial(): TutorialContextValue {
   return ctx;
 }
 
-/** Optional version — returns null if not within a provider. */
 export function useTutorialOptional(): TutorialContextValue | null {
   return useContext(TutorialContext);
 }

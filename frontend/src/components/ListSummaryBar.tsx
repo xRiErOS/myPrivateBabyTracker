@@ -4,11 +4,12 @@ import type { ReactNode } from "react";
 
 interface ListSummaryBarProps {
   children: ReactNode;
+  "data-tutorial"?: string;
 }
 
-export function ListSummaryBar({ children }: ListSummaryBarProps) {
+export function ListSummaryBar({ children, "data-tutorial": dataTutorial }: ListSummaryBarProps) {
   return (
-    <div className="bg-surface0 rounded-card p-3 flex flex-col gap-2">
+    <div data-tutorial={dataTutorial} className="bg-surface0 rounded-card p-3 flex flex-col gap-2">
       {children}
     </div>
   );

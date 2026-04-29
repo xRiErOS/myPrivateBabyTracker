@@ -19,7 +19,7 @@ const OPTIONS: { key: DateRange; labelKey: string }[] = [
 export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
   const { t: tc } = useTranslation("common");
   return (
-    <div className="flex gap-1 bg-surface0 rounded-card p-1">
+    <div data-tutorial="range-tabs" className="flex gap-1 bg-surface0 rounded-card p-1">
       {OPTIONS.map(({ key, labelKey }) => (
         <button
           key={key}
