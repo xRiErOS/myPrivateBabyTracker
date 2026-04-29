@@ -4,9 +4,12 @@ from pydantic import BaseModel, Field
 
 
 class PreferencesResponse(BaseModel):
-    """User preferences (returned by GET /preferences)."""
+    """User preferences (returned by GET /preferences).
 
-    breastfeeding_enabled: bool = True
+    MBT-175: breastfeeding_enabled wurde auf children.breastfeeding_enabled
+    verschoben — pro Kind konfigurierbar statt pro User.
+    """
+
     feeding_hybrid: bool = False
     quick_actions: list[str] | None = None
     widget_order: list[str] | None = None
@@ -22,7 +25,6 @@ class PreferencesResponse(BaseModel):
 class PreferencesUpdate(BaseModel):
     """Partial update for user preferences."""
 
-    breastfeeding_enabled: bool | None = None
     feeding_hybrid: bool | None = None
     quick_actions: list[str] | None = None
     widget_order: list[str] | None = None

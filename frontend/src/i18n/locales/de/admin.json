@@ -80,6 +80,8 @@
     "birth_length_placeholder": "z.B. 51.5",
     "name": "Name",
     "name_placeholder": "Name des Kindes",
+    "breastfeeding_enabled": "Stillmodus",
+    "breastfeeding_enabled_hint": "Zeigt Brustkacheln (links/rechts) statt Flaschenkacheln auf der Startseite. Pro Kind konfigurierbar.",
     "confirm_delete": "\"{{name}}\" wirklich löschen?",
     "export_json": "Export JSON",
     "export_csv": "Export CSV",

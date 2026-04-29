@@ -57,7 +57,7 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 
 #### feeding
 - `feeding_type`: breast_left/breast_right/bottle/solid.
-- Stillmodus (User-Preference) blendet breast_left/breast_right aus, wenn deaktiviert.
+- Stillmodus pro Kind (`children.breastfeeding_enabled`, MBT-175) blendet breast_left/breast_right aus, wenn deaktiviert. Hybridmodus (User-Preference) zeigt beides parallel.
 - Kein Ende-Feld (entfernt nach UX-Feedback).
 
 #### diaper
@@ -90,7 +90,7 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 | Passkeys (WebAuthn) | `app/api/webauthn.py` | `app/models/webauthn.py` | py_webauthn. Register/Login Begin+Finish. Credentials pro User verwaltbar. |
 | API-Keys (M2M) | `app/api/api_keys.py`, `app/middleware/api_key_auth.py` | `app/models/api_key.py` | Argon2-Hash, Prefix-Matching (8 Zeichen), Scopes: read/write/admin. Schlüssel nur einmal sichtbar. |
 | User-Verwaltung | `app/api/users.py` | `app/models/user.py` | Admin-only CRUD. Rollen: admin/caregiver. Set-Password-Endpoint. Zeitzone pro User. |
-| User-Preferences | `app/api/preferences.py` | `app/models/user_preferences.py` | Serverseitig: breastfeeding_enabled, quick_actions, widget_order, track_visibility, tutorial_completed, tutorial_step. Auto-Create bei erstem Zugriff. |
+| User-Preferences | `app/api/preferences.py` | `app/models/user_preferences.py` | Serverseitig: feeding_hybrid, quick_actions, widget_order, track_visibility, tutorial_completed, tutorial_step. Auto-Create bei erstem Zugriff. (MBT-175: breastfeeding_enabled wanderte auf `children.breastfeeding_enabled`.) |
 | Children-Management | `app/api/children.py` | `app/models/child.py` | Mehrere Kinder pro Account, aktives Kind via Selector. Stammdaten: `is_preterm` + `estimated_birth_date` (Frühgeborenenmodus), `sex` (male/female/unknown — WHO-Kurven), `birth_weight_g` + `birth_length_cm` (Geburtsmaße). |
 | Tag-System (polymorph) | `app/api/tags.py` | `app/models/tag.py` (Tag, EntryTag) | EntryTag verbindet `entry_type + entry_id` (kein FK, polymorph). Felder: `is_archived`, `notes`, `created_at`. |
 | Warnhinweise (Alerts) | `app/api/alerts.py`, `app/services/alert_service.py` | `app/models/alert_config.py` | Pro Kind konfigurierbar. 6 Regeln (Fütterung, Temp hoch/niedrig, Windel, Schlaf, Sturmphase). Altersfilter `min_age_weeks/max_age_weeks`. |
@@ -115,13 +115,13 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 | Plugin Registry | `frontend/src/lib/pluginRegistry.ts` | – | 14 Plugin-Definitionen (key, label, icon, route, isBase). |
 | Plugin Config | `frontend/src/lib/pluginConfig.ts` | `pages/PluginConfigPage.tsx` | localStorage: aktive Plugins, Dashboard-Visibility, Widget-Order. Nav + Dashboard reagieren dynamisch. Info-Icon pro Plugin zeigt Beschreibung als Toggle-Box (i18n-Keys `plugin_descriptions.<key>` in `admin.json`). |
 | Quick Actions | `frontend/src/lib/quickActions.ts` | `pages/AdminPage.tsx` | 3 konfigurierbare Favoriten (User-Preference). |
-| Stillmodus | `frontend/src/lib/breastfeedingMode.ts` | – | localStorage Toggle. Bei off: "Letzte Flasche"-Tile + bottle Preset. Hybridmodus: beides parallel. |
+| Stillmodus | `frontend/src/lib/breastfeedingMode.ts`, `frontend/src/pages/ChildrenPage.tsx` | – | Pro Kind (`children.breastfeeding_enabled`, MBT-175). Bei off: "Letzte Flasche"-Tile + bottle Preset. Hybridmodus bleibt User-Preference (localStorage). |
 | Children-Context | `frontend/src/context/ChildContext.tsx` | `hooks/useChildren.ts` | Globaler aktiver Kind-State. Persistenz via localStorage + Server-Preference. |
 | ToastContext | `frontend/src/context/ToastContext.tsx` | `hooks/useToast`, `hooks/useEntryToast.ts` | Globale Toast-Notifications. `useEntryToast` zeigt Erfolgs-Toast nach Plugin-Form-Submits und kontrolliert Auto-Navigate-Zurück (MBT-187). |
 | ErrorBoundary | `frontend/src/components/ErrorBoundary.tsx` | – | Globaler React-Error-Catch. Verhindert schwarze Screens bei Runtime-Fehlern. |
 | Tag-System | `frontend/src/components/TagSelector.tsx`, `TagBadges.tsx` | `pages/TagsPage.tsx`, `TagDetailPage.tsx` | Bound (Edit) + pending (Create) Modus. Swipe auf TagDetailPage: links=archivieren, rechts=Tag entfernen. Suche durchsucht summary + notes. |
 | Alerts (UI) | `frontend/src/components/AlertBanner.tsx`, `AlertBell.tsx` | `lib/alertDismiss.ts`, `hooks/useAlerts.ts` | Banner mit X-Button. 6h Dismiss via localStorage. Bell im Header zeigt Anzahl. |
-| Admin-Hub | `frontend/src/pages/AdminPage.tsx` | – | Kachel-Navigation zu allen 10 Admin-Pages. Inline: Quick Actions, Stillmodus-Toggle, Hybridmodus. |
+| Admin-Hub | `frontend/src/pages/AdminPage.tsx` | – | Kachel-Navigation zu allen 10 Admin-Pages. Inline: Quick Actions, Hybridmodus (Stillmodus pro Kind in `/admin/children`). |
 | Markdown-Editor | `frontend/src/components/MarkdownEditor.tsx` | `lib/markdown.ts` | Eigener Minimal-Parser (kein externes Dependency). Split-View Desktop, Toggle Mobile. |
 | Foto-Upload | `frontend/src/plugins/milestones/PhotoSection.tsx` | `frontend/src/api/milestones.ts` | Galerie statt Kamera (kein `capture`). Skeleton-Loader, Lightbox, max 3 Fotos. |
 | i18n | `frontend/src/i18n/` | `index.ts`, `locales/de/*.json`, `locales/en/*.json` | react-i18next, 15 Namespaces (common, sleep, …, admin). User-Locale serverseitig in `User.locale`, sync beim Login. |

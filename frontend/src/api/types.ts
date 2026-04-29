@@ -13,6 +13,8 @@ export interface Child {
   birth_length_cm: number | string | null;
   notes: string | null;
   is_active: boolean;
+  /** MBT-175: Stillmodus pro Kind (statt User-Preferences). */
+  breastfeeding_enabled: boolean;
   created_at: string;
 }
 
@@ -25,6 +27,7 @@ export interface ChildCreate {
   birth_weight_g?: number | null;
   birth_length_cm?: number | string | null;
   notes?: string | null;
+  breastfeeding_enabled?: boolean;
 }
 
 export interface ChildUpdate {
@@ -37,6 +40,7 @@ export interface ChildUpdate {
   birth_length_cm?: number | string | null;
   notes?: string | null;
   is_active?: boolean;
+  breastfeeding_enabled?: boolean;
 }
 
 export type FeedingType = "breast_left" | "breast_right" | "bottle" | "solid";

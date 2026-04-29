@@ -1,23 +1,23 @@
-/** Breastfeeding / feeding mode localStorage helpers. */
+/**
+ * Breastfeeding / feeding mode helpers.
+ *
+ * MBT-175: Stillmodus liegt jetzt am Kind (`Child.breastfeeding_enabled`),
+ * nicht mehr in localStorage / user_preferences. Hybrid-Modus bleibt
+ * user-Preference (localStorage als Schnellspeicher).
+ */
 
-const KEY = "mybaby-breastfeeding-enabled";
+import type { Child } from "../api/types";
+
 const HYBRID_KEY = "mybaby-feeding-hybrid";
 
-export function isBreastfeedingEnabled(): boolean {
-  try {
-    const val = localStorage.getItem(KEY);
-    return val === null ? true : val === "true";
-  } catch {
-    return true;
-  }
-}
-
-export function setBreastfeedingEnabled(enabled: boolean): void {
-  try {
-    localStorage.setItem(KEY, String(enabled));
-  } catch {
-    // ignore storage errors
-  }
+/**
+ * Liefert den Stillmodus für ein Kind. Fallback `true`, falls noch kein
+ * Kind gewählt ist (z.B. initiales Render bevor ChildContext geladen hat).
+ */
+export function isBreastfeedingForChild(child: Child | null | undefined): boolean {
+  if (!child) return true;
+  // Defensive: ältere API-Antworten ohne Feld → Default true.
+  return child.breastfeeding_enabled ?? true;
 }
 
 export function isFeedingHybrid(): boolean {

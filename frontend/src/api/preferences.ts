@@ -3,7 +3,10 @@
 import { apiFetch } from "./client";
 
 export interface UserPreferences {
-  breastfeeding_enabled: boolean;
+  /**
+   * MBT-175: breastfeeding_enabled wurde auf children.breastfeeding_enabled
+   * verschoben. Hybrid-Modus bleibt user-basiert.
+   */
   feeding_hybrid: boolean;
   quick_actions: string[] | null;
   widget_order: string[] | null;

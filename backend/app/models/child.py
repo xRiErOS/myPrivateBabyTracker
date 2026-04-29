@@ -25,6 +25,10 @@ class Child(TimestampMixin, Base):
     birth_length_cm: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # MBT-175: Stillmodus per Kind statt per User
+    breastfeeding_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="1"
+    )
 
 
 class ChildCaregiver(Base):

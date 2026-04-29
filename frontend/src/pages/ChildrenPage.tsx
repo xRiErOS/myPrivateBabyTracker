@@ -181,6 +181,7 @@ export default function ChildrenPage() {
   const [gender, setGender] = useState<Gender | "">("");
   const [birthWeight, setBirthWeight] = useState("");
   const [birthLength, setBirthLength] = useState("");
+  const [breastfeedingEnabled, setBreastfeedingEnabled] = useState(true);
 
   // Edit form state
   const [editName, setEditName] = useState("");
@@ -190,6 +191,7 @@ export default function ChildrenPage() {
   const [editGender, setEditGender] = useState<Gender | "">("");
   const [editBirthWeight, setEditBirthWeight] = useState("");
   const [editBirthLength, setEditBirthLength] = useState("");
+  const [editBreastfeedingEnabled, setEditBreastfeedingEnabled] = useState(true);
 
   const resetCreateForm = () => {
     setName("");
@@ -199,6 +201,7 @@ export default function ChildrenPage() {
     setGender("");
     setBirthWeight("");
     setBirthLength("");
+    setBreastfeedingEnabled(true);
     setShowForm(false);
   };
 
@@ -213,6 +216,7 @@ export default function ChildrenPage() {
     setEditBirthLength(
       child.birth_length_cm != null ? String(child.birth_length_cm) : ""
     );
+    setEditBreastfeedingEnabled(child.breastfeeding_enabled ?? true);
   };
 
   const cancelEdit = () => {
@@ -231,6 +235,7 @@ export default function ChildrenPage() {
       gender: gender || null,
       birth_weight_g: birthWeight ? Number(birthWeight) : null,
       birth_length_cm: birthLength ? birthLength : null,
+      breastfeeding_enabled: breastfeedingEnabled,
     });
 
     // Tutorial-Hook: signalisiert Erfolgs-Schritt
@@ -253,6 +258,7 @@ export default function ChildrenPage() {
         gender: editGender || null,
         birth_weight_g: editBirthWeight ? Number(editBirthWeight) : null,
         birth_length_cm: editBirthLength ? editBirthLength : null,
+        breastfeeding_enabled: editBreastfeedingEnabled,
       },
     });
 
@@ -346,6 +352,30 @@ export default function ChildrenPage() {
               onChange={(e) => setBirthLength(e.target.value)}
               placeholder={t("children.birth_length_placeholder")}
             />
+
+            {/* MBT-175: Stillmodus pro Kind */}
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-surface1">
+              <div>
+                <p className="font-label text-sm font-medium text-text">
+                  {t("children.breastfeeding_enabled")}
+                </p>
+                <p className="font-body text-xs text-subtext0 mt-1">
+                  {t("children.breastfeeding_enabled_hint")}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={breastfeedingEnabled}
+                onClick={() => setBreastfeedingEnabled((v) => !v)}
+                className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${breastfeedingEnabled ? "bg-green" : "bg-surface2"}`}
+                aria-label={t("children.breastfeeding_enabled")}
+              >
+                <span
+                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${breastfeedingEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
+                />
+              </button>
+            </div>
 
             <div className="flex gap-2">
               <Button type="submit" disabled={createChild.isPending}>
@@ -477,6 +507,32 @@ export default function ChildrenPage() {
                       onChange={(e) => setEditBirthLength(e.target.value)}
                       placeholder={t("children.birth_length_placeholder")}
                     />
+
+                    {/* MBT-175: Stillmodus pro Kind */}
+                    <div className="flex items-center justify-between gap-3 pt-2 border-t border-surface1">
+                      <div>
+                        <p className="font-label text-sm font-medium text-text">
+                          {t("children.breastfeeding_enabled")}
+                        </p>
+                        <p className="font-body text-xs text-subtext0 mt-1">
+                          {t("children.breastfeeding_enabled_hint")}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={editBreastfeedingEnabled}
+                        onClick={() =>
+                          setEditBreastfeedingEnabled((v) => !v)
+                        }
+                        className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${editBreastfeedingEnabled ? "bg-green" : "bg-surface2"}`}
+                        aria-label={t("children.breastfeeding_enabled")}
+                      >
+                        <span
+                          className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${editBreastfeedingEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
+                        />
+                      </button>
+                    </div>
 
                     <div className="flex gap-2">
                       <Button type="submit" disabled={updateChild.isPending}>

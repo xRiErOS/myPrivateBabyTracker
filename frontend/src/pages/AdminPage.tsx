@@ -8,7 +8,7 @@ import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { PLUGINS } from "../lib/pluginRegistry";
 import { getQuickActions, setQuickActions } from "../lib/quickActions";
-import { isBreastfeedingEnabled, setBreastfeedingEnabled, isFeedingHybrid, setFeedingHybrid } from "../lib/breastfeedingMode";
+import { isFeedingHybrid, setFeedingHybrid } from "../lib/breastfeedingMode";
 
 interface AdminTile {
   to: string;
@@ -34,7 +34,6 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("admin");
   const [quickActions, setQuickActionsState] = useState(getQuickActions);
-  const [breastfeedingEnabled, setBreastfeedingEnabledState] = useState(isBreastfeedingEnabled);
   const [hybridEnabled, setHybridEnabledState] = useState(isFeedingHybrid);
 
   function handleQuickActionChange(index: number, value: string) {
@@ -42,12 +41,6 @@ export default function AdminPage() {
     next[index] = value;
     setQuickActionsState(next);
     setQuickActions(next);
-  }
-
-  function handleBreastfeedingToggle() {
-    const next = !breastfeedingEnabled;
-    setBreastfeedingEnabledState(next);
-    setBreastfeedingEnabled(next);
   }
 
   return (
@@ -102,55 +95,32 @@ export default function AdminPage() {
         </div>
       </Card>
 
-      {/* Breastfeeding Mode Toggle */}
+      {/* Hybrid Mode Toggle (MBT-175: Stillmodus selbst wandert in /admin/children) */}
       <Card className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-headline text-base font-semibold text-text">{t("breastfeeding.title")}</h3>
+            <p className="font-label text-sm font-medium text-text">{t("breastfeeding.hybrid")}</p>
             <p className="font-body text-xs text-subtext0 mt-1">
-              {t("breastfeeding.description")}
+              {t("breastfeeding.hybrid_desc")}
             </p>
           </div>
           <button
             type="button"
             role="switch"
-            aria-checked={breastfeedingEnabled}
-            onClick={handleBreastfeedingToggle}
-            className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${breastfeedingEnabled ? "bg-green" : "bg-surface2"}`}
-            aria-label="Stillseiten-Tracking umschalten"
+            aria-checked={hybridEnabled}
+            onClick={() => {
+              const next = !hybridEnabled;
+              setHybridEnabledState(next);
+              setFeedingHybrid(next);
+            }}
+            className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${hybridEnabled ? "bg-green" : "bg-surface2"}`}
+            aria-label="Hybridmodus umschalten"
           >
             <span
-              className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${breastfeedingEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
+              className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${hybridEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
             />
           </button>
         </div>
-
-        {breastfeedingEnabled && (
-          <div className="flex items-center justify-between pt-3 border-t border-surface1">
-            <div>
-              <p className="font-label text-sm font-medium text-text">{t("breastfeeding.hybrid")}</p>
-              <p className="font-body text-xs text-subtext0 mt-1">
-                {t("breastfeeding.hybrid_desc")}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={hybridEnabled}
-              onClick={() => {
-                const next = !hybridEnabled;
-                setHybridEnabledState(next);
-                setFeedingHybrid(next);
-              }}
-              className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${hybridEnabled ? "bg-green" : "bg-surface2"}`}
-              aria-label="Hybridmodus umschalten"
-            >
-              <span
-                className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${hybridEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
-              />
-            </button>
-          </div>
-        )}
       </Card>
     </div>
   );

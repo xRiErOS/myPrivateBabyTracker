@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Clock, Baby, GraduationCap, Globe, Monitor, Moon, Palette, RefreshCw, Sparkles, Sun, Zap } from "lucide-react";
+import { Clock, GraduationCap, Globe, Monitor, Moon, Palette, RefreshCw, Sparkles, Sun, Zap } from "lucide-react";
 import { useTutorialOptional } from "../context/TutorialContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "../components/Card";
@@ -187,52 +187,6 @@ export default function ProfilePage() {
           <option value="de">{t("profile.language_de")}</option>
           <option value="en">{t("profile.language_en")}</option>
         </select>
-      </Card>
-
-      {/* Breastfeeding Mode */}
-      <Card className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Baby className="h-4 w-4 text-pink" />
-            <h3 className="font-headline text-base font-semibold text-text">{t("profile.breastfeeding")}</h3>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={prefs.breastfeeding_enabled}
-            onClick={() => save({ breastfeeding_enabled: !prefs.breastfeeding_enabled })}
-            disabled={saving}
-            className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${prefs.breastfeeding_enabled ? "bg-green" : "bg-surface2"}`}
-          >
-            <span
-              className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${prefs.breastfeeding_enabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
-            />
-          </button>
-        </div>
-        <p className="text-xs text-subtext0">
-          {t("profile.breastfeeding_hint")}
-        </p>
-
-        {prefs.breastfeeding_enabled && (
-          <div className="flex items-center justify-between pt-2 border-t border-surface1">
-            <div>
-              <p className="font-label text-sm text-text">{t("profile.hybrid")}</p>
-              <p className="text-xs text-subtext0">{t("profile.hybrid_hint")}</p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={prefs.feeding_hybrid}
-              onClick={() => save({ feeding_hybrid: !prefs.feeding_hybrid })}
-              disabled={saving}
-              className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors ${prefs.feeding_hybrid ? "bg-green" : "bg-surface2"}`}
-            >
-              <span
-                className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${prefs.feeding_hybrid ? "translate-x-[26px]" : "translate-x-[2px]"}`}
-              />
-            </button>
-          </div>
-        )}
       </Card>
 
       {/* Quick Actions */}

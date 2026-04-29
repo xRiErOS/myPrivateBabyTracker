@@ -80,6 +80,8 @@
     "birth_length_placeholder": "e.g. 51.5",
     "name": "Name",
     "name_placeholder": "Child's name",
+    "breastfeeding_enabled": "Breastfeeding mode",
+    "breastfeeding_enabled_hint": "Show breast tiles (left/right) instead of bottle tiles on the dashboard. Configurable per child.",
     "confirm_delete": "Really delete \"{{name}}\"?",
     "export_json": "Export JSON",
     "export_csv": "Export CSV",

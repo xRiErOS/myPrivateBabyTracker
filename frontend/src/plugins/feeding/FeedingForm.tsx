@@ -12,7 +12,7 @@ import { useEntryToast } from "../../hooks/useEntryToast";
 import { isoToLocalInput, localInputToISO, nowISO } from "../../lib/dateUtils";
 import { attachTag } from "../../api/tags";
 import type { FeedingEntry, FeedingType } from "../../api/types";
-import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
+import { isBreastfeedingForChild } from "../../lib/breastfeedingMode";
 
 interface FeedingFormProps {
   entry?: FeedingEntry;
@@ -47,7 +47,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const presetApplied = useRef(!!entry);
   useEffect(() => {
     if (!presetApplied.current && lastFeedingType) {
-      if (isBreastfeedingEnabled()) {
+      if (isBreastfeedingForChild(activeChild)) {
         // Preset opposite breast side; for bottle/solid keep same type
         const preset: FeedingType =
           lastFeedingType === "breast_left" ? "breast_right" :
@@ -59,7 +59,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
       }
       presetApplied.current = true;
     }
-  }, [lastFeedingType]);
+  }, [lastFeedingType, activeChild]);
 
   const [startTime, setStartTime] = useState(
     entry?.start_time ? isoToLocalInput(entry.start_time) : isoToLocalInput(nowISO()),
@@ -68,7 +68,7 @@ export function FeedingForm({ entry, onDone, onCancel }: FeedingFormProps) {
   const [foodType, setFoodType] = useState(entry?.food_type ?? "");
   const [notes, setNotes] = useState(entry?.notes ?? "");
 
-  const breastfeedingOn = isBreastfeedingEnabled();
+  const breastfeedingOn = isBreastfeedingForChild(activeChild);
   const FEEDING_TYPE_OPTIONS = breastfeedingOn
     ? ALL_FEEDING_TYPE_OPTIONS
     : ALL_FEEDING_TYPE_OPTIONS.filter((o) => o.value !== "breast_left" && o.value !== "breast_right");

@@ -15,7 +15,7 @@ import { useCreateHealth, useHealthEntries } from "../../hooks/useHealth";
 import { formatDateTime, formatTimeSince, nowISO, daysAgoISO } from "../../lib/dateUtils";
 import { berlinDayBounds } from "../../lib/timelineUtils";
 import { FeedingForm } from "./FeedingForm";
-import { isBreastfeedingEnabled } from "../../lib/breastfeedingMode";
+import { isBreastfeedingForChild } from "../../lib/breastfeedingMode";
 import type { FeedingType, HealthSeverity } from "../../api/types";
 
 type HealthOverlay = { feedingId: number; type: "spit_up" | "tummy_ache" };
@@ -107,7 +107,7 @@ export function FeedingList() {
     <div className="flex flex-col gap-3">
       <DateRangeFilter value={dateRange} onChange={setDateRange} />
 
-      {isBreastfeedingEnabled() && (
+      {isBreastfeedingForChild(activeChild) && (
         <Select
           label="Filter"
           options={TYPE_OPTIONS}

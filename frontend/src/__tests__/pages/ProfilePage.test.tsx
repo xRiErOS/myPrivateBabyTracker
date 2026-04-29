@@ -62,7 +62,6 @@ describe("ProfilePage — locale switch", () => {
     getPreferencesMock.mockReset();
     updatePreferencesMock.mockReset();
     getPreferencesMock.mockResolvedValue({
-      breastfeeding_enabled: true,
       feeding_hybrid: false,
       quick_actions: ["sleep", "feeding", "diaper"],
       widget_order: null,
@@ -91,7 +90,6 @@ describe("ProfilePage — locale switch", () => {
 
   it("calls updatePreferences with locale=en when switching to English", async () => {
     updatePreferencesMock.mockResolvedValue({
-      breastfeeding_enabled: true,
       feeding_hybrid: false,
       quick_actions: ["sleep", "feeding", "diaper"],
       widget_order: null,
