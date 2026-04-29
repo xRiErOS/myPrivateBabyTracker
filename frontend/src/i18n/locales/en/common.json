@@ -60,7 +60,8 @@
       "tracking": "Tracking",
       "development": "Development",
       "organization": "Organization",
-      "admin": "Settings"
+      "admin": "Settings",
+      "org_admin": "Organization & Settings"
     },
     "sleep": "Sleep",
     "feeding": "Feeding",

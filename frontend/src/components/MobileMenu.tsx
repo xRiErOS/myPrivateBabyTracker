@@ -1,19 +1,19 @@
 /** Mobile navigation drawer — opened from burger button in Header.
 
-Shows all enabled plugins + Verwaltung in a slide-down panel, grouped
-thematically (MBT-181). Only visible on mobile (< md). Closes on navigation.
+MBT-210: Two-section layout:
+  1. Tracking — all enabled tracking plugins, ordered by widget_order (Plugin
+     Settings) for live single-source-of-truth ordering.
+  2. Organisation & Verwaltung — development + organization plugins + Profil + Admin.
+
+Only visible on mobile (< md). Closes on navigation.
 */
 
 import { useEffect, useState } from "react";
 import { Home, Settings, User, X } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { isPluginEnabled } from "../lib/pluginConfig";
-import {
-  PLUGINS,
-  PLUGIN_CATEGORIES,
-  type PluginCategory,
-} from "../lib/pluginRegistry";
+import { getWidgetOrder, isPluginEnabled } from "../lib/pluginConfig";
+import { PLUGINS, type PluginDef } from "../lib/pluginRegistry";
 
 function useEnabledPlugins() {
   const [, setTick] = useState(0);
@@ -25,6 +25,25 @@ function useEnabledPlugins() {
   }, []);
 
   return PLUGINS.filter((p) => p.route && isPluginEnabled(p.key));
+}
+
+/** Order tracking plugins by the user-configured widget_order from Plugin
+ *  Settings (Single Source of Truth). Plugins not present in widget_order keep
+ *  their declaration order from PLUGINS as a stable fallback. */
+function orderTrackingPlugins(plugins: PluginDef[]): PluginDef[] {
+  const widgetOrder = getWidgetOrder();
+  const orderIndex = new Map<string, number>();
+  widgetOrder.forEach((key, idx) => orderIndex.set(key, idx));
+
+  return [...plugins].sort((a, b) => {
+    const ai = orderIndex.get(a.key);
+    const bi = orderIndex.get(b.key);
+    if (ai !== undefined && bi !== undefined) return ai - bi;
+    if (ai !== undefined) return -1;
+    if (bi !== undefined) return 1;
+    // Both unordered: keep PLUGINS declaration order
+    return PLUGINS.indexOf(a) - PLUGINS.indexOf(b);
+  });
 }
 
 interface MobileMenuProps {
@@ -44,11 +63,14 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   if (!open) return null;
 
-  const grouped: Record<PluginCategory, typeof enabled> = {
-    tracking: enabled.filter((p) => p.category === "tracking"),
-    development: enabled.filter((p) => p.category === "development"),
-    organization: enabled.filter((p) => p.category === "organization"),
-  };
+  const trackingPlugins = orderTrackingPlugins(
+    enabled.filter((p) => p.category === "tracking"),
+  );
+  // Organisation & Verwaltung = development + organization plugins (in
+  // declaration order) + system entries (Profil, Admin).
+  const orgPlugins = enabled.filter(
+    (p) => p.category === "development" || p.category === "organization",
+  );
 
   const tileClass = (isActive: boolean) =>
     `flex flex-col items-center justify-center min-h-[60px] rounded-xl py-2 px-1 text-xs font-label transition-colors ${
@@ -57,6 +79,9 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
         : "text-subtext0 hover:bg-surface1 hover:text-text"
     }`;
 
+  const sectionLabelClass =
+    "font-label text-[10px] font-semibold text-subtext0 uppercase tracking-wide mb-1.5";
+
   return (
     <>
       <div
@@ -64,8 +89,8 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
         onClick={onClose}
       />
 
-      <div className="fixed top-[52px] left-0 right-0 z-[56] bg-surface0 border-b border-surface1 rounded-b-2xl px-4 py-4 md:hidden animate-fade-in max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-3">
+      <div className="fixed top-[52px] left-0 right-0 z-[56] bg-surface0 border-b border-surface1 rounded-b-2xl px-4 py-3 md:hidden animate-fade-in max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-2">
           <span className="font-headline text-sm font-semibold text-text">
             {tc("navigation")}
           </span>
@@ -78,44 +103,48 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
         </div>
 
         {/* Home */}
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="grid grid-cols-3 gap-2 mb-2">
           <NavLink to="/" end className={({ isActive }) => tileClass(isActive)}>
             <Home size={22} />
             <span className="mt-1">{tc("nav.dashboard")}</span>
           </NavLink>
         </div>
 
-        {PLUGIN_CATEGORIES.map((category) => {
-          const items = grouped[category];
-          if (items.length === 0) return null;
-          return (
-            <div key={category} className="mb-3">
-              <p className="font-label text-[10px] font-semibold text-subtext0 uppercase tracking-wide mb-1.5">
-                {tc(`nav.group.${category}`)}
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {items.map(({ key, route, icon: Icon }) => (
-                  <NavLink
-                    key={key}
-                    to={route}
-                    data-tutorial={`menu-${key}`}
-                    className={({ isActive }) => tileClass(isActive)}
-                  >
-                    <Icon size={22} />
-                    <span className="mt-1">{tc(`nav.${key}`)}</span>
-                  </NavLink>
-                ))}
-              </div>
+        {/* Section 1: Tracking */}
+        {trackingPlugins.length > 0 && (
+          <div className="mb-2 pt-2 border-t border-surface1">
+            <p className={sectionLabelClass}>{tc("nav.group.tracking")}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {trackingPlugins.map(({ key, route, icon: Icon }) => (
+                <NavLink
+                  key={key}
+                  to={route}
+                  data-tutorial={`menu-${key}`}
+                  className={({ isActive }) => tileClass(isActive)}
+                >
+                  <Icon size={22} />
+                  <span className="mt-1">{tc(`nav.${key}`)}</span>
+                </NavLink>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        )}
 
-        {/* Verwaltung */}
-        <div className="mb-1">
-          <p className="font-label text-[10px] font-semibold text-subtext0 uppercase tracking-wide mb-1.5">
-            {tc("nav.group.admin")}
-          </p>
+        {/* Section 2: Organisation & Verwaltung */}
+        <div className="pt-2 border-t border-surface1">
+          <p className={sectionLabelClass}>{tc("nav.group.org_admin")}</p>
           <div className="grid grid-cols-3 gap-2">
+            {orgPlugins.map(({ key, route, icon: Icon }) => (
+              <NavLink
+                key={key}
+                to={route}
+                data-tutorial={`menu-${key}`}
+                className={({ isActive }) => tileClass(isActive)}
+              >
+                <Icon size={22} />
+                <span className="mt-1">{tc(`nav.${key}`)}</span>
+              </NavLink>
+            ))}
             <NavLink
               to="/profile"
               data-tutorial="menu-profile"
