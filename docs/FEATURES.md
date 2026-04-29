@@ -1,6 +1,6 @@
 # MyBaby — Feature-Inventar
 
-Stand: 2026-04-29 · Version: 0.9.0 · Sprint 55 (Improvements & Tutorial)
+Stand: 2026-04-29 · Version: 0.10.0 · Sprint 65 (Hebammen Feedback - Features)
 
 Dieses Dokument ist das Source-of-Truth für alle Features der App. Es erfüllt zwei Zwecke:
 
@@ -26,8 +26,9 @@ Verwandte Dokumente:
 | v0.8    | Foto-System (Pillow + Thumbnails), Medienverwaltung (/admin/media), Markdown-Editor |
 | v0.8+   | Sprint 26: Dashboard→Home, Auto-Nachtschlaf 22–06, /admin/logs |
 | v0.9    | Sprint 55: In-App-Tutorial mit Pause-Modus, Sidebar-Gruppierung (thematisch), Plugin-Beschreibungen, WHO-Length-Kurven, Stammdaten-Erweiterung (Geschlecht, Geburtsgewicht/-länge), Toast-Feedback nach Submit |
+| v0.10   | Sprint 65 (Hebammen Feedback): Plugin `motherhealth` (Privacy-first Wochenbett-Notizen, default disabled), Mobile Burger-Menü 2-Sektionen (Tracking + Verwaltung), Header-Redesign (Verwaltungs-Icon ersetzt Theme-Toggle, Theme-Wechsel ins Profil), Stillmodus pro Kind statt User-Preference, FAB-Radial mit 4 Quick-Action-Slots, Child-Delete-Bugfix (Soft-Delete-Filter + Cache-Invalidation), Umlaut-Cleanup (i18n + Code-Strings auf korrekte ä/ö/ü/ß) |
 
-## 1. Plugins (14)
+## 1. Plugins (15)
 
 Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.py`, ADR-1). Sie werden zur Laufzeit über `backend/app/plugins/registry.py` automatisch geladen. Frontend-Definition in `frontend/src/lib/pluginRegistry.ts`.
 
@@ -47,6 +48,7 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 | checkup | U-Untersuchungen | development | – | `plugins/checkup/models.py:CheckupEntry` | `plugins/checkup/router.py` | `pages/CheckupPage.tsx` | `plugins/checkup/CheckupWidget.tsx` |
 | todo | Tasks & Habits | productivity | – | `plugins/todo/models.py` (TodoEntry, TodoTemplate, Habit) | `plugins/todo/router.py` | `pages/TodoPage.tsx` | `plugins/todo/TodoWidget.tsx` |
 | notes | Notizen | productivity | – | `plugins/notes/models.py:SharedNote` | `plugins/notes/router.py` | `pages/NotesPage.tsx` | – (eigenes NoteWidget im Dashboard) |
+| motherhealth | Muttergesundheit | organization | – | `plugins/motherhealth/models.py:MotherHealthEntry` | `plugins/motherhealth/router.py` | `pages/MotherHealthPage.tsx` | – (Privacy: kein Widget, default disabled) |
 
 ### Plugin-Detail-Spezifika
 
@@ -81,6 +83,13 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 - U1–U9 Tracking mit Seed-Daten (`plugins/checkup/seed_data.py`).
 - Kalender-Zeitfenster aus `birth_date` + `min_age_weeks`/`max_age_weeks` (inkl. Frühgeborenen-Anpassung).
 
+#### motherhealth (MBT-109)
+- Privacy-first Plugin: standardmäßig DEAKTIVIERT (`pluginRegistry.defaultDisabled=true`). Aktivierung in `/admin/plugins`.
+- Freitext-Notizbuch für Wochenbett-Visit mit Hebamme: `MotherHealthEntry(child_id, content, created_at, updated_at)`, content max 4000 Zeichen.
+- KEIN Dashboard-Widget, KEIN Tracking-Sektions-Eintrag — bei Aktivierung erscheint Plugin nur in Burger-Sektion "Organisation & Verwaltung".
+- Privacy-Banner sichtbar auf Page: "Sensible Inhalte. Nur du siehst diese Notizen."
+- Phase 1: Freitext only. Strukturierte EPDS-Skala (PPD-Screening) bewusst deferred.
+
 ## 2. Cross-cutting Backend-Features
 
 | Feature | Entry Points | Key Files | Erläuterung |
@@ -110,11 +119,12 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 |---------|--------------|-----------|-------------|
 | App-Routing | `frontend/src/App.tsx` | – | React-Router. Lazy-Imports pro Page. AuthGuard wrapped Layout. |
 | Auth-Guard | `frontend/src/App.tsx:AuthGuard` | `frontend/src/hooks/useAuth.ts` | Reagiert auf authMode: disabled/forward → pass-through; local/both → LoginPage wenn !user. 401-Handler via `set401Handler` in `api/client.ts`. |
-| Layout / Navigation | `frontend/src/components/Layout.tsx` | `Header.tsx`, `Sidebar.tsx`, `BottomNav.tsx`, `MobileMenu.tsx`, `FAB.tsx` | Sidebar fixed Desktop, BottomNav 4 fixe Items + Burger Mobile, FAB für Quick-Actions. Sidebar + MobileMenu thematisch gruppiert (tracking / development / productivity) gemäß `pluginRegistry.category`. |
+| Layout / Navigation | `frontend/src/components/Layout.tsx` | `Header.tsx`, `Sidebar.tsx`, `BottomNav.tsx`, `MobileMenu.tsx`, `FAB.tsx` | Sidebar fixed Desktop ohne Verwaltungs-Link (MBT-178: Verwaltung wanderte in Header). BottomNav 4 fixe Items + Burger Mobile. Burger-Menü mit 2 Sektionen — "Tracking" (alle aktiven Tracking-Plugins, sortiert nach `getWidgetOrder()`) + "Organisation & Verwaltung" (development/productivity/organization Plugins + Profil + Admin), MBT-210. FAB für 1–4 Quick-Actions im Quarter-Circle Radial-Layout (MBT-182). |
+| Header | `frontend/src/components/Header.tsx` | – | Reihenfolge mobile + desktop: [Logo] ... [Glocke] [Verwaltung] [Profil] [Burger-mobile / —]. Verwaltungs-Icon (Settings) führt zu `/admin` (MBT-178); Theme-Toggle wanderte ins Profil. |
 | Dashboard | `frontend/src/pages/Dashboard.tsx` | `components/dashboard/BabySummary.tsx`, `DayTimeline.tsx`, `PatternChart.tsx`, `WeeklyReport.tsx` | Tab-Range (Heute/7T/14T) mit useSwipe. Widget-Grid dynamisch nach Plugin-Order. Tagesverlauf-Sichtbarkeit konfigurierbar (Zahnrad). |
 | Plugin Registry | `frontend/src/lib/pluginRegistry.ts` | – | 14 Plugin-Definitionen (key, label, icon, route, isBase). |
 | Plugin Config | `frontend/src/lib/pluginConfig.ts` | `pages/PluginConfigPage.tsx` | localStorage: aktive Plugins, Dashboard-Visibility, Widget-Order. Nav + Dashboard reagieren dynamisch. Info-Icon pro Plugin zeigt Beschreibung als Toggle-Box (i18n-Keys `plugin_descriptions.<key>` in `admin.json`). |
-| Quick Actions | `frontend/src/lib/quickActions.ts` | `pages/AdminPage.tsx` | 3 konfigurierbare Favoriten (User-Preference). |
+| Quick Actions | `frontend/src/lib/quickActions.ts` | `pages/AdminPage.tsx`, `pages/ProfilePage.tsx`, `components/FAB.tsx` | 1–4 konfigurierbare Favoriten (User-Preference, MBT-182). FAB-Radial rendert nur belegte Slots, Slot 4 optional ("Kein Eintrag"). |
 | Stillmodus | `frontend/src/lib/breastfeedingMode.ts`, `frontend/src/pages/ChildrenPage.tsx` | – | Pro Kind (`children.breastfeeding_enabled`, MBT-175). Bei off: "Letzte Flasche"-Tile + bottle Preset. Hybridmodus bleibt User-Preference (localStorage). |
 | Children-Context | `frontend/src/context/ChildContext.tsx` | `hooks/useChildren.ts` | Globaler aktiver Kind-State. Persistenz via localStorage + Server-Preference. |
 | ToastContext | `frontend/src/context/ToastContext.tsx` | `hooks/useToast`, `hooks/useEntryToast.ts` | Globale Toast-Notifications. `useEntryToast` zeigt Erfolgs-Toast nach Plugin-Form-Submits und kontrolliert Auto-Navigate-Zurück (MBT-187). |
@@ -125,7 +135,7 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 | Markdown-Editor | `frontend/src/components/MarkdownEditor.tsx` | `lib/markdown.ts` | Eigener Minimal-Parser (kein externes Dependency). Split-View Desktop, Toggle Mobile. |
 | Foto-Upload | `frontend/src/plugins/milestones/PhotoSection.tsx` | `frontend/src/api/milestones.ts` | Galerie statt Kamera (kein `capture`). Skeleton-Loader, Lightbox, max 3 Fotos. |
 | i18n | `frontend/src/i18n/` | `index.ts`, `locales/de/*.json`, `locales/en/*.json` | react-i18next, 15 Namespaces (common, sleep, …, admin). User-Locale serverseitig in `User.locale`, sync beim Login. |
-| Theme | `frontend/src/components/ThemeToggle.tsx` | `index.css` | Catppuccin Latte (Light) / Macchiato (Dark) via CSS-Variablen. `--ground` statt `--base` (Tailwind-Konflikt). |
+| Theme | `frontend/src/hooks/useTheme.ts` | `pages/ProfilePage.tsx`, `index.css` | Catppuccin Latte (Light) / Macchiato (Dark) via CSS-Variablen. `--ground` statt `--base`. 3-Modes (light/dark/system) konfigurierbar in `/profile` (MBT-178). Persistenz `localStorage["mybaby-theme"]`. `system`-Mode reagiert live auf `prefers-color-scheme`. |
 | Swipe-Gesten | `frontend/src/hooks/useSwipe.ts` | – | Threshold 50 px. Verwendet auf Dashboard-Tabs, Milestones-Tabs, TagDetailPage. |
 | ChangelogOverlay | `frontend/src/components/ChangelogOverlay.tsx` | – | Modal beim App-Start, wenn Version > letzter im localStorage. |
 | Tutorial / Onboarding | `frontend/src/context/TutorialContext.tsx`, `components/tutorial/TutorialOverlay.tsx` | `components/tutorial/tutorialSteps.ts`, `i18n/locales/{de,en}/tutorial.json` | Spotlight-Overlay mit Step-Sequenz (Mobile-/Desktop-gefiltert via `getStepsForDevice`). Persistenz über `UserPreferences.tutorial_completed/_step` + localStorage-Fallback. Pause-Modus (Off-Path & manuell via X→"Hier umsehen"), `actionPromptKey` (mauve fett), `pauseOnTargetClick`, `resumeEvent` (Tab-Reset auf SleepPage), Burger-Auto-Close, scroll-once. data-tutorial-Marker auf Header, Sidebar, MobileMenu, BabySummary, ViewTabs, FAB, AdminPage-Tile, Plugin-Pages. Auto-Start auf Dashboard wenn `!tutorial_completed`. |

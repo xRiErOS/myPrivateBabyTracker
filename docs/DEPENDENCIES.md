@@ -1,6 +1,6 @@
 # MyBaby — Feature-Abhängigkeiten
 
-Stand: 2026-04-29 · ergänzt `docs/FEATURES.md`.
+Stand: 2026-04-29 (Sprint 65) · ergänzt `docs/FEATURES.md`.
 
 Dieser Graph zeigt, welche Features auf andere angewiesen sind. Pflicht-Lektüre vor jedem Refactor — er beantwortet die Frage: "Was bricht, wenn ich X anfasse?"
 
@@ -57,6 +57,10 @@ graph TD
         Checkup[checkup]
     end
 
+    subgraph OrganizationPlugins
+        MotherHealth[motherhealth — default off]
+    end
+
     subgraph FrontendShell
         Dashboard[Dashboard]
         Layout[Layout / Nav]
@@ -97,8 +101,10 @@ graph TD
     Children --> Milestones
     Children --> Growth
     Children --> Checkup
+    Children --> MotherHealth
     Children --> Alerts
     Children --> ChildSelector
+    Children -. extends .-> Feeding
 
     Plugins --> Sleep
     Plugins --> Feeding
@@ -114,6 +120,7 @@ graph TD
     Plugins --> Milestones
     Plugins --> Growth
     Plugins --> Checkup
+    Plugins --> MotherHealth
     Plugins --> Dashboard
 
     Tags -.optional.-> Sleep
@@ -139,7 +146,6 @@ graph TD
 
     UserPrefs --> Dashboard
     UserPrefs --> Layout
-    UserPrefs --> Feeding
     UserPrefs --> Tutorial
 
     Tutorial --> Layout
@@ -199,7 +205,7 @@ Diese Plugins können aktiviert/deaktiviert werden, ohne dass andere brechen —
 | Plugin | requires | besondere Hinweise |
 |--------|----------|--------------------|
 | sleep (Base) | DB, Children, Plugins | Timer-Logik in `SleepForm.tsx`. Auto-Nachtschlaf 22–06. |
-| feeding (Base) | DB, Children, Plugins, UserPrefs | Stillmodus-Toggle aus User-Preferences. |
+| feeding (Base) | DB, Children, Plugins | Stillmodus pro Kind (`children.breastfeeding_enabled`, MBT-175). Hybridmodus ist User-Preference (Frontend-localStorage). |
 | diaper (Base) | DB, Children, Plugins | – |
 | temperature | DB, Children, Plugins | – |
 | weight | DB, Children, Plugins | Konsumiert von growth. |
@@ -219,6 +225,12 @@ Plugins, die andere Daten konsumieren oder das Children-Modell erweitern.
 | milestones | DB, Children, Plugins | Children (`is_preterm`, `estimated_birth_date`) für Leap-Berechnung | – |
 | growth | DB, Children, Plugins | – | weight, children (für korrigiertes Alter). Daten aus `services/who_data.py`. |
 | checkup | DB, Children, Plugins | Children (Frühgeborenen-Anpassung von Zeitfenstern) | – |
+
+### Layer 3b — Organization Plugins (privacy-first / opt-in)
+
+| Plugin | requires | besondere Hinweise |
+|--------|----------|--------------------|
+| motherhealth (MBT-109) | DB, Children, Plugins | Standardmäßig DEAKTIVIERT (`pluginRegistry.defaultDisabled`). Kein Dashboard-Widget. Erscheint nur in Burger-Sektion "Organisation & Verwaltung", wenn aktiv. Privacy-Banner sichtbar auf Page. |
 
 ### Layer 4 — Frontend Shell
 
@@ -244,6 +256,8 @@ Diese Pfade sind besonders sensibel — Änderungen hier brechen viele Konsument
 7. **`backend/app/services/alert_service.py`** — Alert-Logik nutzt Plugin-Daten direkt (kein Plugin-Hook).
 8. **`backend/alembic/env.py`** — Plugin-Discovery für Migrations. Falsche Reihenfolge → Migrations-Fail.
 9. **`frontend/src/components/tutorial/tutorialSteps.ts`** — Step-Definitionen mit CSS-Selektoren (`data-tutorial="..."`). Entfernen oder Umbenennen eines Markers in einer Layout/Page-Komponente bricht den entsprechenden Step still (Spotlight findet nichts → fällt auf Full-Backdrop zurück, wirkt visuell leer).
+10. **`frontend/src/components/MobileMenu.tsx`** — Section-Helper `orderTrackingPlugins()` (MBT-210). Quelle für Reihenfolge ist `pluginConfig.getWidgetOrder()`. Refactor der Reihenfolge-Logik bricht die Tracking-Sektion (verkehrte Order oder leere Sektion).
+11. **`frontend/src/lib/pluginRegistry.ts:defaultDisabled`** — neues Privacy-Flag (MBT-109). Beim Hinzufügen eines neuen Plugins ohne expliziten Default-Status wird es automatisch aktiv, was bei sensitiven Plugins ein Datenschutz-Risiko ist.
 
 ## Wartung
 
