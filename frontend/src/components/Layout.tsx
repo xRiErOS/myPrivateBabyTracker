@@ -13,11 +13,13 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { theme, toggle } = useTheme();
+  // Theme is selected in /profile (MBT-178); the hook still needs to run here
+  // so the document-level theme is applied for every authenticated page.
+  useTheme();
 
   return (
     <div className="min-h-screen bg-ground text-text">
-      <Header theme={theme} onToggleTheme={toggle} />
+      <Header />
       <div className="flex">
         <Sidebar />
         <div className="hidden md:block w-56 shrink-0" />

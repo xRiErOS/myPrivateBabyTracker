@@ -1,22 +1,19 @@
-/** App header with child selector, refresh, theme toggle, and mobile burger menu. */
+/** App header with child selector, refresh, admin link, profile and mobile burger menu.
+ *
+ * MBT-178: Theme-Toggle ist nach /profile umgezogen. Stattdessen erscheint hier
+ * ein Verwaltungs-Icon (Settings) das nach /admin navigiert (Mobile + Desktop).
+ */
 
 import { useEffect, useState } from "react";
-import { Menu, RefreshCw, User } from "lucide-react";
+import { Menu, RefreshCw, Settings, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Theme } from "../hooks/useTheme";
 import { ChildSelector } from "./ChildSelector";
 import { MobileMenu } from "./MobileMenu";
-import { ThemeToggle } from "./ThemeToggle";
 import { useToast } from "../context/ToastContext";
 import { AlertBell } from "./AlertBell";
 
-interface HeaderProps {
-  theme: Theme;
-  onToggleTheme: () => void;
-}
-
-export function Header({ theme, onToggleTheme }: HeaderProps) {
+export function Header() {
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,6 +52,14 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
             <RefreshCw size={20} className={spinning ? "animate-spin-once" : ""} />
           </button>
           <Link
+            to="/admin"
+            data-tutorial="admin-link"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
+            aria-label="Verwaltung"
+          >
+            <Settings size={20} />
+          </Link>
+          <Link
             to="/profile"
             data-tutorial="profile-link"
             className="hidden md:flex min-h-[44px] min-w-[44px] items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
@@ -62,7 +67,6 @@ export function Header({ theme, onToggleTheme }: HeaderProps) {
           >
             <User size={20} />
           </Link>
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           {/* Burger menu — mobile only */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}

@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Clock, Baby, GraduationCap, Globe, RefreshCw, Sparkles, Zap } from "lucide-react";
+import { Clock, Baby, GraduationCap, Globe, Monitor, Moon, Palette, RefreshCw, Sparkles, Sun, Zap } from "lucide-react";
 import { useTutorialOptional } from "../context/TutorialContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "../components/Card";
 import { ChangelogModal, useShowChangelog } from "../components/ChangelogOverlay";
 import { PageHeader } from "../components/PageHeader";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme, type ThemeMode } from "../hooks/useTheme";
 import { getPreferences, updatePreferences, type UserPreferences } from "../api/preferences";
 import { PLUGINS } from "../lib/pluginRegistry";
 
@@ -50,6 +51,13 @@ export default function ProfilePage() {
   const tutorial = useTutorialOptional();
   const navigate = useNavigate();
   const { t: ttut } = useTranslation("tutorial");
+  const { mode: themeMode, setMode: setThemeMode } = useTheme();
+
+  const themeOptions: { value: ThemeMode; icon: typeof Sun; label: string }[] = [
+    { value: "light", icon: Sun, label: t("profile.theme_light") },
+    { value: "dark", icon: Moon, label: t("profile.theme_dark") },
+    { value: "system", icon: Monitor, label: t("profile.theme_system") },
+  ];
 
   useEffect(() => {
     getPreferences()
@@ -96,6 +104,42 @@ export default function ProfilePage() {
           <p className="text-xs text-subtext0">@{user.username} — {user.role} — {user.auth_type === "forward_auth" ? "SSO" : "Lokal"}</p>
         </Card>
       )}
+
+      {/* Theme (MBT-178) */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Palette className="h-4 w-4 text-mauve" />
+          <h3 className="font-headline text-base font-semibold text-text">{t("profile.theme")}</h3>
+        </div>
+        <p className="text-xs text-subtext0">{t("profile.theme_hint")}</p>
+        <div
+          role="radiogroup"
+          aria-label={t("profile.theme")}
+          className="grid grid-cols-3 gap-2"
+        >
+          {themeOptions.map((opt) => {
+            const Icon = opt.icon;
+            const active = themeMode === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => setThemeMode(opt.value)}
+                className={`flex flex-col items-center justify-center gap-1 min-h-[64px] py-2 rounded-lg border transition-colors ${
+                  active
+                    ? "bg-mauve/10 border-mauve text-mauve"
+                    : "bg-surface1 border-surface1 text-text hover:bg-surface2"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="font-label text-xs font-medium">{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
       {/* Timezone */}
       <Card className="p-4 space-y-3">

@@ -5,11 +5,13 @@
  * - Tracking (Tagesablauf, Pflege, Gesundheit)
  * - Entwicklung (Meilensteine, U-Untersuchungen)
  * - Organisation (Tasks, Notizen, Tags)
- * - Verwaltung
+ *
+ * MBT-178: "Verwaltung" wurde aus der Sidebar entfernt — sie ist jetzt
+ * direkt im Header (Settings-Icon) erreichbar.
  */
 
 import { useEffect, useState } from "react";
-import { Home, Settings } from "lucide-react";
+import { Home } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { isPluginEnabled } from "../lib/pluginConfig";
@@ -75,20 +77,6 @@ export function Sidebar() {
           );
         })}
 
-        {/* Verwaltung */}
-        <div className="mt-3">
-          <p className="px-3 pt-2 pb-1 font-label text-[10px] font-semibold text-subtext0 uppercase tracking-wide border-t border-surface1">
-            {tc("nav.group.admin")}
-          </p>
-          <NavLink
-            to="/admin"
-            data-tutorial="sidebar-admin"
-            className={({ isActive }) => linkClass(isActive)}
-          >
-            <Settings size={20} />
-            <span>{tc("nav.admin")}</span>
-          </NavLink>
-        </div>
       </nav>
     </aside>
   );

@@ -120,7 +120,8 @@ export const ALL_TUTORIAL_STEPS: TutorialStep[] = [
     titleKey: "step.admin.title",
     descriptionKey: "step.admin.description_desktop",
     actionPromptKey: "step.admin.action_desktop",
-    targetSelector: '[data-tutorial="sidebar-admin"]',
+    // MBT-178: Verwaltung ist jetzt im Header (Settings-Icon), nicht mehr in der Sidebar.
+    targetSelector: '[data-tutorial="admin-link"]',
     device: "desktop",
     action: { type: "navigate", route: "/admin" },
     expectedPath: "/",
