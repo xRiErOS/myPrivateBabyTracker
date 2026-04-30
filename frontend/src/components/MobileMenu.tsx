@@ -9,7 +9,7 @@ Only visible on mobile (< md). Closes on navigation.
 */
 
 import { useEffect, useState } from "react";
-import { Home, Settings, User, X } from "lucide-react";
+import { Settings, User, X } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getWidgetOrder, isPluginEnabled } from "../lib/pluginConfig";
@@ -102,17 +102,9 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           </button>
         </div>
 
-        {/* Home */}
-        <div className="grid grid-cols-3 gap-2 mb-2">
-          <NavLink to="/" end className={({ isActive }) => tileClass(isActive)}>
-            <Home size={22} />
-            <span className="mt-1">{tc("nav.dashboard")}</span>
-          </NavLink>
-        </div>
-
-        {/* Section 1: Tracking */}
+        {/* Section 1: Tracking — Home liegt in der BottomNav (MBT-235) */}
         {trackingPlugins.length > 0 && (
-          <div className="mb-2 pt-2 border-t border-surface1">
+          <div className="mb-2">
             <p className={sectionLabelClass}>{tc("nav.group.tracking")}</p>
             <div className="grid grid-cols-3 gap-2">
               {trackingPlugins.map(({ key, route, icon: Icon }) => (
