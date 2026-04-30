@@ -2,6 +2,8 @@
 
 from fastapi.testclient import TestClient
 
+from app.version import APP_VERSION
+
 
 def test_health_endpoint_returns_ok(client: TestClient):
     """Health endpoint returns status ok."""
@@ -9,7 +11,8 @@ def test_health_endpoint_returns_ok(client: TestClient):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["version"] == "0.1.0"
+    # Version comes from the single-source-of-truth module (app.version).
+    assert data["version"] == APP_VERSION
 
 
 def test_health_endpoint_contains_plugins(client: TestClient):

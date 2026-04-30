@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from app.plugins.registry import plugin_registry
+from app.version import APP_VERSION
 
 router = APIRouter(tags=["health"])
 
@@ -17,7 +18,7 @@ async def health():
     plugins = plugin_registry.get_all()
     return JSONResponse({
         "status": "ok",
-        "version": "0.8.1",
+        "version": APP_VERSION,
         "plugins": [
             {"name": p.name, "version": p.version}
             for p in plugins

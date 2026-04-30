@@ -24,6 +24,8 @@ from app.middleware.security import (
 )
 from app.plugins import discover_plugins
 from app.plugins.registry import plugin_registry
+from app.services.changelog_service import ensure_release_note_for_current_version
+from app.version import APP_VERSION
 
 logger = get_logger("main")
 
@@ -81,6 +83,10 @@ async def lifespan(app: FastAPI):
     # Initialize async database engine with WAL mode
     init_db(settings.database_url)
 
+    # Pfad 1 (Container-getriggert): Auto-Release-Note fuer aktuelle App-Version.
+    # Idempotent — bestehende Eintraege werden nicht ueberschrieben.
+    ensure_release_note_for_current_version()
+
     # Run plugin startup hooks (routes already mounted in create_app)
     for plugin in plugin_registry.get_all():
         plugin.on_startup()
@@ -93,7 +99,7 @@ async def lifespan(app: FastAPI):
 
     logger.info(
         "app_started",
-        version="0.1.0",
+        version=APP_VERSION,
         auth_mode=settings.auth_mode,
         environment=settings.environment,
         log_level=settings.log_level,
@@ -118,7 +124,7 @@ def create_app(testing: bool = False) -> FastAPI:
     app = FastAPI(
         title="MyBaby",
         description="Self-hosted, plugin-based baby tracker",
-        version="0.1.0",
+        version=APP_VERSION,
         lifespan=lifespan,
         docs_url="/api/docs" if not testing else "/docs",
         openapi_url="/api/openapi.json" if not testing else "/openapi.json",

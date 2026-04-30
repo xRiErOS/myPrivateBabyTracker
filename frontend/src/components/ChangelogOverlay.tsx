@@ -1,12 +1,20 @@
-/** Changelog overlay — three variants, different visibility logic:
+/** Changelog overlay — three variants, different visibility logic.
  *
- * - 'update': shown when app version changes (version-gated, existing behavior)
- * - 'info':   shown independently of version, dismissed per-entry via localStorage
- * - 'warning': same as info, but with visual emphasis (red/yellow styling)
+ * Pfad 1 (Container-getriggert): Backend-Startup legt fuer eine neue App-Version
+ *   automatisch einen 'update'-Eintrag in data/changelog.json an (idempotent).
+ * Pfad 2 (Manuell): Admin erstellt/bearbeitet Eintraege via /admin/changelog.
  *
- * Dismiss logic:
- * - update  → stores current app version in 'mybaby_last_seen_version'
- * - info/warning → stores entry slug in 'mybaby_dismissed_<version>'
+ * Sichtbarkeitsregeln pro Variante:
+ * - 'update':  gezeigt wenn (a) Eintragsversion > letzte gesehene App-Version
+ *              ODER (b) Eintrag noch nie individuell dismissed wurde.
+ *              Damit erreichen auch manuell nachgepflegte Notes fuer die
+ *              aktuelle App-Version den Nutzer (Bug-Fix MBT-225).
+ * - 'info':    versions-unabhaengig, per-Entry dismiss.
+ * - 'warning': wie info, mit roter Hervorhebung.
+ *
+ * Dismiss schreibt IMMER beide Marker:
+ *   - mybaby_last_seen_version       (App-Versions-Anker fuer Update-Listing)
+ *   - mybaby_dismissed_<version>     (per-Entry, blockt Re-Anzeige bis Edit)
  */
 
 import { useEffect, useState } from "react";
@@ -88,13 +96,15 @@ export function ChangelogOverlay() {
       const allEntries = await fetchChangelog();
       const lastSeen = getLastSeenVersion();
 
-      // Update entries: only if app version changed
+      // Update entries: gezeigt wenn der Eintrag noch nicht individuell
+      // dismissed wurde UND entweder neuer ist als die letzte gesehene Version
+      // ODER die Version-Marke noch nie gesetzt wurde. So erreichen auch
+      // manuell nachgepflegte Notes fuer die aktuelle App-Version den Nutzer.
       const updateEntries = allEntries.filter(
         (e) =>
           e.variant === "update" &&
-          version !== null &&
-          lastSeen !== version &&
-          e.version > (lastSeen ?? "")
+          !isEntryDismissed(e) &&
+          (lastSeen === null || e.version > lastSeen)
       );
 
       // Info / warning entries: version-independent, dismissed per entry
@@ -113,12 +123,12 @@ export function ChangelogOverlay() {
   }, []);
 
   function handleDismiss() {
-    // Mark update entries as seen (by app version)
+    // Mark update entries as seen (by app version) — Sammel-Anker.
     if (appVersion) setLastSeenVersion(appVersion);
-    // Mark info/warning entries as individually dismissed
-    entriesToShow.forEach((e) => {
-      if (e.variant !== "update") dismissEntry(e);
-    });
+    // Per-Entry Dismiss fuer ALLE Varianten — verhindert Re-Anzeige nach
+    // Container-Restarts oder spaeter manuell editierten Notes derselben
+    // App-Version (MBT-225 Pfad 2).
+    entriesToShow.forEach((e) => dismissEntry(e));
     setShow(false);
   }
 
