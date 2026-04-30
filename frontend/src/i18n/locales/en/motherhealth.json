@@ -1,5 +1,6 @@
 {
   "title": "Mother's Health",
+  "label_type": "Kind",
   "label_content": "Note",
   "label_notes_optional": "Note (optional)",
   "content_placeholder": "Note for the midwife or about your own well-being…",

@@ -1,7 +1,8 @@
-/** MotherHealthForm — strukturierte Erfassung mit Tab-Switcher.
+/** MotherHealthForm — strukturierte Erfassung im /health-Layout.
  *
- * Tabs: Wochenfluss / Schmerzen / Stimmung / Notiz.
- * Pro Tab eigene Sub-Form. Notes-Feld optional auf allen Typen.
+ * Pill-Button-Group für "Art" (Wochenfluss / Schmerzen / Stimmung / Notiz).
+ * Pro Typ eigene Sub-Form. Notes-Feld optional auf allen Typen. TagSelector
+ * polymorph für entry_type="motherhealth".
  */
 
 import { type FormEvent, useState } from "react";
@@ -9,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../../components/Button";
 import { Select } from "../../components/Select";
 import { Slider } from "../../components/Slider";
+import { TagSelector } from "../../components/TagSelector";
 import { useActiveChild } from "../../context/ChildContext";
 import {
   useCreateMotherHealthEntry,
@@ -16,6 +18,7 @@ import {
 } from "../../hooks/useMotherHealth";
 import { useEntryToast } from "../../hooks/useEntryToast";
 import { formatApiError } from "../../lib/errorMessages";
+import { attachTag } from "../../api/tags";
 import type {
   ActivityLevel,
   EntryType,
@@ -92,15 +95,16 @@ export function MotherHealthForm({
   );
 
   const [error, setError] = useState<string | null>(null);
+  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
   const isPending = createMut.isPending || updateMut.isPending;
   const notesTooLong = notes.length > MAX_NOTES;
   const noteRequired = type === "note" && notes.trim().length === 0;
 
-  const tabs: { key: EntryType; label: string }[] = [
-    { key: "lochia", label: t("type_lochia") },
-    { key: "pain", label: t("type_pain") },
-    { key: "mood", label: t("type_mood") },
-    { key: "note", label: t("type_note") },
+  const ENTRY_TYPES: { value: EntryType; label: string }[] = [
+    { value: "lochia", label: t("type_lochia") },
+    { value: "pain", label: t("type_pain") },
+    { value: "mood", label: t("type_mood") },
+    { value: "note", label: t("type_note") },
   ];
 
   function buildCreatePayload(): MotherHealthCreate {
@@ -173,54 +177,70 @@ export function MotherHealthForm({
           updateData.activity_level = activityLevel;
         }
         await updateMut.mutateAsync({ id: entry.id, data: updateData });
+        toast.saved();
+        onDone?.();
       } else {
-        await createMut.mutateAsync(buildCreatePayload());
+        const result = await createMut.mutateAsync(buildCreatePayload());
+        if (pendingTagIds.length > 0) {
+          await Promise.all(
+            pendingTagIds.map((tagId) =>
+              attachTag({
+                tag_id: tagId,
+                entry_type: "motherhealth",
+                entry_id: result.id,
+              }),
+            ),
+          );
+        }
+        toast.saved();
+        onDone?.();
       }
-      toast.saved();
-      onDone?.();
     } catch (err) {
       setError(formatApiError(err));
     }
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       {error && (
-        <p className="rounded-lg bg-red/10 px-3 py-2 text-sm text-red">{error}</p>
+        <div className="rounded-[8px] border border-red bg-red/10 p-3 text-sm text-red">
+          {error}
+        </div>
       )}
 
-      {/* Tab-Bar — nur im Create-Modus aktiv */}
-      <div
-        className="flex gap-1 rounded-lg bg-surface0 p-1 overflow-x-auto"
-        role="tablist"
-      >
-        {tabs.map((tab) => {
-          const active = type === tab.key;
-          const disabled = isEditing && !active;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              disabled={disabled}
-              onClick={() => !disabled && setType(tab.key)}
-              className={`flex-1 min-w-[80px] rounded-md px-3 py-2 font-label text-sm transition-colors ${
-                active
-                  ? "bg-peach text-ground font-semibold"
-                  : disabled
-                  ? "text-overlay0 cursor-not-allowed"
-                  : "text-subtext0 hover:bg-surface1"
-              }`}
-              style={{ minHeight: 44 }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+      {/* Art-Selector (Pill-Buttons im /health-Stil) */}
+      <div>
+        <label className="font-label text-sm font-medium text-text block mb-1">
+          {t("label_type")} *
+        </label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {ENTRY_TYPES.map((et) => {
+            const active = type === et.value;
+            const disabled = isEditing && !active;
+            return (
+              <button
+                key={et.value}
+                type="button"
+                aria-pressed={active}
+                disabled={disabled}
+                onClick={() => !disabled && setType(et.value)}
+                className={`min-h-[44px] rounded-[8px] font-label text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-mauve text-ground"
+                    : disabled
+                      ? "bg-surface0 text-overlay0 cursor-not-allowed"
+                      : "bg-surface1 text-text hover:bg-surface2"
+                }`}
+              >
+                {et.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {/* Sub-Form je nach Typ */}
+      <div className="flex flex-col gap-4">
         {type === "lochia" && (
           <LochiaFields
             amount={lochiaAmount}
@@ -274,24 +294,28 @@ export function MotherHealthForm({
             onActivity={setActivityLevel}
           />
         )}
+      </div>
 
-        {/* Notes — alle Typen */}
-        <div>
-          <label
-            htmlFor="mh-notes"
-            className="font-label text-sm font-medium text-subtext0 mb-1 block"
-          >
-            {type === "note" ? t("label_content") : t("label_notes_optional")}
-            {type === "note" && <span className="text-red ml-0.5">*</span>}
-          </label>
-          <textarea
-            id="mh-notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={type === "note" ? 6 : 3}
-            placeholder={t("content_placeholder")}
-            className="w-full min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve resize-y"
-          />
+      {/* Notizen — alle Typen */}
+      <div>
+        <label
+          htmlFor="mh-notes"
+          className="font-label text-sm font-medium text-text block mb-1"
+        >
+          {type === "note" ? t("label_content") : tc("notes")}
+          {type === "note" && <span className="text-red ml-0.5">*</span>}
+        </label>
+        <textarea
+          id="mh-notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={type === "note" ? 6 : 3}
+          placeholder={
+            type === "note" ? t("content_placeholder") : tc("notes_placeholder")
+          }
+          className="w-full min-h-[44px] rounded-[8px] bg-surface0 px-3 py-2 font-body text-base text-text border-none outline-none focus:ring-2 focus:ring-mauve resize-y"
+        />
+        {(notesTooLong || notes.length > MAX_NOTES * 0.75) && (
           <div className="flex justify-end mt-1">
             <span
               className={`font-body text-xs ${
@@ -301,23 +325,37 @@ export function MotherHealthForm({
               {notes.length} / {MAX_NOTES}
             </span>
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button type="button" variant="secondary" onClick={onCancel}>
-              {tc("cancel")}
-            </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={isPending || notesTooLong || noteRequired}
-          >
-            {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
+      {/* Tags */}
+      <div className="pt-3 border-t border-surface1">
+        {isEditing ? (
+          <TagSelector entryType="motherhealth" entryId={entry!.id} />
+        ) : (
+          <TagSelector
+            entryType="motherhealth"
+            pendingTagIds={pendingTagIds}
+            onPendingChange={setPendingTagIds}
+          />
+        )}
+      </div>
+
+      {/* Submit */}
+      <div className="flex justify-end gap-2">
+        {onCancel && (
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            {tc("cancel")}
           </Button>
-        </div>
-      </form>
-    </div>
+        )}
+        <Button
+          type="submit"
+          disabled={isPending || notesTooLong || noteRequired}
+        >
+          {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
+        </Button>
+      </div>
+    </form>
   );
 }
 

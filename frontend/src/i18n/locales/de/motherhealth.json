@@ -1,5 +1,6 @@
 {
   "title": "Muttergesundheit",
+  "label_type": "Art",
   "label_content": "Notiz",
   "label_notes_optional": "Notiz (optional)",
   "content_placeholder": "Notiz für die Hebamme oder zum eigenen Wohlbefinden…",
