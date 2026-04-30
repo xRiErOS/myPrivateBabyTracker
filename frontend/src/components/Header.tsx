@@ -1,7 +1,9 @@
 /** App header with child selector, refresh, admin link, profile and mobile burger menu.
  *
  * MBT-178: Theme-Toggle ist nach /profile umgezogen. Stattdessen erscheint hier
- * ein Verwaltungs-Icon (Settings) das nach /admin navigiert (Mobile + Desktop).
+ * ein Verwaltungs-Icon (Settings) das nach /admin navigiert.
+ * MBT-212: Verwaltungs-Icon nur noch auf Desktop (md+) — auf Mobile dupliziert es
+ * den Burger-Menue-Eintrag und wird daher dort ausgeblendet.
  */
 
 import { useEffect, useState } from "react";
@@ -54,7 +56,7 @@ export function Header() {
           <Link
             to="/admin"
             data-tutorial="admin-link"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
+            className="hidden md:flex min-h-[44px] min-w-[44px] items-center justify-center rounded-card bg-surface0 text-subtext0 hover:text-text transition-colors"
             aria-label="Verwaltung"
           >
             <Settings size={20} />
