@@ -137,3 +137,10 @@ body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   cursor: pointer;
 }
+/* Untouched-State: Daumen unsichtbar bis User aktiv setzt. */
+.slider-vas-untouched::-webkit-slider-thumb {
+  opacity: 0;
+}
+.slider-vas-untouched::-moz-range-thumb {
+  opacity: 0;
+}

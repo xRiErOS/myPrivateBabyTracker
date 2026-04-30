@@ -9,7 +9,8 @@ import type { ChangeEvent } from "react";
 
 interface SliderProps {
   label: string;
-  value: number;
+  /** `null` markiert den Untouched-State (kein Daumen, kein Wert). */
+  value: number | null;
   onChange: (v: number) => void;
   min?: number;
   max?: number;
@@ -35,7 +36,9 @@ export function Slider({
   endpoints,
 }: SliderProps) {
   const sliderId = id ?? `slider-${label.replace(/\s+/g, "-").toLowerCase()}`;
-  const pct = ((value - min) / (max - min)) * 100;
+  const untouched = value === null;
+  const effective = value ?? min;
+  const pct = untouched ? 0 : ((effective - min) / (max - min)) * 100;
   const digits = precision ?? (step < 1 ? 1 : 0);
 
   const handle = (e: ChangeEvent<HTMLInputElement>) => {
@@ -56,29 +59,33 @@ export function Slider({
           className="font-label text-sm font-semibold tabular-nums text-text"
           aria-live="polite"
         >
-          {value.toFixed(digits)}
+          {untouched ? "—" : effective.toFixed(digits)}
         </span>
       </div>
       <div className="relative flex items-center py-2" style={{ minHeight: 44 }}>
         {/* Track-Hintergrund */}
         <div className="absolute left-0 right-0 h-2 rounded-full bg-surface1" />
-        {/* Gefüllter Anteil — neutrale Farbe (mauve), kein Severity-Verlauf */}
-        <div
-          className="absolute left-0 h-2 rounded-full bg-mauve transition-[width]"
-          style={{ width: `${pct}%` }}
-        />
+        {/* Gefüllter Anteil — neutrale Farbe (mauve). Im Untouched-State unsichtbar. */}
+        {!untouched && (
+          <div
+            className="absolute left-0 h-2 rounded-full bg-mauve transition-[width]"
+            style={{ width: `${pct}%` }}
+          />
+        )}
         <input
           id={sliderId}
           type="range"
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={effective}
           onChange={handle}
-          className="relative w-full appearance-none bg-transparent cursor-pointer slider-vas"
+          className={`relative w-full appearance-none bg-transparent cursor-pointer slider-vas ${
+            untouched ? "slider-vas-untouched" : ""
+          }`}
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={value}
+          aria-valuenow={untouched ? undefined : effective}
           aria-label={label}
         />
       </div>

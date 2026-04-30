@@ -72,26 +72,32 @@ export function MotherHealthForm({
     entry?.lochia_clots ?? false,
   );
 
-  // Pain (VAS)
-  const [painPerineum, setPainPerineum] = useState<number>(
-    entry?.pain_perineum ?? 0,
+  // Pain (VAS) — null = untouched, kein Default-Wert
+  const [painPerineum, setPainPerineum] = useState<number | null>(
+    entry?.pain_perineum ?? null,
   );
-  const [painAbdominal, setPainAbdominal] = useState<number>(
-    entry?.pain_abdominal ?? 0,
+  const [painAbdominal, setPainAbdominal] = useState<number | null>(
+    entry?.pain_abdominal ?? null,
   );
-  const [painBreast, setPainBreast] = useState<number>(
-    entry?.pain_breast ?? 0,
+  const [painBreast, setPainBreast] = useState<number | null>(
+    entry?.pain_breast ?? null,
   );
-  const [painUrination, setPainUrination] = useState<number>(
-    entry?.pain_urination ?? 0,
+  const [painUrination, setPainUrination] = useState<number | null>(
+    entry?.pain_urination ?? null,
   );
 
-  // Mood
-  const [moodLevel, setMoodLevel] = useState<number>(entry?.mood_level ?? 3);
-  const [wellbeing, setWellbeing] = useState<number>(entry?.wellbeing ?? 3);
-  const [exhaustion, setExhaustion] = useState<number>(entry?.exhaustion ?? 3);
-  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(
-    entry?.activity_level ?? "normal",
+  // Mood — null = untouched
+  const [moodLevel, setMoodLevel] = useState<number | null>(
+    entry?.mood_level ?? null,
+  );
+  const [wellbeing, setWellbeing] = useState<number | null>(
+    entry?.wellbeing ?? null,
+  );
+  const [exhaustion, setExhaustion] = useState<number | null>(
+    entry?.exhaustion ?? null,
+  );
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel | "">(
+    entry?.activity_level ?? "",
   );
 
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +105,19 @@ export function MotherHealthForm({
   const isPending = createMut.isPending || updateMut.isPending;
   const notesTooLong = notes.length > MAX_NOTES;
   const noteRequired = type === "note" && notes.trim().length === 0;
+  // Untouched-Validation: bei Pain/Mood mind. ein Wert gesetzt sein.
+  const painEmpty =
+    type === "pain" &&
+    painPerineum === null &&
+    painAbdominal === null &&
+    painBreast === null &&
+    painUrination === null;
+  const moodEmpty =
+    type === "mood" &&
+    moodLevel === null &&
+    wellbeing === null &&
+    exhaustion === null &&
+    activityLevel === "";
 
   const ENTRY_TYPES: { value: EntryType; label: string }[] = [
     { value: "lochia", label: t("type_lochia") },
@@ -124,10 +143,10 @@ export function MotherHealthForm({
       return {
         entry_type: "pain",
         child_id: activeChild!.id,
-        pain_perineum: painPerineum,
-        pain_abdominal: painAbdominal,
-        pain_breast: painBreast,
-        pain_urination: painUrination,
+        pain_perineum: painPerineum ?? undefined,
+        pain_abdominal: painAbdominal ?? undefined,
+        pain_breast: painBreast ?? undefined,
+        pain_urination: painUrination ?? undefined,
         notes: trimmedNotes,
       };
     }
@@ -135,10 +154,10 @@ export function MotherHealthForm({
       return {
         entry_type: "mood",
         child_id: activeChild!.id,
-        mood_level: moodLevel,
-        wellbeing,
-        exhaustion,
-        activity_level: activityLevel,
+        mood_level: moodLevel ?? undefined,
+        wellbeing: wellbeing ?? undefined,
+        exhaustion: exhaustion ?? undefined,
+        activity_level: activityLevel === "" ? undefined : activityLevel,
         notes: trimmedNotes,
       };
     }
@@ -152,7 +171,7 @@ export function MotherHealthForm({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (notesTooLong || noteRequired) return;
+    if (notesTooLong || noteRequired || painEmpty || moodEmpty) return;
 
     try {
       if (isEditing) {
@@ -174,7 +193,7 @@ export function MotherHealthForm({
           updateData.mood_level = moodLevel;
           updateData.wellbeing = wellbeing;
           updateData.exhaustion = exhaustion;
-          updateData.activity_level = activityLevel;
+          updateData.activity_level = activityLevel === "" ? null : activityLevel;
         }
         await updateMut.mutateAsync({ id: entry.id, data: updateData });
         toast.saved();
@@ -350,7 +369,9 @@ export function MotherHealthForm({
         )}
         <Button
           type="submit"
-          disabled={isPending || notesTooLong || noteRequired}
+          disabled={
+            isPending || notesTooLong || noteRequired || painEmpty || moodEmpty
+          }
         >
           {isPending ? tc("saving") : isEditing ? tc("update") : tc("add")}
         </Button>
@@ -436,14 +457,14 @@ function LochiaFields({
 }
 
 interface MoodFieldsProps {
-  mood: number;
-  wellbeing: number;
-  exhaustion: number;
-  activity: ActivityLevel;
+  mood: number | null;
+  wellbeing: number | null;
+  exhaustion: number | null;
+  activity: ActivityLevel | "";
   onMood: (v: number) => void;
   onWellbeing: (v: number) => void;
   onExhaustion: (v: number) => void;
-  onActivity: (v: ActivityLevel) => void;
+  onActivity: (v: ActivityLevel | "") => void;
 }
 
 function MoodFields({
@@ -489,8 +510,11 @@ function MoodFields({
       <Select
         label={t("activity_level")}
         value={activity}
-        onChange={(e) => onActivity(e.target.value as ActivityLevel)}
+        onChange={(e) =>
+          onActivity(e.target.value as ActivityLevel | "")
+        }
         options={[
+          { value: "", label: t("activity_unset") },
           { value: "bedrest", label: t("activity_bedrest") },
           { value: "light", label: t("activity_light") },
           { value: "normal", label: t("activity_normal") },

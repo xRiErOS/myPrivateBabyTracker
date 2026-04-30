@@ -43,18 +43,20 @@ class LochiaCreate(_CreateBase):
 
 class PainCreate(_CreateBase):
     entry_type: Literal["pain"]
-    pain_perineum: float = Field(..., ge=0.0, le=10.0)
-    pain_abdominal: float = Field(..., ge=0.0, le=10.0)
-    pain_breast: float = Field(..., ge=0.0, le=10.0)
-    pain_urination: float = Field(..., ge=0.0, le=10.0)
+    # Alle VAS-Skalen optional — Untouched-Default verhindert suggestive Vorbelegung.
+    pain_perineum: float | None = Field(default=None, ge=0.0, le=10.0)
+    pain_abdominal: float | None = Field(default=None, ge=0.0, le=10.0)
+    pain_breast: float | None = Field(default=None, ge=0.0, le=10.0)
+    pain_urination: float | None = Field(default=None, ge=0.0, le=10.0)
 
 
 class MoodCreate(_CreateBase):
     entry_type: Literal["mood"]
-    mood_level: int = Field(..., ge=1, le=5)
-    wellbeing: int = Field(..., ge=1, le=5)
-    exhaustion: int = Field(..., ge=1, le=5)
-    activity_level: ActivityLevel
+    # Alle Skalen optional — Untouched-Default verhindert suggestive Vorbelegung.
+    mood_level: int | None = Field(default=None, ge=1, le=5)
+    wellbeing: int | None = Field(default=None, ge=1, le=5)
+    exhaustion: int | None = Field(default=None, ge=1, le=5)
+    activity_level: ActivityLevel | None = None
 
 
 class NoteCreate(_CreateBase):

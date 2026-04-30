@@ -56,18 +56,18 @@ export interface LochiaCreate extends BaseCreate {
 
 export interface PainCreate extends BaseCreate {
   entry_type: "pain";
-  pain_perineum: number;
-  pain_abdominal: number;
-  pain_breast: number;
-  pain_urination: number;
+  pain_perineum?: number;
+  pain_abdominal?: number;
+  pain_breast?: number;
+  pain_urination?: number;
 }
 
 export interface MoodCreate extends BaseCreate {
   entry_type: "mood";
-  mood_level: number;
-  wellbeing: number;
-  exhaustion: number;
-  activity_level: ActivityLevel;
+  mood_level?: number;
+  wellbeing?: number;
+  exhaustion?: number;
+  activity_level?: ActivityLevel;
 }
 
 export interface NoteCreate extends BaseCreate {

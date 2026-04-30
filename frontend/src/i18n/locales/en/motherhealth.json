@@ -48,6 +48,7 @@
   "exhaustion_min": "not exhausted",
   "exhaustion_max": "very exhausted",
   "activity_level": "Activity",
+  "activity_unset": "— please select",
   "activity_bedrest": "Bed rest",
   "activity_light": "Light",
   "activity_normal": "Normal"

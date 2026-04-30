@@ -48,6 +48,7 @@
   "exhaustion_min": "nicht erschöpft",
   "exhaustion_max": "sehr erschöpft",
   "activity_level": "Aktivität",
+  "activity_unset": "— bitte wählen",
   "activity_bedrest": "Bettruhe",
   "activity_light": "leicht",
   "activity_normal": "normal"
