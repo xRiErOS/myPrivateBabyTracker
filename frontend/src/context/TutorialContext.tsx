@@ -72,17 +72,29 @@ export function TutorialProvider({ children }: TutorialProviderProps) {
     return () => window.removeEventListener("resize", handler);
   }, []);
 
-  // Hydrate from server preferences
+  // Hydrate from server preferences.
+  // localStorage_true wins (MBT-240 R2): Hat der Nutzer das Tutorial einmal
+  // dauerhaft abgelehnt (tutorial_completed=true im localStorage), darf der
+  // Backend-Hydrate diesen Wert NICHT auf false zurücksetzen — das schützt
+  // den No-User-Mode und Auth-Edge-Cases gegen 200+Default-Antworten ohne
+  // explizites 401. Der Backend-State wird in dem Fall mit einem Push
+  // synchronisiert, damit beide Speicher konsistent bleiben.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const prefs = await getPreferences();
         if (cancelled) return;
-        setCompleted(prefs.tutorial_completed);
+        const localCompleted = localStorage.getItem(LOCAL_KEY_COMPLETED) === "true";
+        const effectiveCompleted = prefs.tutorial_completed || localCompleted;
+        setCompleted(effectiveCompleted);
         setStep(prefs.tutorial_step);
-        localStorage.setItem(LOCAL_KEY_COMPLETED, String(prefs.tutorial_completed));
+        localStorage.setItem(LOCAL_KEY_COMPLETED, String(effectiveCompleted));
         localStorage.setItem(LOCAL_KEY_STEP, String(prefs.tutorial_step));
+        if (effectiveCompleted && !prefs.tutorial_completed) {
+          // Backend ist out-of-sync — local true gewinnt, Backend nachziehen
+          void updatePreferences({ tutorial_completed: true }).catch(() => {});
+        }
       } catch {
         // unauthenticated or backend unavailable — keep localStorage values
       } finally {
