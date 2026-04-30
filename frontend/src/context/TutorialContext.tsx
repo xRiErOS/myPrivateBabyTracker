@@ -37,6 +37,8 @@ interface TutorialContextValue extends TutorialState {
   next: () => void;
   prev: () => void;
   skip: () => void;
+  /** Tutorial dauerhaft schließen — unabhängig vom dontShowAgain-State. */
+  dismissForever: () => void;
   reset: () => void;
   goTo: (step: number) => void;
   setDontShowAgain: (v: boolean) => void;
@@ -170,6 +172,18 @@ export function TutorialProvider({ children }: TutorialProviderProps) {
     }
   }, [persist, dontShowAgain]);
 
+  // Forciert tutorial_completed=true, unabhängig vom aktuellen dontShowAgain-State.
+  // Wird vom „Tutorial überspringen und nicht mehr anzeigen"-CTA am Welcome-Step
+  // benutzt (MBT-240). Persistierung erfolgt sowohl in localStorage (No-User-Mode)
+  // als auch — falls verfügbar — über updatePreferences im Backend.
+  const dismissForever = useCallback(() => {
+    setActive(false);
+    setPaused(false);
+    setCompleted(true);
+    setDontShowAgain(true);
+    void persist({ tutorial_completed: true, tutorial_step: 0 });
+  }, [persist]);
+
   const reset = useCallback(() => {
     setStep(0);
     setCompleted(false);
@@ -201,12 +215,13 @@ export function TutorialProvider({ children }: TutorialProviderProps) {
       next,
       prev,
       skip,
+      dismissForever,
       reset,
       goTo,
       setDontShowAgain,
       setPaused,
     }),
-    [active, step, completed, steps, dontShowAgain, paused, start, next, prev, skip, reset, goTo],
+    [active, step, completed, steps, dontShowAgain, paused, start, next, prev, skip, dismissForever, reset, goTo],
   );
 
   return (

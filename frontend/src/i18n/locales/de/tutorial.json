@@ -2,6 +2,7 @@
   "next": "Weiter",
   "prev": "Zurück",
   "skip": "Tutorial überspringen",
+  "skip_permanent": "Tutorial überspringen und nicht mehr anzeigen",
   "done": "Fertig",
   "restart": "Neu starten",
   "end_tutorial": "Einführung beenden",

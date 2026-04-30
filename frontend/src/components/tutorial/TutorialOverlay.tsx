@@ -139,6 +139,7 @@ interface TooltipProps {
   onPrev: () => void;
   onClose: () => void;
   onReset: () => void;
+  onDismissForever: () => void;
 }
 
 function Tooltip({
@@ -155,6 +156,7 @@ function Tooltip({
   onPrev,
   onClose,
   onReset,
+  onDismissForever,
 }: TooltipProps) {
   const { t } = useTranslation("tutorial");
 
@@ -283,6 +285,18 @@ function Tooltip({
           </button>
         </div>
       </div>
+
+      {isFirstStep && (
+        <div className="mt-3 pt-3 border-t border-surface1">
+          <button
+            type="button"
+            onClick={onDismissForever}
+            className="w-full min-h-[36px] px-3 rounded-[6px] bg-transparent hover:bg-surface1 font-label text-[11px] text-subtext0 hover:text-text underline underline-offset-2"
+          >
+            {t("skip_permanent")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -679,6 +693,7 @@ export function TutorialOverlay() {
           onPrev={tut.prev}
           onClose={handleClose}
           onReset={tut.reset}
+          onDismissForever={tut.dismissForever}
         />
         {confirmOpen && (
           <ConfirmCloseModal
@@ -710,6 +725,7 @@ export function TutorialOverlay() {
         onPrev={tut.prev}
         onClose={handleClose}
         onReset={tut.reset}
+        onDismissForever={tut.dismissForever}
       />
       {confirmOpen && (
         <ConfirmCloseModal

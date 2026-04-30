@@ -2,6 +2,7 @@
   "next": "Next",
   "prev": "Back",
   "skip": "Skip tutorial",
+  "skip_permanent": "Skip tutorial and don't show again",
   "done": "Done",
   "restart": "Restart",
   "end_tutorial": "End tutorial",
