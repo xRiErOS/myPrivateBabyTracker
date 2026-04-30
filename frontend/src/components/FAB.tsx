@@ -3,11 +3,23 @@
 Position: fixed bottom-right, above BottomNav.
 Only visible on mobile (< md breakpoint).
 
-MBT-182: Radial-Menü mit bis zu 4 konfigurierbaren Slots.
-- Items werden im Quarter-Circle (270°-360°, also oben links vom FAB) angeordnet.
-- Slot 4 darf leer sein → dann werden nur 3 Items gerendert.
+MBT-182: Radial-Menü mit bis zu 4 konfigurierbaren Slots + "Weitere".
+- Items werden im Quarter-Circle (90°–180°, oben links vom FAB) angeordnet.
+- Slot 4 darf leer sein → dann werden nur 3 Items + "Weitere" gerendert.
 - Animation: Stagger 35ms, max 240ms total, ease-out, 60fps tauglich
   (transform/opacity only, kein Layout-Shift).
+
+MBT-231 R2: Adaptive Geometrie. Radius und Spread skalieren mit
+der Item-Anzahl, damit benachbarte Buttons (48px) niemals überlappen
+(min. Sehne 56px = 8px sichtbarer Gap). Berechnung:
+  chord(r, Δ) = 2·r·sin(Δ/2) mit Δ = spread/(n-1) ≥ 56px.
+Ergebnis-Tabelle (Spread / Radius):
+  n=1: 0°  / 92px   (Diagonale 135°)
+  n=2: 50° / 96px   (110°, 160°)
+  n=3: 70° / 96px   (100°, 135°, 170°)
+  n=4: 80° / 125px  (95°, 121.66°, 148.33°, 175°)
+  n=5: 90° / 145px  (90°, 112.5°, 135°, 157.5°, 180°)
+Viewport-Cap: r ≤ 240px (passt auf iPhone SE 320px Breite).
 */
 
 import { useState } from "react";
@@ -39,28 +51,60 @@ const ALL_ACTIONS: ActionDef[] = [
   { key: "tummytime", label: "Bauchlage", icon: Timer, route: "/tummy-time?new=1" },
 ];
 
-// Radius des Bogens in Pixel — 90px ergibt komfortable 44px-Touch-Targets
-// ohne Überlappung bei 4 Slots im Quarter-Circle.
-const RADIAL_RADIUS = 96;
+// Mindestabstand (Mittelpunkt-zu-Mittelpunkt) zwischen benachbarten 48px-Buttons
+// ist 56px = 48px Diameter + 8px sichtbarer Gap. Die Radius-Werte unten
+// sind so gewählt, dass die Sehne stets ≥ 56px ist.
+// Maximaler Radius, damit auf iPhone SE (320px) der linkeste Item-Rand
+// noch ≥ 8px vom Bildschirmrand bleibt (FAB-Mitte bei x=276 → 276 - r - 24 ≥ 8).
+const RADIAL_MAX_RADIUS = 240;
 
 /**
- * Bestimmt für n Items (1–4) die Winkel (in Grad) auf einem Quarter-Circle.
+ * Liefert den Radius (px) für n Items so, dass die Sehne zwischen
+ * benachbarten Buttons ≥ MIN_CHORD ist. Werte sind aus
+ *   r ≥ (MIN_CHORD/2) / sin(Δ/2),  Δ = spread/(n-1)
+ * abgeleitet und auf 5px aufgerundet.
+ */
+function getRadialRadius(count: number): number {
+  let r: number;
+  if (count <= 1) r = 92;
+  else if (count === 2) r = 96; // spread 50°, chord 81px
+  else if (count === 3) r = 96; // spread 70°, chord 57.7px
+  else if (count === 4) r = 125; // spread 80°, chord 57.7px
+  else r = 145; // n>=5: spread 90°, chord 56.6px
+  return Math.min(r, RADIAL_MAX_RADIUS);
+}
+
+/**
+ * Bestimmt für n Items (1–5) die Winkel (in Grad) auf einem Quarter-Circle.
  * Der FAB sitzt unten rechts — Items werden oben links davon platziert.
- * 180° = links, 270° = oben (CSS-Koordinaten: x = cos(angle)·r, y = sin(angle)·r,
- * y wird negiert, da Bildschirm-Y nach unten zeigt).
+ * Konvention: 0° = rechts, 90° = oben, 180° = links (mathematische Polar­koordinaten).
+ * Render-Code (top: 50% - 24px - y) negiert y wieder, daher liefert sin>0 → Item nach oben.
+ * Der nutzbare Bogen für „oben-links vom FAB" liegt zwischen 90° und 180°.
  *
- * - 1 Item:  225° (diagonal oben-links)
- * - 2 Items: 200°, 250°
- * - 3 Items: 190°, 225°, 260°
- * - 4 Items: 185°, 215°, 245°, 275°  (gleichmäßig zwischen 180° und 280°)
+ * Spread skaliert mit Item-Anzahl, damit Sehne ≥ 56px:
+ * - 1 Item:  135°
+ * - 2 Items: 110°, 160°                          (spread 50°)
+ * - 3 Items: 100°, 135°, 170°                    (spread 70°)
+ * - 4 Items: 95°, 121.66°, 148.33°, 175°         (spread 80°)
+ * - 5 Items: 90°, 112.5°, 135°, 157.5°, 180°     (spread 90°)
  */
 function getRadialAngles(count: number): number[] {
   if (count <= 0) return [];
-  if (count === 1) return [225];
-  if (count === 2) return [200, 250];
-  if (count === 3) return [190, 225, 260];
-  // 4 Items
-  return [185, 215, 245, 275];
+  if (count === 1) return [135];
+  if (count === 2) return [110, 160];
+  if (count === 3) return [100, 135, 170];
+  if (count === 4) {
+    const start = 95;
+    const spread = 80;
+    const step = spread / 3;
+    return [start, start + step, start + 2 * step, start + spread];
+  }
+  // n >= 5 — gleichmäßig über 90°–180°
+  const start = 90;
+  const spread = 90;
+  const n = Math.min(count, 5);
+  const step = spread / (n - 1);
+  return Array.from({ length: n }, (_, i) => start + i * step);
 }
 
 function polarToCartesian(angleDeg: number, radius: number): { x: number; y: number } {
@@ -84,11 +128,9 @@ export function FAB() {
 
   // "Weitere"-Button zählt als zusätzlicher Slot im Radial-Menü.
   // Maximal 4 Quick-Actions + "Weitere" = 5 Items im Bogen.
-  const radialItemCount = actions.length + 1; // +1 für "Weitere"
-  const angles = getRadialAngles(Math.min(radialItemCount, 4));
-  // Falls 5 Items (4 Actions + Weitere): nutze einen breiteren Bogen.
-  const fiveAngles = [180, 205, 230, 255, 280];
-  const finalAngles = radialItemCount === 5 ? fiveAngles : angles;
+  const radialItemCount = Math.min(actions.length + 1, 5); // +1 für "Weitere"
+  const finalAngles = getRadialAngles(radialItemCount);
+  const radialRadius = getRadialRadius(radialItemCount);
 
   // All enabled plugins with a route (for the "Weitere" modal)
   const allPlugins = PLUGINS.filter((p) => p.route && isPluginEnabled(p.key));
@@ -197,7 +239,7 @@ export function FAB() {
             {radialItems.map((item, idx) => {
               const angle = finalAngles[idx];
               if (angle === undefined) return null;
-              const { x, y } = polarToCartesian(angle, RADIAL_RADIUS);
+              const { x, y } = polarToCartesian(angle, radialRadius);
               const Icon = item.icon;
               const delayMs = idx * 35;
               // Kreisförmige Buttons (h-12 w-12 = 48px ≥ 44px Touch-Target).
