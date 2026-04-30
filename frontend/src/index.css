@@ -86,7 +86,8 @@ html[data-theme="dark"] {
 
 html {
   min-height: 100dvh;
-  overflow-x: hidden;
+  /* overflow-x: hidden auf <html> nicht setzen — auf iOS Safari bricht das
+     den Containing-Block für position: fixed (BottomNav scrollt mit). */
 }
 
 body {
