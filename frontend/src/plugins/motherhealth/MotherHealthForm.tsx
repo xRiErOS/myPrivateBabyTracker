@@ -120,10 +120,10 @@ export function MotherHealthForm({
     activityLevel === "";
 
   const ENTRY_TYPES: { value: EntryType; label: string }[] = [
+    { value: "note", label: t("type_note") },
     { value: "lochia", label: t("type_lochia") },
     { value: "pain", label: t("type_pain") },
     { value: "mood", label: t("type_mood") },
-    { value: "note", label: t("type_note") },
   ];
 
   function buildCreatePayload(): MotherHealthCreate {
