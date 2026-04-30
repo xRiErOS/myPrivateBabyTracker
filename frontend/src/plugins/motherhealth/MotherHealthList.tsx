@@ -36,17 +36,31 @@ export function MotherHealthList() {
   const filterTabs = useMemo(
     () =>
       [
-        { key: "all", label: t("filter_all") },
-        ...TYPE_ORDER.map((k) => ({ key: k, label: t(`type_${k}`) })),
-      ] as { key: EntryType | "all"; label: string }[],
+        { key: "all", label: t("filter_all"), shortLabel: t("filter_all") },
+        ...TYPE_ORDER.map((k) => ({
+          key: k,
+          label: t(`type_${k}`),
+          // Lochia ist der medizinische Fachbegriff und semantisch identisch zu "Wochenfluss".
+          // Auf Mobile (<md) verwenden wir die kürzere Variante, damit alle 5 Tabs in eine
+          // Zeile passen, ohne horizontalen Scroll.
+          shortLabel: k === "lochia" ? "Lochia" : t(`type_${k}`),
+        })),
+      ] as {
+        key: EntryType | "all";
+        label: string;
+        shortLabel: string;
+      }[],
     [t],
   );
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Filter-Tabs */}
+      {/* Filter-Tabs — flex-1 verteilt die 5 Tabs gleichmäßig über die volle Container-Breite
+         (Desktop wie Mobile). Auf Mobile (<md) zeigen wir die Kurz-Variante des Labels (z.B.
+         "Lochia" statt "Wochenfluss"), damit alle Tabs in eine Zeile passen. overflow-x-auto
+         bleibt als sicherer Fallback bei extrem schmalen Viewports oder Schriftvergrößerung. */}
       <div
-        className="flex gap-1 rounded-lg bg-surface0 p-1 overflow-x-auto"
+        className="-mx-1 flex gap-1 overflow-x-auto rounded-lg bg-surface0 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
       >
         {filterTabs.map((tab) => {
@@ -58,14 +72,15 @@ export function MotherHealthList() {
               role="tab"
               aria-selected={active}
               onClick={() => setFilter(tab.key)}
-              className={`flex-1 min-w-[72px] rounded-md px-3 py-2 font-label text-sm transition-colors ${
+              className={`flex-1 min-w-0 rounded-md px-2 py-2 font-label text-sm transition-colors sm:px-3 ${
                 active
                   ? "bg-peach text-ground font-semibold"
                   : "text-subtext0 hover:bg-surface1"
               }`}
               style={{ minHeight: 44 }}
             >
-              {tab.label}
+              <span className="block truncate md:hidden">{tab.shortLabel}</span>
+              <span className="hidden truncate md:block">{tab.label}</span>
             </button>
           );
         })}
