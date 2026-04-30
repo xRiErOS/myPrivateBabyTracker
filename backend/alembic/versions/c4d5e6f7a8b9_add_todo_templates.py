@@ -38,15 +38,24 @@ def upgrade() -> None:
         )
         op.create_index('ix_todo_templates_child_id', 'todo_templates', ['child_id'])
 
-    # Add template_id FK to todo_entries (idempotent)
+    # Add template_id FK to todo_entries (idempotent, batch for SQLite)
     existing_columns = [c['name'] for c in inspector.get_columns('todo_entries')]
     if 'template_id' not in existing_columns:
-        op.add_column(
-            'todo_entries',
-            sa.Column('template_id', sa.Integer(), sa.ForeignKey('todo_templates.id', ondelete='SET NULL'), nullable=True),
-        )
+        with op.batch_alter_table('todo_entries') as batch_op:
+            batch_op.add_column(
+                sa.Column('template_id', sa.Integer(), nullable=True),
+            )
+            batch_op.create_foreign_key(
+                'fk_todo_entries_template_id',
+                'todo_templates',
+                ['template_id'],
+                ['id'],
+                ondelete='SET NULL',
+            )
 
 
 def downgrade() -> None:
-    op.drop_column('todo_entries', 'template_id')
+    # batch_alter_table rebuilds the table; dropping the column removes the FK with it.
+    with op.batch_alter_table('todo_entries') as batch_op:
+        batch_op.drop_column('template_id')
     op.drop_table('todo_templates')
