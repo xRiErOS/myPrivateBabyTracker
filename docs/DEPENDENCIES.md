@@ -230,7 +230,7 @@ Plugins, die andere Daten konsumieren oder das Children-Modell erweitern.
 
 | Plugin | requires | besondere Hinweise |
 |--------|----------|--------------------|
-| motherhealth (MBT-109) | DB, Children, Plugins | Standardmäßig DEAKTIVIERT (`pluginRegistry.defaultDisabled`). Kein Dashboard-Widget. Erscheint nur in Burger-Sektion "Organisation & Verwaltung", wenn aktiv. Privacy-Banner sichtbar auf Page. |
+| motherhealth (MBT-109 + Erweiterung) | DB, Children, Plugins | Standardmäßig DEAKTIVIERT (`pluginRegistry.defaultDisabled`). Kein Dashboard-Widget. Erscheint nur in Burger-Sektion "Organisation & Verwaltung", wenn aktiv. Privacy-Banner sichtbar auf Page. Discriminated Union mit 4 Entry-Typen (`lochia`, `pain`, `mood`, `note`) — strukturierte Erfassung für Wochenbett-Visit (Wochenfluss, Schmerzen via VAS 0–10, Stimmung 1–5). |
 
 ### Layer 4 — Frontend Shell
 
