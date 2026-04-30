@@ -98,3 +98,42 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
+
+/* VAS-Slider — Catppuccin-Daumen, Touch-Target >=44 px */
+.slider-vas {
+  height: 28px;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 1;
+}
+.slider-vas::-webkit-slider-runnable-track {
+  height: 8px;
+  background: transparent;
+  border-radius: 9999px;
+}
+.slider-vas::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  width: 28px;
+  border-radius: 9999px;
+  background: var(--color-text);
+  border: 3px solid var(--color-base);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  margin-top: -10px;
+  cursor: pointer;
+}
+.slider-vas::-moz-range-track {
+  height: 8px;
+  background: transparent;
+  border-radius: 9999px;
+}
+.slider-vas::-moz-range-thumb {
+  height: 28px;
+  width: 28px;
+  border-radius: 9999px;
+  background: var(--color-text);
+  border: 3px solid var(--color-base);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+}

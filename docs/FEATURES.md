@@ -83,12 +83,18 @@ Alle Plugins folgen dem Plugin-Architektur-Pattern (`backend/app/plugins/_base.p
 - U1–U9 Tracking mit Seed-Daten (`plugins/checkup/seed_data.py`).
 - Kalender-Zeitfenster aus `birth_date` + `min_age_weeks`/`max_age_weeks` (inkl. Frühgeborenen-Anpassung).
 
-#### motherhealth (MBT-109)
+#### motherhealth (MBT-109 + Erweiterung)
 - Privacy-first Plugin: standardmäßig DEAKTIVIERT (`pluginRegistry.defaultDisabled=true`). Aktivierung in `/admin/plugins`.
-- Freitext-Notizbuch für Wochenbett-Visit mit Hebamme: `MotherHealthEntry(child_id, content, created_at, updated_at)`, content max 4000 Zeichen.
+- Strukturierte Erfassung mit Discriminated Union pro Eintrag (analog Health-Plugin): `entry_type` ∈ `lochia | pain | mood | note`. Alle typespezifischen Spalten in `mother_health_entries`, nullable; Pydantic discriminated union validiert.
+  - `lochia`: Wochenfluss — `lochia_amount` (none/traces/light/moderate/heavy), `lochia_color` (red/brown/pink/yellow/white), `lochia_smell` (normal/abnormal), `lochia_clots` (Boolean).
+  - `pain`: VAS 0–10 (Step 0.5 im Frontend) — `pain_perineum`, `pain_abdominal`, `pain_breast`, `pain_urination`.
+  - `mood`: Stimmung — `mood_level`, `wellbeing`, `exhaustion` (alle 1–5) + `activity_level` (bedrest/light/normal).
+  - `note`: nur Freitext (alter MBT-109-Stand, content → `notes`).
+- Optional auf jedem Eintrag: `notes` (TEXT, max 4000 Zeichen).
+- Frontend: `MotherHealthForm` mit Tab-Switcher pro Typ; VAS-Slider (`components/Slider.tsx`) mit Catppuccin-Verlauf green→yellow→peach→red; `MotherHealthList` mit Filter-Tabs + Type-Badges.
 - KEIN Dashboard-Widget, KEIN Tracking-Sektions-Eintrag — bei Aktivierung erscheint Plugin nur in Burger-Sektion "Organisation & Verwaltung".
 - Privacy-Banner sichtbar auf Page: "Sensible Inhalte. Nur du siehst diese Notizen."
-- Phase 1: Freitext only. Strukturierte EPDS-Skala (PPD-Screening) bewusst deferred.
+- Strukturierte EPDS-Skala (PPD-Screening) bewusst weiterhin deferred.
 
 ## 2. Cross-cutting Backend-Features
 

@@ -1,4 +1,4 @@
-/** React Query hooks for MotherHealth CRUD (MBT-109). */
+/** React Query hooks für MotherHealth (MBT-109 + strukturierte Typen). */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -6,6 +6,7 @@ import {
   deleteMotherHealthEntry,
   listMotherHealthEntries,
   updateMotherHealthEntry,
+  type EntryType,
   type MotherHealthCreate,
   type MotherHealthUpdate,
 } from "../api/motherhealth";
@@ -13,10 +14,13 @@ import { useToast } from "../context/ToastContext";
 
 const KEY = ["motherhealth"] as const;
 
-export function useMotherHealthEntries(childId: number | undefined) {
+export function useMotherHealthEntries(
+  childId: number | undefined,
+  entryType?: EntryType,
+) {
   return useQuery({
-    queryKey: [...KEY, childId],
-    queryFn: () => listMotherHealthEntries(childId),
+    queryKey: [...KEY, childId, entryType ?? "all"],
+    queryFn: () => listMotherHealthEntries(childId, entryType),
     enabled: !!childId,
   });
 }
@@ -28,7 +32,7 @@ export function useCreateMotherHealthEntry() {
     mutationFn: (data: MotherHealthCreate) => createMotherHealthEntry(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY });
-      showToast("Notiz gespeichert");
+      showToast("Eintrag gespeichert");
     },
   });
 }
@@ -51,7 +55,7 @@ export function useDeleteMotherHealthEntry() {
     mutationFn: (id: number) => deleteMotherHealthEntry(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY });
-      showToast("Notiz gelöscht");
+      showToast("Eintrag gelöscht");
     },
   });
 }

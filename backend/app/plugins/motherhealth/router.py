@@ -1,6 +1,9 @@
-"""MotherHealth plugin CRUD router (MBT-109) — postpartum notes."""
+"""MotherHealth plugin CRUD router (MBT-109 + Strukturierung).
 
-from fastapi import APIRouter, Depends, Query
+Eintragstypen: lochia | pain | mood | note (Discriminated Union).
+"""
+
+from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +14,7 @@ from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.plugins.motherhealth.models import MotherHealthEntry
 from app.plugins.motherhealth.schemas import (
+    EntryType,
     MotherHealthCreate,
     MotherHealthResponse,
     MotherHealthUpdate,
@@ -22,22 +26,17 @@ router = APIRouter(prefix="/motherhealth", tags=["motherhealth"])
 
 
 def _to_response(entry: MotherHealthEntry) -> MotherHealthResponse:
-    return MotherHealthResponse(
-        id=entry.id,
-        child_id=entry.child_id,
-        content=entry.content,
-        created_at=entry.created_at,
-        updated_at=entry.updated_at,
-    )
+    return MotherHealthResponse.model_validate(entry)
 
 
 @router.get("/", response_model=list[MotherHealthResponse])
 async def list_entries(
     child_id: int | None = Query(default=None, gt=0),
+    entry_type: EntryType | None = Query(default=None),
     user: User | None = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """List all mother-health entries, optionally filtered by child.
+    """List all mother-health entries, optionally filtered by child/type.
 
     Sorted newest first (created_at desc).
     """
@@ -46,6 +45,8 @@ async def list_entries(
     )
     if child_id:
         stmt = stmt.where(MotherHealthEntry.child_id == child_id)
+    if entry_type:
+        stmt = stmt.where(MotherHealthEntry.entry_type == entry_type)
     result = await db.execute(stmt)
     return [_to_response(e) for e in result.scalars().all()]
 
@@ -68,19 +69,22 @@ async def get_entry(
 
 @router.post("/", response_model=MotherHealthResponse, status_code=201)
 async def create_entry(
-    data: MotherHealthCreate,
+    data: MotherHealthCreate = Body(...),
     user: User | None = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """Create a new mother-health entry."""
-    entry = MotherHealthEntry(
-        child_id=data.child_id,
-        content=data.content,
-    )
+    """Create a new mother-health entry (Discriminated Union by entry_type)."""
+    payload = data.model_dump()
+    entry = MotherHealthEntry(**payload)
     db.add(entry)
     await db.commit()
     await db.refresh(entry)
-    logger.info("motherhealth_created", entry_id=entry.id, child_id=entry.child_id)
+    logger.info(
+        "motherhealth_created",
+        entry_id=entry.id,
+        child_id=entry.child_id,
+        entry_type=entry.entry_type,
+    )
     return _to_response(entry)
 
 
