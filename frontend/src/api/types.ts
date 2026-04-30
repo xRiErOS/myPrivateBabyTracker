@@ -15,6 +15,8 @@ export interface Child {
   is_active: boolean;
   /** MBT-175: Stillmodus pro Kind (statt User-Preferences). */
   breastfeeding_enabled: boolean;
+  /** Hybridmodus pro Kind — Brust- + Flaschenkacheln gleichzeitig. */
+  feeding_hybrid: boolean;
   created_at: string;
 }
 
@@ -28,6 +30,7 @@ export interface ChildCreate {
   birth_length_cm?: number | string | null;
   notes?: string | null;
   breastfeeding_enabled?: boolean;
+  feeding_hybrid?: boolean;
 }
 
 export interface ChildUpdate {
@@ -41,6 +44,7 @@ export interface ChildUpdate {
   notes?: string | null;
   is_active?: boolean;
   breastfeeding_enabled?: boolean;
+  feeding_hybrid?: boolean;
 }
 
 export type FeedingType = "breast_left" | "breast_right" | "bottle" | "solid";

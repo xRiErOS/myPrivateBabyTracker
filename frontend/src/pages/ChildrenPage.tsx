@@ -182,6 +182,7 @@ export default function ChildrenPage() {
   const [birthWeight, setBirthWeight] = useState("");
   const [birthLength, setBirthLength] = useState("");
   const [breastfeedingEnabled, setBreastfeedingEnabled] = useState(true);
+  const [feedingHybrid, setFeedingHybrid] = useState(false);
 
   // Edit form state
   const [editName, setEditName] = useState("");
@@ -192,6 +193,7 @@ export default function ChildrenPage() {
   const [editBirthWeight, setEditBirthWeight] = useState("");
   const [editBirthLength, setEditBirthLength] = useState("");
   const [editBreastfeedingEnabled, setEditBreastfeedingEnabled] = useState(true);
+  const [editFeedingHybrid, setEditFeedingHybrid] = useState(false);
 
   const resetCreateForm = () => {
     setName("");
@@ -202,6 +204,7 @@ export default function ChildrenPage() {
     setBirthWeight("");
     setBirthLength("");
     setBreastfeedingEnabled(true);
+    setFeedingHybrid(false);
     setShowForm(false);
   };
 
@@ -217,6 +220,7 @@ export default function ChildrenPage() {
       child.birth_length_cm != null ? String(child.birth_length_cm) : ""
     );
     setEditBreastfeedingEnabled(child.breastfeeding_enabled ?? true);
+    setEditFeedingHybrid(child.feeding_hybrid ?? false);
   };
 
   const cancelEdit = () => {
@@ -236,6 +240,7 @@ export default function ChildrenPage() {
       birth_weight_g: birthWeight ? Number(birthWeight) : null,
       birth_length_cm: birthLength ? birthLength : null,
       breastfeeding_enabled: breastfeedingEnabled,
+      feeding_hybrid: feedingHybrid,
     });
 
     // Tutorial-Hook: signalisiert Erfolgs-Schritt
@@ -259,6 +264,7 @@ export default function ChildrenPage() {
         birth_weight_g: editBirthWeight ? Number(editBirthWeight) : null,
         birth_length_cm: editBirthLength ? editBirthLength : null,
         breastfeeding_enabled: editBreastfeedingEnabled,
+        feeding_hybrid: editFeedingHybrid,
       },
     });
 
@@ -373,6 +379,31 @@ export default function ChildrenPage() {
               >
                 <span
                   className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${breastfeedingEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
+                />
+              </button>
+            </div>
+
+            {/* Hybridmodus pro Kind */}
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-label text-sm font-medium text-text">
+                  {t("children.feeding_hybrid")}
+                </p>
+                <p className="font-body text-xs text-subtext0 mt-1">
+                  {t("children.feeding_hybrid_hint")}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={feedingHybrid}
+                disabled={!breastfeedingEnabled}
+                onClick={() => setFeedingHybrid((v) => !v)}
+                className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors disabled:opacity-40 ${feedingHybrid ? "bg-green" : "bg-surface2"}`}
+                aria-label={t("children.feeding_hybrid")}
+              >
+                <span
+                  className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${feedingHybrid ? "translate-x-[26px]" : "translate-x-[2px]"}`}
                 />
               </button>
             </div>
@@ -530,6 +561,31 @@ export default function ChildrenPage() {
                       >
                         <span
                           className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${editBreastfeedingEnabled ? "translate-x-[26px]" : "translate-x-[2px]"}`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Hybridmodus pro Kind */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-label text-sm font-medium text-text">
+                          {t("children.feeding_hybrid")}
+                        </p>
+                        <p className="font-body text-xs text-subtext0 mt-1">
+                          {t("children.feeding_hybrid_hint")}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={editFeedingHybrid}
+                        disabled={!editBreastfeedingEnabled}
+                        onClick={() => setEditFeedingHybrid((v) => !v)}
+                        className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors disabled:opacity-40 ${editFeedingHybrid ? "bg-green" : "bg-surface2"}`}
+                        aria-label={t("children.feeding_hybrid")}
+                      >
+                        <span
+                          className={`inline-block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${editFeedingHybrid ? "translate-x-[26px]" : "translate-x-[2px]"}`}
                         />
                       </button>
                     </div>

@@ -10,11 +10,10 @@ QUICK_ACTIONS_MAX = 4
 class PreferencesResponse(BaseModel):
     """User preferences (returned by GET /preferences).
 
-    MBT-175: breastfeeding_enabled wurde auf children.breastfeeding_enabled
+    MBT-175: breastfeeding_enabled + feeding_hybrid wurden auf das Child-Model
     verschoben — pro Kind konfigurierbar statt pro User.
     """
 
-    feeding_hybrid: bool = False
     quick_actions: list[str] | None = None
     widget_order: list[str] | None = None
     track_visibility: dict[str, bool] | None = None
@@ -29,7 +28,6 @@ class PreferencesResponse(BaseModel):
 class PreferencesUpdate(BaseModel):
     """Partial update for user preferences."""
 
-    feeding_hybrid: bool | None = None
     # MBT-182: maximal 4 Quick-Actions (FAB-Radial-Menü).
     quick_actions: list[str] | None = Field(default=None, max_length=QUICK_ACTIONS_MAX)
     widget_order: list[str] | None = None

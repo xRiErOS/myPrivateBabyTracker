@@ -13,7 +13,7 @@ import {
   groupByDay,
   splitSleepByDay,
 } from "../../lib/timelineUtils";
-import { isBreastfeedingForChild, isFeedingHybrid } from "../../lib/breastfeedingMode";
+import { isBreastfeedingForChild, isHybridForChild } from "../../lib/breastfeedingMode";
 import { useActiveChild } from "../../context/ChildContext";
 import {
   useVitaminD3Entries,
@@ -360,7 +360,7 @@ export function BabySummary({
   // Last bottle across ALL feedings (for non-breastfeeding mode)
   const lastBottleAll = allSortedFeedings.find((f) => f.feeding_type === "bottle");
   const breastfeedingEnabled = isBreastfeedingForChild(activeChild);
-  const hybridMode = breastfeedingEnabled && isFeedingHybrid();
+  const hybridMode = breastfeedingEnabled && isHybridForChild(activeChild);
 
   // Breast stats for today (used in breast & hybrid mode)
   const todayBreast = todayFeedings.filter(

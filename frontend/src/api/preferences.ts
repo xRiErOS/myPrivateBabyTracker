@@ -4,10 +4,9 @@ import { apiFetch } from "./client";
 
 export interface UserPreferences {
   /**
-   * MBT-175: breastfeeding_enabled wurde auf children.breastfeeding_enabled
-   * verschoben. Hybrid-Modus bleibt user-basiert.
+   * MBT-175 + Folge-Refactor: Stillmodus + Hybridmodus liegen jetzt am
+   * Child-Model (`children.breastfeeding_enabled`, `children.feeding_hybrid`).
    */
-  feeding_hybrid: boolean;
   quick_actions: string[] | null;
   widget_order: string[] | null;
   track_visibility: Record<string, boolean> | null;

@@ -1,6 +1,6 @@
 """User preferences model — stores per-user settings (replaces localStorage)."""
 
-from sqlalchemy import ForeignKey, Integer, String, Text, Boolean
+from sqlalchemy import ForeignKey, Integer, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -15,8 +15,8 @@ class UserPreferences(TimestampMixin, Base):
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
     )
-    # MBT-175: breastfeeding_enabled umgezogen auf children.breastfeeding_enabled
-    feeding_hybrid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # MBT-175 + Folge-Refactor: breastfeeding_enabled + feeding_hybrid liegen
+    # jetzt am Child-Model.
     quick_actions: Mapped[str | None] = mapped_column(Text)  # JSON array of plugin keys
     widget_order: Mapped[str | None] = mapped_column(Text)  # JSON array of widget keys
     track_visibility: Mapped[str | None] = mapped_column(Text)  # JSON object {sleep: true, ...}

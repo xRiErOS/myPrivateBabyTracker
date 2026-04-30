@@ -29,6 +29,10 @@ class Child(TimestampMixin, Base):
     breastfeeding_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="1"
     )
+    # Hybridmodus per Kind (zeigt Brust- + Flaschenkacheln gleichzeitig).
+    feeding_hybrid: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
 
 
 class ChildCaregiver(Base):

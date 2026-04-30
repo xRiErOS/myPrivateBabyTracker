@@ -21,7 +21,6 @@ router = APIRouter(prefix="/preferences", tags=["preferences"])
 def _to_response(prefs: UserPreferences, user: User) -> PreferencesResponse:
     """Convert model to response, parsing JSON fields."""
     return PreferencesResponse(
-        feeding_hybrid=prefs.feeding_hybrid,
         quick_actions=json.loads(prefs.quick_actions) if prefs.quick_actions else None,
         widget_order=json.loads(prefs.widget_order) if prefs.widget_order else None,
         track_visibility=json.loads(prefs.track_visibility) if prefs.track_visibility else None,

@@ -82,6 +82,8 @@
     "name_placeholder": "Child's name",
     "breastfeeding_enabled": "Breastfeeding mode",
     "breastfeeding_enabled_hint": "Show breast tiles (left/right) instead of bottle tiles on the dashboard. Configurable per child.",
+    "feeding_hybrid": "Hybrid mode",
+    "feeding_hybrid_hint": "Shows breast and bottle tiles at the same time on the home screen. Only active when breastfeeding mode is on.",
     "confirm_delete": "Really delete \"{{name}}\"?",
     "export_json": "Export JSON",
     "export_csv": "Export CSV",
@@ -234,8 +236,6 @@
     "title": "Breastfeeding mode",
     "description": "Shows the last breastfeeding side on the home page. Disable if you are not breastfeeding.",
     "enabled": "Breastfeeding active",
-    "disabled": "Breastfeeding disabled",
-    "hybrid": "Hybrid mode",
-    "hybrid_desc": "Shows breast and bottle tiles simultaneously on the home page."
+    "disabled": "Breastfeeding disabled"
   }
 }

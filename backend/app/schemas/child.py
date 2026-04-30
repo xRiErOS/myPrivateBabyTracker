@@ -28,6 +28,7 @@ class ChildCreate(BaseModel):
     notes: str | None = Field(default=None, max_length=2000)
     # MBT-175: Stillmodus pro Kind
     breastfeeding_enabled: bool = True
+    feeding_hybrid: bool = False
 
 
 class ChildUpdate(BaseModel):
@@ -43,6 +44,7 @@ class ChildUpdate(BaseModel):
     notes: str | None = Field(default=None, max_length=2000)
     is_active: bool | None = None
     breastfeeding_enabled: bool | None = None
+    feeding_hybrid: bool | None = None
 
 
 class ChildResponse(BaseModel):
@@ -59,6 +61,7 @@ class ChildResponse(BaseModel):
     notes: str | None
     is_active: bool
     breastfeeding_enabled: bool
+    feeding_hybrid: bool
     created_at: UTCDatetime
 
     model_config = {"from_attributes": True}
