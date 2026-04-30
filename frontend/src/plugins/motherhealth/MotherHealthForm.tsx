@@ -466,6 +466,7 @@ function MoodFields({
         min={1}
         max={5}
         step={1}
+        endpoints={{ min: t("mood_min"), max: t("mood_max") }}
       />
       <Slider
         label={t("wellbeing")}
@@ -474,6 +475,7 @@ function MoodFields({
         min={1}
         max={5}
         step={1}
+        endpoints={{ min: t("wellbeing_min"), max: t("wellbeing_max") }}
       />
       <Slider
         label={t("exhaustion")}
@@ -482,7 +484,7 @@ function MoodFields({
         min={1}
         max={5}
         step={1}
-        hint={t("exhaustion_hint")}
+        endpoints={{ min: t("exhaustion_min"), max: t("exhaustion_max") }}
       />
       <Select
         label={t("activity_level")}

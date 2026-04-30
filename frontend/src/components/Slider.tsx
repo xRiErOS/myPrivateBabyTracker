@@ -18,6 +18,8 @@ interface SliderProps {
   id?: string;
   /** Anzahl Nachkommastellen für die Wert-Anzeige. Default: step < 1 ? 1 : 0. */
   precision?: number;
+  /** Endpunkt-Beschriftungen (links/rechts unter dem Track). */
+  endpoints?: { min: string; max: string };
 }
 
 export function Slider({
@@ -30,6 +32,7 @@ export function Slider({
   hint,
   id,
   precision,
+  endpoints,
 }: SliderProps) {
   const sliderId = id ?? `slider-${label.replace(/\s+/g, "-").toLowerCase()}`;
   const pct = ((value - min) / (max - min)) * 100;
@@ -79,6 +82,12 @@ export function Slider({
           aria-label={label}
         />
       </div>
+      {endpoints && (
+        <div className="flex items-center justify-between font-body text-xs text-overlay0">
+          <span>{endpoints.min}</span>
+          <span>{endpoints.max}</span>
+        </div>
+      )}
       {hint && (
         <p className="font-body text-xs text-overlay0">{hint}</p>
       )}
