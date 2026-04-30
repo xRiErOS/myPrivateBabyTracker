@@ -458,13 +458,30 @@ function MoodFields({
 }: MoodFieldsProps) {
   const { t } = useTranslation("motherhealth");
   return (
-    <div className="flex flex-col gap-4">
-      <StarRating label={t("mood_level")} value={mood} onChange={onMood} />
-      <StarRating label={t("wellbeing")} value={wellbeing} onChange={onWellbeing} />
-      <StarRating
+    <div className="flex flex-col gap-3">
+      <Slider
+        label={t("mood_level")}
+        value={mood}
+        onChange={onMood}
+        min={1}
+        max={5}
+        step={1}
+      />
+      <Slider
+        label={t("wellbeing")}
+        value={wellbeing}
+        onChange={onWellbeing}
+        min={1}
+        max={5}
+        step={1}
+      />
+      <Slider
         label={t("exhaustion")}
         value={exhaustion}
         onChange={onExhaustion}
+        min={1}
+        max={5}
+        step={1}
         hint={t("exhaustion_hint")}
       />
       <Select
@@ -477,45 +494,6 @@ function MoodFields({
           { value: "normal", label: t("activity_normal") },
         ]}
       />
-    </div>
-  );
-}
-
-interface StarRatingProps {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  hint?: string;
-}
-
-function StarRating({ label, value, onChange, hint }: StarRatingProps) {
-  const stars = [1, 2, 3, 4, 5];
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="font-label text-sm text-subtext0">{label}</span>
-      <div className="flex gap-2">
-        {stars.map((n) => {
-          const active = n <= value;
-          return (
-            <button
-              key={n}
-              type="button"
-              onClick={() => onChange(n)}
-              aria-label={`${label} ${n}`}
-              aria-pressed={active}
-              className={`flex items-center justify-center rounded-md transition-colors ${
-                active
-                  ? "bg-peach text-ground"
-                  : "bg-surface0 text-subtext0 hover:bg-surface1"
-              }`}
-              style={{ minWidth: 44, minHeight: 44 }}
-            >
-              <span className="font-label text-base font-semibold">{n}</span>
-            </button>
-          );
-        })}
-      </div>
-      {hint && <p className="font-body text-xs text-overlay0">{hint}</p>}
     </div>
   );
 }

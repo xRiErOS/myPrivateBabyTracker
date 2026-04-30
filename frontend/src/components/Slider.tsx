@@ -1,7 +1,8 @@
-/** VAS-Slider (Visual Analog Scale) — 0–10 in 0.5er-Stufen.
+/** Slider — neutrale visuelle Analogskala.
  *
- * Catppuccin-Farbverlauf: green (0) → yellow → peach → red (10).
- * Touch-Target ≥44 px (Track-Höhe + Padding).
+ * Bewusst KEIN Farbverlauf (grün → rot): Selbstauskunft soll nicht durch
+ * visuelle Wertung beeinflusst werden. Track + Wert-Anzeige in Catppuccin
+ * mauve (primary). Touch-Target ≥44 px.
  */
 
 import type { ChangeEvent } from "react";
@@ -15,23 +16,8 @@ interface SliderProps {
   step?: number;
   hint?: string;
   id?: string;
-}
-
-/** Catppuccin-Token für die Farb-Lookup je VAS-Stufe. */
-function colorForValue(v: number): string {
-  if (v <= 0) return "text-green";
-  if (v < 3) return "text-green";
-  if (v < 5) return "text-yellow";
-  if (v < 7) return "text-peach";
-  return "text-red";
-}
-
-function trackBgFor(v: number): string {
-  // Hintergrundfarbe der gefüllten Strecke
-  if (v < 3) return "var(--ctp-green, #40a02b)";
-  if (v < 5) return "var(--ctp-yellow, #df8e1d)";
-  if (v < 7) return "var(--ctp-peach, #fe640b)";
-  return "var(--ctp-red, #d20f39)";
+  /** Anzahl Nachkommastellen für die Wert-Anzeige. Default: step < 1 ? 1 : 0. */
+  precision?: number;
 }
 
 export function Slider({
@@ -43,9 +29,11 @@ export function Slider({
   step = 0.5,
   hint,
   id,
+  precision,
 }: SliderProps) {
   const sliderId = id ?? `slider-${label.replace(/\s+/g, "-").toLowerCase()}`;
   const pct = ((value - min) / (max - min)) * 100;
+  const digits = precision ?? (step < 1 ? 1 : 0);
 
   const handle = (e: ChangeEvent<HTMLInputElement>) => {
     const raw = parseFloat(e.target.value);
@@ -62,22 +50,19 @@ export function Slider({
           {label}
         </label>
         <span
-          className={`font-label text-sm font-semibold tabular-nums ${colorForValue(value)}`}
+          className="font-label text-sm font-semibold tabular-nums text-text"
           aria-live="polite"
         >
-          {value.toFixed(1)}
+          {value.toFixed(digits)}
         </span>
       </div>
       <div className="relative flex items-center py-2" style={{ minHeight: 44 }}>
         {/* Track-Hintergrund */}
         <div className="absolute left-0 right-0 h-2 rounded-full bg-surface1" />
-        {/* Gefüllter Anteil */}
+        {/* Gefüllter Anteil — neutrale Farbe (mauve), kein Severity-Verlauf */}
         <div
-          className="absolute left-0 h-2 rounded-full transition-[width,background-color]"
-          style={{
-            width: `${pct}%`,
-            backgroundColor: trackBgFor(value),
-          }}
+          className="absolute left-0 h-2 rounded-full bg-mauve transition-[width]"
+          style={{ width: `${pct}%` }}
         />
         <input
           id={sliderId}
