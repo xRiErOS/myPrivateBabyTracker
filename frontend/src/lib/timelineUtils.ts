@@ -75,15 +75,17 @@ export function splitSleepByDay(
 /** Convert ISO timestamp to minutes since midnight (Berlin time). */
 export function toMinutes(isoStr: string): number {
   const d = new Date(isoStr);
-  const parts = d
-    .toLocaleString("en-US", {
-      timeZone: TZ,
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-    .split(":");
-  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+  // Mobile Safari (WebKit) returns '24:XX' for midnight with hour12:false;
+  // formatToParts + % 24 normalises this cross-browser.
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const h = parseInt(parts.find((p) => p.type === "hour")!.value) % 24;
+  const m = parseInt(parts.find((p) => p.type === "minute")!.value);
+  return h * 60 + m;
 }
 
 /** Convert minutes to percentage of 24h (1440 minutes). */
