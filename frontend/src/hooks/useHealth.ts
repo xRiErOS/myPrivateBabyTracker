@@ -23,25 +23,21 @@ export function useHealthEntries(params: HealthListParams = {}) {
 
 export function useCreateHealth() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: HealthCreate) => createHealth(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: HEALTH_KEY });
-      showToast("Eintrag gespeichert");
     },
   });
 }
 
 export function useUpdateHealth() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: HealthUpdate }) =>
       updateHealth(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: HEALTH_KEY });
-      showToast("Eintrag aktualisiert");
     },
   });
 }

@@ -22,12 +22,10 @@ export function useVitaminD3Entries(params: VitaminD3ListParams = {}) {
 
 export function useCreateVitaminD3() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: VitaminD3Create) => createVitaminD3(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: D3_KEY });
-      showToast("Vitamin D3 erfasst");
     },
   });
 }

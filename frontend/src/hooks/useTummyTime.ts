@@ -23,25 +23,21 @@ export function useTummyTimeEntries(params: TummyTimeListParams = {}) {
 
 export function useCreateTummyTime() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: TummyTimeCreate) => createTummyTime(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TUMMY_TIME_KEY });
-      showToast("Bauchlage gespeichert");
     },
   });
 }
 
 export function useUpdateTummyTime() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: TummyTimeUpdate }) =>
       updateTummyTime(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TUMMY_TIME_KEY });
-      showToast("Bauchlage aktualisiert");
     },
   });
 }

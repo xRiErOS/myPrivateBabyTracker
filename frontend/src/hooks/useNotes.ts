@@ -16,12 +16,10 @@ export function useNotes(childId: number | undefined, search?: string) {
 
 export function useCreateNote() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: NoteCreate) => createNote(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: NOTES_KEY });
-      showToast("Notiz gespeichert");
     },
   });
 }

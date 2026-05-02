@@ -23,25 +23,21 @@ export function useFeedingEntries(params: FeedingListParams = {}) {
 
 export function useCreateFeeding() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: FeedingCreate) => createFeeding(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: FEEDING_KEY });
-      showToast("Mahlzeit gespeichert");
     },
   });
 }
 
 export function useUpdateFeeding() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: FeedingUpdate }) =>
       updateFeeding(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: FEEDING_KEY });
-      showToast("Mahlzeit aktualisiert");
     },
   });
 }

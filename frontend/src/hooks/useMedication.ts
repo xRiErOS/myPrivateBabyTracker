@@ -23,25 +23,21 @@ export function useMedicationEntries(params: MedicationListParams = {}) {
 
 export function useCreateMedication() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: MedicationCreate) => createMedication(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MEDICATION_KEY });
-      showToast("Medikament gespeichert");
     },
   });
 }
 
 export function useUpdateMedication() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: MedicationUpdate }) =>
       updateMedication(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MEDICATION_KEY });
-      showToast("Medikament aktualisiert");
     },
   });
 }

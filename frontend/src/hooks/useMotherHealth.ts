@@ -27,12 +27,10 @@ export function useMotherHealthEntries(
 
 export function useCreateMotherHealthEntry() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: MotherHealthCreate) => createMotherHealthEntry(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY });
-      showToast("Eintrag gespeichert");
     },
   });
 }

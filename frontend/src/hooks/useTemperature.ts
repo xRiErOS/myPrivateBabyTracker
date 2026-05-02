@@ -23,25 +23,21 @@ export function useTemperatureEntries(params: TemperatureListParams = {}) {
 
 export function useCreateTemperature() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: TemperatureCreate) => createTemperature(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TEMPERATURE_KEY });
-      showToast("Temperatur gespeichert");
     },
   });
 }
 
 export function useUpdateTemperature() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: TemperatureUpdate }) =>
       updateTemperature(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TEMPERATURE_KEY });
-      showToast("Temperatur aktualisiert");
     },
   });
 }

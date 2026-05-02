@@ -23,25 +23,21 @@ export function useWeightEntries(params: WeightListParams = {}) {
 
 export function useCreateWeight() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: WeightCreate) => createWeight(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WEIGHT_KEY });
-      showToast("Gewicht gespeichert");
     },
   });
 }
 
 export function useUpdateWeight() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: WeightUpdate }) =>
       updateWeight(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: WEIGHT_KEY });
-      showToast("Gewicht aktualisiert");
     },
   });
 }

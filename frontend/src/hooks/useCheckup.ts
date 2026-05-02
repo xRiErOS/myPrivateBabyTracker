@@ -40,25 +40,21 @@ export function useNextCheckup(childId: number | undefined) {
 
 export function useCreateCheckup() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: CheckupCreate) => createCheckup(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CHECKUP_KEY });
-      showToast("U-Untersuchung gespeichert");
     },
   });
 }
 
 export function useUpdateCheckup() {
   const qc = useQueryClient();
-  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: CheckupUpdate }) =>
       updateCheckup(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CHECKUP_KEY });
-      showToast("U-Untersuchung aktualisiert");
     },
   });
 }
